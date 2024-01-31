@@ -1,57 +1,49 @@
 <!--
-SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
-SPDX-License-Identifier: CC0-1.0
+* SPDX-FileCopyrightText: 2024 Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>
+* SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# Machbarkeit
-Place this app in **nextcloud/apps/**
+# Nextcloud app development example
+
+This is an example nextcloud app development setup.
+
+This repository features a [Docker Compose setup](dev/compose.yaml) to develop against a specific Nextcloud version and supports
+hot module replacement of the app's frontend (Vue.js) components.
 
 ## Building the app
 
-The app can be built by using the provided Makefile by running:
+1. Install php dependencies:
+   ```
+   make composer
+   ```
+2. Install npm dependencies:
+   ```
+   npm ci
+   ```
 
-    make
+## Run the app
 
-This requires the following things to be present:
-* make
-* which
-* tar: for building the archive
-* curl: used if phpunit and composer are not installed to fetch them from the web
-* npm: for building and testing everything JS, only required if a package.json is placed inside the **js/** folder
+1. Start the webpack dev server (see [package.json](package.json) from your development IDE:
+   ```
+   npm run serve
+   ```
+2. Start the Nextcloud Docker environment from the `dev` folder:
+   ```
+   docker compose up -d
+   ```
 
-The make command will install or update Composer dependencies if a composer.json is present and also **npm run build** if a package.json is present in the **js/** folder. The npm **build** script should use local paths for build systems and package managers, so people that simply want to build the app won't need to install npm libraries globally, e.g.:
+This starts the [nextcloud-docker-dev](https://github.com/juliushaertl/nextcloud-docker-dev) container.
 
-**package.json**:
-```json
-"scripts": {
-    "test": "node node_modules/gulp-cli/bin/gulp.js karma",
-    "prebuild": "npm install && node_modules/bower/bin/bower install && node_modules/bower/bin/bower update",
-    "build": "node node_modules/gulp-cli/bin/gulp.js"
-}
-```
+## Enable apps
 
+In order for Hot module replacement (HMR) to work the [HMR Enabler](https://github.com/nextcloud/hmr_enabler) app
+which is already mounted into the container needs to be enabled.
 
-## Publish to App Store
+1. Login to `http://localhost:8080` with user `admin` and password `admin`.
+2. Go to _Apps_ and **HMR Enabler** and the **Template App**
 
-First get an account for the [App Store](http://apps.nextcloud.com/) then run:
+You can now go the App's navigation item at the top to see the example app from the
+[Nextcloud App Generator](https://apps.nextcloud.com/developer/apps/generate).
 
-    make && make appstore
-
-The archive is located in build/artifacts/appstore and can then be uploaded to the App Store.
-
-## Running tests
-You can use the provided Makefile to run all tests by using:
-
-    make test
-
-This will run the PHP unit and integration tests and if a package.json is present in the **js/** folder will execute **npm run test**
-
-Of course you can also install [PHPUnit](http://phpunit.de/getting-started.html) and use the configurations directly:
-
-    phpunit -c phpunit.xml
-
-or:
-
-    phpunit -c phpunit.integration.xml
-
-for integration tests
+Changes to the Vue.js frontend code should now trigger the webpack-dev-server to rebuild the code and the browser to
+reload the content.

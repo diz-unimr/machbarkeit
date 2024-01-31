@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-// SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+// SPDX-FileCopyrightText: Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace OCA\Machbarkeit\Tests\Integration\Controller;
@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 class NoteIntegrationTest extends TestCase {
 	private NoteController $controller;
-	private QBMapper $mapper;
+	private NoteMapper $mapper;
 	private string $userId = 'john';
 
 	public function setUp(): void {

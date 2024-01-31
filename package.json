@@ -1,11 +1,11 @@
 {
-  "name": "machbarkeit",
-  "description": "Machbarkeitsabfrage",
+  "name": "templateapp",
+  "description": "Development example app",
   "version": "0.0.1",
-  "author": "Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>",
+  "author": "Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>",
   "contributors": [],
   "bugs": {
-    "url": "https://test.com"
+    "url": "https://github.com/diz-unimr/nc-app-template"
   },
   "license": "agpl",
   "private": true,
@@ -13,7 +13,7 @@
     "build": "webpack --node-env production --progress",
     "dev": "webpack --node-env development --progress",
     "watch": "webpack --node-env development --progress --watch",
-    "serve": "webpack --node-env development serve --progress",
+    "serve": "webpack serve --node-env development --allowed-hosts all",
     "lint": "eslint --ext .js,.vue src",
     "lint:fix": "eslint --ext .js,.vue src --fix",
     "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
@@ -36,8 +36,11 @@
   "devDependencies": {
     "@nextcloud/babel-config": "^1.0.0",
     "@nextcloud/browserslist-config": "^2.2.0",
-    "@nextcloud/eslint-config": "^8.0.0",
+    "@nextcloud/eslint-config": "^8.3.0",
     "@nextcloud/stylelint-config": "^2.1.2",
-    "@nextcloud/webpack-vue-config": "^5.2.1"
+    "@nextcloud/webpack-vue-config": "^5.2.1",
+    "eslint": "^8.56.0",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^5.0.1"
   }
 }
