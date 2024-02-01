@@ -1,241 +1,260 @@
 <template>
-    <!--
-    SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
-    SPDX-License-Identifier: AGPL-3.0-or-later
-    -->
-	<div id="content" class="app-machbarkeit">
-		<AppNavigation>
-			<AppNavigationNew v-if="!loading"
-				:text="t('machbarkeit', 'New note')"
-				:disabled="false"
-				button-id="new-machbarkeit-button"
-				button-class="icon-add"
-				@click="newNote" />
-			<ul>
-				<AppNavigationItem v-for="note in notes"
-					:key="note.id"
-					:title="note.title ? note.title : t('machbarkeit', 'New note')"
-					:class="{active: currentNoteId === note.id}"
-					@click="openNote(note)">
-					<template slot="actions">
-						<ActionButton v-if="note.id === -1"
-							icon="icon-close"
-							@click="cancelNewNote(note)">
-							{{
-							t('machbarkeit', 'Cancel note creation') }}
-						</ActionButton>
-						<ActionButton v-else
-							icon="icon-delete"
-							@click="deleteNote(note)">
-							{{
-							 t('machbarkeit', 'Delete note') }}
-						</ActionButton>
-					</template>
-				</AppNavigationItem>
-			</ul>
-		</AppNavigation>
-		<AppContent>
-			<div v-if="currentNote">
-				<input ref="title"
-					v-model="currentNote.title"
-					type="text"
-					:disabled="updating">
-				<textarea ref="content" v-model="currentNote.content" :disabled="updating" />
-				<input type="button"
-					class="primary"
-					:value="t('machbarkeit', 'Save')"
-					:disabled="updating || !savePossible"
-					@click="saveNote">
-			</div>
-			<div v-else id="emptycontent">
-				<div class="icon-file" />
-				<h2>{{
-				 t('machbarkeit', 'Create a note to get started') }}</h2>
-			</div>
-		</AppContent>
-	</div>
+  <!--
+	  SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+	  SPDX-License-Identifier: AGPL-3.0-or-later
+	  -->
+  <div id="content" class="app-machbarkeit">
+    <div id="container">
+      <div id="content-left">
+        <div id="attribute-list">
+          <h2 style="font-weight: bold; text-align: center">Attributliste</h2>
+          <input
+            type="text"
+            placeholder="Attribut suchen"
+            style="width: 100%; margin-bottom: 15px; border-color: lightblue"
+            v-model="txtSearch"
+            @input="searchAttribute()"
+          />
+          <div style="overflow: auto">
+            <div v-for="(modul, index) in modulName" :key="index">
+              <a
+                @click="toggleExpansion(index)"
+                style="font-weight: bold; margin-bottom: 2px"
+                >{{ modul }}
+                <!-- :src (short for v-bind:src="") -->
+                <img
+                  style="width: 10px; height: 10px"
+                  :src="
+                    isExpanded(index)
+                      ? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
+                      : 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
+                  "
+                />
+              </a>
+              <div style="margin: 10px 0px" v-show="isExpanded(index)">
+                <!-- eslint-disable -->
+                <div
+                  id="attribute-items"
+                  v-for="(item, key) in fillteredArr"
+                  :key="key"
+                  v-if="
+                    item[
+                      'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
+                    ] === modul
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    :id="key"
+                    :value="
+                      item[
+                        'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+                      ]
+                    "
+                    v-model="selectedArr"
+                  />
+                  <!-- The for attribute is used in HTML to associate a <label> element with a form element -->
+                  <label :for="key">{{
+                    item[
+                      "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+                    ]
+                  }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="selected-attribute">
+          <h2 style="font-weight: bold; text-align: center">
+            ausgewählte Attributliste
+          </h2>
+          <div style="overflow: auto">
+            <p v-for="(item, key) in selectedArr" :key="key">- {{ item }}</p>
+          </div>
+        </div>
+      </div>
+      <div id="content-right"></div>
+      <!-- <button id="loadBtn" v-on:click="loadcsv">Load CSV file</button> -->
+    </div>
+  </div>
 </template>
 
 <script>
-import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
-import AppContent from '@nextcloud/vue/dist/Components/AppContent'
-import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
-import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
-import AppNavigationNew from '@nextcloud/vue/dist/Components/AppNavigationNew'
-
-import '@nextcloud/dialogs/styles/toast.scss'
-import { generateUrl } from '@nextcloud/router'
-import { showError, showSuccess } from '@nextcloud/dialogs'
-import axios from '@nextcloud/axios'
+import "@nextcloud/dialogs/styles/toast.scss";
+import { generateUrl } from "@nextcloud/router";
+import axios from "@nextcloud/axios";
+import Papa from "papaparse";
 
 export default {
-	name: 'App',
-	components: {
-		ActionButton,
-		AppContent,
-		AppNavigation,
-		AppNavigationItem,
-		AppNavigationNew,
-	},
-	data() {
-		return {
-			notes: [],
-			currentNoteId: null,
-			updating: false,
-			loading: true,
-		}
-	},
-	computed: {
-		/**
-		 * Return the currently selected note object
-		 * @returns {Object|null}
-		 */
-		currentNote() {
-			if (this.currentNoteId === null) {
-				return null
-			}
-			return this.notes.find((note) => note.id === this.currentNoteId)
-		},
+  name: "App",
+  data() {
+    return {
+      responseArray: [],
+      fillteredArr: [],
+      selectedArr: [],
+      expandedGroup: [],
+      modulName: [],
+      txtSearch: "",
+    };
+  },
 
-		/**
-		 * Returns true if a note is selected and its title is not empty
-		 * @returns {Boolean}
-		 */
-		savePossible() {
-			return this.currentNote && this.currentNote.title !== ''
-		},
-	},
-	/**
-	 * Fetch list of notes when the component is loaded
-	 */
-	async mounted() {
-		try {
-			const response = await axios.get(generateUrl('/apps/machbarkeit/notes'))
-			this.notes = response.data
-		} catch (e) {
-			console.error(e)
-			showError(t('notestutorial', 'Could not fetch notes'))
-		}
-		this.loading = false
-	},
+  computed: {},
+  /**
+   * Fetch list of notes when the component is loaded
+   */
+  async mounted() {},
 
-	methods: {
-		/**
-		 * Create a new note and focus the note content field automatically
-		 * @param {Object} note Note object
-		 */
-		openNote(note) {
-			if (this.updating) {
-				return
-			}
-			this.currentNoteId = note.id
-			this.$nextTick(() => {
-				this.$refs.content.focus()
-			})
-		},
-		/**
-		 * Action tiggered when clicking the save button
-		 * create a new note or save
-		 */
-		saveNote() {
-			if (this.currentNoteId === -1) {
-				this.createNote(this.currentNote)
-			} else {
-				this.updateNote(this.currentNote)
-			}
-		},
-		/**
-		 * Create a new note and focus the note content field automatically
-		 * The note is not yet saved, therefore an id of -1 is used until it
-		 * has been persisted in the backend
-		 */
-		newNote() {
-			if (this.currentNoteId !== -1) {
-				this.currentNoteId = -1
-				this.notes.push({
-					id: -1,
-					title: '',
-					content: '',
-				})
-				this.$nextTick(() => {
-					this.$refs.title.focus()
-				})
-			}
-		},
-		/**
-		 * Abort creating a new note
-		 */
-		cancelNewNote() {
-			this.notes.splice(this.notes.findIndex((note) => note.id === -1), 1)
-			this.currentNoteId = null
-		},
-		/**
-		 * Create a new note by sending the information to the server
-		 * @param {Object} note Note object
-		 */
-		async createNote(note) {
-			this.updating = true
-			try {
-				const response = await axios.post(generateUrl('/apps/machbarkeit/notes'), note)
-				const index = this.notes.findIndex((match) => match.id === this.currentNoteId)
-				this.$set(this.notes, index, response.data)
-				this.currentNoteId = response.data.id
-			} catch (e) {
-				console.error(e)
-				showError(t('notestutorial', 'Could not create the note'))
-			}
-			this.updating = false
-		},
-		/**
-		 * Update an existing note on the server
-		 * @param {Object} note Note object
-		 */
-		async updateNote(note) {
-			this.updating = true
-			try {
-				await axios.put(generateUrl(`/apps/machbarkeit/notes/${note.id}`), note)
-			} catch (e) {
-				console.error(e)
-				showError(t('notestutorial', 'Could not update the note'))
-			}
-			this.updating = false
-		},
-		/**
-		 * Delete a note, remove it from the frontend and show a hint
-		 * @param {Object} note Note object
-		 */
-		async deleteNote(note) {
-			try {
-				await axios.delete(generateUrl(`/apps/machbarkeit/notes/${note.id}`))
-				this.notes.splice(this.notes.indexOf(note), 1)
-				if (this.currentNoteId === note.id) {
-					this.currentNoteId = null
-				}
-				showSuccess(t('machbarkeit', 'Note deleted'))
-			} catch (e) {
-				console.error(e)
-				showError(t('machbarkeit', 'Could not delete the note'))
-			}
-		},
-	},
-}
+  methods: {
+    loadcsv() {
+      const response = fetch(
+        "http://localhost:8080/apps-extra/machbarkeit/csvfile/diz.csv"
+      )
+        .then((res) => res.text())
+        .then((text) => Papa.parse(text, { header: true }))
+        .catch((e) => console.error(e));
+      response.then((v) => {
+        // get all data from csv file
+        this.responseArray = Object.values(v.data);
+        this.fillteredArr = this.responseArray;
+        // get modul name
+        for (var i = 0; i < Object.values(v.data).length; i++) {
+          this.modulName.push(
+            Object.values(v.data)[i][
+              "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul"
+            ]
+          );
+        }
+        // filter duplicate
+        this.modulName = this.modulName.filter(
+          (item, index) =>
+            this.modulName.indexOf(item) === index &&
+            item !== undefined &&
+            item !== ""
+        );
+        this.expandedGroup = [...Array(this.modulName.length).keys()];
+        console.log(this.expandedGroup);
+      });
+      return response;
+    },
+
+    isExpanded(key) {
+      return this.expandedGroup.indexOf(key) !== -1;
+    },
+
+    toggleExpansion(key) {
+      if (this.isExpanded(key)) {
+        // .splice(start, deleteCount, item1, ..., itemN)
+        this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1);
+      } else this.expandedGroup.push(key);
+    },
+
+    searchAttribute() {
+      // delete empty string and undefined from attribute name
+      this.responseArray = this.responseArray
+        .filter(
+          (item) =>
+            item[
+              "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+            ]
+        )
+        .filter((attr) => attr !== "" && attr !== undefined);
+
+      // filter txtSearch
+      this.fillteredArr = this.responseArray.filter((item) =>
+        item[
+          "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+        ]
+          .toLowerCase()
+          .includes(this.txtSearch.toLowerCase())
+      );
+    },
+
+    showSelectedAttribute() {
+      this.selectedArr;
+      this.selectedAttribute = this.selectedArr.filter((selectedItm) =>
+        this.fillteredArr.filter(
+          (item) =>
+            item[
+              "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+            ] === selectedItm
+        )
+      );
+      console.log(this.selectedAttribute);
+    },
+  },
+  // call function on page load
+  // or beforeMount() {}
+  created() {
+    this.loadcsv();
+  },
+};
 </script>
 <style scoped>
-	#app-content > div {
-		width: 100%;
-		height: 100%;
-		padding: 20px;
-		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
-	}
+#container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  background-color: white;
+}
 
-	input[type='text'] {
-		width: 100%;
-	}
+#content-left {
+  width: 25%;
+  height: 90%;
+  margin: 20px;
+}
 
-	textarea {
-		flex-grow: 1;
-		width: 100%;
-	}
+#attribute-list,
+#content-left #selected-attribute {
+  display: flex;
+  flex-direction: column;
+
+  height: 50%;
+  background-color: aliceblue;
+  border-radius: 26px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+#content-right {
+  margin: 10px;
+  width: 70%;
+  height: 1000px;
+}
+
+#app-content > div {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+#toggle-img {
+  width: 15px;
+  height: 15px;
+}
+
+input[type="text"] {
+  width: 100%;
+}
+
+textarea {
+  flex-grow: 1;
+  width: 100%;
+}
+
+#attribute-items {
+  display: flex;
+  flex-direction: row;
+  column-gap: 8px;
+  min-height: 30px;
+  padding-left: 15px;
+}
+
+#attribute-items input {
+  margin: 0px;
+  position: relative;
+  top: -6px;
+}
 </style>
