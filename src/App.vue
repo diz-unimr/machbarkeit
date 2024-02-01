@@ -7,7 +7,9 @@
     <div id="container">
       <div id="content-left">
         <div id="attribute-list">
-          <h2 style="font-weight: bold; text-align: center">Attributliste</h2>
+          <h2 style="font-weight: bold; text-align: center">
+            Attributliste111
+          </h2>
           <input
             type="text"
             placeholder="Attribut suchen"
@@ -52,6 +54,7 @@
                       ]
                     "
                     v-model="selectedArr"
+                    @input="showSelectedAttribute"
                   />
                   <!-- The for attribute is used in HTML to associate a <label> element with a form element -->
                   <label :for="key">{{
@@ -92,6 +95,7 @@ export default {
       responseArray: [],
       fillteredArr: [],
       selectedArr: [],
+      selectedAttribute: [],
       expandedGroup: [],
       modulName: [],
       txtSearch: "",
@@ -132,7 +136,6 @@ export default {
             item !== ""
         );
         this.expandedGroup = [...Array(this.modulName.length).keys()];
-        console.log(this.expandedGroup);
       });
       return response;
     },
@@ -170,13 +173,14 @@ export default {
     },
 
     showSelectedAttribute() {
-      this.selectedArr;
-      this.selectedAttribute = this.selectedArr.filter((selectedItm) =>
+      console.log("selectedArr");
+      console.log(this.selectedArr);
+      this.selectedAttribute = this.selectedArr.filter((selectedItem) =>
         this.fillteredArr.filter(
           (item) =>
             item[
               "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
-            ] === selectedItm
+            ] === selectedItem
         )
       );
       console.log(this.selectedAttribute);
