@@ -7,9 +7,7 @@
     <div id="container">
       <div id="content-left">
         <div id="attribute-list">
-          <h2 style="font-weight: bold; text-align: center">
-            Attributliste111
-          </h2>
+          <h2 style="font-weight: bold; text-align: center">Attributliste</h2>
           <input
             type="text"
             placeholder="Attribut suchen"
@@ -19,9 +17,7 @@
           />
           <div style="overflow: auto">
             <div v-for="(modul, index) in modulName" :key="index">
-              <a
-                @click="toggleExpansion(index)"
-                style="font-weight: bold; margin-bottom: 2px"
+              <a id="modul-name" @click="toggleExpansion(index)"
                 >{{ modul }}
                 <!-- :src (short for v-bind:src="") -->
                 <img
@@ -45,6 +41,7 @@
                     ] === modul
                   "
                 >
+                  <!-- eslint-enable -->
                   <input
                     type="checkbox"
                     :id="key"
@@ -54,7 +51,7 @@
                       ]
                     "
                     v-model="selectedArr"
-                    @input="showSelectedAttribute"
+                    @change="showSelectedAttribute"
                   />
                   <!-- The for attribute is used in HTML to associate a <label> element with a form element -->
                   <label :for="key">{{
@@ -72,12 +69,30 @@
             ausgewählte Attributliste
           </h2>
           <div style="overflow: auto">
-            <p v-for="(item, key) in selectedArr" :key="key">- {{ item }}</p>
+            <div v-for="(modul, index) in selectedArrModulName" :key="index">
+              <div id="modul-name">{{ modul }}</div>
+              <!-- eslint-disable -->
+              <div
+                id="attribute-items"
+                v-for="item in selectedAttribute"
+                v-if="
+                  item[
+                    'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
+                  ] === modul
+                "
+              >
+                <!-- eslint-enable -->
+                <label style="cursor: auto">{{
+                  item[
+                    "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+                  ]
+                }}</label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div id="content-right"></div>
-      <!-- <button id="loadBtn" v-on:click="loadcsv">Load CSV file</button> -->
     </div>
   </div>
 </template>
@@ -98,15 +113,29 @@ export default {
       selectedAttribute: [],
       expandedGroup: [],
       modulName: [],
+      selectedArrModulName: [],
       txtSearch: "",
     };
   },
+
+  // life cycle of vue js
+  // Call functions before all component are rendered
+  beforeCreate() {},
+  // Call functions before the template is rendered
+  created() {
+    this.loadcsv();
+  },
+  beforeMount() {},
+  mounted() {},
+  beforeUpdate() {},
+  updated() {},
+  beforeDestroy() {},
+  destroyed() {},
 
   computed: {},
   /**
    * Fetch list of notes when the component is loaded
    */
-  async mounted() {},
 
   methods: {
     loadcsv() {
@@ -119,22 +148,20 @@ export default {
       response.then((v) => {
         // get all data from csv file
         this.responseArray = Object.values(v.data);
+
+        this.responseArray = this.responseArray
+          .filter(
+            (item) =>
+              item[
+                "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+              ]
+          )
+          .filter((attr) => attr !== "" && attr !== undefined);
+
         this.fillteredArr = this.responseArray;
         // get modul name
-        for (var i = 0; i < Object.values(v.data).length; i++) {
-          this.modulName.push(
-            Object.values(v.data)[i][
-              "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul"
-            ]
-          );
-        }
-        // filter duplicate
-        this.modulName = this.modulName.filter(
-          (item, index) =>
-            this.modulName.indexOf(item) === index &&
-            item !== undefined &&
-            item !== ""
-        );
+        this.modulName = this.getModulName(this.responseArray);
+        // initialize keys from modulName.length (default: expand all attributelists)
         this.expandedGroup = [...Array(this.modulName.length).keys()];
       });
       return response;
@@ -172,24 +199,32 @@ export default {
       );
     },
 
+    getModulName(inputArr) {
+      let name;
+      name = inputArr.map(
+        (item) =>
+          item[
+            "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul"
+          ]
+      );
+      // filter duplicate
+      name = name.filter(
+        (item, index) =>
+          name.indexOf(item) === index && item !== undefined && item !== ""
+      );
+      return name;
+    },
+
     showSelectedAttribute() {
-      console.log("selectedArr");
-      console.log(this.selectedArr);
-      this.selectedAttribute = this.selectedArr.filter((selectedItem) =>
-        this.fillteredArr.filter(
-          (item) =>
-            item[
-              "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
-            ] === selectedItem
+      this.selectedAttribute = this.responseArray.filter((filteredItem) =>
+        this.selectedArr.includes(
+          filteredItem[
+            "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+          ]
         )
       );
-      console.log(this.selectedAttribute);
+      this.selectedArrModulName = this.getModulName(this.selectedAttribute);
     },
-  },
-  // call function on page load
-  // or beforeMount() {}
-  created() {
-    this.loadcsv();
   },
 };
 </script>
@@ -260,5 +295,10 @@ textarea {
   margin: 0px;
   position: relative;
   top: -6px;
+}
+
+#modul-name {
+  font-weight: bold;
+  margin-bottom: 2px;
 }
 </style>
