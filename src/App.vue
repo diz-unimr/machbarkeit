@@ -6,35 +6,78 @@
   <div id="content" class="app-machbarkeit">
     <div id="container">
       <div id="content-left">
-        <div id="attribute-list">
-          <h2 style="font-weight: bold; text-align: center">Attributliste</h2>
-          <input
-            type="text"
-            placeholder="Attribut suchen"
-            style="width: 100%; margin-bottom: 15px; border-color: lightblue"
-            v-model="txtSearch"
-            @input="searchAttribute()"
-          />
-          <div style="overflow: auto">
-            <div v-for="(modul, index) in modulName" :key="index">
-              <a id="modul-name" @click="toggleExpansion(index)"
-                >{{ modul }}
-                <!-- :src (short for v-bind:src="") -->
-                <img
-                  style="width: 10px; height: 10px"
-                  :src="
-                    isExpanded(index)
-                      ? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
-                      : 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
-                  "
-                />
-              </a>
-              <div style="margin: 10px 0px" v-show="isExpanded(index)">
+        <div id="attribute-list-container">
+          <div id="attribute-list-header">Attributliste</div>
+          <div id="attribute-list-content">
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Attribut suchen"
+              v-model="txtSearch"
+              @input="searchAttribute()"
+            />
+            <div style="overflow: auto">
+              <div v-for="(modul, index) in modulName" :key="index">
+                <a id="modul-name" @click="toggleExpansion(index)"
+                  >{{ modul }}
+                  <!-- :src (short for v-bind:src="") -->
+                  <img
+                    style="width: 10px; height: 10px"
+                    :src="
+                      isExpanded(index)
+                        ? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
+                        : 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
+                    "
+                  />
+                </a>
+                <div style="margin-top: 10px" v-show="isExpanded(index)">
+                  <!-- eslint-disable -->
+                  <div
+                    id="attribute-items"
+                    v-for="(item, key) in fillteredArr"
+                    :key="key"
+                    v-if="
+                      item[
+                        'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
+                      ] === modul
+                    "
+                  >
+                    <!-- eslint-enable -->
+                    <input
+                      type="checkbox"
+                      :id="key"
+                      :value="
+                        item[
+                          'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+                        ]
+                      "
+                      v-model="selectedArr"
+                      @change="showSelectedAttribute"
+                    />
+                    <!-- The for attribute is used in HTML to associate a <label> element with a form element -->
+                    <label :for="key">{{
+                      item[
+                        "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+                      ]
+                    }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="attribute-list-container">
+          <div id="attribute-list-header">ausgewählte Attributliste</div>
+
+          <div id="attribute-list-content">
+            <div style="overflow: auto; width: 100%">
+              <div v-for="(modul, index) in selectedArrModulName" :key="index">
+                <div id="modul-name">{{ modul }}</div>
                 <!-- eslint-disable -->
                 <div
                   id="attribute-items"
-                  v-for="(item, key) in fillteredArr"
-                  :key="key"
+                  v-for="item in selectedAttribute"
                   v-if="
                     item[
                       'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
@@ -42,51 +85,12 @@
                   "
                 >
                   <!-- eslint-enable -->
-                  <input
-                    type="checkbox"
-                    :id="key"
-                    :value="
-                      item[
-                        'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-                      ]
-                    "
-                    v-model="selectedArr"
-                    @change="showSelectedAttribute"
-                  />
-                  <!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-                  <label :for="key">{{
+                  <label style="cursor: auto">{{
                     item[
                       "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
                     ]
                   }}</label>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="selected-attribute">
-          <h2 style="font-weight: bold; text-align: center">
-            ausgewählte Attributliste
-          </h2>
-          <div style="overflow: auto">
-            <div v-for="(modul, index) in selectedArrModulName" :key="index">
-              <div id="modul-name">{{ modul }}</div>
-              <!-- eslint-disable -->
-              <div
-                id="attribute-items"
-                v-for="item in selectedAttribute"
-                v-if="
-                  item[
-                    'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-                  ] === modul
-                "
-              >
-                <!-- eslint-enable -->
-                <label style="cursor: auto">{{
-                  item[
-                    "Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
-                  ]
-                }}</label>
               </div>
             </div>
           </div>
@@ -237,7 +241,7 @@ export default {
 }
 
 #content-left {
-  width: 25%;
+  width: 22%;
   height: 90%;
   margin: 20px;
 }
@@ -246,12 +250,35 @@ export default {
 #content-left #selected-attribute {
   display: flex;
   flex-direction: column;
-
   height: 50%;
-  background-color: aliceblue;
-  border-radius: 26px;
+  background-color: white;
+  border: 1px solid #9ea9b3;
+  border-radius: 5px;
   padding: 20px;
   margin-bottom: 20px;
+}
+
+#attribute-list-container {
+  height: 50%;
+  border: 1px solid #9ea9b3;
+  border-radius: 5px;
+  margin-bottom: 25px;
+}
+
+#attribute-list-header {
+  background-color: #5270a7;
+  font-weight: bold;
+  font-size: large;
+  text-align: center;
+  color: white;
+  padding: 15px 0px;
+}
+
+#attribute-list-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 90%;
 }
 
 #content-right {
@@ -300,5 +327,17 @@ textarea {
 #modul-name {
   font-weight: bold;
   margin-bottom: 2px;
+}
+
+#search-input {
+  padding-left: 5px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 512 512' fill='gray'%3E%3Cpath d='M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position-y: center;
+  background-position-x: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  border: 1px solid #c0c7ce;
+  padding-left: 35px;
 }
 </style>
