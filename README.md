@@ -4,7 +4,7 @@
 -->
 
 # Nextcloud app development example
-[![ESLint](https://github.com/diz-unimr/nc-template-app/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/nc-template-app/actions/workflows/lint-eslint.yml)
+[![ESLint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml)
 [![Lint app info](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml)
 [![PHP Coding Standards Fixer](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-php-cs.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-php-cs.yml)
 [![Stylelint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-stylelint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-stylelint.yml)
