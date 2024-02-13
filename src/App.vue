@@ -51,9 +51,12 @@
 											@change="showSelectedAttribute"
 										/>
 										<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-										<label @mouseover.nativ="tooltipPosition"   :for="key" class="attribute-item__tooltip">
+										<label
+											:for="key"
+											class="attribute-item__tooltip"
+											@mouseover="tooltipPosition"
+										>
 											{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
-											
 										</label>
 										<span class="tooltip-text">{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}</span>
 									</div>
@@ -225,13 +228,13 @@ export default {
 		},
 
 		tooltipPosition(event) {
-				var labelPosition = event.target.getBoundingClientRect();
-				this.tooltip_Position = labelPosition.top - 62
-				var tooltip = document.getElementsByClassName('tooltip-text')
+			const labelPosition = event.target.getBoundingClientRect()
+			this.tooltip_Position = labelPosition.top - 62
+			const tooltip = document.getElementsByClassName('tooltip-text')
 
-				for (let i = 0; i < tooltip.length; i++) {
-					tooltip[i].style.top = this.tooltip_Position + 'px';
-				}
+			for (let i = 0; i < tooltip.length; i++) {
+				tooltip[i].style.top = this.tooltip_Position + 'px'
+			}
 		},
 	},
 }
