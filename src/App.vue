@@ -7,9 +7,9 @@
 	<div id="content" class="app-machbarkeit">
 		<div id="container">
 			<div id="content-left">
-				<div id="attribute-list-container">
-					<div id="attribute-list-header">Attributliste</div>
-					<div id="attribute-list-content">
+				<div id="attribute-list__container">
+					<div id="attribute-list__header">Attributliste</div>
+					<div id="attribute-list__content">
 						<input
 							id="search-input"
 							v-model="txtSearch"
@@ -51,8 +51,11 @@
 											@change="showSelectedAttribute"
 										/>
 										<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-										<label :for="key">{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']
-										}}</label>
+										<label @mouseover.nativ="tooltipPosition"   :for="key" class="attribute-item__tooltip">
+											{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
+											
+										</label>
+										<span class="tooltip-text">{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}</span>
 									</div>
 								</div>
 							</div>
@@ -60,10 +63,10 @@
 					</div>
 				</div>
 
-				<div id="attribute-list-container">
-					<div id="attribute-list-header">ausgewählte Attributliste</div>
+				<div id="attribute-list__container">
+					<div id="attribute-list__header">ausgewählte Attributliste</div>
 
-					<div id="attribute-list-content">
+					<div id="attribute-list__content">
 						<div style="overflow: auto; width: 100%">
 							<div v-for="(modul, index) in selectedArrModulName" :key="index">
 								<div id="modul-name">{{ modul }}</div>
@@ -89,7 +92,9 @@
 					</div>
 				</div>
 			</div>
-			<div id="content-right">Right Content</div>
+			<div id="content-right">
+				Right Content
+			</div>
 		</div>
 	</div>
 </template>
@@ -110,6 +115,7 @@ export default {
 			modulName: [],
 			selectedArrModulName: [],
 			txtSearch: '',
+			tooltip_Position: 0,
 		}
 	},
 
@@ -217,9 +223,20 @@ export default {
 			)
 			this.selectedArrModulName = this.getModulName(this.selectedAttribute)
 		},
+
+		tooltipPosition(event) {
+				var labelPosition = event.target.getBoundingClientRect();
+				this.tooltip_Position = labelPosition.top - 62
+				var tooltip = document.getElementsByClassName('tooltip-text')
+
+				for (let i = 0; i < tooltip.length; i++) {
+					tooltip[i].style.top = this.tooltip_Position + 'px';
+				}
+		},
 	},
 }
 </script>
+
 <style scoped>
 #container {
 	display: flex;
@@ -246,14 +263,14 @@ export default {
 	margin-bottom: 20px;
 }
 
-#attribute-list-container {
+#attribute-list__container {
 	height: 50%;
 	border: 1px solid #9ea9b3;
 	border-radius: 5px;
 	margin-bottom: 25px;
 }
 
-#attribute-list-header {
+#attribute-list__header {
 	background-color: #5270a7;
 	font-weight: bold;
 	font-size: large;
@@ -262,7 +279,7 @@ export default {
 	padding: 15px 0px;
 }
 
-#attribute-list-content {
+#attribute-list__content {
 	display: flex;
 	flex-direction: column;
 	padding: 20px;
@@ -273,29 +290,6 @@ export default {
 	margin: 10px;
 	width: 70%;
 	height: 1000px;
-}
-
-#app-content > div {
-	width: 100%;
-	height: 100%;
-	padding: 20px;
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-}
-
-#toggle-img {
-	width: 15px;
-	height: 15px;
-}
-
-input[type='text'] {
-	width: 100%;
-}
-
-textarea {
-	flex-grow: 1;
-	width: 100%;
 }
 
 #attribute-items {
@@ -326,5 +320,37 @@ textarea {
 	margin-bottom: 20px;
 	border: 1px solid #c0c7ce;
 	padding-left: 35px;
+}
+.attribute-item__tooltip {
+  position: relative;
+  display: inline-block;
+}
+.tooltip-text {
+	display: flex;
+  visibility: hidden;
+  width: 300px;
+  background-color: white;
+	border: 2px solid#5270a7;
+  color: black;
+  padding: 10px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+	left: 25%;
+}
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 35%;
+  left: -8%; /* -11% */
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent #5270a7 transparent transparent;
+}
+.attribute-item__tooltip:hover .tooltip-text {
+  visibility: visible;
+}
+.attribute-item__tooltip:hover + .tooltip-text {
+	visibility: visible;
 }
 </style>
