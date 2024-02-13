@@ -324,35 +324,40 @@ export default {
 	border: 1px solid #c0c7ce;
 	padding-left: 35px;
 }
+
 .attribute-item__tooltip {
-  position: relative;
-  display: inline-block;
+	position: relative;
+	display: inline-block;
 }
+
 .tooltip-text {
 	display: flex;
-  visibility: hidden;
-  width: 300px;
-  background-color: white;
+	visibility: hidden;
+	width: 300px;
+	background-color: white;
 	border: 2px solid#5270a7;
-  color: black;
-  padding: 10px;
-  border-radius: 6px;
-  position: absolute;
-  z-index: 1;
+	color: black;
+	padding: 10px;
+	border-radius: 6px;
+	position: absolute;
+	z-index: 1;
 	left: 25%;
 }
+
 .tooltip-text::after {
-  content: "";
-  position: absolute;
-  top: 35%;
-  left: -8%; /* -11% */
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent #5270a7 transparent transparent;
+	content: '';
+	position: absolute;
+	top: 35%;
+	left: -8%; /* -11% */
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent #5270a7 transparent transparent;
 }
+
 .attribute-item__tooltip:hover .tooltip-text {
-  visibility: visible;
+	visibility: visible;
 }
+
 .attribute-item__tooltip:hover + .tooltip-text {
 	visibility: visible;
 }
