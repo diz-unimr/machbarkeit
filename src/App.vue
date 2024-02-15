@@ -8,27 +8,24 @@
 		<div id="container">
 			<div id="content-left">
 				<div id="attribute-list__container">
-					<div id="attribute-list__header">Attributliste</div>
+					<div id="attribute-list__header">
+						Attributliste
+					</div>
 					<div id="attribute-list__content">
-						<input
-							id="search-input"
+						<input id="search-input"
 							v-model="txtSearch"
 							type="text"
 							placeholder="Attribut suchen"
-							@input="searchAttribute"
-						/>
+							@input="searchAttribute">
 						<div style="overflow: auto">
 							<div v-for="(modul, index) in modulName" :key="index">
 								<a id="modul-name" @click="toggleExpansion(index)">
 									{{ modul }}
-									<img
-										style="width: 10px; height: 10px"
-										:src="
-											isExpanded(index)
-												? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
-												: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
-										"
-									/>
+									<img style="width: 10px; height: 10px"
+										:src="isExpanded(index)
+											? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
+											: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
+										">
 								</a>
 								<div v-show="isExpanded(index)" style="margin-top: 10px">
 									<!-- eslint-disable -->
@@ -43,19 +40,15 @@
 										"
 									>
 										<!-- eslint-enable -->
-										<input
-											:id="key"
+										<input :id="key"
 											v-model="selectedArr"
 											type="checkbox"
 											:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
-											@change="showSelectedAttribute"
-										/>
+											@change="showSelectedAttribute">
 										<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-										<label
-											:for="key"
+										<label :for="key"
 											class="attribute-item__tooltip"
-											@mouseover="tooltipPosition"
-										>
+											@mouseover="tooltipPosition">
 											{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
 										</label>
 										<span class="tooltip-text">{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}</span>
@@ -65,14 +58,16 @@
 						</div>
 					</div>
 				</div>
-
 				<div id="attribute-list__container">
-					<div id="attribute-list__header">ausgewählte Attributliste</div>
-
+					<div id="attribute-list__header">
+						ausgewählte Attributliste
+					</div>
 					<div id="attribute-list__content">
 						<div style="overflow: auto; width: 100%">
 							<div v-for="(modul, index) in selectedArrModulName" :key="index">
-								<div id="modul-name">{{ modul }}</div>
+								<div id="modul-name">
+									{{ modul }}
+								</div>
 								<!-- eslint-disable -->
 								<div
 									id="attribute-items"
@@ -97,6 +92,16 @@
 			</div>
 			<div id="content-right">
 				Right Content
+				<div v-if="isContent1" id="content1">
+					<button @click="contentChange">
+						Go to Content2
+					</button>
+				</div>
+				<div v-if="isContent2" id="content2">
+					<button @click="contentChange">
+						Go to Content1
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -105,7 +110,7 @@
 <script>
 import '@nextcloud/dialogs/styles/toast.scss'
 import Papa from 'papaparse'
-
+// import {useRouter} from 'vue-router'
 export default {
 	name: 'App',
 	data() {
@@ -119,6 +124,8 @@ export default {
 			selectedArrModulName: [],
 			txtSearch: '',
 			tooltip_Position: 0,
+			isContent1: true,
+			isContent2: false,
 		}
 	},
 
@@ -234,6 +241,16 @@ export default {
 
 			for (let i = 0; i < tooltip.length; i++) {
 				tooltip[i].style.top = this.tooltip_Position + 'px'
+			}
+		},
+
+		contentChange() {
+			if (this.isContent1 === true) {
+				this.isContent1 = false
+				this.isContent2 = true
+			} else if (this.isContent2 === true) {
+				this.isContent1 = true
+				this.isContent2 = false
 			}
 		},
 	},
