@@ -6,16 +6,16 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Controller;
 
-use OCP\AppFramework\ApiController;
 use OCA\Machbarkeit\AppInfo\Application;
-use OCP\AppFramework\Http\DataResponse;
 use OCA\Machbarkeit\Service\MachbarkeitService;
+use OCP\AppFramework\ApiController;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
 class MachbarkeitApiController extends ApiController {
-    private MachbarkeitService $service;
+	private MachbarkeitService $service;
 	private ?string $userId;
-    public function __construct(IRequest $request,
+	public function __construct(IRequest $request,
 		MachbarkeitService $service,
 		?string $userId) {
 		parent::__construct(Application::APP_ID, $request);
