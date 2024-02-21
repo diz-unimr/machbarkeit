@@ -26,4 +26,5 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'main');
 	}
+
 }

@@ -15,11 +15,13 @@ declare(strict_types=1);
 return [
 	'resources' => [
 		'note' => ['url' => '/notes'],
-		'note_api' => ['url' => '/api/0.1/notes']
+		'note_api' => ['url' => '/api/0.1/notes'],
+		'machbarkeit_api' => ['url' => '/api/0.1/machbarkeit']
 	],
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
-			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']]
+			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
+		['name' => 'machbarkeit_api#getMetadata', 'url' => '/api/0.1/machbarkeit/metadata', 'verb' => 'GET']
 	]
 ];

@@ -1,0 +1,28 @@
+<?php
+
+use OCP\AppFramework\ApiController;
+use OCA\Machbarkeit\AppInfo\Application;
+use OCP\AppFramework\Http\DataResponse;
+use OCA\Machbarkeit\Service\MachbarkeitService;
+use OCP\IRequest;
+
+class MachbarkeitApiController extends ApiController {
+    private MachbarkeitService $service;
+	private ?string $userId;
+    public function __construct(IRequest $request,
+		MachbarkeitService $service,
+		?string $userId) {
+		parent::__construct(Application::APP_ID, $request);
+		$this->service = $service;
+		$this->userId = $userId;
+	}
+
+	/**
+	 * @CORS
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 */
+	public function getMetadata(): DataResponse {
+		return new DataResponse('DEBUG TEST');
+	}
+}
