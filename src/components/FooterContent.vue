@@ -1,13 +1,16 @@
 <template>
 	<div id="footer">
 		<div v-if="ismachbarkeit">
-			<button class="button" @click="updateStatus">
-				Gehen zu "Meine Abfragen"
+			<button style="border-radius: 8px;" @click="updateStatus">
+				ABFRAGE LADEN
+			</button>
+			<button style="border-radius: 8px;" @click="updateStatus">
+				ABFRAGE SPEICHERN
 			</button>
 		</div>
 		<!-- @click="contentChange" -->
 		<div v-if="ismeineabfragen">
-			<button class="button" @click="updateStatus">
+			<button style="border-radius: 8px;" @click="updateStatus">
 				Genhen zu "Machbarkeitsabfrage"
 			</button>
 		</div>
@@ -28,8 +31,6 @@ export default {
 	},
 	methods: {
 		updateStatus() {
-			this.isMachbarkeitContent = this.ismachbarkeit
-			this.isMeineAbfragenContent = this.ismeineabfragen
 			this.$emit('update-status')
 		},
 	},
@@ -45,7 +46,4 @@ export default {
 	left: 0px;
 }
 
-.button {
-	border-radius: 8px;
-}
 </style>
