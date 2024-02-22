@@ -6,18 +6,25 @@
 	<!-- eslint no-trailing-spaces: "error" -->
 	<div id="content" class="app-machbarkeit">
 		<div id="container">
-			Container
+			<FeasibilityContent v-if="isMachbarkeitContent" />
+			<MyQueryContent v-if="isMeineAbfragenContent" />
+			<FooterContent :ismachbarkeit="isMachbarkeitContent" :ismeineabfragen="isMeineAbfragenContent" @update-status="contentChange" />
 		</div>
 	</div>
 </template>
 
 <script>
-import { generateUrl } from '@nextcloud/router'
-import axios from '@nextcloud/axios'
+import FeasibilityContent from './components/FeasibilityContent.vue'
+import MyQueryContent from './components/MyQueryContent.vue'
+import FooterContent from './components/FooterContent.vue'
 
 export default {
 	name: 'App',
-	components: {},
+	components: {
+		FeasibilityContent,
+		MyQueryContent,
+		FooterContent,
+	},
 	data() {
 		return {
 			isMachbarkeitContent: true,
@@ -34,7 +41,7 @@ export default {
 	created() {},
 	beforeMount() {},
 	mounted() {
-		this.getCsv()
+		/* this.getCsv() */
 	},
 	beforeUpdate() {},
 	updated() {},
@@ -42,8 +49,9 @@ export default {
 	destroyed() {},
 
 	methods: {
-		async getCsv() {
-			await axios.get(generateUrl('/apps/machbarkeit/api/0.1/machbarkeit/metadata'))
+		contentChange() {
+			this.isMachbarkeitContent = !this.isMachbarkeitContent
+			this.isMeineAbfragenContent = !this.isMeineAbfragenContent
 		},
 	},
 }
