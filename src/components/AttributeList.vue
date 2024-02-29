@@ -4,17 +4,27 @@
 			<div id="attribute-list__header">
 				Attributliste
 			</div>
-			<div id="attribute-list__content">
-				<input id="search-input"
+			<div id="attribute-list__content" ref="attribute-list__content">
+				<!-- v-model="txtSearch" -->
+				<NcTextField :value.sync="txtSearch"
+					label="Attribut suchen"
+					trailing-button-icon="close"
+					placeholder=" "
+					:show-trailing-button="txtSearch !== ''"
+					@trailing-button-click="txtSearch = ''"
+					@input="searchAttribute">
+					<Magnify :size="20" />
+				</NcTextField>
+				<!-- <input id="attribute-search-input"
 					v-model="txtSearch"
 					type="text"
 					placeholder="Attribut suchen"
-					@input="searchAttribute">
-				<div style="overflow: auto">
+					@input="searchAttribute"> -->
+				<div class="attribute-list-modul">
 					<div v-for="(modul, index) in modulName" :key="index">
 						<a id="modul-name" @click="toggleExpansion(index)">
 							{{ modul }}
-							<img style="width: 10px; height: 10px"
+							<img class="expandImg"
 								:src="isExpanded(index)
 									? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
 									: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
@@ -28,7 +38,7 @@
 								:key="key"
 								v-if="
 									item[
-											'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
+										'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
 									] === modul
 								"
 							>
@@ -42,7 +52,7 @@
 								<label :for="key"
 									class="attribute-item__tooltip"
 									@mouseover="tooltipPosition">
-									{{ item[ 'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
+									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
 								</label>
 								<span class="tooltip-text">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
 							</div>
@@ -56,7 +66,8 @@
 				ausgewählte Attributliste
 			</div>
 			<div id="attribute-list__content">
-				<div style="overflow: auto; width: 100%">
+				<div class="attribute-list-modul">
+					{{ data.data }}
 					<div v-for="(modul, index) in selectedArrModulName" :key="index">
 						<div id="modul-name">
 							{{ modul }}
@@ -67,7 +78,7 @@
 							v-for="item in selectedAttribute"
 							v-if="
 								item[
-										'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
+									'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
 								] === modul
 							"
 						>
@@ -90,9 +101,15 @@ import '@nextcloud/dialogs/styles/toast.scss'
 import Papa from 'papaparse'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-// import {useRouter} from 'vue-router'
+import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
+import Magnify from 'vue-material-design-icons/Magnify'
+
 export default {
 	name: 'AttributeList',
+	components: {
+		NcTextField,
+		Magnify,
+	},
 	data() {
 		return {
 			responseArray: [],
@@ -105,7 +122,7 @@ export default {
 			txtSearch: '',
 			tooltip_Position: 0,
 			jsonData: [],
-			data: '',
+			data: [],
 		}
 	},
 
@@ -117,23 +134,21 @@ export default {
 	// Call functions before the template is rendered
 	created() {
 		this.loadcsv()
-		this.getAPI()
 		this.getCsv()
 	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
+	updated() {
+		const buttonContainer = document.getElementsByClassName('input-field__main-wrapper')
+		if (buttonContainer[0].querySelector('button') !== null) {
+			buttonContainer[0].querySelector('button').addEventListener('click', this.searchAttribute)
+		}
+	},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		async getAPI() {
-			const res = await fetch('http://localhost:8080/apps-extra/machbarkeit/templates/main.php')
-			const responseData = await res.json()
-			this.jsonData = responseData
-		},
-
 		async getCsv() {
 			this.data = await axios.get(generateUrl('/apps/machbarkeit/api/0.1/machbarkeit/metadata'))
 		},
@@ -227,9 +242,8 @@ export default {
 
 		tooltipPosition(event) {
 			const labelPosition = event.target.getBoundingClientRect()
-			this.tooltip_Position = labelPosition.top - 62
+			this.tooltip_Position = labelPosition.top - 136
 			const tooltip = document.getElementsByClassName('tooltip-text')
-
 			for (let i = 0; i < tooltip.length; i++) {
 				tooltip[i].style.top = this.tooltip_Position + 'px'
 			}
@@ -244,9 +258,9 @@ export default {
 	flex-direction: row;
 	flex-wrap: wrap;
 	row-gap: 20px;
-	width: 25%;
+	width: 27%;
 	height: 100%;
-	padding: 20px;
+	padding: 20px 20px 0px 20px;
 }
 
 #attribute-list #selected-attribute {
@@ -261,7 +275,8 @@ export default {
 }
 
 #attribute-list__container {
-	height: 50%;
+	position: relative;
+	min-height: 45%;
 	width: 100%;
 	border: 1px solid #9ea9b3;
 	border-radius: 5px;
@@ -278,10 +293,17 @@ export default {
 }
 
 #attribute-list__content {
+	position: absolute;
 	display: flex;
 	flex-direction: column;
 	padding: 20px;
-	height: 90%;
+	height: -webkit-fill-available;
+	width: 100%;
+}
+
+.attribute-list-modul {
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 #attribute-items {
@@ -303,7 +325,7 @@ export default {
 	margin-bottom: 2px;
 }
 
-#search-input {
+#attribute-search-input {
 	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 512 512' fill='gray'%3E%3Cpath d='M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z'%3E%3C/path%3E%3C/svg%3E");
 	background-repeat: no-repeat;
 	background-position-y: center;
@@ -314,6 +336,15 @@ export default {
 	padding-left: 35px;
 }
 
+#attribute-list__content input:focus {
+	border: 2px solid #5a78ae;
+}
+
+.expandImg {
+	width: 10px;
+	height: 10px
+}
+
 .attribute-item__tooltip {
 	position: relative;
 	display: inline-block;
@@ -322,15 +353,14 @@ export default {
 .tooltip-text {
 	display: flex;
 	visibility: hidden;
-	width: 300px;
+	width: 350px;
 	background-color: white;
-	border: 2px solid#5270a7;
-	color: black;
+	border-radius: 5px;
+	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
 	padding: 10px;
-	border-radius: 6px;
 	position: absolute;
 	z-index: 1;
-	left: 25%;
+	left: 105%;
 }
 
 .tooltip-text::after {
@@ -369,5 +399,34 @@ export default {
 	align-items: flex-start;
 	flex: 1 1 100%;
 	max-width: 90%;
+}
+
+.input-field {
+	margin-block-start: 0px;
+	margin-bottom: 15px;
+}
+
+.show-tooltip {
+	position: relative;
+	display: inline-block;
+}
+
+.show-tooltip .tooltiptext {
+	display: flex;
+	visibility: hidden;
+	width: 300px;
+	height: auto;
+	background-color: white;
+	padding: 10px;
+	position: absolute;
+	z-index: 100;
+	left: 150%;
+	top: -160%;
+	border-radius: 5px;
+	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
+}
+
+.show-tooltip:hover .tooltiptext {
+	visibility: visible;
 }
 </style>

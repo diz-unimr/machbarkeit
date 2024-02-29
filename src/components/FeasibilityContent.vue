@@ -1,7 +1,7 @@
 <template>
-	<div id="body">
-		<AttributeList></AttributeList>
-		<FeasibilityQuery></FeasibilityQuery>
+	<div id="machbarkeit-body">
+		<AttributeList />
+		<FeasibilityQuery />
 	</div>
 </template>
 
@@ -34,11 +34,12 @@ export default {
 </script>
 
 <style scoped>
-#body {
+#machbarkeit-body {
 	width: 100%;
-	height: 90%;
+	height: 97%;
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap;
 }
+
 </style>

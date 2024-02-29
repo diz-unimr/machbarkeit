@@ -5,30 +5,22 @@
 	-->
 	<!-- eslint no-trailing-spaces: "error" -->
 	<div id="content" class="app-machbarkeit">
-		<div id="container">
-			<FeasibilityContent v-if="isMachbarkeitContent" />
-			<MyQueryContent v-if="isMeineAbfragenContent" />
-			<FooterContent :ismachbarkeit="isMachbarkeitContent" :ismeineabfragen="isMeineAbfragenContent" @update-status="contentChange" />
+		<div id="machbarkeit-container">
+			<FeasibilityContent @update-status="querySave" />
 		</div>
 	</div>
 </template>
 
 <script>
 import FeasibilityContent from './components/FeasibilityContent.vue'
-import MyQueryContent from './components/MyQueryContent.vue'
-import FooterContent from './components/FooterContent.vue'
-
 export default {
 	name: 'App',
 	components: {
 		FeasibilityContent,
-		MyQueryContent,
-		FooterContent,
 	},
 	data() {
 		return {
-			isMachbarkeitContent: true,
-			isMeineAbfragenContent: false,
+			isDialogVisible: false,
 		}
 	},
 
@@ -40,25 +32,25 @@ export default {
 	// Call functions before the template is rendered
 	created() {},
 	beforeMount() {},
-	mounted() {
-		/* this.getCsv() */
-	},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		contentChange() {
-			this.isMachbarkeitContent = !this.isMachbarkeitContent
-			this.isMeineAbfragenContent = !this.isMeineAbfragenContent
+		querySave() {
+			this.isDialogVisible = true
+		},
+		queryCancel() {
+			this.isDialogVisible = false
 		},
 	},
 }
 </script>
 
 <style scoped>
-#container {
+#machbarkeit-container {
 	display: flex;
 	flex-wrap: wrap;
 	width: 100%;
