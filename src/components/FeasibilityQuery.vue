@@ -161,7 +161,7 @@
 import SaveQuery from './SaveQuery.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import Magnify from 'vue-material-design-icons/Magnify'
+import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 export default {
 	name: 'FeasibilityQuery',

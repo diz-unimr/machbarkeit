@@ -101,7 +101,7 @@ import Papa from 'papaparse'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import Magnify from 'vue-material-design-icons/Magnify'
+import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 export default {
 	name: 'AttributeList',
@@ -149,7 +149,8 @@ export default {
 
 	methods: {
 		async getCsv() {
-			this.data = await axios.get(generateUrl('/apps/machbarkeit/api/0.1/machbarkeit/metadata'))
+			console.log("data")
+			this.data = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
 		},
 
 		loadcsv() {

@@ -16,12 +16,12 @@ return [
 	'resources' => [
 		'note' => ['url' => '/notes'],
 		'note_api' => ['url' => '/api/0.1/notes'],
-		'machbarkeit_api' => ['url' => '/api/0.1/machbarkeit']
+		'machbarkeit' => ['url' => '/machbarkeit']
 	],
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
 			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
-		['name' => 'machbarkeit_api#getMetadata', 'url' => '/api/0.1/machbarkeit/metadata', 'verb' => 'GET']
+		['name' => 'machbarkeit#getMetadata', 'url' => '/machbarkeit/metadata', 'verb' => 'GET']
 	]
 ];

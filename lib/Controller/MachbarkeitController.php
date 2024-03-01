@@ -8,11 +8,11 @@ namespace OCA\Machbarkeit\Controller;
 
 use OCA\Machbarkeit\AppInfo\Application;
 use OCA\Machbarkeit\Service\MachbarkeitService;
-use OCP\AppFramework\ApiController;
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
-class MachbarkeitApiController extends ApiController {
+class MachbarkeitController extends Controller {
 	private MachbarkeitService $service;
 	private ?string $userId;
 	public function __construct(IRequest $request,

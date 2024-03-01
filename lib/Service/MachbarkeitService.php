@@ -8,7 +8,7 @@ namespace OCA\Machbarkeit\Service;
 header('Content-Type: application/json; charset=UTF-8');
 class MachbarkeitService {
 	public function readCsv() {
-		$csvFile = file_get_contents(__DIR__ .'/diz_metadaten.csv');
+		$csvFile = file_get_contents(__DIR__ .'/../../csvfile/diz_metadaten.csv');
 		$csvArray = explode("\n", $csvFile);
 		$result = array_map("str_getcsv", $csvArray);
 		$headers = $result[0];
@@ -19,8 +19,6 @@ class MachbarkeitService {
 				$jsonArray[$i][$headers[$key]] = $column;
 			}
 		}
-		header('Content-Type: application/json; charset=UTF-8');
-
 		$jsonObject = json_encode($jsonArray, JSON_PRETTY_PRINT);
 
 		print_r($jsonObject);
@@ -36,7 +34,7 @@ class MachbarkeitService {
 		}
 		fclose($csvFile);
 
-		$keys = array_shift($data);
+		/* $keys = array_shift($data);
 		$data2 = [];
 		foreach ($data as $row) {
 			$data2[] = array_combine($keys, $row);

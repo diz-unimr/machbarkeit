@@ -1,6 +1,11 @@
 <template>
 	<div style="padding: 50px; height: 90%; width: 100%;">
-		Meine Abfragen Content
+		<!-- <div>
+			Meine Abfragen Content
+		</div> -->
+		<div style="display: flex; justify-content: center;margin: 20px;">
+			<img :src="'http://localhost:8080/apps-extra/machbarkeit/img/mockup.png'">
+		</div>
 	</div>
 </template>
 
