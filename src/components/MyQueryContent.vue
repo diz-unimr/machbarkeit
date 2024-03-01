@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div style="padding: 50px; height: 90%; width: 100%;">
 		<!-- <div>
 			Meine Abfragen Content

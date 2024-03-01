@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div id="attribute-list">
 		<div id="attribute-list__container">
 			<div id="attribute-list__header">
@@ -151,6 +155,11 @@ export default {
 		async getCsv() {
 			console.log("data")
 			this.data = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			//const jsonData = JSON.parse(this.data.data)
+			console.log(this.data)
+			console.log(this.data.data)
+			//console.log(this.data.data[1]['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'])
+			//console.log(jsonData)
 		},
 
 		loadcsv() {

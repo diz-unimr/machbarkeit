@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div id="feasibility-query">
 		<div id="feasibility-query__content">
 			<SaveQuery v-if="isDialogVisible" ref="saveQueryRef" @update-status="queryCancel" />
