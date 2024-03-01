@@ -29,6 +29,6 @@ class MachbarkeitApiController extends ApiController {
 	 * @NoAdminRequired
 	 */
 	public function getMetadata(): DataResponse {
-		return new DataResponse("DEBUG TEST");
+		return new DataResponse($this->service->readCsv());
 	}
 }

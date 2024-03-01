@@ -5,7 +5,6 @@
 				Attributliste
 			</div>
 			<div id="attribute-list__content" ref="attribute-list__content">
-				<!-- v-model="txtSearch" -->
 				<NcTextField :value.sync="txtSearch"
 					label="Attribut suchen"
 					trailing-button-icon="close"
