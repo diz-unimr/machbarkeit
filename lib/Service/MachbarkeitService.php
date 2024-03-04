@@ -12,15 +12,30 @@ class MachbarkeitService {
 		$csvArray = explode("\n", $csvFile);
 		$result = array_map("str_getcsv", $csvArray);
 		$headers = $result[0];
+
 		$jsonArray = array();
 		$rowCount = count($result);
-		for ($i=1; $i<$rowCount; $i++) {
+		for ($i = 1; $i < $rowCount; $i++) {
 			foreach ($result[$i] as $key => $column) {
 				$jsonArray[$i][$headers[$key]] = $column;
 			}
 		}
-		//$jsonObject = json_encode($jsonArray, JSON_PRETTY_PRINT);
+		/* $arr = [];
 
+			foreach ($jsonArray as $key) {
+				$nestedObj = $jsonArray[$key];
+				$arr.push($nestedObj);
+			} */
 		return $jsonArray;
+	}
+
+	public function readCsv1() {
+		$handle = fopen(__DIR__ .'/../../csvfile/diz_metadaten.csv', 'r');
+		$row = 1;
+		while (!feof($handle) ) {
+			$lines[] = fgetcsv($handle, 1000, ',');
+		}
+		fclose($handle);
+		return $lines;
 	}
 }
