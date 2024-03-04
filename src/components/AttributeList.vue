@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div id="attribute-list">
 		<div id="attribute-list__container">
 			<div id="attribute-list__header">
@@ -151,7 +155,6 @@ export default {
 			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
 			const obj = objData.data
 			const arr = []
-
 			for (const key in obj) {
 				const nestedObj = obj[key]
 				arr.push(nestedObj)

@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div id="footer">
 		<div class="button-container">
 			<!-- <label style="font-size: 12px; cursor: unset;">Nur JSON Datei erlaubt</label> -->
