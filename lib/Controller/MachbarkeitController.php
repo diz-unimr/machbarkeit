@@ -9,7 +9,7 @@ namespace OCA\Machbarkeit\Controller;
 use OCA\Machbarkeit\AppInfo\Application;
 use OCA\Machbarkeit\Service\MachbarkeitService;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
 class MachbarkeitController extends Controller {
@@ -28,7 +28,7 @@ class MachbarkeitController extends Controller {
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
-	public function getMetadata(): DataResponse {
-		return new DataResponse($this->service->readCsv());
+	public function getMetadata(): JSONResponse {
+		return new JSONResponse($this->service->readCsv());
 	}
 }

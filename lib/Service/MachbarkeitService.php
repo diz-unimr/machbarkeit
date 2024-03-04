@@ -5,37 +5,18 @@ declare(strict_types=1);
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace OCA\Machbarkeit\Service;
-header('Content-Type: application/json; charset=UTF-8');
 class MachbarkeitService {
 	public function readCsv() {
-		$csvFile = file_get_contents(__DIR__ .'/../../csvfile/diz_metadaten.csv');
-		$csvArray = explode("\n", $csvFile);
-		$result = array_map("str_getcsv", $csvArray);
+		$result = array_map("str_getcsv", file(__DIR__ .'/../../csvfile/diz_metadaten.csv'));
 		$headers = $result[0];
 
-		$jsonArray = array();
+		$jsonArray = [];
 		$rowCount = count($result);
 		for ($i = 1; $i < $rowCount; $i++) {
 			foreach ($result[$i] as $key => $column) {
 				$jsonArray[$i][$headers[$key]] = $column;
 			}
 		}
-		/* $arr = [];
-
-			foreach ($jsonArray as $key) {
-				$nestedObj = $jsonArray[$key];
-				$arr.push($nestedObj);
-			} */
-		return $jsonArray;
-	}
-
-	public function readCsv1() {
-		$handle = fopen(__DIR__ .'/../../csvfile/diz_metadaten.csv', 'r');
-		$row = 1;
-		while (!feof($handle) ) {
-			$lines[] = fgetcsv($handle, 1000, ',');
-		}
-		fclose($handle);
-		return $lines;
+		return array_values($jsonArray);
 	}
 }
