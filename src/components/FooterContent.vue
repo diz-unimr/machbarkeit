@@ -5,7 +5,7 @@
 	-->
 	<div id="footer">
 		<div class="button-container">
-			<label style="font-size: 12px; cursor: unset;">Nur JSON Datei erlaubt</label>
+			<!-- <label style="font-size: 12px; cursor: unset;">Nur JSON Datei erlaubt</label> -->
 			<div style="display: flex; flex-direction: row; column-gap: 15px;">
 				<input id="upload" type="file" hidden>
 				<label for="upload" class="query-upload-button" @click="dialogClose">ABFRAGE LADEN</label>

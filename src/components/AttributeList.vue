@@ -70,7 +70,6 @@
 			</div>
 			<div id="attribute-list__content">
 				<div class="attribute-list-modul">
-					{{ data.data }}
 					<div v-for="(modul, index) in selectedArrModulName" :key="index">
 						<div id="modul-name">
 							{{ modul }}
@@ -101,7 +100,6 @@
 
 <script>
 import '@nextcloud/dialogs/styles/toast.scss'
-import Papa from 'papaparse'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
@@ -136,7 +134,6 @@ export default {
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.loadcsv()
 		this.getCsv()
 	},
 	beforeMount() {},
@@ -153,41 +150,23 @@ export default {
 
 	methods: {
 		async getCsv() {
-			console.log("data")
-			this.data = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			//const jsonData = JSON.parse(this.data.data)
-			console.log(this.data)
-			console.log(this.data.data)
-			//console.log(this.data.data[1]['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'])
-			//console.log(jsonData)
-		},
+			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			const obj = objData.data
+			this.responseArray = Object.values(obj)
+			this.responseArray = this.responseArray
+				.filter(
+					(item) =>
+						item[
+							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+						],
+				)
+				.filter((attr) => attr !== '' && attr !== undefined)
 
-		loadcsv() {
-			const response = fetch(
-				'http://localhost:8080/apps-extra/machbarkeit/csvfile/diz_metadaten.csv',
-			)
-				.then((res) => res.text())
-				.then((text) => Papa.parse(text, { header: true }))
-				.catch((e) => console.error(e))
-			response.then((v) => {
-				// get all data from csv file
-				this.responseArray = Object.values(v.data)
-				this.responseArray = this.responseArray
-					.filter(
-						(item) =>
-							item[
-								'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-							],
-					)
-					.filter((attr) => attr !== '' && attr !== undefined)
-
-				this.fillteredArr = this.responseArray
-				// get modul name
-				this.modulName = this.getModulName(this.responseArray)
-				// initialize keys from modulName.length (default: expand all attributelists)
-				this.expandedGroup = [...Array(this.modulName.length).keys()]
-			})
-			return response
+			this.fillteredArr = this.responseArray
+			// get modul name
+			this.modulName = this.getModulName(this.responseArray)
+			// initialize keys from modulName.length (default: expand all attributelists)
+			this.expandedGroup = [...Array(this.modulName.length).keys()]
 		},
 
 		isExpanded(key) {

@@ -10,7 +10,7 @@
 				<div class="top">
 					<div class="number-patients">
 						<p style="margin-left: 30px; font-size: medium;">
-							Anzahl der Patienten: 5
+							Anzahl der Patienten: -
 						</p>
 					</div>
 					<div class="button-container">

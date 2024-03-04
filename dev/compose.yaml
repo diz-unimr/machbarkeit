@@ -9,6 +9,7 @@ services:
     image: ghcr.io/juliushaertl/nextcloud-dev-php80:latest
     environment:
       SERVER_BRANCH: v27.1.5
+      PHP_XDEBUG_MODE: debug #develop
     volumes:
       - ./data/shared:/shared
       - ../:/var/www/html/apps-extra/machbarkeit
