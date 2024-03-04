@@ -6,10 +6,8 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Service;
 
-class MachbarkeitService
-{
-	public function readCsv()
-	{
+class MachbarkeitService {
+	public function readCsv() {
 		$result = array_map("str_getcsv", file(__DIR__ . '/../../csvfile/diz_metadaten.csv'));
 		$headers = $result[0];
 
