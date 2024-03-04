@@ -19,27 +19,8 @@ class MachbarkeitService {
 				$jsonArray[$i][$headers[$key]] = $column;
 			}
 		}
-		$jsonObject = json_encode($jsonArray, JSON_PRETTY_PRINT);
+		//$jsonObject = json_encode($jsonArray, JSON_PRETTY_PRINT);
 
-		print_r($jsonObject);
+		return $jsonArray;
 	}
-	/* public function readCsv() {
-		$csvFile = fopen(__DIR__ .'/diz_metadaten.csv', 'r');
-		$data = [];
-
-		// Read each line of the CSV file until the end
-		while (($row = fgetcsv($csvFile)) !== false) {
-			// Process the row data
-			$data[] = $row;
-		}
-		fclose($csvFile);
-
-		/* $keys = array_shift($data);
-		$data2 = [];
-		foreach ($data as $row) {
-			$data2[] = array_combine($keys, $row);
-		}
-		$jsonData = json_encode($data);
-		print_r ($jsonData);
-	} */
 }

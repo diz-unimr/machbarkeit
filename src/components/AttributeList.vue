@@ -66,7 +66,6 @@
 			</div>
 			<div id="attribute-list__content">
 				<div class="attribute-list-modul">
-					{{ data.data }}
 					<div v-for="(modul, index) in selectedArrModulName" :key="index">
 						<div id="modul-name">
 							{{ modul }}
@@ -132,7 +131,7 @@ export default {
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.loadcsv()
+		//this.loadcsv()
 		this.getCsv()
 	},
 	beforeMount() {},
@@ -149,8 +148,30 @@ export default {
 
 	methods: {
 		async getCsv() {
-			console.log("data")
-			this.data = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			const obj = objData.data
+			const arr = []
+
+			for (const key in obj) {
+				const nestedObj = obj[key]
+				arr.push(nestedObj)
+			}
+			console.log(arr)
+			this.responseArray = Object.values(arr)
+			this.responseArray = this.responseArray
+				.filter(
+					(item) =>
+						item[
+							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+						],
+				)
+				.filter((attr) => attr !== '' && attr !== undefined)
+
+			this.fillteredArr = this.responseArray
+			// get modul name
+			this.modulName = this.getModulName(this.responseArray)
+			// initialize keys from modulName.length (default: expand all attributelists)
+			this.expandedGroup = [...Array(this.modulName.length).keys()]
 		},
 
 		loadcsv() {
