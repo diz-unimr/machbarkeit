@@ -131,7 +131,7 @@ export default {
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		//this.loadcsv()
+		// this.loadcsv()
 		this.getCsv()
 	},
 	beforeMount() {},
@@ -156,7 +156,6 @@ export default {
 				const nestedObj = obj[key]
 				arr.push(nestedObj)
 			}
-			console.log(arr)
 			this.responseArray = Object.values(arr)
 			this.responseArray = this.responseArray
 				.filter(
