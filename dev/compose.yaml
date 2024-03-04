@@ -15,6 +15,5 @@ services:
       - ../:/var/www/html/apps-extra/machbarkeit
     ports:
       - "8080:80"
-      - "9003:9003"
     extra_hosts:
       - host.docker.internal:host-gateway
