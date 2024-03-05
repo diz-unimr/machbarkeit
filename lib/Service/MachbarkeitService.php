@@ -8,16 +8,23 @@ namespace OCA\Machbarkeit\Service;
 
 class MachbarkeitService {
 	public function readCsv() {
-		$result = array_map("str_getcsv", file(__DIR__ . '/../../csvfile/diz_metadaten.csv'));
-		$headers = $result[0];
+		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
+		$data = [];
+		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
+		while (($row = fgetcsv($file)) !== false) {
+			$data[] = $row;
+		}
 
+		$headers = $data[0];
 		$jsonArray = [];
-		$rowCount = count($result);
+		$rowCount = count($data);
 		for ($i = 1; $i < $rowCount; $i++) {
-			foreach ($result[$i] as $key => $column) {
+			foreach ($data[$i] as $key => $column) {
 				$jsonArray[$i][$headers[$key]] = $column;
 			}
 		}
+
+		fclose($file);
 		return array_values($jsonArray);
 	}
 }

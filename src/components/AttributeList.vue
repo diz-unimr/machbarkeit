@@ -7,6 +7,7 @@
 		<div id="attribute-list__container">
 			<div id="attribute-list__header">
 				Attributliste
+				
 			</div>
 			<div id="attribute-list__content" ref="attribute-list__content">
 				<NcTextField :value.sync="txtSearch"
