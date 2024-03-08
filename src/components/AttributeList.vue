@@ -347,7 +347,7 @@ export default {
 	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
 	padding: 10px;
 	position: absolute;
-	z-index: 1;
+	z-index: 1000;
 	left: 105%;
 }
 

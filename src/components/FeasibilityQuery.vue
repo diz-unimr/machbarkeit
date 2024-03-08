@@ -5,7 +5,7 @@
 	-->
 	<div id="feasibility-query">
 		<div id="feasibility-query__content">
-			<SaveQuery v-if="isDialogVisible" ref="saveQueryRef" @update-status="queryCancel" />
+			<SaveQuery v-if="isDialogOpen" ref="saveQueryRef" @update-status="queryCancel" />
 			<div id="feasibility-query__input">
 				<div class="top">
 					<div class="number-patients">
@@ -74,118 +74,31 @@
 						</div>
 					</div>
 				</div>
-				<div id="in-exclusion-criteria">
-					<div class="container-search-input">
-						<div class="header-label">
-							Einschlusskriterien
-						</div>
-						<div class="search-container">
-							<div class="search-button">
-								<button class="button-view">
-									<svg role="img"
-										aria-hidden="true"
-										focusable="false"
-										data-prefix="fas"
-										data-icon="folder"
-										class="svg-inline--fa fa-folder fa-w-16 fa-2x"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 512 512">
-										<path fill="currentColor"
-											d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
-									</svg>
-								</button>
-							</div>
-							<div class="search-input">
-								<NcTextField :value.sync="text1"
-									style="font-size: 16px;"
-									label="Code oder Suchbegriff eingeben"
-									trailing-button-icon="close"
-									placeholder=" "
-									:show-trailing-button="text1 !== ''"
-									@trailing-button-click="text1 = ''">
-									<Magnify :size="20" />
-								</NcTextField>
-							</div>
-						</div>
-					</div>
-					<div class="pipe" />
-					<div class="container-search-input">
-						<div class="header-label">
-							Ausschlusskriterien
-						</div>
-						<div class="search-container">
-							<div class="search-button">
-								<button class="button-view">
-									<svg role="img"
-										aria-hidden="true"
-										focusable="false"
-										data-prefix="fas"
-										data-icon="folder"
-										class="svg-inline--fa fa-folder fa-w-16 fa-2x"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 512 512">
-										<path fill="currentColor"
-											d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
-									</svg>
-								</button>
-							</div>
-							<div class="search-input">
-								<NcTextField :value.sync="text2"
-									style="font-size: 16px;"
-									label="Code oder Suchbegriff eingeben"
-									trailing-button-icon="close"
-									placeholder=" "
-									:show-trailing-button="text2 !== ''"
-									@trailing-button-click="text2 = ''">
-									<Magnify :size="20" />
-								</NcTextField>
-							</div>
-						</div>
-					</div>
-				</div>
 			</div>
-			<div id="feasibility-query__output">
-				<div class="card-header">
-					<div class="text-header">
-						<label style="font-size: 16px; font-weight: 500;">Ausgewählte Merkmale</label>
-					</div>
-				</div>
-				<div class="card-content">
-					<div class="textfield" />
-					<div class="pipe2" />
-					<div class="textfield" />
-				</div>
-			</div>
+			<FeasibilityQueryBuilder />
 		</div>
 		<MachbarkeitFooter @dialog-open="querySaveDialogOpen" @dialog-close="querySaveDiaglogClose" />
 	</div>
 </template>
 
 <script>
+import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQuery from './SaveQuery.vue'
 import MachbarkeitFooter from './FooterContent.vue'
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 export default {
 	name: 'FeasibilityQuery',
 	components: {
+		FeasibilityQueryBuilder,
 		SaveQuery,
 		MachbarkeitFooter,
-		NcTextField,
-		Magnify,
 	},
 	data() {
 		return {
-			text1: '',
-			text2: '',
-			text3: 'hunter',
-			text4: '',
-			text5: '',
 			boardConsent: '',
 			noBoardConsent: '',
 			selectedOption: 'no-broad-consent',
-			isDialogVisible: false,
+			isDialogOpen: false,
 		}
 	},
 	computed: {},
@@ -206,13 +119,13 @@ export default {
 			text = ''
 		},
 		querySaveDialogOpen() {
-			this.isDialogVisible = true
+			this.isDialogOpen = true
 		},
 		querySaveDiaglogClose() {
-			this.isDialogVisible = false
+			this.isDialogOpen = false
 		},
 		queryCancel() {
-			this.isDialogVisible = false
+			this.isDialogOpen = false
 		},
 
 	},
@@ -256,33 +169,6 @@ export default {
 	position: relative;
 	top: 0;
 	width: 100%;
-	margin-bottom: 20px;
-}
-
-#feasibility-query__output {
-	border: 1px solid #9ea9b3;
-	border-top-right-radius: 5px;
-	border-top-left-radius: 5px;
-	box-shadow: none!important;
-	width: 100%;
-}
-
-.card-header {
-	display: flex;
-	padding-left: 10px;
-	background: #5270a7;
-	color: #ffffff;
-	border-top-right-radius: 4px;
-	border-top-left-radius: 4px;
-	min-height: 3.5em;
-}
-
-.text-header {
-	flex-direction: column;
-	box-sizing: border-box;
-	display: flex;
-	place-content: stretch space-around;
-	align-items: stretch;
 }
 
 .top {
@@ -330,12 +216,12 @@ export default {
 	color:#5270a7; text-decoration: underline;
 }
 
-.consent-text {
+/* .consent-text {
 	display: flex;
 	align-items: center;
 	flex-direction: row;
 	column-gap: 5px;
-}
+} */
 
 svg {
 	width: 15px;
@@ -364,137 +250,5 @@ svg {
 
 .show-tooltip:hover .tooltiptext {
 	visibility: visible;
-}
-
-#in-exclusion-criteria {
-	flex-direction: row;
-	box-sizing: border-box;
-	display: flex;
-	place-content: stretch space-between;
-	align-items: stretch;
-}
-
-.container-search-input {
-	flex: 1 1 100%;
-	box-sizing: border-box;
-	max-width: 48.5%;
-	position: relative;
-	min-height: 6em;
-	border: 1px solid #9ea9b3;
-	border-radius: 5px;
-}
-
-.header-label {
-	min-width: min-content;
-	background-color: #5270a7;
-	color: #ffffff;
-	text-align: center;
-	font-size: 16px;
-	font-weight: 500;
-	padding: 2px 0;
-}
-
-.search-container {
-	flex-direction: row;
-	box-sizing: border-box;
-	display: flex;
-	justify-content: space-around;
-	align-items: center;
-	margin: 10px;
-}
-
-.search-button {
-	place-content: stretch center;
-	align-items: stretch;
-	flex-direction: row;
-	box-sizing: border-box;
-	display: flex;
-}
-
-.button-view {
-	border-radius: 4px;
-	border-width: 1px;
-	border-style: solid;
-	margin-left: 5%;
-	height: 44px;
-	width: 44px;
-	line-height: unset;
-	color: white;
-	background-color: #5e6c78;
-}
-
-.button-view:hover {
-	background-color: #9ea9b3;
-}
-
-.button-view:active {
-	background-color: #5e6c78 !important;
-	color: white !important;
-}
-
-.search-input {
-	flex: 1 1 100%;
-	box-sizing: border-box;
-	max-width: 85%;
-	font-size: 14px;
-}
-
-.input-field {
-	margin-block-start: 0px;
-}
-
-#code-search-input {
-	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 512 512' fill='gray'%3E%3Cpath d='M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z'%3E%3C/path%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position-y: center;
-	background-position-x: 10px;
-	width: 100%;
-	margin-bottom: 20px;
-	border: 1px solid #c0c7ce;
-	padding-left: 35px;
-}
-
-.pipe {
-	flex: 1 1 100%;
-	box-sizing: border-box;
-	max-width: 1%;
-	background-color: #5270a7;
-	border-radius: 4px;
-}
-
-.pipe2 {
-	flex: 1 1 100%;
-	box-sizing: border-box;
-	max-width: 1%;
-	background-color: #5270a7;
-}
-
-.card-content {
-	display: flex;
-	flex-direction: row;
-	min-height: 150px;
-}
-
-.card-content2 {
-	padding-bottom: 16px;
-	display: block;
-}
-
-.textfield2 {
-	flex-direction: row;
-	box-sizing: border-box;
-	display: flex;
-	place-content: stretch space-between;
-	align-items: stretch;
-	height: 100%;
-	max-width: 100%;
-	flex: 1 1 100%;
-}
-
-.textfield {
-	flex: 1 1 100%;
-	border: dashed 1px black;
-	margin: 20px;
-	padding: 10px;
 }
 </style>

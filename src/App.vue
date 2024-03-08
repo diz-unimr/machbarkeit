@@ -3,7 +3,6 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<!-- eslint no-trailing-spaces: "error" -->
 	<div id="content" class="app-machbarkeit">
 		<div id="machbarkeit-container">
 			<FeasibilityContent @update-status="querySave" />
@@ -13,6 +12,7 @@
 
 <script>
 import FeasibilityContent from './components/FeasibilityContent.vue'
+
 export default {
 	name: 'App',
 	components: {
