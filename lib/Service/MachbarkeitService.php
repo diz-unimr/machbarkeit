@@ -27,4 +27,10 @@ class MachbarkeitService {
 		fclose($file);
 		return array_values($jsonArray);
 	}
+
+	public function readOntology() {
+		$json_file = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Bioprobe.json');
+		$data = json_decode($json_file, true);
+		return($data);
+	}
 }

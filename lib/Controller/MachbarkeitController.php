@@ -31,4 +31,8 @@ class MachbarkeitController extends Controller {
 	public function getMetadata(): JSONResponse {
 		return new JSONResponse($this->service->readCsv());
 	}
+
+	public function getOntology(): JSONResponse {
+		return new JSONResponse($this->service->readOntology());
+	}
 }

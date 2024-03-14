@@ -150,8 +150,9 @@ export default {
 	methods: {
 		async getCsv() {
 			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			const obj = objData.data
-			this.responseArray = Object.values(obj)
+			/* const obj = objData.data
+			this.responseArray = Object.values(obj) */
+			this.responseArray = objData.data
 			this.responseArray = this.responseArray
 				.filter(
 					(item) =>

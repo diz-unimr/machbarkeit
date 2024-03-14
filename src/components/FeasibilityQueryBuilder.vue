@@ -122,6 +122,7 @@ export default {
 			mockupArr: ['Test1', 'Test2', 'Test3'],
 			responseArray: [],
 			filteredArr: [],
+			ontologyResponseArr: [],
 		}
 	},
 	computed: {},
@@ -131,6 +132,7 @@ export default {
 	// Call functions before the template is rendered
 	created() {
 		this.getCsv()
+		this.getOntology()
 	},
 	beforeMount() {},
 	mounted() {},
@@ -170,6 +172,12 @@ export default {
 			// this.modulName = this.getModulName(this.responseArray)
 			// initialize keys from modulName.length (default: expand all attributelists)
 			// this.expandedGroup = [...Array(this.modulName.length).keys()]
+		},
+
+		async getOntology() {
+			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+			const jsonObj = jsonData.data
+			return jsonObj
 		},
 
 		switchSearchEinschlusskriterien() {
