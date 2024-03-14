@@ -4,19 +4,24 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div id="content" class="app-machbarkeit">
-		<div id="machbarkeit-container">
-			<FeasibilityContent @update-status="querySave" />
+		<div id="machbarkeit" class="machbarkeit">
+			<div class="machbarkeit machbarkeit__body">
+				<AttributeList />
+				<FeasibilityQuery />
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import FeasibilityContent from './components/FeasibilityContent.vue'
+import AttributeList from './components/AttributeList.vue'
+import FeasibilityQuery from './components/FeasibilityQuery.vue'
 
 export default {
 	name: 'App',
 	components: {
-		FeasibilityContent,
+		AttributeList,
+		FeasibilityQuery,
 	},
 	data() {
 		return {
@@ -38,22 +43,24 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		querySave() {
-			this.isDialogVisible = true
-		},
-		queryCancel() {
-			this.isDialogVisible = false
-		},
-	},
+	methods: {},
 }
 </script>
 
-<style scoped>
-#machbarkeit-container {
+<style>
+.machbarkeit {
 	display: flex;
 	flex-wrap: wrap;
 	width: 100%;
 	background-color: white;
+}
+
+.machbarkeit__body {
+	height: 97%;
+	flex-direction: column;
+}
+
+.input-field__input {
+	border: 1px solid #c0c7ce !important;
 }
 </style>

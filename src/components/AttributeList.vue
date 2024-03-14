@@ -3,12 +3,12 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div id="attribute-list">
-		<div id="attribute-list__container">
-			<div id="attribute-list__header">
+	<div class="attribute-list-container">
+		<div class="attribute-list">
+			<div class="attribute-list__header">
 				Attributliste
 			</div>
-			<div id="attribute-list__content" ref="attribute-list__content">
+			<div class="attribute-list__content">
 				<NcTextField :value.sync="txtSearch"
 					label="Attribut suchen"
 					trailing-button-icon="close"
@@ -18,14 +18,14 @@
 					@input="searchAttribute">
 					<Magnify :size="20" />
 				</NcTextField>
-				<!-- <input id="attribute-search-input"
+				<!-- <input class="attribute-search-input"
 					v-model="txtSearch"
 					type="text"
 					placeholder="Attribut suchen"
 					@input="searchAttribute"> -->
-				<div class="attribute-list-modul">
+				<div class="attribute-display">
 					<div v-for="(modul, index) in modulName" :key="index">
-						<a id="modul-name" @click="toggleExpansion(index)">
+						<a class="modul-name" @click="toggleExpansion(index)">
 							{{ modul }}
 							<img class="expandImg"
 								:src="isExpanded(index)
@@ -36,8 +36,8 @@
 						<div v-show="isExpanded(index)" style="margin-top: 10px">
 							<!-- eslint-disable -->
 							<div
-								id="attribute-items"
-								v-for="(item, key) in fillteredArr"
+								class="attribute-items"
+								v-for="(item, key) in filteredArr"
 								:key="key"
 								v-if="
 									item[
@@ -53,30 +53,29 @@
 									@change="showSelectedAttribute">
 								<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
 								<label :for="key"
-									class="attribute-item__tooltip"
 									@mouseover="tooltipPosition">
 									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
 								</label>
-								<span class="tooltip-text">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
+								<span class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div id="attribute-list__container">
-			<div id="attribute-list__header">
+		<div class="attribute-list">
+			<div class="attribute-list__header">
 				ausgewählte Attributliste
 			</div>
-			<div id="attribute-list__content">
-				<div class="attribute-list-modul">
+			<div class="attribute-list__content">
+				<div class="attribute-display">
 					<div v-for="(modul, index) in selectedArrModulName" :key="index">
-						<div id="modul-name">
+						<div class="modul-name">
 							{{ modul }}
 						</div>
 						<!-- eslint-disable -->
 						<div
-							id="attribute-items"
+							class="attribute-items"
 							v-for="item in selectedAttribute"
 							v-if="
 								item[
@@ -99,7 +98,7 @@
 </template>
 
 <script>
-import '@nextcloud/dialogs/styles/toast.scss'
+// import '@nextcloud/dialogs/styles/toast.scss'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
@@ -114,7 +113,7 @@ export default {
 	data() {
 		return {
 			responseArray: [],
-			fillteredArr: [],
+			filteredArr: [],
 			selectedArr: [],
 			selectedAttribute: [],
 			expandedGroup: [],
@@ -162,7 +161,7 @@ export default {
 				)
 				.filter((attr) => attr !== '' && attr !== undefined)
 
-			this.fillteredArr = this.responseArray
+			this.filteredArr = this.responseArray
 			// get modul name
 			this.modulName = this.getModulName(this.responseArray)
 			// initialize keys from modulName.length (default: expand all attributelists)
@@ -192,7 +191,7 @@ export default {
 				.filter((attr) => attr !== '' && attr !== undefined)
 
 			// filter txtSearch
-			this.fillteredArr = this.responseArray.filter((item) =>
+			this.filteredArr = this.responseArray.filter((item) =>
 				item[
 					'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
 				]
@@ -231,7 +230,7 @@ export default {
 		tooltipPosition(event) {
 			const labelPosition = event.target.getBoundingClientRect()
 			this.tooltip_Position = labelPosition.top - 136
-			const tooltip = document.getElementsByClassName('tooltip-text')
+			const tooltip = document.getElementsByClassName('attribute-tooltip')
 			for (let i = 0; i < tooltip.length; i++) {
 				tooltip[i].style.top = this.tooltip_Position + 'px'
 			}
@@ -241,7 +240,7 @@ export default {
 </script>
 
 <style scoped>
-#attribute-list {
+.attribute-list-container {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -251,18 +250,7 @@ export default {
 	padding: 20px 20px 0px 20px;
 }
 
-#attribute-list #selected-attribute {
-	display: flex;
-	flex-direction: column;
-	height: 50%;
-	background-color: white;
-	border: 1px solid #9ea9b3;
-	border-radius: 5px;
-	padding: 20px;
-	margin-bottom: 20px;
-}
-
-#attribute-list__container {
+.attribute-list {
 	position: relative;
 	min-height: 45%;
 	width: 100%;
@@ -271,7 +259,7 @@ export default {
 	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
 }
 
-#attribute-list__header {
+.attribute-list__header {
 	background-color: #5270a7;
 	font-weight: bold;
 	font-size: large;
@@ -280,21 +268,31 @@ export default {
 	padding: 15px 0px;
 }
 
-#attribute-list__content {
-	position: absolute;
+.attribute-list__content {
 	display: flex;
 	flex-direction: column;
-	padding: 20px;
-	height: -webkit-fill-available;
+	position: absolute;
 	width: 100%;
+	height: -webkit-fill-available;
+	padding: 20px;
 }
 
-.attribute-list-modul {
+.input-field {
+	margin-block-start: 0px;
+	margin-bottom: 15px;
+}
+
+.attribute-display {
 	overflow-y: auto;
 	overflow-x: hidden;
 }
 
-#attribute-items {
+.modul-name {
+	font-weight: bold;
+	margin-bottom: 2px;
+}
+
+.attribute-items {
 	display: flex;
 	flex-direction: row;
 	column-gap: 8px;
@@ -302,29 +300,18 @@ export default {
 	padding-left: 15px;
 }
 
-#attribute-items input {
+.attribute-items input {
 	margin: 0px;
 	position: relative;
 	top: -6px;
 }
 
-#modul-name {
-	font-weight: bold;
-	margin-bottom: 2px;
+.attribute-items label {
+	position: relative;
+	display: inline-block;
 }
 
-#attribute-search-input {
-	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 512 512' fill='gray'%3E%3Cpath d='M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z'%3E%3C/path%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position-y: center;
-	background-position-x: 10px;
-	width: 100%;
-	margin-bottom: 20px;
-	border: 1px solid #c0c7ce;
-	padding-left: 35px;
-}
-
-#attribute-list__content input:focus {
+.attribute-list__content input:focus {
 	border: 2px solid #5a78ae;
 }
 
@@ -333,12 +320,7 @@ export default {
 	height: 10px
 }
 
-.attribute-item__tooltip {
-	position: relative;
-	display: inline-block;
-}
-
-.tooltip-text {
+.attribute-tooltip {
 	display: flex;
 	visibility: hidden;
 	width: 350px;
@@ -351,7 +333,7 @@ export default {
 	left: 105%;
 }
 
-.tooltip-text::after {
+.attribute-tooltip::after {
 	content: '';
 	position: absolute;
 	top: 35%;
@@ -361,60 +343,8 @@ export default {
 	border-color: transparent #5270a7 transparent transparent;
 }
 
-.attribute-item__tooltip:hover .tooltip-text {
+.attribute-items label:hover + .attribute-tooltip {
 	visibility: visible;
 }
 
-.attribute-item__tooltip:hover + .tooltip-text {
-	visibility: visible;
-}
-
-#content-right {
-	width: 100%;
-	height: 100%;
-	flex-direction: row;
-	box-sizing: border-box;
-	display: flex;
-	place-content: flex-start center;
-	align-items: flex-start;
-}
-
-#feasibility-query {
-	flex-direction: column;
-	box-sizing: border-box;
-	display: flex;
-	place-content: flex-start center;
-	align-items: flex-start;
-	flex: 1 1 100%;
-	max-width: 90%;
-}
-
-.input-field {
-	margin-block-start: 0px;
-	margin-bottom: 15px;
-}
-
-.show-tooltip {
-	position: relative;
-	display: inline-block;
-}
-
-.show-tooltip .tooltiptext {
-	display: flex;
-	visibility: hidden;
-	width: 300px;
-	height: auto;
-	background-color: white;
-	padding: 10px;
-	position: absolute;
-	z-index: 100;
-	left: 150%;
-	top: -160%;
-	border-radius: 5px;
-	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
-}
-
-.show-tooltip:hover .tooltiptext {
-	visibility: visible;
-}
 </style>

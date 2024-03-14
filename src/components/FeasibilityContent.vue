@@ -3,7 +3,7 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div id="machbarkeit-body">
+	<div class="machbarkeit-body">
 		<AttributeList />
 		<FeasibilityQuery />
 	</div>
@@ -38,7 +38,7 @@ export default {
 </script>
 
 <style scoped>
-#machbarkeit-body {
+.machbarkeit-body {
 	width: 100%;
 	height: 97%;
 	display: flex;

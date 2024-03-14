@@ -3,13 +3,12 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div id="footer">
-		<div class="button-container">
-			<!-- <label style="font-size: 12px; cursor: unset;">Nur JSON Datei erlaubt</label> -->
-			<div style="display: flex; flex-direction: row; column-gap: 15px;">
+	<div class="footer-container">
+		<div class="footer-wrapper">
+			<div class="load-save-button">
 				<input id="upload" type="file" hidden>
-				<label for="upload" class="query-upload-button" @click="dialogClose">ABFRAGE LADEN</label>
-				<button style="border-radius: 8px;" @click="dialogOpen">
+				<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">ABFRAGE LADEN</label>
+				<button @click="$emit('dialog-open')">
 					ABFRAGE SPEICHERN
 				</button>
 			</div>
@@ -17,24 +16,13 @@
 	</div>
 </template>
 <script>
+
 export default {
 	name: 'FooterContent',
-	data() {
-		return {
-		}
-	},
-	methods: {
-		dialogOpen() {
-			this.$emit('dialog-open')
-		},
-		dialogClose() {
-			this.$emit('dialog-close')
-		},
-	},
 }
 </script>
 <style scoped>
-#footer {
+.footer-container {
 	display: flex;
 	justify-content: flex-end;
 	align-items: flex-end;
@@ -44,11 +32,17 @@ export default {
 	/* padding: 20px; */
 }
 
-.button-container {
+.footer-wrapper {
 	display: flex;
 	flex-direction: column;
 	row-gap: 8px;
 	align-items: center;
+}
+
+.load-save-button {
+	display: flex;
+	flex-direction: row;
+	column-gap: 15px;
 }
 
 .query-upload-button {
@@ -72,5 +66,9 @@ export default {
 
 .query-upload-button:active {
 	background-color: white;
+}
+
+button {
+	border-radius: 8px;
 }
 </style>

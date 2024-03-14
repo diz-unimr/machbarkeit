@@ -3,16 +3,16 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="container">
-		<div id="in-ex-clusion-criteria">
-			<div class="test">
-				<div class="container-search-input">
-					<div class="header-label">
+	<div class="query-builder-container">
+		<div class="feasibility-query__input">
+			<div class="criteria-wrapper">
+				<div class="criteria">
+					<div class="criteria-title">
 						Einschlusskriterien
 					</div>
-					<div class="search-container">
+					<div class="criteria-search-input">
 						<div class="search-button">
-							<button class="button-view" @click="switchSearchEinschlusskriterien">
+							<button @click="switchSearchEinschlusskriterien">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -40,14 +40,14 @@
 						</div>
 					</div>
 				</div>
-				<div class="pipe" />
-				<div class="container-search-input">
-					<div class="header-label">
+				<div class="pipe pipe--criteria" />
+				<div class="criteria">
+					<div class="criteria-title">
 						Ausschlusskriterien
 					</div>
-					<div class="search-container">
+					<div class="criteria-search-input">
 						<div class="search-button">
-							<button class="button-view" @click="switchSearchAusschlusskriterien">
+							<button @click="switchSearchAusschlusskriterien">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -76,20 +76,23 @@
 					</div>
 				</div>
 			</div>
-			<SearchTreeOverlayContent v-if="isEinschlusskriterienOverlayOpen" :filtered-arr="filteredArr" />
-			<SearchTreeOverlayContent v-if="isAusschlusskriterienOverlayOpen" :is-ausschlusskriterien="isAusschlusskriterien" :filtered-arr="filteredArr" />
+			<SearchTreeOverlayContent v-if="isEinschlusskriterienOverlayOpen"
+				:filtered-arr="filteredArr"
+				criteria="Einschlusskriterien" />
+			<SearchTreeOverlayContent v-if="isAusschlusskriterienOverlayOpen"
+				:is-ausschlusskriterien="isAusschlusskriterien"
+				:filtered-arr="filteredArr"
+				criteria="Ausschlusskriterien" />
 		</div>
 
-		<div id="feasibility-query__output">
-			<div class="card-header">
-				<div class="text-header">
-					<label style="font-size: 16px; font-weight: 500;">Ausgewählte Merkmale</label>
-				</div>
+		<div class="feasibility-query__output">
+			<div class="output-header">
+				<label>Ausgewählte Merkmale</label>
 			</div>
-			<div class="card-content">
-				<div class="textfield" />
-				<div class="pipe2" />
-				<div class="textfield" />
+			<div class="output-content">
+				<div class="output-textfield" />
+				<div class="pipe" />
+				<div class="output-textfield" />
 			</div>
 		</div>
 	</div>
@@ -99,6 +102,8 @@
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
 
 export default {
 	name: 'FeasibilityQueryBuilder',
@@ -115,6 +120,7 @@ export default {
 			isAusschlusskriterienOverlayOpen: false,
 			isAusschlusskriterien: true,
 			mockupArr: ['Test1', 'Test2', 'Test3'],
+			responseArray: [],
 			filteredArr: [],
 		}
 	},
@@ -123,12 +129,17 @@ export default {
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.getCsv()
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {
+		// Update when search
 		const buttonContainer = document.getElementsByClassName('input-field__main-wrapper')
+		buttonContainer[1].querySelector('input').addEventListener('focus', this.searchCodeEinschlusskriterien, true)
+		buttonContainer[2].querySelector('input').addEventListener('focus', this.searchCodeAusschlusskriterien, true)
 		if (buttonContainer[1].querySelector('button') !== null) {
 			buttonContainer[1].querySelector('button').addEventListener('click', this.searchCodeEinschlusskriterien)
 		}
@@ -140,69 +151,84 @@ export default {
 	destroyed() {},
 
 	methods: {
+		async getCsv() {
+			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			const obj = objData.data
+			this.responseArray = Object.values(obj)
+
+			this.responseArray = this.responseArray
+				.filter(
+					(item) =>
+						item[
+							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+						],
+				)
+				.filter((attr) => attr !== '' && attr !== undefined)
+
+			this.filteredArr = this.responseArray
+			// get modul name
+			// this.modulName = this.getModulName(this.responseArray)
+			// initialize keys from modulName.length (default: expand all attributelists)
+			// this.expandedGroup = [...Array(this.modulName.length).keys()]
+		},
+
 		switchSearchEinschlusskriterien() {
 			this.isEinschlusskriterienOverlayOpen = !this.isEinschlusskriterienOverlayOpen
 			this.isAusschlusskriterienOverlayOpen = false
-			this.fillteredSearch(this.einschlussTextSerach)
+			this.filteredSearch(this.einschlussTextSerach)
 		},
 		switchSearchAusschlusskriterien() {
 			this.isAusschlusskriterienOverlayOpen = !this.isAusschlusskriterienOverlayOpen
 			this.isEinschlusskriterienOverlayOpen = false
-			this.fillteredSearch(this.ausschlussTextSerach)
+			this.filteredSearch(this.ausschlussTextSerach)
 		},
 		searchCodeEinschlusskriterien() {
 			this.isEinschlusskriterienOverlayOpen = true
 			this.isAusschlusskriterienOverlayOpen = false
-			this.fillteredSearch(this.einschlussTextSerach)
+			this.filteredSearch(this.einschlussTextSerach)
 		},
 		searchCodeAusschlusskriterien() {
 			this.isAusschlusskriterienOverlayOpen = true
 			this.isEinschlusskriterienOverlayOpen = false
-			this.fillteredSearch(this.ausschlussTextSerach)
+			this.filteredSearch(this.ausschlussTextSerach)
 		},
-		fillteredSearch(textSearch) {
-			this.filteredArr = this.mockupArr.filter((item) =>
-				item.toLowerCase().includes(textSearch.toLowerCase()),
+		filteredSearch(textSearch) {
+			this.filteredArr = this.responseArray.filter((item) =>
+				item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'].toLowerCase().includes(textSearch.toLowerCase()),
 			)
 		},
 	},
 }
 </script>
 <style scoped>
-.container {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    width: 100%;
-    row-gap: 20px;
-}
-
-#in-ex-clusion-criteria {
-	flex-direction: column;
-	box-sizing: border-box;
+.query-builder-container {
 	display: flex;
-	place-content: stretch space-between;
-	align-items: stretch;
+	flex-direction: column;
+	width: 100%;
+	row-gap: 20px;
 }
 
-.test {
-    display: flex;
-    flex-direction: row;
-    column-gap: 20px;
-    width: 100%;
+.feasibility-query__input {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }
 
-.container-search-input {
+.criteria-wrapper {
+	display: flex;
+	flex-direction: row;
+	column-gap: 20px;
+	width: 100%;
+}
+
+.criteria {
 	flex: 1 1 100%;
-	box-sizing: border-box;
-	max-width: 48.5%;
 	position: relative;
-	min-height: 6em;
 	border: 1px solid #9ea9b3;
 	border-radius: 5px;
 }
 
-.header-label {
+.criteria-title {
 	min-width: min-content;
 	background-color: #5270a7;
 	color: #ffffff;
@@ -212,12 +238,11 @@ export default {
 	padding: 2px 0;
 }
 
-.search-container {
+.criteria-search-input {
 	flex-direction: row;
-	box-sizing: border-box;
 	display: flex;
 	justify-content: space-around;
-    align-items: baseline;
+	align-items: baseline;
 	margin: 10px;
 }
 
@@ -225,11 +250,10 @@ export default {
 	place-content: stretch center;
 	align-items: stretch;
 	flex-direction: row;
-	box-sizing: border-box;
 	display: flex;
 }
 
-.button-view {
+.search-button button {
 	border-radius: 4px;
 	border-width: 1px;
 	border-style: solid;
@@ -240,38 +264,32 @@ export default {
 	background-color: #5e6c78;
 }
 
-.button-view:hover {
+.search-button button:hover {
 	background-color: #9ea9b3;
 }
 
-.button-view:active {
+.search-button button:active {
 	background-color: #5e6c78 !important;
 	color: white !important;
 }
 
 .search-input {
 	flex: 1 1 100%;
-	box-sizing: border-box;
 	max-width: 85%;
 	font-size: 14px;
 }
 
 .pipe {
 	flex: 1 1 100%;
-	box-sizing: border-box;
 	max-width: 1%;
 	background-color: #5270a7;
+}
+
+.pipe--criteria {
 	border-radius: 4px;
 }
 
-.pipe2 {
-	flex: 1 1 100%;
-	box-sizing: border-box;
-	max-width: 1%;
-	background-color: #5270a7;
-}
-
-#feasibility-query__output {
+.feasibility-query__output {
 	border: 1px solid #9ea9b3;
 	border-top-right-radius: 5px;
 	border-top-left-radius: 5px;
@@ -279,8 +297,9 @@ export default {
 	width: 100%;
 }
 
-.card-header {
+.output-header {
 	display: flex;
+	align-items: center;
 	padding-left: 10px;
 	background: #5270a7;
 	color: #ffffff;
@@ -289,40 +308,21 @@ export default {
 	min-height: 3.5em;
 }
 
-.text-header {
-	flex-direction: column;
-	box-sizing: border-box;
-	display: flex;
-	place-content: stretch space-around;
-	align-items: stretch;
+.output-header label {
+	font-size: 16px;
+	font-weight: 500;
 }
 
-.card-content {
+.output-content {
 	display: flex;
 	flex-direction: row;
 	min-height: 150px;
 }
 
-.card-content2 {
-	padding-bottom: 16px;
-	display: block;
-}
-
-.textfield2 {
-	flex-direction: row;
-	box-sizing: border-box;
-	display: flex;
-	place-content: stretch space-between;
-	align-items: stretch;
-	height: 100%;
-	max-width: 100%;
-	flex: 1 1 100%;
-}
-
-.textfield {
+.output-textfield {
 	flex: 1 1 100%;
 	border: dashed 1px black;
 	margin: 20px;
 	padding: 10px;
 }
-</style>
+</style>./SearchTreeOverlayContent.vue
