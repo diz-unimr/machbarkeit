@@ -10,14 +10,9 @@
             "type": "php",
             "request": "launch",
             "port": 9003,
-            // server -> local
             "pathMappings": 
             {
-                "/var/www/html": "${workspaceRoot}/www",
-//                "/app": "${workspaceRoot}/app",
-                "/var/www/html/apps-extra/machbarkeit": "${workspaceRoot}",
-                "/apps": "${workspaceRoot}/apps",
-                "/apps-extra": "${workspaceRoot}/custom_apps"
+                "/var/www/html/apps-extra/machbarkeit": "${workspaceFolder}",
             }
         },
         {

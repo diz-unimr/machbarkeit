@@ -12,6 +12,7 @@ services:
       PHP_XDEBUG_MODE: debug #develop
     volumes:
       - ./data/shared:/shared
+      - ./data/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
       - ../:/var/www/html/apps-extra/machbarkeit
     ports:
       - "8080:80"
