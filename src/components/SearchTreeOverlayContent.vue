@@ -153,14 +153,14 @@ export default {
 <style scoped>
 
 .ontology-tab {
-  padding: 10px 20px;
-  cursor: pointer;
-  border-bottom: none;
+	padding: 10px 20px;
+	cursor: pointer;
+	border-bottom: none;
 }
 
 .ontology-tab.active {
-  background-color: #738cba;
-  color: white;
+	background-color: #738cba;
+	color: white;
 }
 
 /* .tab-content > div {
@@ -168,11 +168,11 @@ export default {
 } */
 
 .tab-content > div.show {
-  display: block;
+	display: block;
 }
 
 li {
-    list-style-type: none;
+	list-style-type: none;
 }
 
 ul {
@@ -280,8 +280,8 @@ ul {
 
 .modul-name {
 	display: flex;
-    flex-direction: row;
-    align-items: center;
+	flex-direction: row;
+	align-items: center;
 }
 
 img {
