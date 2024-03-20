@@ -76,12 +76,14 @@
 					</div>
 				</div>
 			</div>
-			<SearchTreeOverlayContent v-if="isEinschlusskriterienOverlayOpen"
-				:filtered-arr="filteredArr"
-				criteria="Einschlusskriterien" />
+			<div v-if="isEinschlusskriterienOverlayOpen">
+				<SearchTreeOverlayContent :ontology-group-name="ontologyGroupName"
+					:response-array="responseArray"
+					criteria="Einschlusskriterien" />
+			</div>
 			<SearchTreeOverlayContent v-if="isAusschlusskriterienOverlayOpen"
+				:ontology-group-name="ontologyGroupName"
 				:is-ausschlusskriterien="isAusschlusskriterien"
-				:filtered-arr="filteredArr"
 				criteria="Ausschlusskriterien" />
 		</div>
 
@@ -119,19 +121,20 @@ export default {
 			isEinschlusskriterienOverlayOpen: false,
 			isAusschlusskriterienOverlayOpen: false,
 			isAusschlusskriterien: true,
-			mockupArr: ['Test1', 'Test2', 'Test3'],
 			responseArray: [],
 			filteredArr: [],
-			ontologyResponseArr: [],
+			ontologyGroupName: [],
+			person: [],
 		}
 	},
+
 	computed: {},
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.getCsv()
+		// this.getCsv()
 		this.getOntology()
 	},
 	beforeMount() {},
@@ -153,6 +156,13 @@ export default {
 	destroyed() {},
 
 	methods: {
+		async getOntology() {
+			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+			this.responseArray = jsonData.data
+
+			this.ontologyGroupName = this.responseArray.map((item) => item.display)
+		},
+
 		async getCsv() {
 			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
 			const obj = objData.data
@@ -174,37 +184,31 @@ export default {
 			// this.expandedGroup = [...Array(this.modulName.length).keys()]
 		},
 
-		async getOntology() {
-			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-			const jsonObj = jsonData.data
-			return jsonObj
-		},
-
 		switchSearchEinschlusskriterien() {
 			this.isEinschlusskriterienOverlayOpen = !this.isEinschlusskriterienOverlayOpen
 			this.isAusschlusskriterienOverlayOpen = false
-			this.filteredSearch(this.einschlussTextSerach)
+			// this.filteredSearch(this.einschlussTextSerach)
 		},
 		switchSearchAusschlusskriterien() {
 			this.isAusschlusskriterienOverlayOpen = !this.isAusschlusskriterienOverlayOpen
 			this.isEinschlusskriterienOverlayOpen = false
-			this.filteredSearch(this.ausschlussTextSerach)
+			// this.filteredSearch(this.ausschlussTextSerach)
 		},
 		searchCodeEinschlusskriterien() {
 			this.isEinschlusskriterienOverlayOpen = true
 			this.isAusschlusskriterienOverlayOpen = false
-			this.filteredSearch(this.einschlussTextSerach)
+			// this.filteredSearch(this.einschlussTextSerach)
 		},
 		searchCodeAusschlusskriterien() {
 			this.isAusschlusskriterienOverlayOpen = true
 			this.isEinschlusskriterienOverlayOpen = false
-			this.filteredSearch(this.ausschlussTextSerach)
+			// this.filteredSearch(this.ausschlussTextSerach)
 		},
-		filteredSearch(textSearch) {
+		/* filteredSearch(textSearch) {
 			this.filteredArr = this.responseArray.filter((item) =>
 				item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'].toLowerCase().includes(textSearch.toLowerCase()),
 			)
-		},
+		}, */
 	},
 }
 </script>

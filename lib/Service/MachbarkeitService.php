@@ -6,7 +6,47 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Service;
 
+use SebastianBergmann\RecursionContext\Context;
+
 class MachbarkeitService {
+	public function readOntology() {
+		$json_files = [
+			'Bioprobe.json', 
+			'Diagnose.json', 
+			'Einwilligung.json', 
+			'Laboruntersuchung.json', 
+			'Medikamentenverabreichung.json', 
+			'Person.json', 
+			'Prozedur.json'
+		];
+		// 'Prozedur.json', 'Diagnose.json', 'Medikamentenverabreichung.json',
+
+		/* $json_bioprobe = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Bioprobe.json');
+		$json_diagnose = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Diagnose.json');
+		$json_einwilligung = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Einwilligung.json');
+		$json_laboruntersuchung = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Laboruntersuchung.json');
+		$json_medikamentenverabreichung = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Medikamentenverabreichung.json');
+		$json_person = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Person.json');
+		$json_prozedur = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Prozedur.json');
+
+		$json_prozedur = json_decode($json_bioprobe, true);
+		$json_diagnose = json_decode($json_diagnose, true);
+		$merged_file = array_merge(array($json_bioprobe), array($json_diagnose)); */
+
+		$merged_file = [];
+
+		foreach ($json_files as $file) {
+			// Read JSON file contents
+			$json_content = file_get_contents(__DIR__ . '/../../ontology/ui_trees/'.$file);
+			// Decode JSON content into associative array
+			$json_data = json_decode($json_content, true);
+			// Merge data from current file into merged_file array
+			$merged_file = array_merge($merged_file, array($json_data));
+		};
+
+		return $merged_file;
+	}
+	
 	public function readCsv() {
 		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
 		$data = [];
@@ -26,11 +66,5 @@ class MachbarkeitService {
 
 		fclose($file);
 		return array_values($jsonArray);
-	}
-
-	public function readOntology() {
-		$json_file = file_get_contents(__DIR__ . '/../../ontology/ui_trees/Bioprobe.json');
-		$data = json_decode($json_file, true);
-		return($data);
 	}
 }
