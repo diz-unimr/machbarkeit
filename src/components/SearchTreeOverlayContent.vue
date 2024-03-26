@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/valid-v-show -->
 <template>
 	<!--
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
@@ -11,54 +12,33 @@
 			<div v-if="responseArray.length > 0">
 				<div class="ontology-search-tree-header">
 					<div class="search-tree-button">
-						<div>Alle</div>
-						<div v-for="(groupName, index) in ontologyGroupName"
-							:key="index"
+						<!-- <div>Alle</div> -->
+						<div v-for="(groupName, groupName_index) in ontologyGroupName"
+							:key="groupName_index"
 							class="ontology-tab"
-							:class="{ 'active': activeTab === index }"
-							@click="activateTab(index)">
+							:class="{ 'active': activeTab === groupName_index }"
+							@click="activateTab(groupName_index)">
 							{{ groupName }}
 						</div>
 					</div>
 				</div>
-				<OntologyNestedTreeNode :ontology="responseArray[0]['children']" :ontology-name="responseArray[0]['display']" /> <!-- :index="index" -->
-				<!--<div v-for="(ontology, index) in responseArray" v-show="activeTab === index" :key="index">
-
-					 <div v-if="node['leaf'] === true" class="ontology-tree">
-						<div class="ontology-tree-node">
-							<li>
-								<a class="modul-name">
-									<img src="http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png">
-									{{ node['display'] }}
-									leaf = true
-								</a>
-							</li>
+				<div class="ontology-container">
+					<div v-for="(ontology, ontology_index) in responseArray"
+						v-show="activeTab === ontology_index"
+						:key="ontology_index">
+						<div class="ontologyNode">
+							<OntologyNestedTreeNode v-if="ontology.hasOwnProperty('children')" :ontology="ontology" />
+							<OntologyTreeNode v-if="!ontology.hasOwnProperty('children')" :ontology="ontology" />
 						</div>
 					</div>
-					<div v-if="node['leaf'] === false" class="ontology-tree">
-						<div class="ontology-nested-tree-node">
-							<li>
-								<a class="modul-name">
-									<img src="http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png">
-									<div v-if="node['selectable'] === true" class="search-tree-term-entry">
-										<input type="checkbox">
-										{{ node['display'] }}
-									</div>
-									<div v-if="node['selectable'] === false" class="search-tree-term-entry">
-										{{ node['display'] }}
-									</div>
-								</a>
-
-								<ul v-if="node['children'] !== undefined">
-									<OntologyNestedTreeNode />
-								</ul>
-							</li>
-						</div>
+					<div class="ontology-button">
+						<button>AUSWÄHLEN</button>
+						<button>ABBRECHEN</button>
 					</div>
-				</div> -->
+				</div>
 			</div>
 			<div v-else class="ontology-loading">
-				Loading
+				Loading...
 			</div>
 		</div>
 	</div>
@@ -72,18 +52,14 @@
 </NcActionCheckbox> -->
 
 <script>
-// import OntologyTree from './OntologyTree.vue'
-// import { generateUrl } from '@nextcloud/router'
-// import axios from '@nextcloud/axios'
-import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
+import OntologyTreeNode from './OntologyTreeNode.vue'
 
 export default {
 	name: 'SearchTreeOverlayContent',
 	components: {
-		// OntologyTree,
-		NcActionCheckbox,
 		OntologyNestedTreeNode,
+		OntologyTreeNode,
 	},
 	props: {
 		isAusschlusskriterien: {
@@ -110,8 +86,6 @@ export default {
 	data() {
 		return {
 			activeTab: 0,
-			tabs: ['Tab 1', 'Tab 2', 'Tab 3'],
-			tabContents: this.ontologyGroupName,
 		}
 	},
 
@@ -193,10 +167,9 @@ ul {
 	position: absolute;
 	min-height: 12em;
 	background-color: #fff;
-	box-shadow: 0 11px 15px -4px #0003, 0 24px 38px 5px #00000024, 0 9px 46px 8px #0000001f;
+	box-shadow: 0px 10px 15px 0px #0003, 0px 0px 25px 2px #00000024, 0px 0px 10px 0px #0000001f;
 	pointer-events: auto;
-	min-width: 94%;
-	max-width: 100%;
+	width: 95%;
 }
 
 .criteria-name {
@@ -248,7 +221,6 @@ ul {
 	overflow-y: auto;
 	height: 35vh;
 	margin: 1em;
-	/* font-family: Roboto, monospace !important; */
 }
 
 .ontology-list {
@@ -288,6 +260,30 @@ img {
 	margin: 0px 10px;
 	width: 12px;
 	height: 12px
+}
+
+.ontology-container {
+	height: 650px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.ontologyNode {
+	height: 550px;
+	padding: 22px;
+}
+
+.ontology-button {
+	display: flex;
+	column-gap: 15px;
+	margin: 20px;
+	justify-content: flex-end;
+	flex-direction: row;
+}
+
+button {
+	border-radius: 8px;
 }
 
 </style>

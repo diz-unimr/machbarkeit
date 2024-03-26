@@ -18,11 +18,6 @@
 					@input="searchAttribute">
 					<Magnify :size="20" />
 				</NcTextField>
-				<!-- <input class="attribute-search-input"
-					v-model="txtSearch"
-					type="text"
-					placeholder="Attribut suchen"
-					@input="searchAttribute"> -->
 				<div class="attribute-display">
 					<div v-for="(modul, index) in modulName" :key="index">
 						<a class="modul-name" @click="toggleExpansion(index)">
@@ -98,7 +93,6 @@
 </template>
 
 <script>
-// import '@nextcloud/dialogs/styles/toast.scss'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
@@ -150,8 +144,6 @@ export default {
 	methods: {
 		async getCsv() {
 			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			/* const obj = objData.data
-			this.responseArray = Object.values(obj) */
 			this.responseArray = objData.data
 			this.responseArray = this.responseArray
 				.filter(
@@ -246,9 +238,9 @@ export default {
 	flex-direction: row;
 	flex-wrap: wrap;
 	row-gap: 20px;
-	width: 27%;
+	width: 460px;
 	height: 100%;
-	padding: 20px 20px 0px 20px;
+	padding: 20px 0px 0px 20px;
 }
 
 .attribute-list {

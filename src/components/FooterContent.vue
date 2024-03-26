@@ -4,14 +4,12 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="footer-container">
-		<div class="footer-wrapper">
-			<div class="load-save-button">
-				<input id="upload" type="file" hidden>
-				<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">ABFRAGE LADEN</label>
-				<button @click="$emit('dialog-open')">
-					ABFRAGE SPEICHERN
-				</button>
-			</div>
+		<div class="load-save-button">
+			<input id="upload" type="file" hidden>
+			<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">ABFRAGE LADEN</label>
+			<button @click="$emit('dialog-open')">
+				ABFRAGE SPEICHERN
+			</button>
 		</div>
 	</div>
 </template>
@@ -26,10 +24,8 @@ export default {
 	display: flex;
 	justify-content: flex-end;
 	align-items: flex-end;
-	margin-top: 10px;
-	/* height: 10%; */
-	width: 90%;
-	/* padding: 20px; */
+	margin-top: 20px;
+	width: 100%;
 }
 
 .footer-wrapper {

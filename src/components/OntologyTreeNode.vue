@@ -1,10 +1,9 @@
-<!-- eslint-disable vue/no-v-for-template-key -->
 <template>
 	<!--
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div id="ontology-nested-tree" class="ontology-nested-tree-node">
+	<div id="ontology-tree" class="ontology-tree">
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
 				<button>
@@ -16,33 +15,14 @@
 						{{ ontology.display }}
 					</label>
 				</div>
-				<div v-if="ontology.selectable === false"
-					class="search-tree-term-entry">
-					<label>
-						{{ ontology.display }}
-					</label>
-				</div>
 			</div>
-			<ul>
-				<template v-for="(node, index) in ontology.children">
-					<OntologyNestedTreeNode v-if="node.hasOwnProperty('children')"
-						:key="index"
-						:ontology="node" />
-					<OntologyTreeNode v-if="!node.hasOwnProperty('children')" :key="index" :ontology="node" />
-				</template>
-			</ul>
 		</li>
 	</div>
 </template>
 
 <script>
-import OntologyTreeNode from './OntologyTreeNode.vue'
 export default {
-	name: 'OntologyNestedTreeNode',
-	components: {
-		// OntologyNestedTreeNode: 'OntologyNestedTreeNode',
-		OntologyTreeNode,
-	},
+	name: 'OntologyTreeNode',
 	props: {
 		ontology: {
 			type: Object,
@@ -63,9 +43,7 @@ export default {
 	},
 	beforeMount() {
 	},
-	mounted() {
-		// this.getChildren(this.ontology)
-	},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
@@ -76,12 +54,8 @@ export default {
 </script>
 
 <style scoped>
-input[type='checkbox'] {
-	width: 15px;
-	height: 15px;
-}
 
-#ontology-nested-tree {
+#ontology-tree {
 	overflow-y: auto;
 	height: 100%;
 }
@@ -108,9 +82,15 @@ input[type='checkbox'] {
 	padding-left: 10px;
 }
 
+input[type='checkbox'] {
+	width: 15px;
+	height: 15px;
+}
+
 img {
 	height: 12px;
 	width: 12px;
+	display: none;
 }
 
 button {
@@ -119,10 +99,6 @@ button {
 	border: none;
 	outline: none;
 	width: 20px;
-}
-
-ul {
-	margin-left: 40px;
 }
 
 </style>

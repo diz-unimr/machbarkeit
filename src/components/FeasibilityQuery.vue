@@ -138,11 +138,11 @@ export default {
 <style scoped>
 .feasibility-query-container {
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	width: 73%;
+	flex-direction: column;
+	width: 1200px;
+	max-width: 1200px;
 	height: 100%;
-	place-content: space-between center; /* place-content: <align-content> <justify-content>; */
+	margin: 0px auto 0px auto;
 	padding: 20px 20px 0px 20px;
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -152,9 +152,6 @@ export default {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 100%;
-	max-width: 90%;
-	place-content: flex-start center;
-	align-items: flex-start;
 }
 
 .feasibility-query__top {

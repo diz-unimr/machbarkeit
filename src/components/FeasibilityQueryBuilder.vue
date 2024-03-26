@@ -76,14 +76,14 @@
 					</div>
 				</div>
 			</div>
-			<div v-if="isEinschlusskriterienOverlayOpen">
-				<SearchTreeOverlayContent :ontology-group-name="ontologyGroupName"
-					:response-array="responseArray"
-					criteria="Einschlusskriterien" />
-			</div>
+			<SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
+				:ontology-group-name="ontologyGroupName"
+				:response-array="responseArray"
+				criteria="Einschlusskriterien" />
 			<SearchTreeOverlayContent v-if="isAusschlusskriterienOverlayOpen"
 				:ontology-group-name="ontologyGroupName"
 				:is-ausschlusskriterien="isAusschlusskriterien"
+				:response-array="responseArray"
 				criteria="Ausschlusskriterien" />
 		</div>
 
@@ -134,7 +134,6 @@ export default {
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		// this.getCsv()
 		this.getOntology()
 	},
 	beforeMount() {},
@@ -159,29 +158,9 @@ export default {
 		async getOntology() {
 			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
 			this.responseArray = jsonData.data
+			console.log(this.responseArray)
 
 			this.ontologyGroupName = this.responseArray.map((item) => item.display)
-		},
-
-		async getCsv() {
-			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			const obj = objData.data
-			this.responseArray = Object.values(obj)
-
-			this.responseArray = this.responseArray
-				.filter(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-						],
-				)
-				.filter((attr) => attr !== '' && attr !== undefined)
-
-			this.filteredArr = this.responseArray
-			// get modul name
-			// this.modulName = this.getModulName(this.responseArray)
-			// initialize keys from modulName.length (default: expand all attributelists)
-			// this.expandedGroup = [...Array(this.modulName.length).keys()]
 		},
 
 		switchSearchEinschlusskriterien() {
@@ -218,6 +197,7 @@ export default {
 	flex-direction: column;
 	width: 100%;
 	row-gap: 20px;
+	font-size: 16px;
 }
 
 .feasibility-query__input {

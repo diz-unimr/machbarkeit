@@ -50,14 +50,12 @@ export default {
 <style>
 .machbarkeit {
 	display: flex;
-	flex-wrap: wrap;
 	width: 100%;
 	background-color: white;
 }
 
 .machbarkeit__body {
 	height: 97%;
-	flex-direction: column;
 }
 
 .input-field__input {
