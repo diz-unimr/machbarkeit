@@ -27,7 +27,9 @@
 						v-show="activeTab === ontology_index"
 						:key="ontology_index">
 						<div class="ontologyNode">
-							<OntologyNestedTreeNode v-if="ontology.hasOwnProperty('children')" :ontology="ontology" />
+							<OntologyNestedTreeNode v-if="ontology.hasOwnProperty('children')"
+								:ontology="ontology"
+								:is-head-node="isHeadNode" />
 							<OntologyTreeNode v-if="!ontology.hasOwnProperty('children')" :ontology="ontology" />
 						</div>
 					</div>
@@ -86,6 +88,7 @@ export default {
 	data() {
 		return {
 			activeTab: 0,
+			isHeadNode: true,
 		}
 	},
 
@@ -270,8 +273,8 @@ img {
 }
 
 .ontologyNode {
-	height: 550px;
-	padding: 22px;
+	height: 570px;
+	padding: 20px 25px 20px 25px;
 }
 
 .ontology-button {

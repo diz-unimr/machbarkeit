@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-v-for-template-key -->
 <template>
 	<!--
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
@@ -7,23 +6,31 @@
 	<div id="ontology-nested-tree" class="ontology-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
-				<button>
-					<img src="http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png">
+				<button @click="() => (state = !state)">
+					<img class="expandImg"
+						:src="state
+							? imgExpand
+							: imgCollapse
+						">
 				</button>
 				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-					<input type="checkbox">
-					<label>
+					<input :id="ontology.id"
+						:value="ontology.display"
+						type="checkbox"
+						@change="checkboxClicked">
+					<p @click="() => (state = !state)">
 						{{ ontology.display }}
-					</label>
+					</p>
 				</div>
-				<div v-if="ontology.selectable === false"
+				<!-- v-if="ontology.selectable === false" -->
+				<div v-else
 					class="search-tree-term-entry">
-					<label>
+					<p @click="() => (state = !state)">
 						{{ ontology.display }}
-					</label>
+					</p>
 				</div>
 			</div>
-			<ul>
+			<ul v-show="state">
 				<template v-for="(node, index) in ontology.children">
 					<OntologyNestedTreeNode v-if="node.hasOwnProperty('children')"
 						:key="index"
@@ -37,6 +44,7 @@
 
 <script>
 import OntologyTreeNode from './OntologyTreeNode.vue'
+import { ref } from 'vue'
 export default {
 	name: 'OntologyNestedTreeNode',
 	components: {
@@ -48,9 +56,17 @@ export default {
 			type: Object,
 			default: Object,
 		},
+		isHeadNode: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	data() {
-		return {}
+		return {
+			state: ref(false),
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
+			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+		}
 	},
 
 	computed: {},
@@ -60,6 +76,9 @@ export default {
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
+		if (this.isHeadNode === true) {
+			this.state = true
+		}
 	},
 	beforeMount() {
 	},
@@ -71,7 +90,25 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {},
+	methods: {
+		isExpanded(key) {
+			return this.expandedGroup.indexOf(key) !== -1
+		},
+
+		toggleExpansion() {
+			console.log('click')
+		},
+
+		buttonClicked() {
+			console.log('hello')
+			this.isHeadNodeOnLoad = false
+			console.log(this.isHeadNodeOnLoad)
+		},
+
+		checkboxClicked() {
+			console.log('checkbox1')
+		},
+	},
 }
 </script>
 
@@ -83,6 +120,7 @@ input[type='checkbox'] {
 
 #ontology-nested-tree {
 	overflow-y: auto;
+	scrollbar-width: auto;
 	height: 100%;
 }
 
@@ -94,18 +132,38 @@ input[type='checkbox'] {
 	align-items: center;
 }
 
+.ontology-head-node button {
+	display: flex;
+    flex-direction: row;
+    align-items: center;
+	width: auto;
+	text-decoration: none;
+	background-color: white;
+	border: none;
+	outline: none;
+	margin: 0px;
+    padding: 0px;
+}
+
 .search-tree-term-entry {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	margin-left: 5px;
 }
 
 .search-tree-term-entry input {
 	margin: 0px 10px;
 }
 
-.search-tree-term-entry label {
+.search-tree-term-entry p {
+	font-size: 16px;
+	font-weight: 400;
 	padding-left: 10px;
+}
+
+.search-tree-term-entry p:hover {
+	cursor: pointer;
 }
 
 img {
@@ -113,16 +171,12 @@ img {
 	width: 12px;
 }
 
-button {
-	text-decoration: none;
-	background-color: white;
-	border: none;
-	outline: none;
-	width: 20px;
-}
-
 ul {
 	margin-left: 40px;
+}
+
+img imgCollapse {
+	transform: rotate(90deg);
 }
 
 </style>

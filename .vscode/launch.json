@@ -22,6 +22,18 @@
             "program": "${file}",
             "cwd": "${fileDirname}",
             "port": 9003
+        },
+
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Vuejs: Chrome",
+            "url": "http://localhost:8080", // Change this to match your Vue.js app's URL
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMapPathOverrides": {
+                "webpack:///src/*": "${webRoot}/*"
+            }
         }
+
     ]
 }

@@ -76,11 +76,11 @@
 					</div>
 				</div>
 			</div>
-			<SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
+			<SearchTreeOverlayContent v-if="isEinschlusskriterienOverlayOpen"
 				:ontology-group-name="ontologyGroupName"
 				:response-array="responseArray"
 				criteria="Einschlusskriterien" />
-			<SearchTreeOverlayContent v-if="isAusschlusskriterienOverlayOpen"
+			<SearchTreeOverlayContent v-show="isAusschlusskriterienOverlayOpen"
 				:ontology-group-name="ontologyGroupName"
 				:is-ausschlusskriterien="isAusschlusskriterien"
 				:response-array="responseArray"
@@ -89,7 +89,7 @@
 
 		<div class="feasibility-query__output">
 			<div class="output-header">
-				<label>Ausgewählte Merkmale</label>
+				<p>Ausgewählte Merkmale</p>
 			</div>
 			<div class="output-content">
 				<div class="output-textfield" />
@@ -300,7 +300,7 @@ export default {
 	min-height: 3.5em;
 }
 
-.output-header label {
+.output-header p {
 	font-size: 16px;
 	font-weight: 500;
 }

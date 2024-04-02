@@ -21,12 +21,12 @@
 				<div class="attribute-display">
 					<div v-for="(modul, index) in modulName" :key="index">
 						<a class="modul-name" @click="toggleExpansion(index)">
-							{{ modul }}
 							<img class="expandImg"
 								:src="isExpanded(index)
-									? 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png'
-									: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png'
+									? imgExpand
+									: imgCollapse
 								">
+							{{ modul }}
 						</a>
 						<div v-show="isExpanded(index)" style="margin-top: 10px">
 							<!-- eslint-disable -->
@@ -47,10 +47,10 @@
 									:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
 									@change="showSelectedAttribute">
 								<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-								<label :for="key"
+								<p :for="key"
 									@mouseover="tooltipPosition">
 									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
-								</label>
+								</p>
 								<span class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
 							</div>
 						</div>
@@ -117,6 +117,8 @@ export default {
 			tooltip_Position: 0,
 			jsonData: [],
 			data: [],
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
+			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
 
@@ -285,6 +287,10 @@ export default {
 	margin-bottom: 2px;
 }
 
+.modul-name img {
+	margin-right: 5px;
+}
+
 .attribute-items {
 	display: flex;
 	flex-direction: row;
@@ -299,7 +305,7 @@ export default {
 	top: -6px;
 }
 
-.attribute-items label {
+.attribute-items p {
 	position: relative;
 	display: inline-block;
 }
@@ -336,7 +342,7 @@ export default {
 	border-color: transparent #5270a7 transparent transparent;
 }
 
-.attribute-items label:hover + .attribute-tooltip {
+.attribute-items p:hover + .attribute-tooltip {
 	visibility: visible;
 }
 

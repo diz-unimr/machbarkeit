@@ -7,6 +7,25 @@
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
 				<button>
+					<img src="">
+					<div v-if="ontology.selectable === true" class="search-tree-term-entry">
+						<input :id="ontology.id"
+							:value="ontology.display"
+							type="checkbox"
+							@change="checkboxClicked">
+						<p>
+							{{ ontology.display }}
+						</p>
+					</div>
+					<!-- v-if="ontology.selectable === false" -->
+					<div v-else
+						class="search-tree-term-entry">
+						<p>
+							{{ ontology.display }}
+						</p>
+					</div>
+				</button>
+				<!-- <button>
 					<img src="http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png">
 				</button>
 				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
@@ -14,7 +33,7 @@
 					<label>
 						{{ ontology.display }}
 					</label>
-				</div>
+				</div> -->
 			</div>
 		</li>
 	</div>
@@ -49,7 +68,11 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {},
+	methods: {
+		checkboxClicked() {
+			console.log('checkbox')
+		},
+	},
 }
 </script>
 
@@ -68,18 +91,38 @@ export default {
 	align-items: center;
 }
 
+.ontology-head-node button {
+	display: flex;
+    flex-direction: row;
+    align-items: center;
+	text-decoration: none;
+	background-color: white;
+	border: none;
+	outline: none;
+	width: auto;
+	margin: 1px 0px 1px 0px;
+	padding: 0px;
+}
+
 .search-tree-term-entry {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	margin-left: 5px;
 }
 
 .search-tree-term-entry input {
 	margin: 0px 10px;
 }
 
-.search-tree-term-entry label {
+.search-tree-term-entry p {
+	font-size: 16px;
+	font-weight: 400;
 	padding-left: 10px;
+}
+
+.search-tree-term-entry p:hover {
+	cursor: pointer;
 }
 
 input[type='checkbox'] {
@@ -90,15 +133,12 @@ input[type='checkbox'] {
 img {
 	height: 12px;
 	width: 12px;
-	display: none;
+	opacity: 0;
 }
 
-button {
-	text-decoration: none;
-	background-color: white;
-	border: none;
-	outline: none;
-	width: 20px;
+p {
+	font-size: 16px;
+	font-weight: 400;
 }
 
 </style>
