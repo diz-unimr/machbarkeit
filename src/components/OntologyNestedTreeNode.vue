@@ -82,9 +82,7 @@ export default {
 	},
 	beforeMount() {
 	},
-	mounted() {
-		// this.getChildren(this.ontology)
-	},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
@@ -93,20 +91,6 @@ export default {
 	methods: {
 		isExpanded(key) {
 			return this.expandedGroup.indexOf(key) !== -1
-		},
-
-		toggleExpansion() {
-			console.log('click')
-		},
-
-		buttonClicked() {
-			console.log('hello')
-			this.isHeadNodeOnLoad = false
-			console.log(this.isHeadNodeOnLoad)
-		},
-
-		checkboxClicked() {
-			console.log('checkbox1')
 		},
 	},
 }
@@ -134,15 +118,15 @@ input[type='checkbox'] {
 
 .ontology-head-node button {
 	display: flex;
-    flex-direction: row;
-    align-items: center;
+	flex-direction: row;
+	align-items: center;
 	width: auto;
 	text-decoration: none;
 	background-color: white;
 	border: none;
 	outline: none;
 	margin: 0px;
-    padding: 0px;
+	padding: 0px;
 }
 
 .search-tree-term-entry {

@@ -158,8 +158,6 @@ export default {
 		async getOntology() {
 			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
 			this.responseArray = jsonData.data
-			console.log(this.responseArray)
-
 			this.ontologyGroupName = this.responseArray.map((item) => item.display)
 		},
 

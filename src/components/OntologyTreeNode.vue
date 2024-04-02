@@ -70,7 +70,7 @@ export default {
 
 	methods: {
 		checkboxClicked() {
-			console.log('checkbox')
+			// console.log('checkbox')
 		},
 	},
 }
@@ -93,8 +93,8 @@ export default {
 
 .ontology-head-node button {
 	display: flex;
-    flex-direction: row;
-    align-items: center;
+	flex-direction: row;
+	align-items: center;
 	text-decoration: none;
 	background-color: white;
 	border: none;
