@@ -9,15 +9,17 @@
 				<button>
 					<img src="">
 					<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-						<input :id="ontology.id"
+						<input :id="ontology.termCodes[0].code"
+							ref="ontologyCheckbox"
+							v-model="isCheckboxSelected"
 							:value="ontology.display"
 							type="checkbox"
-							@change="checkboxClicked">
+							@change="addCheckboxSelected(ontology)">
+						{{ isCheckboxSelected }}
 						<p>
 							{{ ontology.display }}
 						</p>
 					</div>
-					<!-- v-if="ontology.selectable === false" -->
 					<div v-else
 						class="search-tree-term-entry">
 						<p>
@@ -25,15 +27,6 @@
 						</p>
 					</div>
 				</button>
-				<!-- <button>
-					<img src="http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png">
-				</button>
-				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-					<input type="checkbox">
-					<label>
-						{{ ontology.display }}
-					</label>
-				</div> -->
 			</div>
 		</li>
 	</div>
@@ -48,8 +41,15 @@ export default {
 			default: Object,
 		},
 	},
+	setup() {
+		// this.ontology.checkboxSelected = false
+	},
 	data() {
-		return {}
+		return {
+			selectedOntology: [],
+			selectedOntologyList: [],
+			isCheckboxSelected: '',
+		}
 	},
 
 	computed: {},
@@ -58,20 +58,34 @@ export default {
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-	},
+	created() {},
 	beforeMount() {
 	},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
+	updated() {
+	},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		checkboxClicked() {
-			// console.log('checkbox')
+		addCheckboxSelected(ontology) {
+			ontology.checkboxSelected = this.isCheckboxSelected
+			console.log(ontology)
+			this.$emit('update-ontology', ontology)
 		},
+
+		/* getSelectedOntology1() {
+			this.selectedOntologyList = this.ontologyList
+			const arrIndex = this.activeTab.toString() + this.ontologyIndex.toString()
+			if (this.selectedOntology.length > 0) {
+				const ontologyId = this.$refs.ontologyCheckbox.id
+				this.selectedOntologyList.push([arrIndex, this.selectedOntology[0], ontologyId])
+			} else {
+				const index = this.selectedOntologyList.findIndex(subarray => subarray.includes(arrIndex))
+				this.selectedOntologyList.splice(index, 1)
+			}
+		}, */
 	},
 }
 </script>

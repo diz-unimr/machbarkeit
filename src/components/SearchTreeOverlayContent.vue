@@ -5,32 +5,34 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="search-tree-overlay-container">
-		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': isAusschlusskriterien }">
+		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaId === 'Ausschlusskriterien' }">
 			<div class="criteria-name">
-				{{ criteria }}
+				{{ criteriaId }}
 			</div>
-			<div v-if="responseArray.length > 0">
+			<div v-if="ontologyArray.length > 0">
 				<div class="ontology-search-tree-header">
 					<div class="search-tree-button">
-						<!-- <div>Alle</div> -->
-						<div v-for="(groupName, groupName_index) in ontologyGroupName"
-							:key="groupName_index"
+						<div v-for="(modulName, modulName_index) in ontologyArray.map((item) => item.display)"
+							:key="modulName_index"
 							class="ontology-tab"
-							:class="{ 'active': activeTab === groupName_index }"
-							@click="activateTab(groupName_index)">
-							{{ groupName }}
+							:class="{ 'active': activeTab === modulName_index }"
+							@click="activateTab(modulName_index)">
+							{{ modulName }}
 						</div>
 					</div>
 				</div>
 				<div class="ontology-container">
-					<div v-for="(ontology, ontology_index) in responseArray"
+					<div v-for="(ontology, ontology_index) in ontologyArray"
 						v-show="activeTab === ontology_index"
 						:key="ontology_index">
 						<div class="ontologyNode">
 							<OntologyNestedTreeNode v-if="ontology.hasOwnProperty('children')"
 								:ontology="ontology"
-								:is-head-node="isHeadNode" />
-							<OntologyTreeNode v-if="!ontology.hasOwnProperty('children')" :ontology="ontology" />
+								:is-head-node="true"
+								@update-ontology="updateOntology" />
+							<OntologyTreeNode v-if="!ontology.hasOwnProperty('children')"
+								:ontology="ontology"
+								@update-ontology="updateOntology" />
 						</div>
 					</div>
 					<div class="ontology-button">
@@ -47,10 +49,10 @@
 </template>
 
 <!-- <NcActionCheckbox>
-		{{ responseArray[5]['children'][0]['display'] }}
+		{{ ontologyArray[5]['children'][0]['display'] }}
 	</NcActionCheckbox>
 	<NcActionCheckbox>
-		{{ responseArray[5]['children'][1]['display'] }}
+		{{ ontologyArray[5]['children'][1]['display'] }}
 </NcActionCheckbox> -->
 
 <script>
@@ -68,10 +70,6 @@ export default {
 			type: Boolean,
 			default: false,
 		},
-		ontologyGroupName: {
-			type: Array,
-			default: Array,
-		},
 		responseArray: {
 			type: Array,
 			default: Array,
@@ -84,15 +82,28 @@ export default {
 			type: String,
 			default: '',
 		},
+		criteriaId: {
+			type: String,
+			default: '',
+		},
 	},
 	data() {
 		return {
 			activeTab: 0,
-			isHeadNode: true,
+			ontologyModulName: [],
+			ontologyArray: [],
 		}
 	},
 
 	computed: {},
+
+	watch: {
+		responseArray(hasData) {
+			if (hasData) {
+				this.getData()
+			}
+		},
+	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -103,26 +114,26 @@ export default {
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {},
+	beforeDestroy() {
+	},
 	destroyed() {},
 
 	methods: {
 		activateTab(index) {
 			this.activeTab = index
 		},
-		/* ontologyName() {
-			this.ontologyGroupName = this.filteredArr.map(
-				(item) =>
-					item[
-						'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-					],
-			)
-			// filter duplicate
-			this.ontologyGroupName = this.ontologyGroupName.filter(
-				(item, index) =>
-					this.ontologyGroupName.indexOf(item) === index && item !== undefined && item !== '',
-			)
-		}, */
+
+		updateOntology(ontology) {
+			console.log(ontology)
+			this.$emit('update-array', ontology)
+		},
+
+		getData() {
+			this.ontologyArray = this.responseArray
+			this.ontologyModulName = this.ontologyArray.map((item) => item.display)
+			console.log('getData')
+			console.log(this.ontologyArray.length)
+		},
 	},
 }
 

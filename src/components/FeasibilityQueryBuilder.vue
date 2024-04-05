@@ -12,7 +12,7 @@
 					</div>
 					<div class="criteria-search-input">
 						<div class="search-button">
-							<button @click="switchSearchEinschlusskriterien">
+							<button id="einschlusskriterien" @click="openSearchCriteria('Einschlusskriterien')">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -47,7 +47,7 @@
 					</div>
 					<div class="criteria-search-input">
 						<div class="search-button">
-							<button @click="switchSearchAusschlusskriterien">
+							<button id="ausschlusskriterien" @click="openSearchCriteria('Ausschlusskriterien')">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -76,15 +76,23 @@
 					</div>
 				</div>
 			</div>
-			<SearchTreeOverlayContent v-if="isEinschlusskriterienOverlayOpen"
-				:ontology-group-name="ontologyGroupName"
+			<SearchTreeOverlayContent v-show="criteriaOverlay === 'Einschlusskriterien' || criteriaOverlay === 'Ausschlusskriterien'"
+				:criteria-id="criteriaOverlay"
 				:response-array="responseArray"
-				criteria="Einschlusskriterien" />
+				@update-array="UpdateArray" />
+			<!-- <SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
+				:response-array="responseArray"
+				criteria="Einschlusskriterien"
+				@update-array="UpdateArray" />
 			<SearchTreeOverlayContent v-show="isAusschlusskriterienOverlayOpen"
-				:ontology-group-name="ontologyGroupName"
-				:is-ausschlusskriterien="isAusschlusskriterien"
+				:is-ausschlusskriterien="true"
 				:response-array="responseArray"
-				criteria="Ausschlusskriterien" />
+				criteria="Ausschlusskriterien"
+				@update-array="UpdateArray" /> -->
+		</div>
+
+		<div v-if="isOntologyOptionOpen">
+			Hello
 		</div>
 
 		<div class="feasibility-query__output">
@@ -114,33 +122,36 @@ export default {
 		Magnify,
 		SearchTreeOverlayContent,
 	},
+
 	data() {
 		return {
 			einschlussTextSerach: '',
 			ausschlussTextSerach: '',
 			isEinschlusskriterienOverlayOpen: false,
 			isAusschlusskriterienOverlayOpen: false,
-			isAusschlusskriterien: true,
+			isOntologyOptionOpen: false,
 			responseArray: [],
 			filteredArr: [],
-			ontologyGroupName: [],
-			person: [],
+			criteriaOverlay: null,
 		}
 	},
 
 	computed: {},
 	// life cycle of vue js
 	// Call functions before all component are rendered
-	beforeCreate() {},
+	async beforeCreate() {
+		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+		const response = jsonData.data
+		this.responseArray = response
+	},
 	// Call functions before the template is rendered
 	created() {
-		this.getOntology()
 	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {
-		// Update when search
+		// Update input search
 		const buttonContainer = document.getElementsByClassName('input-field__main-wrapper')
 		buttonContainer[1].querySelector('input').addEventListener('focus', this.searchCodeEinschlusskriterien, true)
 		buttonContainer[2].querySelector('input').addEventListener('focus', this.searchCodeAusschlusskriterien, true)
@@ -155,22 +166,18 @@ export default {
 	destroyed() {},
 
 	methods: {
-		async getOntology() {
-			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-			this.responseArray = jsonData.data
-			this.ontologyGroupName = this.responseArray.map((item) => item.display)
+		openSearchCriteria(id) {
+			this.criteriaOverlay = this.criteriaOverlay === id ? null : id
 		},
-
-		switchSearchEinschlusskriterien() {
+		/* switchSearchEinschlusskriterien() {
+			console.log('hello')
 			this.isEinschlusskriterienOverlayOpen = !this.isEinschlusskriterienOverlayOpen
 			this.isAusschlusskriterienOverlayOpen = false
-			// this.filteredSearch(this.einschlussTextSerach)
 		},
 		switchSearchAusschlusskriterien() {
 			this.isAusschlusskriterienOverlayOpen = !this.isAusschlusskriterienOverlayOpen
 			this.isEinschlusskriterienOverlayOpen = false
-			// this.filteredSearch(this.ausschlussTextSerach)
-		},
+		}, */
 		searchCodeEinschlusskriterien() {
 			this.isEinschlusskriterienOverlayOpen = true
 			this.isAusschlusskriterienOverlayOpen = false
@@ -181,11 +188,18 @@ export default {
 			this.isEinschlusskriterienOverlayOpen = false
 			// this.filteredSearch(this.ausschlussTextSerach)
 		},
-		/* filteredSearch(textSearch) {
-			this.filteredArr = this.responseArray.filter((item) =>
-				item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'].toLowerCase().includes(textSearch.toLowerCase()),
-			)
-		}, */
+		UpdateArray(array) {
+			console.log(array)
+			const index = this.responseArray.findIndex(item => item.id === array.id)
+			if (index !== -1) {
+				this.responseArray.splice(index, 1, array)
+			}
+			console.log(this.responseArray)
+
+			this.responseArray.forEach(item => {
+
+			})
+		},
 	},
 }
 </script>

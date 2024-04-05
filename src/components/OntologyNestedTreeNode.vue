@@ -14,15 +14,16 @@
 						">
 				</button>
 				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-					<input :id="ontology.id"
+					<input :id="ontology.termCodes[0].code"
+						ref="ontologyCheckbox"
+						v-model="isCheckboxSelected"
 						:value="ontology.display"
 						type="checkbox"
-						@change="checkboxClicked">
+						@change="addCheckboxSelected(ontology)">
 					<p @click="() => (state = !state)">
 						{{ ontology.display }}
 					</p>
 				</div>
-				<!-- v-if="ontology.selectable === false" -->
 				<div v-else
 					class="search-tree-term-entry">
 					<p @click="() => (state = !state)">
@@ -34,8 +35,12 @@
 				<template v-for="(node, index) in ontology.children">
 					<OntologyNestedTreeNode v-if="node.hasOwnProperty('children')"
 						:key="index"
-						:ontology="node" />
-					<OntologyTreeNode v-if="!node.hasOwnProperty('children')" :key="index" :ontology="node" />
+						:ontology="node"
+						@update-ontology="updateOntology" />
+					<OntologyTreeNode v-if="!node.hasOwnProperty('children')"
+						:key="index"
+						:ontology="node"
+						@update-ontology="updateOntology" />
 				</template>
 			</ul>
 		</li>
@@ -45,10 +50,10 @@
 <script>
 import OntologyTreeNode from './OntologyTreeNode.vue'
 import { ref } from 'vue'
+
 export default {
 	name: 'OntologyNestedTreeNode',
 	components: {
-		// OntologyNestedTreeNode: 'OntologyNestedTreeNode',
 		OntologyTreeNode,
 	},
 	props: {
@@ -66,6 +71,10 @@ export default {
 			state: ref(false),
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			selectedOntology: [],
+			selectedOntologyList: [],
+			updatedObject: {},
+			isCheckboxSelected: '',
 		}
 	},
 
@@ -82,7 +91,9 @@ export default {
 	},
 	beforeMount() {
 	},
-	mounted() {},
+	mounted() {
+		this.updatedObject = this.ontology
+	},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
@@ -92,6 +103,29 @@ export default {
 		isExpanded(key) {
 			return this.expandedGroup.indexOf(key) !== -1
 		},
+
+		addCheckboxSelected(ontology) {
+			ontology.checkboxSelected = this.isCheckboxSelected
+			console.log(ontology)
+			this.$emit('update-ontology', ontology)
+		},
+
+		updateOntology(ontology) {
+			console.log(ontology)
+			this.$emit('update-ontology', ontology)
+		},
+
+		/* getSelectedOntology1() {
+			this.selectedOntologyList = this.ontologyList
+			const arrIndex = this.activeTab.toString() + this.ontologyIndex.toString()
+			if (this.selectedOntology.length > 0) {
+				const ontologyId = this.$refs.ontologyCheckbox.id
+				this.selectedOntologyList.push([arrIndex, this.selectedOntology[0], ontologyId])
+			} else {
+				const index = this.selectedOntologyList.findIndex(subarray => subarray.includes(arrIndex))
+				this.selectedOntologyList.splice(index, 1)
+			}
+		}, */
 	},
 }
 </script>
