@@ -29,15 +29,21 @@
 							<OntologyNestedTreeNode v-if="ontology.hasOwnProperty('children')"
 								:ontology="ontology"
 								:is-head-node="true"
-								@update-ontology="updateOntology" />
+								@update-ontology="updateOntology"
+								@add-checkbox-selected="addCheckboxSelected" />
 							<OntologyTreeNode v-if="!ontology.hasOwnProperty('children')"
 								:ontology="ontology"
-								@update-ontology="updateOntology" />
+								@update-ontology="updateOntology"
+								@add-checkbox-selected="addCheckboxSelected" />
 						</div>
 					</div>
 					<div class="ontology-button">
-						<button>AUSWÄHLEN</button>
-						<button>ABBRECHEN</button>
+						<button @click="$emit('select-ontology', selectedOntologyArr)">
+							AUSWÄHLEN
+						</button>
+						<button @click="$emit('update-status', criteriaId)">
+							ABBRECHEN
+						</button>
 					</div>
 				</div>
 			</div>
@@ -92,6 +98,7 @@ export default {
 			activeTab: 0,
 			ontologyModulName: [],
 			ontologyArray: [],
+			selectedOntologyArr: [],
 		}
 	},
 
@@ -124,15 +131,41 @@ export default {
 		},
 
 		updateOntology(ontology) {
-			console.log(ontology)
 			this.$emit('update-array', ontology)
 		},
 
 		getData() {
-			this.ontologyArray = this.responseArray
+			this.ontologyArray = [...this.responseArray]
 			this.ontologyModulName = this.ontologyArray.map((item) => item.display)
 			console.log('getData')
-			console.log(this.ontologyArray.length)
+			console.log(this.ontologyArray)
+		},
+
+		/* addCheckboxSelected(ontology) {
+			console.log('ontology')
+			console.log(ontology)
+			this.ontology2 = { ...ontology }
+			this.ontology2.checkboxSelected = this.isCheckboxSelected
+			console.log('ontology2')
+			console.log(this.ontology2)
+		}, */
+
+		addCheckboxSelected(id, isCheckboxSelected) {
+			console.log('addCheckboxSelected')
+			console.log(isCheckboxSelected)
+			console.log(id)
+
+			console.log(this.selectedOntologyArr)
+			const index = this.selectedOntologyArr.findIndex(element => element.id === id)
+			console.log(index)
+			if (index === -1) {
+				this.selectedOntologyArr.push({ id, isCheckboxSelected })
+			} else if (isCheckboxSelected === false && index !== -1) {
+				// delete array if isCheckboxSelected === false
+				this.selectedOntologyArr.splice(index, 1)
+			}
+
+			console.log(this.selectedOntologyArr)
 		},
 	},
 }

@@ -24,9 +24,7 @@ export default {
 		FeasibilityQuery,
 	},
 	data() {
-		return {
-			isDialogVisible: false,
-		}
+		return {}
 	},
 
 	computed: {},

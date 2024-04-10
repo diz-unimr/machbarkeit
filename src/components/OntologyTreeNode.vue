@@ -4,6 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div id="ontology-tree" class="ontology-tree">
+		{{ isCheckboxSelected }}
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
 				<button>
@@ -14,18 +15,17 @@
 							v-model="isCheckboxSelected"
 							:value="ontology.display"
 							type="checkbox"
-							@change="addCheckboxSelected(ontology)">
-						{{ isCheckboxSelected }}
+							@change="$emit('add-checkbox-selected', ontology.termCodes[0].code, isCheckboxSelected)">
 						<p>
 							{{ ontology.display }}
 						</p>
 					</div>
-					<div v-else
+					<!-- <div v-else
 						class="search-tree-term-entry">
 						<p>
 							{{ ontology.display }}
 						</p>
-					</div>
+					</div> -->
 				</button>
 			</div>
 		</li>
@@ -48,7 +48,8 @@ export default {
 		return {
 			selectedOntology: [],
 			selectedOntologyList: [],
-			isCheckboxSelected: '',
+			isCheckboxSelected: [],
+			ontology3: [],
 		}
 	},
 
@@ -69,11 +70,17 @@ export default {
 	destroyed() {},
 
 	methods: {
-		addCheckboxSelected(ontology) {
-			ontology.checkboxSelected = this.isCheckboxSelected
+		/* addCheckboxSelected(ontology) {
+			console.log('ontology')
 			console.log(ontology)
-			this.$emit('update-ontology', ontology)
-		},
+			this.ontology3 = { ...ontology }
+			this.ontology3.checkboxSelected = this.isCheckboxSelected
+			console.log('ontology3')
+			console.log(this.ontology3)
+			console.log('ontology')
+			console.log(ontology)
+			this.$emit('update-ontology', this.ontology3)
+		}, */
 
 		/* getSelectedOntology1() {
 			this.selectedOntologyList = this.ontologyList

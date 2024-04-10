@@ -5,7 +5,7 @@
 	-->
 	<div class="feasibility-query-container">
 		<div class="feasibility-query">
-			<SaveQuery v-if="isDialogOpen" ref="saveQueryRef" @update-status="queryCancel" />
+			<SaveQueryDialog v-if="isDialogOpen" ref="saveQueryRef" @update-status="queryCancel" />
 			<div class="feasibility-query__top">
 				<div class="number-patients">
 					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
@@ -19,7 +19,7 @@
 					</button>
 				</div>
 			</div>
-			<div class="feasibility-query__consent">
+			<!-- <div class="feasibility-query__consent">
 				<div class="consent-title">
 					Art der Datennutzung
 				</div>
@@ -72,7 +72,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 			<FeasibilityQueryBuilder />
 		</div>
 		<MachbarkeitFooter @dialog-open="querySaveDialogOpen" @dialog-close="querySaveDiaglogClose" />
@@ -81,14 +81,14 @@
 
 <script>
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
-import SaveQuery from './SaveQuery.vue'
+import SaveQueryDialog from './SaveQueryDialog.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 
 export default {
 	name: 'FeasibilityQuery',
 	components: {
 		FeasibilityQueryBuilder,
-		SaveQuery,
+		SaveQueryDialog,
 		MachbarkeitFooter,
 	},
 	data() {
@@ -157,9 +157,10 @@ export default {
 .feasibility-query__top {
 	display: flex;
 	flex-direction: row;
-	width: 100%;
 	place-content: center space-between;
 	align-items: center;
+	margin-bottom: 20px;
+	width: 100%;
 }
 
 .number-patients {

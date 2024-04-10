@@ -79,7 +79,10 @@
 			<SearchTreeOverlayContent v-show="criteriaOverlay === 'Einschlusskriterien' || criteriaOverlay === 'Ausschlusskriterien'"
 				:criteria-id="criteriaOverlay"
 				:response-array="responseArray"
-				@update-array="UpdateArray" />
+				@select-ontology="selectOntology" />
+				<!-- @update-array="UpdateArray"
+				@update-status="openSearchCriteria" -->
+
 			<!-- <SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
 				:response-array="responseArray"
 				criteria="Einschlusskriterien"
@@ -100,9 +103,20 @@
 				<p>Ausgewählte Merkmale</p>
 			</div>
 			<div class="output-content">
-				<div class="output-textfield" />
+				<div id="Einschlusskriterien" class="output-textfield">
+					<template v-if="selectedOntologyArr.length > 0">
+						<ul v-for="(selectedElement, index) in selectedOntologyArr" :key="index">
+							<div>
+								{{ selectedElement.display }}
+								<button @click="deleteItem(selectedElement.id)">
+									Delete
+								</button>
+							</div>
+						</ul>
+					</template>
+				</div>
 				<div class="pipe" />
-				<div class="output-textfield" />
+				<div id="Ausschlusskriterien" class="output-textfield" />
 			</div>
 		</div>
 	</div>
@@ -131,8 +145,10 @@ export default {
 			isAusschlusskriterienOverlayOpen: false,
 			isOntologyOptionOpen: false,
 			responseArray: [],
+			response: [],
 			filteredArr: [],
 			criteriaOverlay: null,
+			selectedOntologyArr: [],
 		}
 	},
 
@@ -141,8 +157,8 @@ export default {
 	// Call functions before all component are rendered
 	async beforeCreate() {
 		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-		const response = jsonData.data
-		this.responseArray = response
+		this.response = jsonData.data
+		this.responseArray = [...this.response]
 	},
 	// Call functions before the template is rendered
 	created() {
@@ -168,6 +184,9 @@ export default {
 	methods: {
 		openSearchCriteria(id) {
 			this.criteriaOverlay = this.criteriaOverlay === id ? null : id
+			if (this.criteriaOverlay === null) {
+				this.responseArray = this.response
+			}
 		},
 		/* switchSearchEinschlusskriterien() {
 			console.log('hello')
@@ -189,16 +208,25 @@ export default {
 			// this.filteredSearch(this.ausschlussTextSerach)
 		},
 		UpdateArray(array) {
-			console.log(array)
-			const index = this.responseArray.findIndex(item => item.id === array.id)
-			if (index !== -1) {
-				this.responseArray.splice(index, 1, array)
-			}
-			console.log(this.responseArray)
 
-			this.responseArray.forEach(item => {
+		},
+		selectOntology(selectedOntologyArray) {
+			this.responseArray.forEach(element => {
+				const index = selectedOntologyArray.findIndex(item => item.id === element.id)
+				/* if (index === -1) {   nochmal nachdenken
+					this.selectedOntologyArr.push(element)
+				}
 
+				if (element.children) {
+					this.selectOntology(element.children)
+				} */
 			})
+		},
+
+		deleteItem(id) {
+			// event.target.parentNode.remove()
+			const index = this.selectedOntologyArr.findIndex(item => item.id === id)
+			this.selectedOntologyArr.splice(index, 1)
 		},
 	},
 }

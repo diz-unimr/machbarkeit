@@ -34,7 +34,7 @@
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 
 export default {
-	name: 'SaveQuery',
+	name: 'SaveQueryDialog',
 	components: {
 		NcTextField,
 	},
@@ -69,24 +69,18 @@ export default {
 <style scoped>
 .save-overlay-wrapper {
 	display: flex;
-	position: absolute;
+	position: sticky;
 	z-index: 1000;
-	justify-content: center;
-	align-items: center;
-	width: 73%;
+	width: 50%;
 	top: 20%;
-	left: 25%;
+	margin: 0px auto 0px auto;
 }
 
 .save-overlay-pane {
 	display: flex;
-	position: static;
+	position: absolute;
 	pointer-events: auto;
-	justify-content: center;
-	align-items: center;
-	min-width: 45%;
-	max-width: 100%;
-	max-height: 100%;
+	width: 100%;
 }
 
 .save-dialog {

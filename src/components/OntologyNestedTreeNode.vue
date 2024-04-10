@@ -19,7 +19,7 @@
 						v-model="isCheckboxSelected"
 						:value="ontology.display"
 						type="checkbox"
-						@change="addCheckboxSelected(ontology)">
+						@change="$emit('add-checkbox-selected', ontology.termCodes[0].code, isCheckboxSelected)">
 					<p @click="() => (state = !state)">
 						{{ ontology.display }}
 					</p>
@@ -36,11 +36,13 @@
 					<OntologyNestedTreeNode v-if="node.hasOwnProperty('children')"
 						:key="index"
 						:ontology="node"
-						@update-ontology="updateOntology" />
+						@update-ontology="updateOntology"
+						@add-checkbox-selected="addCheckboxSelected" />
 					<OntologyTreeNode v-if="!node.hasOwnProperty('children')"
 						:key="index"
 						:ontology="node"
-						@update-ontology="updateOntology" />
+						@update-ontology="updateOntology"
+						@add-checkbox-selected="addCheckboxSelected" />
 				</template>
 			</ul>
 		</li>
@@ -74,7 +76,7 @@ export default {
 			selectedOntology: [],
 			selectedOntologyList: [],
 			updatedObject: {},
-			isCheckboxSelected: '',
+			isCheckboxSelected: false,
 		}
 	},
 
@@ -104,15 +106,21 @@ export default {
 			return this.expandedGroup.indexOf(key) !== -1
 		},
 
-		addCheckboxSelected(ontology) {
-			ontology.checkboxSelected = this.isCheckboxSelected
+		/* addCheckboxSelected(ontology) {
+			console.log('ontology')
 			console.log(ontology)
-			this.$emit('update-ontology', ontology)
+			this.ontology2 = { ...ontology }
+			this.ontology2.checkboxSelected = this.isCheckboxSelected
+			console.log('ontology2')
+			console.log(this.ontology2)
+		}, */
+
+		addCheckboxSelected(id, isCheckboxSelected) {
+			this.$emit('add-checkbox-selected', id, isCheckboxSelected)
 		},
 
 		updateOntology(ontology) {
-			console.log(ontology)
-			this.$emit('update-ontology', ontology)
+			/* this.$emit('update-ontology', ontology) */
 		},
 
 		/* getSelectedOntology1() {
