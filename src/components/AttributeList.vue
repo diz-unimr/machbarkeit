@@ -14,8 +14,7 @@
 					trailing-button-icon="close"
 					placeholder=" "
 					:show-trailing-button="txtSearch !== ''"
-					@trailing-button-click="txtSearch = ''"
-					@input="searchAttribute">
+					@trailing-button-click="txtSearch = ''">
 					<Magnify :size="20" />
 				</NcTextField>
 				<div class="attribute-display">
@@ -107,7 +106,6 @@ export default {
 	data() {
 		return {
 			responseArray: [],
-			filteredArr: [],
 			selectedArr: [],
 			selectedAttribute: [],
 			expandedGroup: [],
@@ -122,7 +120,17 @@ export default {
 		}
 	},
 
-	computed: {},
+	computed: {
+		filteredArr() {
+			return this.responseArray.filter((item) =>
+				item[
+					'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+				]
+					.toLowerCase()
+					.includes(this.txtSearch.toLowerCase()),
+			)
+		},
+	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -134,12 +142,7 @@ export default {
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-		const buttonContainer = document.getElementsByClassName('input-field__main-wrapper')
-		if (buttonContainer[0].querySelector('button') !== null) {
-			buttonContainer[0].querySelector('button').addEventListener('click', this.searchAttribute)
-		}
-	},
+	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -156,7 +159,6 @@ export default {
 				)
 				.filter((attr) => attr !== '' && attr !== undefined)
 
-			this.filteredArr = this.responseArray
 			// get modul name
 			this.modulName = this.getModulName(this.responseArray)
 			// initialize keys from modulName.length (default: expand all attributelists)
@@ -172,27 +174,6 @@ export default {
 				// .splice(start, deleteCount, item1, ..., itemN)
 				this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1)
 			} else this.expandedGroup.push(key)
-		},
-
-		searchAttribute() {
-			// delete empty string and undefined from attribute name
-			this.responseArray = this.responseArray
-				.filter(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-						],
-				)
-				.filter((attr) => attr !== '' && attr !== undefined)
-
-			// filter txtSearch
-			this.filteredArr = this.responseArray.filter((item) =>
-				item[
-					'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-				]
-					.toLowerCase()
-					.includes(this.txtSearch.toLowerCase()),
-			)
 		},
 
 		getModulName(inputArr) {
