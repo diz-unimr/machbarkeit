@@ -3,6 +3,7 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
+
 	<div id="ontology-nested-tree" class="ontology-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
@@ -14,12 +15,10 @@
 						">
 				</button>
 				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-					<input :id="ontology.termCodes[0].code"
-						ref="ontologyCheckbox"
-						v-model="isCheckboxSelected"
-						:value="ontology.display"
+					<input :id="ontology.id"
+						v-model="isChecked"
 						type="checkbox"
-						@change="$emit('add-checkbox-selected', ontology.termCodes[0].code, isCheckboxSelected)">
+						:value="ontology.display">
 					<p @click="() => (state = !state)">
 						{{ ontology.display }}
 					</p>
@@ -32,17 +31,17 @@
 				</div>
 			</div>
 			<ul v-show="state">
-				<template v-for="(node, index) in ontology.children">
-					<OntologyNestedTreeNode v-if="node.hasOwnProperty('children')"
-						:key="index"
-						:ontology="node"
-						@update-ontology="updateOntology"
-						@add-checkbox-selected="addCheckboxSelected" />
-					<OntologyTreeNode v-if="!node.hasOwnProperty('children')"
-						:key="index"
-						:ontology="node"
-						@update-ontology="updateOntology"
-						@add-checkbox-selected="addCheckboxSelected" />
+				<template v-for="child in ontology.children">
+					<OntologyNestedTreeNode v-if="child.children"
+						:key="child.id"
+						v-model="checkedItems"
+						:ontology="child"
+						@input="checkboxTrigger" />
+					<OntologyTreeNode v-if="!child.children"
+						:key="child.id"
+						v-model="checkedItems"
+						:ontology="child"
+						@input="checkboxTrigger" />
 				</template>
 			</ul>
 		</li>
@@ -67,6 +66,14 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		modelValue: {
+			type: String,
+			default: String,
+		},
+		selectedValues: {
+			type: Array,
+			default: () => [],
+		},
 	},
 	data() {
 		return {
@@ -76,11 +83,28 @@ export default {
 			selectedOntology: [],
 			selectedOntologyList: [],
 			updatedObject: {},
-			isCheckboxSelected: false,
+			selectedElement: [],
+			selectedElementArray: [],
+			checkedItems: [],
 		}
 	},
 
-	computed: {},
+	computed: {
+		isChecked: {
+			// Determines if the current item is checked
+			get() {
+				  return 0/* this.value.includes(this.ontology.display) */
+			},
+			// Updates checked items when checkbox state changes
+			set(checked) {
+				if (checked) {
+					this.$emit('input', { action: 'add', node: this.ontology })
+				} else {
+					this.$emit('input', { action: 'delete', node: this.ontology })
+				}
+			},
+		},
+	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -106,34 +130,9 @@ export default {
 			return this.expandedGroup.indexOf(key) !== -1
 		},
 
-		/* addCheckboxSelected(ontology) {
-			console.log('ontology')
-			console.log(ontology)
-			this.ontology2 = { ...ontology }
-			this.ontology2.checkboxSelected = this.isCheckboxSelected
-			console.log('ontology2')
-			console.log(this.ontology2)
-		}, */
-
-		addCheckboxSelected(id, isCheckboxSelected) {
-			this.$emit('add-checkbox-selected', id, isCheckboxSelected)
+		checkboxTrigger(data) {
+			this.$emit('input', data)
 		},
-
-		updateOntology(ontology) {
-			/* this.$emit('update-ontology', ontology) */
-		},
-
-		/* getSelectedOntology1() {
-			this.selectedOntologyList = this.ontologyList
-			const arrIndex = this.activeTab.toString() + this.ontologyIndex.toString()
-			if (this.selectedOntology.length > 0) {
-				const ontologyId = this.$refs.ontologyCheckbox.id
-				this.selectedOntologyList.push([arrIndex, this.selectedOntology[0], ontologyId])
-			} else {
-				const index = this.selectedOntologyList.findIndex(subarray => subarray.includes(arrIndex))
-				this.selectedOntologyList.splice(index, 1)
-			}
-		}, */
 	},
 }
 </script>

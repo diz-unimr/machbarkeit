@@ -76,12 +76,9 @@
 					</div>
 				</div>
 			</div>
+			<!-- :response-array="responseArray" -->
 			<SearchTreeOverlayContent v-show="criteriaOverlay === 'Einschlusskriterien' || criteriaOverlay === 'Ausschlusskriterien'"
-				:criteria-id="criteriaOverlay"
-				:response-array="responseArray"
-				@select-ontology="selectOntology" />
-				<!-- @update-array="UpdateArray"
-				@update-status="openSearchCriteria" -->
+				:criteria-id="criteriaOverlay" />
 
 			<!-- <SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
 				:response-array="responseArray"
@@ -126,8 +123,6 @@
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
-import { generateUrl } from '@nextcloud/router'
-import axios from '@nextcloud/axios'
 
 export default {
 	name: 'FeasibilityQueryBuilder',
@@ -145,7 +140,6 @@ export default {
 			isAusschlusskriterienOverlayOpen: false,
 			isOntologyOptionOpen: false,
 			responseArray: [],
-			response: [],
 			filteredArr: [],
 			criteriaOverlay: null,
 			selectedOntologyArr: [],
@@ -153,40 +147,22 @@ export default {
 	},
 
 	computed: {},
+
 	// life cycle of vue js
 	// Call functions before all component are rendered
-	async beforeCreate() {
-		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-		this.response = jsonData.data
-		this.responseArray = [...this.response]
-	},
+	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-		// Update input search
-		const buttonContainer = document.getElementsByClassName('input-field__main-wrapper')
-		buttonContainer[1].querySelector('input').addEventListener('focus', this.searchCodeEinschlusskriterien, true)
-		buttonContainer[2].querySelector('input').addEventListener('focus', this.searchCodeAusschlusskriterien, true)
-		if (buttonContainer[1].querySelector('button') !== null) {
-			buttonContainer[1].querySelector('button').addEventListener('click', this.searchCodeEinschlusskriterien)
-		}
-		if (buttonContainer[2].querySelector('button') !== null) {
-			buttonContainer[2].querySelector('button').addEventListener('click', this.searchCodeAusschlusskriterien)
-		}
-	},
+	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
 		openSearchCriteria(id) {
 			this.criteriaOverlay = this.criteriaOverlay === id ? null : id
-			if (this.criteriaOverlay === null) {
-				this.responseArray = this.response
-			}
 		},
 		/* switchSearchEinschlusskriterien() {
 			console.log('hello')
@@ -213,13 +189,13 @@ export default {
 		selectOntology(selectedOntologyArray) {
 			this.responseArray.forEach(element => {
 				const index = selectedOntologyArray.findIndex(item => item.id === element.id)
-				/* if (index === -1) {   nochmal nachdenken
+				if (index === -1) {
 					this.selectedOntologyArr.push(element)
 				}
 
 				if (element.children) {
 					this.selectOntology(element.children)
-				} */
+				}
 			})
 		},
 

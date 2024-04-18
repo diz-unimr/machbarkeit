@@ -9,10 +9,10 @@
 			<div class="criteria-name">
 				{{ criteriaId }}
 			</div>
-			<div v-if="ontologyArray.length > 0">
+			<div v-if="responseArray.length > 0">
 				<div class="ontology-search-tree-header">
 					<div class="search-tree-button">
-						<div v-for="(modulName, modulName_index) in ontologyArray.map((item) => item.display)"
+						<div v-for="(modulName, modulName_index) in responseArray.map((item) => item.display)"
 							:key="modulName_index"
 							class="ontology-tab"
 							:class="{ 'active': activeTab === modulName_index }"
@@ -22,19 +22,40 @@
 					</div>
 				</div>
 				<div class="ontology-container">
-					<div v-for="(ontology, ontology_index) in ontologyArray"
+					<div v-for="(ontology, ontology_index) in responseArray"
 						v-show="activeTab === ontology_index"
 						:key="ontology_index">
 						<div class="ontologyNode">
-							<OntologyNestedTreeNode v-if="ontology.hasOwnProperty('children')"
-								:ontology="ontology"
-								:is-head-node="true"
-								@update-ontology="updateOntology"
-								@add-checkbox-selected="addCheckboxSelected" />
-							<OntologyTreeNode v-if="!ontology.hasOwnProperty('children')"
-								:ontology="ontology"
-								@update-ontology="updateOntology"
-								@add-checkbox-selected="addCheckboxSelected" />
+							<div id="ontology-nested-tree" class="ontology-nested-tree-node">
+								<li style="list-style-type: none;">
+									<div class="ontology-head-node">
+										<button @click="() => (state = !state)">
+											<img class="expandImg"
+												:src="state
+													? imgExpand
+													: imgCollapse
+												">
+										</button>
+										<div class="search-tree-term-entry">
+											<p @click="() => (state = !state)">
+												{{ ontology.display }}
+											</p>
+										</div>
+									</div>
+
+									<ul v-show="state">
+										<div v-for="(child, index) in ontology.children" :key="index">
+											<!-- :is-head-node="true" -->
+											<OntologyNestedTreeNode v-if="child.children"
+												:ontology="child"
+												@input="getCheckboxItems" />
+											<OntologyTreeNode v-if="!child.children"
+												:ontology="child"
+												@input="getCheckboxItems" />
+										</div>
+									</ul>
+								</li>
+							</div>
 						</div>
 					</div>
 					<div class="ontology-button">
@@ -54,16 +75,12 @@
 	</div>
 </template>
 
-<!-- <NcActionCheckbox>
-		{{ ontologyArray[5]['children'][0]['display'] }}
-	</NcActionCheckbox>
-	<NcActionCheckbox>
-		{{ ontologyArray[5]['children'][1]['display'] }}
-</NcActionCheckbox> -->
-
 <script>
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyTreeNode from './OntologyTreeNode.vue'
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
+import { ref } from 'vue'
 
 export default {
 	name: 'SearchTreeOverlayContent',
@@ -75,10 +92,6 @@ export default {
 		isAusschlusskriterien: {
 			type: Boolean,
 			default: false,
-		},
-		responseArray: {
-			type: Array,
-			default: Array,
 		},
 		filteredArr: {
 			type: Array,
@@ -99,22 +112,24 @@ export default {
 			ontologyModulName: [],
 			ontologyArray: [],
 			selectedOntologyArr: [],
+			responseArray: [],
+			checkedItems: [],
+			state: ref(true),
+			isCheckboxSelected: [],
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
+			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
 
 	computed: {},
 
-	watch: {
-		responseArray(hasData) {
-			if (hasData) {
-				this.getData()
-			}
-		},
-	},
-
 	// life cycle of vue js
 	// Call functions before all component are rendered
-	beforeCreate() {},
+	async beforeCreate() {
+		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+		this.responseArray = jsonData.data
+		console.log(this.responseArray)
+	},
 	// Call functions before the template is rendered
 	created() {},
 	beforeMount() {},
@@ -134,38 +149,13 @@ export default {
 			this.$emit('update-array', ontology)
 		},
 
-		getData() {
-			this.ontologyArray = [...this.responseArray]
-			this.ontologyModulName = this.ontologyArray.map((item) => item.display)
-			console.log('getData')
-			console.log(this.ontologyArray)
-		},
-
-		/* addCheckboxSelected(ontology) {
-			console.log('ontology')
-			console.log(ontology)
-			this.ontology2 = { ...ontology }
-			this.ontology2.checkboxSelected = this.isCheckboxSelected
-			console.log('ontology2')
-			console.log(this.ontology2)
-		}, */
-
-		addCheckboxSelected(id, isCheckboxSelected) {
-			console.log('addCheckboxSelected')
-			console.log(isCheckboxSelected)
-			console.log(id)
-
-			console.log(this.selectedOntologyArr)
-			const index = this.selectedOntologyArr.findIndex(element => element.id === id)
-			console.log(index)
-			if (index === -1) {
-				this.selectedOntologyArr.push({ id, isCheckboxSelected })
-			} else if (isCheckboxSelected === false && index !== -1) {
-				// delete array if isCheckboxSelected === false
-				this.selectedOntologyArr.splice(index, 1)
+		getCheckboxItems(data) {
+			if (data.action === 'add') {
+				this.checkedItems = [...this.checkedItems, data.node]
+			} else if (data.action === 'delete') {
+				this.checkedItems = this.checkedItems.filter(function(name) { return name !== data.node })
 			}
-
-			console.log(this.selectedOntologyArr)
+			console.log(this.checkedItems)
 		},
 	},
 }
@@ -183,10 +173,6 @@ export default {
 	background-color: #738cba;
 	color: white;
 }
-
-/* .tab-content > div {
-  display: none;
-} */
 
 .tab-content > div.show {
 	display: block;
@@ -331,6 +317,72 @@ img {
 
 button {
 	border-radius: 8px;
+}
+
+input[type='checkbox'] {
+	width: 15px;
+	height: 15px;
+}
+
+#ontology-nested-tree {
+	overflow-y: auto;
+	scrollbar-width: auto;
+	height: 100%;
+}
+
+.ontology-head-node {
+	flex-direction: row;
+	box-sizing: border-box;
+	display: flex;
+	place-content: center flex-start;
+	align-items: center;
+}
+
+.ontology-head-node button {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: auto;
+	text-decoration: none;
+	background-color: white;
+	border: none;
+	outline: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+.search-tree-term-entry {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-left: 5px;
+}
+
+.search-tree-term-entry input {
+	margin: 0px 10px;
+}
+
+.search-tree-term-entry p {
+	font-size: 16px;
+	font-weight: 400;
+	padding-left: 10px;
+}
+
+.search-tree-term-entry p:hover {
+	cursor: pointer;
+}
+
+img {
+	height: 12px;
+	width: 12px;
+}
+
+ul {
+	margin-left: 40px;
+}
+
+img imgCollapse {
+	transform: rotate(90deg);
 }
 
 </style>

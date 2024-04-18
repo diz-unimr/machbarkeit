@@ -11,8 +11,8 @@ use SebastianBergmann\RecursionContext\Context;
 class MachbarkeitService {
 	public function readOntology() {
 		$json_files = [
-			'Diagnose.json', 
-			'Laboruntersuchung.json', 
+			'Diagnose.json',
+			'Laboruntersuchung.json',
 			'Person.json', 
 			'Prozedur.json'
 		];

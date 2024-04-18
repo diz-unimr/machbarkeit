@@ -4,29 +4,20 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div id="ontology-tree" class="ontology-tree">
-		{{ isCheckboxSelected }}
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
 				<button>
 					<img src="">
-					<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-						<input :id="ontology.termCodes[0].code"
-							ref="ontologyCheckbox"
-							v-model="isCheckboxSelected"
-							:value="ontology.display"
-							type="checkbox"
-							@change="$emit('add-checkbox-selected', ontology.termCodes[0].code, isCheckboxSelected)">
-						<p>
-							{{ ontology.display }}
-						</p>
-					</div>
-					<!-- <div v-else
-						class="search-tree-term-entry">
-						<p>
-							{{ ontology.display }}
-						</p>
-					</div> -->
 				</button>
+				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
+					<input :id="ontology.id"
+						v-model="isChecked"
+						type="checkbox"
+						:value="ontology.display">
+					<p>
+						{{ ontology.display }}
+					</p>
+				</div>
 			</div>
 		</li>
 	</div>
@@ -40,20 +31,40 @@ export default {
 			type: Object,
 			default: Object,
 		},
+		updateOntology: {
+			type: Function,
+			default: () => {},
+		},
+		selectedElementArray: {
+			type: Boolean,
+			default: Boolean,
+		},
 	},
-	setup() {
-		// this.ontology.checkboxSelected = false
-	},
+
 	data() {
 		return {
 			selectedOntology: [],
 			selectedOntologyList: [],
-			isCheckboxSelected: [],
-			ontology3: [],
+			selectedElement: [],
 		}
 	},
 
-	computed: {},
+	computed: {
+		isChecked: {
+			// Determines if the current item is checked
+			get() {
+				return 0/* this.value.includes(this.ontology.display) */
+			},
+			// Updates checked items when checkbox state changes
+			set(checked) {
+				if (checked) {
+					this.$emit('input', { action: 'add', node: this.ontology })
+				} else {
+					this.$emit('input', { action: 'delete', node: this.ontology })
+				}
+			},
+		},
+	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -69,31 +80,7 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		/* addCheckboxSelected(ontology) {
-			console.log('ontology')
-			console.log(ontology)
-			this.ontology3 = { ...ontology }
-			this.ontology3.checkboxSelected = this.isCheckboxSelected
-			console.log('ontology3')
-			console.log(this.ontology3)
-			console.log('ontology')
-			console.log(ontology)
-			this.$emit('update-ontology', this.ontology3)
-		}, */
-
-		/* getSelectedOntology1() {
-			this.selectedOntologyList = this.ontologyList
-			const arrIndex = this.activeTab.toString() + this.ontologyIndex.toString()
-			if (this.selectedOntology.length > 0) {
-				const ontologyId = this.$refs.ontologyCheckbox.id
-				this.selectedOntologyList.push([arrIndex, this.selectedOntology[0], ontologyId])
-			} else {
-				const index = this.selectedOntologyList.findIndex(subarray => subarray.includes(arrIndex))
-				this.selectedOntologyList.splice(index, 1)
-			}
-		}, */
-	},
+	methods: {},
 }
 </script>
 
