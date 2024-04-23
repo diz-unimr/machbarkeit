@@ -26,43 +26,17 @@
 						v-show="activeTab === ontology_index"
 						:key="ontology_index">
 						<div class="ontologyNode">
-							<div id="ontology-nested-tree" class="ontology-nested-tree-node">
-								<li style="list-style-type: none;">
-									<div class="ontology-head-node">
-										<button @click="() => (state = !state)">
-											<img class="expandImg"
-												:src="state
-													? imgExpand
-													: imgCollapse
-												">
-										</button>
-										<div class="search-tree-term-entry">
-											<p @click="() => (state = !state)">
-												{{ ontology.display }}
-											</p>
-										</div>
-									</div>
-
-									<ul v-show="state">
-										<div v-for="(child, index) in ontology.children" :key="index">
-											<!-- :is-head-node="true" -->
-											<OntologyNestedTreeNode v-if="child.children"
-												:ontology="child"
-												@input="getCheckboxItems" />
-											<OntologyTreeNode v-if="!child.children"
-												:ontology="child"
-												@input="getCheckboxItems" />
-										</div>
-									</ul>
-								</li>
-							</div>
+							<OntologyNestedTreeNode v-if="ontology.children"
+								:is-root-node="true"
+								:ontology="ontology"
+								@input="getCheckboxItems" />
 						</div>
 					</div>
 					<div class="ontology-button">
-						<button @click="$emit('select-ontology', selectedOntologyArr)">
+						<button :disabled="checkedItems.length > 0 ? false : true" @click="showSelectionOntologyDialog({criteriaId: criteriaId, items:checkedItems})">
 							AUSWÄHLEN
 						</button>
-						<button @click="$emit('update-status', criteriaId)">
+						<button @click="$emit('toggle-search-criteria', criteriaId)">
 							ABBRECHEN
 						</button>
 					</div>
@@ -77,7 +51,6 @@
 
 <script>
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
-import OntologyTreeNode from './OntologyTreeNode.vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import { ref } from 'vue'
@@ -86,38 +59,29 @@ export default {
 	name: 'SearchTreeOverlayContent',
 	components: {
 		OntologyNestedTreeNode,
-		OntologyTreeNode,
 	},
 	props: {
 		isAusschlusskriterien: {
 			type: Boolean,
 			default: false,
 		},
-		filteredArr: {
-			type: Array,
-			default: Array,
-		},
-		criteria: {
-			type: String,
-			default: '',
-		},
 		criteriaId: {
 			type: String,
 			default: '',
 		},
+		toggleSearchCriteria: {
+			type: Function,
+			default: () => {},
+		},
+
 	},
 	data() {
 		return {
 			activeTab: 0,
 			ontologyModulName: [],
-			ontologyArray: [],
-			selectedOntologyArr: [],
 			responseArray: [],
 			checkedItems: [],
 			state: ref(true),
-			isCheckboxSelected: [],
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
-			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
 
@@ -128,7 +92,6 @@ export default {
 	async beforeCreate() {
 		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
 		this.responseArray = jsonData.data
-		console.log(this.responseArray)
 	},
 	// Call functions before the template is rendered
 	created() {},
@@ -145,46 +108,23 @@ export default {
 			this.activeTab = index
 		},
 
-		updateOntology(ontology) {
-			this.$emit('update-array', ontology)
-		},
-
 		getCheckboxItems(data) {
 			if (data.action === 'add') {
 				this.checkedItems = [...this.checkedItems, data.node]
 			} else if (data.action === 'delete') {
 				this.checkedItems = this.checkedItems.filter(function(name) { return name !== data.node })
 			}
-			console.log(this.checkedItems)
+		},
+
+		showSelectionOntologyDialog(data) {
+			this.$emit('get-selected-ontology', data)
+			/* this.$emit('background') */
 		},
 	},
 }
 
 </script>
 <style scoped>
-
-.ontology-tab {
-	padding: 10px 20px;
-	cursor: pointer;
-	border-bottom: none;
-}
-
-.ontology-tab.active {
-	background-color: #738cba;
-	color: white;
-}
-
-.tab-content > div.show {
-	display: block;
-}
-
-li {
-	list-style-type: none;
-}
-
-ul {
-	padding-inline-start: 40px;
-}
 
 .search-tree-overlay-container {
 	display:flex;
@@ -249,50 +189,15 @@ ul {
 	color: #ffffff;
 }
 
-.ontology-tree {
-	max-height: 50vh;
-	overflow-y: auto;
-	height: 35vh;
-	margin: 1em;
+.ontology-tab {
+	padding: 10px 20px;
+	cursor: pointer;
+	border-bottom: none;
 }
 
-.ontology-list {
-	display: flex;
-	flex-direction: row;
-	column-gap: 8px;
-	min-height: 30px;
-	padding-left: 15px;
-	align-items: center;
-}
-
-.ontology-loading {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 150px;
-	border-top: 2px solid #adbcd7;
-}
-
-.search-tree-term-entry {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-}
-
-.search-tree-term-entry input {
-	margin: 0px 10px;
-}
-
-.modul-name {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-}
-
-img {
-	margin: 0px 10px;
-	width: 12px;
-	height: 12px
+.ontology-tab.active {
+	background-color: #738cba;
+	color: white;
 }
 
 .ontology-container {
@@ -315,74 +220,16 @@ img {
 	flex-direction: row;
 }
 
-button {
+.ontology-button button {
 	border-radius: 8px;
 }
 
-input[type='checkbox'] {
-	width: 15px;
-	height: 15px;
-}
-
-#ontology-nested-tree {
-	overflow-y: auto;
-	scrollbar-width: auto;
-	height: 100%;
-}
-
-.ontology-head-node {
-	flex-direction: row;
-	box-sizing: border-box;
+.ontology-loading {
 	display: flex;
-	place-content: center flex-start;
 	align-items: center;
-}
-
-.ontology-head-node button {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: auto;
-	text-decoration: none;
-	background-color: white;
-	border: none;
-	outline: none;
-	margin: 0px;
-	padding: 0px;
-}
-
-.search-tree-term-entry {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	margin-left: 5px;
-}
-
-.search-tree-term-entry input {
-	margin: 0px 10px;
-}
-
-.search-tree-term-entry p {
-	font-size: 16px;
-	font-weight: 400;
-	padding-left: 10px;
-}
-
-.search-tree-term-entry p:hover {
-	cursor: pointer;
-}
-
-img {
-	height: 12px;
-	width: 12px;
-}
-
-ul {
-	margin-left: 40px;
-}
-
-img imgCollapse {
-	transform: rotate(90deg);
+	justify-content: center;
+	height: 150px;
+	border-top: 2px solid #adbcd7;
 }
 
 </style>

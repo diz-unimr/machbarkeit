@@ -12,7 +12,7 @@
 					</div>
 					<div class="criteria-search-input">
 						<div class="search-button">
-							<button id="einschlusskriterien" @click="openSearchCriteria('Einschlusskriterien')">
+							<button id="einschlusskriterien" @click="toggleSearchCriteria('Einschlusskriterien')">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -47,7 +47,7 @@
 					</div>
 					<div class="criteria-search-input">
 						<div class="search-button">
-							<button id="ausschlusskriterien" @click="openSearchCriteria('Ausschlusskriterien')">
+							<button id="ausschlusskriterien" @click="toggleSearchCriteria('Ausschlusskriterien')">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -76,9 +76,10 @@
 					</div>
 				</div>
 			</div>
-			<!-- :response-array="responseArray" -->
 			<SearchTreeOverlayContent v-show="criteriaOverlay === 'Einschlusskriterien' || criteriaOverlay === 'Ausschlusskriterien'"
-				:criteria-id="criteriaOverlay" />
+				:criteria-id="criteriaOverlay"
+				@get-selected-ontology="getSelectedOntology"
+				@toggle-search-criteria="toggleSearchCriteria" />
 
 			<!-- <SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
 				:response-array="responseArray"
@@ -91,9 +92,9 @@
 				@update-array="UpdateArray" /> -->
 		</div>
 
-		<div v-if="isOntologyOptionOpen">
-			Hello
-		</div>
+		<SelectionOntologyDialog v-if="isOntologyOptionOpen"
+			:selected-ontology-array="selectedOntologyArray"
+			@dialog-close="selectionOntologyDiaglogClose" />
 
 		<div class="feasibility-query__output">
 			<div class="output-header">
@@ -101,7 +102,7 @@
 			</div>
 			<div class="output-content">
 				<div id="Einschlusskriterien" class="output-textfield">
-					<template v-if="selectedOntologyArr.length > 0">
+					<!-- <template v-if="selectedOntologyArr.length > 0">
 						<ul v-for="(selectedElement, index) in selectedOntologyArr" :key="index">
 							<div>
 								{{ selectedElement.display }}
@@ -110,7 +111,7 @@
 								</button>
 							</div>
 						</ul>
-					</template>
+					</template> -->
 				</div>
 				<div class="pipe" />
 				<div id="Ausschlusskriterien" class="output-textfield" />
@@ -123,6 +124,7 @@
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
+import SelectionOntologyDialog from './SelectionOntologyDialog.vue'
 
 export default {
 	name: 'FeasibilityQueryBuilder',
@@ -130,6 +132,7 @@ export default {
 		NcTextField,
 		Magnify,
 		SearchTreeOverlayContent,
+		SelectionOntologyDialog,
 	},
 
 	data() {
@@ -143,6 +146,7 @@ export default {
 			filteredArr: [],
 			criteriaOverlay: null,
 			selectedOntologyArr: [],
+			selectedOntologyArray: null,
 		}
 	},
 
@@ -161,8 +165,14 @@ export default {
 	destroyed() {},
 
 	methods: {
-		openSearchCriteria(id) {
+		toggleSearchCriteria(id) {
 			this.criteriaOverlay = this.criteriaOverlay === id ? null : id
+		},
+		selectionOntologyDialogOpen() {
+			this.isOntologyOptionOpen = true
+		},
+		selectionOntologyDiaglogClose() {
+			this.isOntologyOptionOpen = false
 		},
 		/* switchSearchEinschlusskriterien() {
 			console.log('hello')
@@ -183,20 +193,10 @@ export default {
 			this.isEinschlusskriterienOverlayOpen = false
 			// this.filteredSearch(this.ausschlussTextSerach)
 		},
-		UpdateArray(array) {
-
-		},
-		selectOntology(selectedOntologyArray) {
-			this.responseArray.forEach(element => {
-				const index = selectedOntologyArray.findIndex(item => item.id === element.id)
-				if (index === -1) {
-					this.selectedOntologyArr.push(element)
-				}
-
-				if (element.children) {
-					this.selectOntology(element.children)
-				}
-			})
+		getSelectedOntology(selectedOntologyItems) {
+			this.toggleSearchCriteria(selectedOntologyItems.criteriaId)
+			this.selectionOntologyDialogOpen()
+			this.selectedOntologyArray = selectedOntologyItems.items
 		},
 
 		deleteItem(id) {
@@ -208,6 +208,7 @@ export default {
 }
 </script>
 <style scoped>
+
 .query-builder-container {
 	display: flex;
 	flex-direction: column;

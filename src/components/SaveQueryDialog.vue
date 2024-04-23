@@ -21,7 +21,7 @@
 					<button>
 						SPEICHERN
 					</button>
-					<button @click="hideDialog">
+					<button @click="$emit('dialog-close')">
 						ABBRECHEN
 					</button>
 				</div>
@@ -58,11 +58,7 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		hideDialog() {
-			this.$emit('update-status')
-		},
-	},
+	methods: {},
 }
 </script>
 

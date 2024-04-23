@@ -7,12 +7,15 @@
 	<div id="ontology-nested-tree" class="ontology-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
-				<button @click="() => (state = !state)">
-					<img class="expandImg"
+				<button :class="{'defaultCursor': !ontology.children}" @click="() => (state = !state)">
+					<img v-if="ontology.children"
 						:src="state
 							? imgExpand
 							: imgCollapse
 						">
+					<img v-if="!ontology.children"
+						class="defaultCursor"
+						src="">
 				</button>
 				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
 					<input :id="ontology.id"
@@ -31,60 +34,37 @@
 				</div>
 			</div>
 			<ul v-show="state">
-				<template v-for="child in ontology.children">
-					<OntologyNestedTreeNode v-if="child.children"
-						:key="child.id"
-						v-model="checkedItems"
-						:ontology="child"
-						@input="checkboxTrigger" />
-					<OntologyTreeNode v-if="!child.children"
-						:key="child.id"
-						v-model="checkedItems"
-						:ontology="child"
-						@input="checkboxTrigger" />
-				</template>
+				<OntologyNestedTreeNode v-for="child in ontology.children"
+					:key="child.id"
+					v-model="checkedItems"
+					:ontology="child"
+					@input="checkboxTrigger" />
 			</ul>
 		</li>
 	</div>
 </template>
 
 <script>
-import OntologyTreeNode from './OntologyTreeNode.vue'
-import { ref } from 'vue'
+/* import { ref } from 'vue' */
 
 export default {
 	name: 'OntologyNestedTreeNode',
-	components: {
-		OntologyTreeNode,
-	},
+	components: {},
 	props: {
 		ontology: {
 			type: Object,
 			default: Object,
 		},
-		isHeadNode: {
+		isRootNode: {
 			type: Boolean,
 			default: false,
-		},
-		modelValue: {
-			type: String,
-			default: String,
-		},
-		selectedValues: {
-			type: Array,
-			default: () => [],
 		},
 	},
 	data() {
 		return {
-			state: ref(false),
+			state: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
-			selectedOntology: [],
-			selectedOntologyList: [],
-			updatedObject: {},
-			selectedElement: [],
-			selectedElementArray: [],
 			checkedItems: [],
 		}
 	},
@@ -111,15 +91,13 @@ export default {
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		if (this.isHeadNode === true) {
+		if (this.isRootNode === true) {
 			this.state = true
 		}
 	},
 	beforeMount() {
 	},
-	mounted() {
-		this.updatedObject = this.ontology
-	},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
@@ -191,6 +169,10 @@ input[type='checkbox'] {
 	cursor: pointer;
 }
 
+.defaultCursor {
+	cursor: default
+}
+
 img {
 	height: 12px;
 	width: 12px;
@@ -198,10 +180,6 @@ img {
 
 ul {
 	margin-left: 40px;
-}
-
-img imgCollapse {
-	transform: rotate(90deg);
 }
 
 </style>
