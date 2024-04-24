@@ -2,9 +2,9 @@
 	<div class="selection-dialog-card">
 		<div class="selection-dialog-card__header">
 			<p style="font-weight: 500;">
-				{{ selectedOntology.display }}
+				{{ ontology.display }}
 			</p>
-			<button class="delete-btn" @click="$emit('delete-dialog-card', indexElement)">
+			<button class="delete-btn" @click="deleteCard">
 				Löschen
 				<img :src="imgDelete">
 			</button>
@@ -13,19 +13,19 @@
 		<div class="selection-dialog-card__content"
 			:class="{'card-content__expand': state}">
 			<div class="content-header">
-				<button :id="selectedOntology.display"
-					:label="selectedOntology.display"
+				<button :id="ontology.display"
+					:label="ontology.display"
 					@click="() => state = !state">
 					<img :src="imgExpand"
 						:style="{transform: state === true ? 'rotate(180deg)': 'rotate(0deg)'}">
 				</button>
-				<p>Zeitraum (option)</p>
+				<p>Zeitraum (option)</p>  <!-- option condition -->
 			</div>
 			<div class="content-header__option">
 				<select :id="indexElement"
-					v-model="selectedOption"
-					:click="optionChange(selectedOption, 0)"
-					class="content-option option__between">
+					v-model="timeRangeOption"
+					class="content-option option__between"
+					@change="addLimitationOption('timeRange', timeRangeOption)">
 					<option value="zwischen">
 						zwischen
 					</option>
@@ -41,17 +41,17 @@
 				</select>
 				<input id="formDate"
 					v-model="fromDate"
-					:change="optionChange(fromDate, 1)"
 					class="content-option"
 					type="date"
-					name="formDate">
+					name="formDate"
+					@change="addLimitationOption('fromDate', fromDate)">
 
 				<input id="toDate"
 					v-model="toDate"
-					:change="optionChange(toDate, 2)"
 					class="content-option"
 					type="date"
-					name="toDate">
+					name="toDate"
+					@change="addLimitationOption('toDate', toDate)">
 			</div>
 		</div>
 	</div>
@@ -61,7 +61,7 @@ export default {
 	name: 'SelectedFeatureLimitation',
 	components: {},
 	props: {
-		selectedOntology: {
+		ontology: {
 			type: Object,
 			default: Object,
 		},
@@ -73,18 +73,32 @@ export default {
 			type: Function,
 			default: () => {},
 		},
+		selectedOptionArray: {
+			type: Array,
+			default: Array,
+		},
 	},
 	data() {
 		return {
 			state: false,
-			selectedOption: 'zwischen',
+			timeRangeOption: 'zwischen',
 			fromDate: '', /* moment().format('YYYY-MM-DD') */
 			toDate: '',
 			limitedInfo: {
-				id: null,
-				option: null,
-				fromDate: null,
-				toDate: null,
+				id: this.ontology.id,
+				ontologyName: this.ontology.display,
+				timeRange: {
+					name: 'zwischen',
+					fromDate: null,
+					toDate: null,
+				},
+				compareOperator: {
+					name: 'kein Filter',
+					min: null,
+					max: null,
+					unit: null,
+				},
+				gender: null,
 			},
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
@@ -93,10 +107,63 @@ export default {
 
 	computed: {},
 
+	// life cycle of vue js
+	// Call functions before all component are rendered
+	beforeCreate() {},
+	// Call functions before the template is rendered
+	created() {
+	},
+	beforeMount() {},
+	mounted() {},
+	beforeUpdate() {},
+	updated() {},
+	beforeDestroy() {
+	},
+	destroyed() {},
+
 	methods: {
-		optionChange(value, position, index) {
-			this.limitedInfo.id = this.selectedOntology.id
-			this.limitedInfo[position] = value
+		addLimitationOption(attrName, value) {
+			switch (attrName) {
+			/* time range */
+			case 'timeRange':
+				this.limitedInfo.timeRange.name = value
+				break
+			case 'fromDate':
+				this.limitedInfo.timeRange.fromDate = value
+				break
+			case 'toDate':
+				this.limitedInfo.timeRange.toDate = value
+				break
+			/* compare operator */
+			case 'compareOperator':
+				this.limitedInfo.compareOperator.name = value
+				break
+			case 'min':
+				this.limitedInfo.compareOperator.min = value
+				break
+			case 'max':
+				this.limitedInfo.compareOperator.max = value
+				break
+			case 'unit':
+				this.limitedInfo.compareOperator.unit = value
+				break
+			/* gender */
+			case 'gender':
+				this.limitedInfo.gender = value
+				break
+			}
+
+			if (this.limitedInfo.compareOperator.name === 'kein Filter') {
+				this.limitedInfo.compareOperator = Object.fromEntries(Object.entries(this.limitedInfo.compareOperator).map(([key]) => [key, null]))
+			}
+			/* insert object into array */
+			this.selectedOptionArray.splice(this.indexElement, 1, this.limitedInfo)
+		},
+
+		deleteCard() {
+			this.$emit('delete-dialog-card', this.indexElement)
+			/* delete object from array */
+			this.selectedOptionArray.splice(this.indexElement, 1)
 		},
 	},
 }
