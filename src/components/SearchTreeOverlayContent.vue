@@ -9,31 +9,31 @@
 			<div class="criteria-name">
 				{{ criteriaId }}
 			</div>
-			<div v-if="responseArray.length > 0">
-				<div class="ontology-search-tree-header">
+			<div v-if="criteriaResponse.length > 0">
+				<div class="criteria-search-tree-header">
 					<div class="search-tree-button">
-						<div v-for="(modulName, modulName_index) in responseArray.map((item) => item.display)"
+						<div v-for="(modulName, modulName_index) in criteriaResponse.map((item) => item.display)"
 							:key="modulName_index"
-							class="ontology-tab"
+							class="criteria-tab"
 							:class="{ 'active': activeTab === modulName_index }"
 							@click="activateTab(modulName_index)">
 							{{ modulName }}
 						</div>
 					</div>
 				</div>
-				<div class="ontology-container">
-					<div v-for="(ontology, ontology_index) in responseArray"
-						v-show="activeTab === ontology_index"
-						:key="ontology_index">
-						<div class="ontologyNode">
-							<OntologyNestedTreeNode v-if="ontology.children"
+				<div class="criteria-container">
+					<div v-for="(criterion, criterion_index) in criteriaResponse"
+						v-show="activeTab === criterion_index"
+						:key="criterion_index">
+						<div class="criteria-node">
+							<CriteriaNestedTreeNode v-if="criterion.children"
 								:is-root-node="true"
-								:ontology="ontology"
+								:criterion="criterion"
 								@input="getCheckboxItems" />
 						</div>
 					</div>
-					<div class="ontology-button">
-						<button :disabled="checkedItems.length > 0 ? false : true" @click="showSelectionOntologyDialog({criteriaId: criteriaId, items:checkedItems})">
+					<div class="button-group">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="submitSelectedItems({criteriaId: criteriaId, items:selectedItems})">
 							AUSWÄHLEN
 						</button>
 						<button @click="$emit('toggle-search-criteria', criteriaId)">
@@ -42,7 +42,7 @@
 					</div>
 				</div>
 			</div>
-			<div v-else class="ontology-loading">
+			<div v-else class="criteria-loading">
 				Loading...
 			</div>
 		</div>
@@ -50,20 +50,19 @@
 </template>
 
 <script>
-import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
+import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-import { ref } from 'vue'
 
 export default {
 	name: 'SearchTreeOverlayContent',
 	components: {
-		OntologyNestedTreeNode,
+		CriteriaNestedTreeNode,
 	},
 	props: {
-		isAusschlusskriterien: {
-			type: Boolean,
-			default: false,
+		getSelectedCriteria: {
+			type: Function,
+			default: () => {},
 		},
 		criteriaId: {
 			type: String,
@@ -78,10 +77,8 @@ export default {
 	data() {
 		return {
 			activeTab: 0,
-			ontologyModulName: [],
-			responseArray: [],
-			checkedItems: [],
-			state: ref(true),
+			criteriaResponse: [],
+			selectedItems: [],
 		}
 	},
 
@@ -91,7 +88,7 @@ export default {
 	// Call functions before all component are rendered
 	async beforeCreate() {
 		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-		this.responseArray = jsonData.data
+		this.criteriaResponse = jsonData.data
 	},
 	// Call functions before the template is rendered
 	created() {},
@@ -108,17 +105,16 @@ export default {
 			this.activeTab = index
 		},
 
-		getCheckboxItems(data) {
-			if (data.action === 'add') {
-				this.checkedItems = [...this.checkedItems, data.node]
-			} else if (data.action === 'delete') {
-				this.checkedItems = this.checkedItems.filter(function(name) { return name !== data.node })
+		getCheckboxItems(checkedItem) {
+			if (checkedItem.action === 'add') {
+				this.selectedItems = [...this.selectedItems, checkedItem.node]
+			} else if (checkedItem.action === 'delete') {
+				this.selectedItems = this.selectedItems.filter(function(name) { return name !== checkedItem.node })
 			}
 		},
 
-		showSelectionOntologyDialog(data) {
-			this.$emit('get-selected-ontology', data)
-			/* this.$emit('background') */
+		submitSelectedItems(selectedItems) {
+			this.$emit('get-selected-criteria', selectedItems)
 		},
 	},
 }
@@ -155,7 +151,7 @@ export default {
 	right: 0;
 }
 
-.ontology-search-tree-header {
+.criteria-search-tree-header {
 	display: flex;
 	flex-direction: row;
 	place-content: stretch flex-start;
@@ -189,30 +185,30 @@ export default {
 	color: #ffffff;
 }
 
-.ontology-tab {
+.criteria-tab {
 	padding: 10px 20px;
 	cursor: pointer;
 	border-bottom: none;
 }
 
-.ontology-tab.active {
+.criteria-tab.active {
 	background-color: #738cba;
 	color: white;
 }
 
-.ontology-container {
+.criteria-container {
 	height: 650px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 }
 
-.ontologyNode {
+.criteria-node {
 	height: 570px;
 	padding: 20px 25px 20px 25px;
 }
 
-.ontology-button {
+.button-group {
 	display: flex;
 	column-gap: 15px;
 	margin: 20px;
@@ -220,11 +216,11 @@ export default {
 	flex-direction: row;
 }
 
-.ontology-button button {
+.button-group button {
 	border-radius: 8px;
 }
 
-.ontology-loading {
+.criteria-loading {
 	display: flex;
 	align-items: center;
 	justify-content: center;

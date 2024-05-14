@@ -7,7 +7,7 @@
 		<div id="machbarkeit" class="machbarkeit">
 			<div class="machbarkeit machbarkeit__body">
 				<AttributeList />
-				<FeasibilityQuery />
+				<FeasibilityQueryContainer />
 			</div>
 		</div>
 	</div>
@@ -15,13 +15,13 @@
 
 <script>
 import AttributeList from './components/AttributeList.vue'
-import FeasibilityQuery from './components/FeasibilityQuery.vue'
+import FeasibilityQueryContainer from './components/FeasibilityQueryContainer.vue'
 
 export default {
 	name: 'App',
 	components: {
 		AttributeList,
-		FeasibilityQuery,
+		FeasibilityQueryContainer,
 	},
 	data() {
 		return {}

@@ -4,40 +4,39 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div id="ontology-nested-tree" class="ontology-nested-tree-node">
+	<div id="criteria-nested-tree" class="criteria-nested-tree-node">
 		<li style="list-style-type: none;">
-			<div class="ontology-head-node">
-				<button :class="{'defaultCursor': !ontology.children}" @click="() => (state = !state)">
-					<img v-if="ontology.children"
+			<div class="criteria-head-node">
+				<button :class="{'default-cursor': !criterion.children}" @click="() => (state = !state)">
+					<img v-if="criterion.children"
 						:src="state
 							? imgExpand
 							: imgCollapse
 						">
-					<img v-if="!ontology.children"
-						class="defaultCursor"
+					<img v-if="!criterion.children"
+						class="default-cursor"
 						src="">
 				</button>
-				<div v-if="ontology.selectable === true" class="search-tree-term-entry">
-					<input :id="ontology.id"
+				<div v-if="criterion.selectable === true" class="search-tree-term-entry">
+					<input :id="criterion.id"
 						v-model="isChecked"
 						type="checkbox"
-						:value="ontology.display">
+						:value="criterion.display">
 					<p @click="() => (state = !state)">
-						{{ ontology.display }}
+						{{ criterion.display }}
 					</p>
 				</div>
 				<div v-else
 					class="search-tree-term-entry">
 					<p @click="() => (state = !state)">
-						{{ ontology.display }}
+						{{ criterion.display }}
 					</p>
 				</div>
 			</div>
 			<ul v-show="state">
-				<OntologyNestedTreeNode v-for="child in ontology.children"
+				<CriteriaNestedTreeNode v-for="child in criterion.children"
 					:key="child.id"
-					v-model="checkedItems"
-					:ontology="child"
+					:criterion="child"
 					@input="checkboxTrigger" />
 			</ul>
 		</li>
@@ -45,13 +44,11 @@
 </template>
 
 <script>
-/* import { ref } from 'vue' */
-
 export default {
-	name: 'OntologyNestedTreeNode',
+	name: 'CriteriaNestedTreeNode',
 	components: {},
 	props: {
-		ontology: {
+		criterion: {
 			type: Object,
 			default: Object,
 		},
@@ -65,7 +62,6 @@ export default {
 			state: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
-			checkedItems: [],
 		}
 	},
 
@@ -73,14 +69,14 @@ export default {
 		isChecked: {
 			// Determines if the current item is checked
 			get() {
-				  return 0/* this.value.includes(this.ontology.display) */
+				return ''
 			},
 			// Updates checked items when checkbox state changes
 			set(checked) {
 				if (checked) {
-					this.$emit('input', { action: 'add', node: this.ontology })
+					this.$emit('input', { action: 'add', node: this.criterion })
 				} else {
-					this.$emit('input', { action: 'delete', node: this.ontology })
+					this.$emit('input', { action: 'delete', node: this.criterion })
 				}
 			},
 		},
@@ -108,8 +104,8 @@ export default {
 			return this.expandedGroup.indexOf(key) !== -1
 		},
 
-		checkboxTrigger(data) {
-			this.$emit('input', data)
+		checkboxTrigger(checkedItem) {
+			this.$emit('input', checkedItem)
 		},
 	},
 }
@@ -121,13 +117,13 @@ input[type='checkbox'] {
 	height: 15px;
 }
 
-#ontology-nested-tree {
+#criteria-nested-tree {
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
 }
 
-.ontology-head-node {
+.criteria-head-node {
 	flex-direction: row;
 	box-sizing: border-box;
 	display: flex;
@@ -135,7 +131,7 @@ input[type='checkbox'] {
 	align-items: center;
 }
 
-.ontology-head-node button {
+.criteria-head-node button {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -169,7 +165,7 @@ input[type='checkbox'] {
 	cursor: pointer;
 }
 
-.defaultCursor {
+.default-cursor {
 	cursor: default
 }
 

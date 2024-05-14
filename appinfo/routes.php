@@ -23,6 +23,7 @@ return [
 		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
 			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'machbarkeit#getMetadata', 'url' => '/machbarkeit/metadata', 'verb' => 'GET'],
-		['name' => 'machbarkeit#getOntology', 'url' => '/machbarkeit/ontology', 'verb' => 'GET']
+		['name' => 'machbarkeit#getOntology', 'url' => '/machbarkeit/ontology', 'verb' => 'GET'],
+		['name' => 'machbarkeit#getUiProfile', 'url' => '/machbarkeit/ui_profile', 'verb' => 'GET']
 	]
 ];

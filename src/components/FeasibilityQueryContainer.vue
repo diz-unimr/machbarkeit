@@ -31,7 +31,7 @@ import SaveQueryDialog from './SaveQueryDialog.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 
 export default {
-	name: 'FeasibilityQuery',
+	name: 'FeasibilityQueryContainer',
 	components: {
 		FeasibilityQueryBuilder,
 		SaveQueryDialog,

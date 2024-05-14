@@ -76,25 +76,16 @@
 					</div>
 				</div>
 			</div>
-			<SearchTreeOverlayContent v-show="criteriaOverlay === 'Einschlusskriterien' || criteriaOverlay === 'Ausschlusskriterien'"
+			<SearchTreeOverlayContent v-if="isCriteriaOverlayOpen"
 				:criteria-id="criteriaOverlay"
-				@get-selected-ontology="getSelectedOntology"
+				@get-selected-criteria="getSelectedCriteria"
 				@toggle-search-criteria="toggleSearchCriteria" />
-
-			<!-- <SearchTreeOverlayContent v-show="isEinschlusskriterienOverlayOpen"
-				:response-array="responseArray"
-				criteria="Einschlusskriterien"
-				@update-array="UpdateArray" />
-			<SearchTreeOverlayContent v-show="isAusschlusskriterienOverlayOpen"
-				:is-ausschlusskriterien="true"
-				:response-array="responseArray"
-				criteria="Ausschlusskriterien"
-				@update-array="UpdateArray" /> -->
 		</div>
 
-		<SelectionOntologyDialog v-if="isOntologyOptionOpen"
+		<LimitationsSelectedFeatures v-if="isCriteriaOptionOpen"
 			:selected-ontology-array="selectedOntologyArray"
-			@dialog-close="selectionOntologyDiaglogClose" />
+			@dialog-close="selectionOntologyDiaglogClose"
+			@get-filter-info="getFilterInfo" />
 
 		<div class="feasibility-query__output">
 			<div class="output-header">
@@ -102,6 +93,35 @@
 			</div>
 			<div class="output-content">
 				<div id="Einschlusskriterien" class="output-textfield">
+					<div v-if="selectedCharacteristics.length > 0">
+						<div v-for="(characteristic, index) in selectedCharacteristics" :key="index">
+							<div class="selected-criteria-display">
+								{{ characteristic.display }}
+							</div>
+							<div v-if="characteristic.conceptType" class="selected-criteria-condition">
+								<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
+									{{ type }}
+								</span>
+							</div>
+							<div v-if="characteristic.quantityType" class="selected-criteria-condition">
+								<p v-if="characteristic.quantityType.value.type === 'zwischen'">
+									{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+								</p>
+								<p v-else>
+									{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+								</p>
+							</div>
+							<div v-if="characteristic.timeRange" class="selected-criteria-condition">
+								<p v-if="characteristic.timeRange.value.type === 'zwischen'">
+									{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+								</p>
+								<p v-else>
+									{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+								</p>
+							</div>
+						</div>
+					</div>
+
 					<!-- <template v-if="selectedOntologyArr.length > 0">
 						<ul v-for="(selectedElement, index) in selectedOntologyArr" :key="index">
 							<div>
@@ -124,7 +144,7 @@
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
-import SelectionOntologyDialog from './SelectionOntologyDialog.vue'
+import LimitationsSelectedFeatures from './Limitations/LimitationsSelectedFeatures.vue'
 
 export default {
 	name: 'FeasibilityQueryBuilder',
@@ -132,21 +152,18 @@ export default {
 		NcTextField,
 		Magnify,
 		SearchTreeOverlayContent,
-		SelectionOntologyDialog,
+		LimitationsSelectedFeatures,
 	},
 
 	data() {
 		return {
 			einschlussTextSerach: '',
 			ausschlussTextSerach: '',
-			isEinschlusskriterienOverlayOpen: false,
-			isAusschlusskriterienOverlayOpen: false,
-			isOntologyOptionOpen: false,
-			responseArray: [],
-			filteredArr: [],
+			isCriteriaOptionOpen: false,
 			criteriaOverlay: null,
-			selectedOntologyArr: [],
+			isCriteriaOverlayOpen: false,
 			selectedOntologyArray: null,
+			selectedCharacteristics: [],
 		}
 	},
 
@@ -166,43 +183,37 @@ export default {
 
 	methods: {
 		toggleSearchCriteria(id) {
-			this.criteriaOverlay = this.criteriaOverlay === id ? null : id
+			this.criteriaOverlay = id
+			this.isCriteriaOverlayOpen = !this.isCriteriaOverlayOpen
 		},
 		selectionOntologyDialogOpen() {
-			this.isOntologyOptionOpen = true
+			this.isCriteriaOptionOpen = true
 		},
 		selectionOntologyDiaglogClose() {
-			this.isOntologyOptionOpen = false
+			this.isCriteriaOptionOpen = false
 		},
-		/* switchSearchEinschlusskriterien() {
-			console.log('hello')
-			this.isEinschlusskriterienOverlayOpen = !this.isEinschlusskriterienOverlayOpen
-			this.isAusschlusskriterienOverlayOpen = false
-		},
-		switchSearchAusschlusskriterien() {
-			this.isAusschlusskriterienOverlayOpen = !this.isAusschlusskriterienOverlayOpen
-			this.isEinschlusskriterienOverlayOpen = false
-		}, */
 		searchCodeEinschlusskriterien() {
 			this.isEinschlusskriterienOverlayOpen = true
 			this.isAusschlusskriterienOverlayOpen = false
-			// this.filteredSearch(this.einschlussTextSerach)
 		},
 		searchCodeAusschlusskriterien() {
 			this.isAusschlusskriterienOverlayOpen = true
 			this.isEinschlusskriterienOverlayOpen = false
-			// this.filteredSearch(this.ausschlussTextSerach)
 		},
-		getSelectedOntology(selectedOntologyItems) {
+		getSelectedCriteria(selectedOntologyItems) {
 			this.toggleSearchCriteria(selectedOntologyItems.criteriaId)
 			this.selectionOntologyDialogOpen()
 			this.selectedOntologyArray = selectedOntologyItems.items
 		},
+		getFilterInfo(object) {
+			// check
+			/* if (this.comparisonRestriction.value === '' || this.comparisonRestriction.min === '' || this.comparisonRestriction.max === '') {
+				this.comparisonRestriction.value = 0
+				this.comparisonRestriction.min = 0
+				this.comparisonRestriction.max = 0
+			} */
+			this.selectedCharacteristics.push(...object)
 
-		deleteItem(id) {
-			// event.target.parentNode.remove()
-			const index = this.selectedOntologyArr.findIndex(item => item.id === id)
-			this.selectedOntologyArr.splice(index, 1)
 		},
 	},
 }
@@ -334,4 +345,17 @@ export default {
 	margin: 20px;
 	padding: 10px;
 }
-</style>./SearchTreeOverlayContent.vue
+
+.selected-criteria-display {
+	font-weight: 700;
+}
+
+.selected-criteria-condition span::after {
+	content: ',';
+}
+
+.selected-criteria-condition span:last-child::after {
+	content: none;
+}
+
+</style>
