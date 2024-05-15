@@ -4,7 +4,6 @@
 			<span>*</span> Geben Sie einen Wertebereich ein:
 		</div>
 		<div class="content-option__body">
-			{{ comparisonRestriction }}
 			<div class="content-option-dropdown">
 				<select v-model="comparisonRestriction.type"
 					class="input-selection-textbox">
@@ -69,7 +68,6 @@
 				</div>
 			</div>
 		</div>
-		{{ comparisonRestriction.min >= comparisonRestriction.max }}
 		<div v-if="comparisonRestriction.type === 'zwischen' && (comparisonRestriction.min >= comparisonRestriction.max)">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
@@ -190,7 +188,7 @@ export default {
 	methods: {
 		checkEmptyValue(event, tag) {
 			if (event.target.value.length === 0) {
-				this.comparisonRestriction[tag] = 0
+				this.comparisonRestriction[tag] = '0'
 			}
 		},
 	},
@@ -258,9 +256,9 @@ select, input {
 
 .input-selection-textbox {
 	height: 45px !important;
-    width: 150px !important;
-    border: 1px solid gray;
-    border-radius: 5px;
+	width: 150px !important;
+	border: 1px solid gray;
+	border-radius: 5px;
 }
 
 .input-wrapper {
@@ -269,11 +267,11 @@ select, input {
 
 .value-floating {
 	position: absolute;
-    left: 0;
+	left: 0;
 	top: -20%;
-    margin-left: 15px;
-    padding: 0px 5px;
-    background-color: white;
+	margin-left: 15px;
+	padding: 0px 5px;
+	background-color: white;
 	font-size: 12px;
 }
 </style>

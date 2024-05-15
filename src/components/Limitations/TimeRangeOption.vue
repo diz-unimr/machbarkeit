@@ -109,25 +109,47 @@ export default {
 						completeFilter: false,
 					})
 				} else if (this.timeRangeRestriction.type === 'zwischen') {
-					this.$emit('get-selected-option', {
-						type: 'timeRange',
-						value: this.timeRangeRestriction,
-						isFilterOptional: this.isFilterOptional,
-						completeFilter: this.timeRangeRestriction.type.length > 0 && (this.timeRangeRestriction.fromDate < this.timeRangeRestriction.toDate),
-					})
+					if (!!this.timeRangeRestriction.fromDate && !!this.timeRangeRestriction.toDate) {
+						const validDate = !(this.timeRangeRestriction.fromDate > this.timeRangeRestriction.toDate)
+						this.$emit('get-selected-option', {
+							type: 'timeRange',
+							value: this.timeRangeRestriction,
+							isFilterOptional: validDate,
+							completeFilter: validDate,
+						})
+					}
 
 				} else {
-
-					this.$emit('get-selected-option', {
-						type: 'timeRange',
-						value: this.timeRangeRestriction,
-						isFilterOptional: this.isFilterOptional,
-						completeFilter: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
-					})
+					if (this.timeRangeRestriction.fromDate) {
+						this.$emit('get-selected-option', {
+							type: 'timeRange',
+							value: this.timeRangeRestriction,
+							isFilterOptional: this.isFilterOptional,
+							completeFilter: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
+						})
+					}
 
 				}
 			},
 			deep: true,
+		},
+
+		'timeRangeRestriction.type'() {
+			if (this.timeRangeRestriction.type !== 'kein Filter') {
+				this.$emit('toggle-reset-button', true)
+			} else {
+				this.$emit('toggle-reset-button', false)
+			}
+		},
+
+		isResetDisabled() {
+			if (this.isResetDisabled && this.timeRangeRestriction.type !== 'kein Filter') {
+				this.timeRangeRestriction.type = 'kein Filter'
+				this.timeRangeRestriction.fromDate = null
+				this.timeRangeRestriction.fromDateFormatted = null
+				this.timeRangeRestriction.toDate = null
+				this.timeRangeRestriction.toDateFormatted = null
+			}
 		},
 	},
 
@@ -205,9 +227,9 @@ select {
 
 .input-selection-textbox {
 	height: 45px !important;
-    width: 150px !important;
-    border: 1px solid gray;
-    border-radius: 5px;
+	width: 150px !important;
+	border: 1px solid gray;
+	border-radius: 5px;
 }
 
 .input-wrapper {
@@ -216,11 +238,11 @@ select {
 
 .value-floating {
 	position: absolute;
-    left: 0;
+	left: 0;
 	top: -20%;
-    margin-left: 15px;
-    padding: 0px 5px;
-    background-color: white;
+	margin-left: 15px;
+	padding: 0px 5px;
+	background-color: white;
 	font-size: 12px;
 	cursor: unset;
 }

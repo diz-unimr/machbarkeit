@@ -94,30 +94,52 @@
 			<div class="output-content">
 				<div id="Einschlusskriterien" class="output-textfield">
 					<div v-if="selectedCharacteristics.length > 0">
-						<div v-for="(characteristic, index) in selectedCharacteristics" :key="index">
-							<div class="selected-criteria-display">
-								{{ characteristic.display }}
-							</div>
-							<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-								<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-									{{ type }}
-								</span>
-							</div>
-							<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-								<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-									{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
-								</p>
-								<p v-else>
-									{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
-								</p>
-							</div>
-							<div v-if="characteristic.timeRange" class="selected-criteria-condition">
-								<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-									{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
-								</p>
-								<p v-else>
-									{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
-								</p>
+						<div>
+							<div v-for="(characteristic, index) in selectedCharacteristics" :key="index" class="selected-criteria-container">
+								<div class="selected-criteria-left" />
+								<div class="selected-criteria-middle">
+									<div class="selected-criteria-display">
+										{{ characteristic.display }}
+									</div>
+									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
+										<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
+											{{ type }}
+										</span>
+									</div>
+									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
+										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
+											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+										</p>
+										<p v-else>
+											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+										</p>
+									</div>
+									<div v-if="characteristic.timeRange" class="selected-criteria-condition">
+										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
+											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+										</p>
+										<p v-else>
+											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+										</p>
+									</div>
+								</div>
+								<div class="selected-criteria-right">
+									<!-- @click="deleteCard($vnode.data.attrs.id)" -->
+									<button class="delete-btn">
+										<!-- <img :src="imgDelete"> -->
+
+										<svg role="img"
+											width="20px"
+											height="20px"
+											aria-hidden="true"
+											focusable="false"
+											data-prefix="fas"
+											data-icon="times"
+											class="svg-inline--fa fa-times fa-w-11 fa-lg"
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 352 512"><path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" /></svg>
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -164,6 +186,7 @@ export default {
 			isCriteriaOverlayOpen: false,
 			selectedOntologyArray: null,
 			selectedCharacteristics: [],
+			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
 	},
 
@@ -343,19 +366,81 @@ export default {
 	flex: 1 1 100%;
 	border: dashed 1px black;
 	margin: 20px;
+	padding: 20px;
+}
+
+.selected-criteria-container {
+	display: flex;
+	border: 1px solid #5270a7;
+	margin-bottom: 15px;
+}
+
+.selected-criteria-container:last-child {
+	margin-bottom: 0px;
+}
+
+.selected-criteria-left {
+	width: 15%;
+	padding: 10px 0px;
+	background-color: #5270a7;
+}
+
+.selected-criteria-middle {
+	display: flex;
+	flex-direction: column;
+	width: 80%;
 	padding: 10px;
+}
+
+.selected-criteria-right {
+	display: flex;
+	justify-content: center;
+	width: 5%;
+	background-color: #5270a7;
+	padding: 10px 0px;
 }
 
 .selected-criteria-display {
 	font-weight: 700;
 }
 
-.selected-criteria-condition span::after {
+.selected-criteria-condition {
+	padding-left: 5px;
+	background-color: #adbcd7;
+}
+
+.selected-criteria-condition span {
+	float: left;
+}
+
+.selected-criteria-condition span::before {
 	content: ',';
 }
 
-.selected-criteria-condition span:last-child::after {
+.selected-criteria-condition span:first-child::before {
 	content: none;
 }
 
+.delete-btn {
+	display: flex;
+	border: none;
+	outline: none;
+	margin: 0px;
+	padding: 0px;
+	background-color: unset;
+}
+
+.selected-criteria-right button.delete-btn:active {
+	background-color: rgb(0, 0, 0);
+}
+
+/* .selected-criteria-right button:focus-visible {
+	background-color: red;
+	color: red;
+}*/
+
+.delete-btn img {
+	width: 25px;
+	height: 20px;
+}
 </style>

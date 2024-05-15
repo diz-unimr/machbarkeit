@@ -125,9 +125,9 @@ input[type='checkbox'] {
 
 .checkbox-option {
 	display: flex;
-    flex-direction: row;
-    column-gap: 10px;
-    align-items: center;
+	flex-direction: row;
+	column-gap: 10px;
+	align-items: center;
 }
 
 .dialog-card {

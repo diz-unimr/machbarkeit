@@ -211,4 +211,5 @@ export default {
 .dialog-button button {
 	border-radius: 8px;
 }
+
 </style>
