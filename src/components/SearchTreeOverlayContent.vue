@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/valid-v-show -->
 <template>
 	<!--
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>

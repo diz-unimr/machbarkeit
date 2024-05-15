@@ -6,8 +6,6 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Service;
 
-use SebastianBergmann\RecursionContext\Context;
-
 class MachbarkeitService {
 	public function readCsv() {
 		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
@@ -46,7 +44,7 @@ class MachbarkeitService {
 			// Decode JSON content into associative array (decode string to json)
 			$json_data = json_decode($json_content, true);
 			// Merge data from current file into merged_file array
-			$merged_file = array_merge($merged_file, array($json_data));
+			$merged_file = array_merge($merged_file, [$json_data]);
 		};
 
 		return $merged_file;

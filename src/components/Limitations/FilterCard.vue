@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div class="selection-dialog-card__content"
 		:class="{'card-content__expand': state}">
 		<div class="card-content__header">

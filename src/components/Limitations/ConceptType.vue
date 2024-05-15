@@ -1,4 +1,8 @@
 <template>
+	<!--
+		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+		SPDX-License-Identifier: AGPL-3.0-or-later
+	-->
 	<div class="content-option dialog-card">
 		<div class="content-option__header">
 			<span>*</span> Geben Sie einen oder mehrere zulässige Werte an:
