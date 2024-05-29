@@ -94,7 +94,8 @@ export default {
 		},
 
 		deleteDialogCard(index) {
-			this.selectedOntologyArray.splice(index, 1)
+			this.$emit('change-selected', this.selectedOntologyArray.toSpliced(index, 1))
+
 			this.filterInfo.splice(index, 1)
 			if (this.selectedOntologyArray.length === 0) {
 				this.$emit('dialog-close')

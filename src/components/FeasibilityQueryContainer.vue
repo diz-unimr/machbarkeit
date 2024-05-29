@@ -64,9 +64,9 @@ export default {
 	destroyed() {},
 
 	methods: {
-		clearText(text) {
-			text = ''
-		},
+		// clearText(text) {
+		// 	text = ''
+		// },
 		querySaveDialogOpen() {
 			this.isDialogOpen = true
 		},

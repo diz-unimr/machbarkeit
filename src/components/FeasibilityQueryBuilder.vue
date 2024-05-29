@@ -84,6 +84,7 @@
 
 		<LimitationsSelectedFeatures v-if="isCriteriaOptionOpen"
 			:selected-ontology-array="selectedOntologyArray"
+			@change-selected="setSelectedOntology"
 			@dialog-close="selectionOntologyDiaglogClose"
 			@get-filter-info="getFilterInfo" />
 
@@ -205,6 +206,9 @@ export default {
 	destroyed() {},
 
 	methods: {
+		setSelectedOntology(selectedOntology) {
+			this.selectedOntologyArray = selectedOntology
+		},
 		toggleSearchCriteria(id) {
 			this.criteriaOverlay = id
 			this.isCriteriaOverlayOpen = !this.isCriteriaOverlayOpen
