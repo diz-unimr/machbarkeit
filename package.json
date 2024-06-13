@@ -47,8 +47,13 @@
     "@nextcloud/eslint-config": "^8.3.0",
     "@nextcloud/stylelint-config": "^2.1.2",
     "@nextcloud/webpack-vue-config": "^5.5.1",
+<<<<<<< HEAD
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.5.0",
+=======
+    "@typescript-eslint/parser": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+>>>>>>> 593e5f1557cd75d10bd7f62215f5431c9e9ad120
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.56.0",
     "vue-material-design-icons": "^5.3.0",

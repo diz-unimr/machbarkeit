@@ -64,7 +64,10 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		querySaveDialogOpen(): void {
+		// clearText(text) {
+		// 	text = ''
+		// },
+		querySaveDialogOpen() {
 			this.isDialogOpen = true
 		},
 

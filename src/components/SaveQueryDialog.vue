@@ -35,7 +35,7 @@ import Vue from 'vue'
 import { NcTextField } from '@nextcloud/vue'
 
 interface SaveQueryDialogData {
-	fileName: string;
+	fileName:string;
 	isDialogVisible: boolean;
 }
 
@@ -56,9 +56,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		// this.fileName = 'test'
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

@@ -98,12 +98,6 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		/* async getUiProfile() {
-			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
-			this.uiProfile = response.data
-			this.getNotEmptyProfile(this.uiProfile)
-		}, */
-
 		getNotEmptyProfile(uiProfile: UiProfile) {
 			if (uiProfile !== null) {
 				const profileKeys = Object.keys(uiProfile)
@@ -115,6 +109,13 @@ export default Vue.extend({
 				}
 			}
 
+		deleteDialogCard(index) {
+			this.$emit('change-selected', this.selectedOntologyArray.toSpliced(index, 1))
+
+			this.filterInfo.splice(index, 1)
+			if (this.selectedOntologyArray.length === 0) {
+				this.$emit('dialog-close')
+			}
 		},
 
 		getSelectedFeatureFilter(filteredCriteria: FilteredCriteriaData) {

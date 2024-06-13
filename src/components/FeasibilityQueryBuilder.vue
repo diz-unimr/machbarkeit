@@ -84,8 +84,7 @@
 		</div>
 
 		<LimitationsSelectedFeatures v-if="isCriteriaOptionOpen"
-			:selected-criteria="selectedCriteria"
-			:ui-profile="uiProfile"
+			:selected-ontology-array="selectedOntologyArray"
 			@dialog-close="selectionOntologyDiaglogClose"
 			@get-filter-info="getFilterInfo" />
 
@@ -219,22 +218,8 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		/* async getOntology() {
-			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-			this.criteriaResponse = jsonData.data
-		}, */
-
-		async getUiProfile() {
-			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
-			this.uiProfile = response.data
-			// this.getNotEmptyProfile(this.uiProfile)
-		},
-
-		setSelectedOntology(selectedOntology) {
-			this.selectedCriteria = selectedOntology
-		},
-		toggleSearchCriteria(criteriaType: string) {
-			this.criteriaOverlayType = criteriaType
+		toggleSearchCriteria(id) {
+			this.criteriaOverlay = id
 			this.isCriteriaOverlayOpen = !this.isCriteriaOverlayOpen
 		},
 		selectionOntologyDialogOpen() {
