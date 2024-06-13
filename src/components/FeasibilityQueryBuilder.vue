@@ -76,14 +76,16 @@
 					</div>
 				</div>
 			</div>
+			<!-- :criteria-response="criteriaResponse" -->
 			<SearchTreeOverlayContent v-if="isCriteriaOverlayOpen"
-				:criteria-id="criteriaOverlay"
+				:criteria-type="criteriaOverlayType"
 				@get-selected-criteria="getSelectedCriteria"
 				@toggle-search-criteria="toggleSearchCriteria" />
 		</div>
 
 		<LimitationsSelectedFeatures v-if="isCriteriaOptionOpen"
-			:selected-ontology-array="selectedOntologyArray"
+			:selected-criteria="selectedCriteria"
+			:ui-profile="uiProfile"
 			@dialog-close="selectionOntologyDiaglogClose"
 			@get-filter-info="getFilterInfo" />
 
@@ -124,10 +126,7 @@
 									</div>
 								</div>
 								<div class="selected-criteria-right">
-									<!-- @click="deleteCard($vnode.data.attrs.id)" -->
-									<button class="delete-btn">
-										<!-- <img :src="imgDelete"> -->
-
+									<button class="delete-btn" @click="deleteCharacteristic(index)">
 										<svg role="img"
 											width="20px"
 											height="20px"
@@ -144,8 +143,8 @@
 						</div>
 					</div>
 
-					<!-- <template v-if="selectedOntologyArr.length > 0">
-						<ul v-for="(selectedElement, index) in selectedOntologyArr" :key="index">
+					<!-- <template v-if="selectedCriteria!.length > 0">
+						<ul v-for="(selectedElement, index) in selectedCriteria" :key="index">
 							<div>
 								{{ selectedElement.display }}
 								<button @click="deleteItem(selectedElement.id)">
@@ -162,13 +161,23 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
 import LimitationsSelectedFeatures from './Limitations/LimitationsSelectedFeatures.vue'
+import type { FilterInfo, FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData.ts'
 
-export default {
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
+
+interface SelectedCriteriaData {
+	criteriaType: string;
+	selectedItems: CriteriaResponse[];
+}
+
+export default Vue.extend({
 	name: 'FeasibilityQueryBuilder',
 	components: {
 		NcTextField,
@@ -177,26 +186,31 @@ export default {
 		LimitationsSelectedFeatures,
 	},
 
-	data() {
+	data(): FeasibilityQueryBuilderData {
 		return {
+			// criteriaResponse: null,
+			uiProfile: null,
 			einschlussTextSerach: '',
 			ausschlussTextSerach: '',
 			isCriteriaOptionOpen: false,
-			criteriaOverlay: null,
 			isCriteriaOverlayOpen: false,
-			selectedOntologyArray: null,
+			isEinschlusskriterienOverlayOpen: false,
+			isAusschlusskriterienOverlayOpen: false,
+			criteriaOverlayType: '',
+			selectedCriteria: null,
 			selectedCharacteristics: [],
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
 	},
 
-	computed: {},
-
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		// this.getOntology()
+		this.getUiProfile()
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -205,8 +219,22 @@ export default {
 	destroyed() {},
 
 	methods: {
-		toggleSearchCriteria(id) {
-			this.criteriaOverlay = id
+		/* async getOntology() {
+			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+			this.criteriaResponse = jsonData.data
+		}, */
+
+		async getUiProfile() {
+			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
+			this.uiProfile = response.data
+			// this.getNotEmptyProfile(this.uiProfile)
+		},
+
+		setSelectedOntology(selectedOntology) {
+			this.selectedCriteria = selectedOntology
+		},
+		toggleSearchCriteria(criteriaType: string) {
+			this.criteriaOverlayType = criteriaType
 			this.isCriteriaOverlayOpen = !this.isCriteriaOverlayOpen
 		},
 		selectionOntologyDialogOpen() {
@@ -223,12 +251,19 @@ export default {
 			this.isAusschlusskriterienOverlayOpen = true
 			this.isEinschlusskriterienOverlayOpen = false
 		},
-		getSelectedCriteria(selectedOntologyItems) {
+		/* getSelectedCriteria(selectedOntologyItems) {
 			this.toggleSearchCriteria(selectedOntologyItems.criteriaId)
 			this.selectionOntologyDialogOpen()
 			this.selectedOntologyArray = selectedOntologyItems.items
+		}, */
+
+		getSelectedCriteria(items: SelectedCriteriaData) {
+			this.toggleSearchCriteria(items.criteriaType)
+			this.selectionOntologyDialogOpen()
+			this.selectedCriteria = items.selectedItems
 		},
-		getFilterInfo(object) {
+
+		getFilterInfo(object: FilterInfo[]) {
 			// check
 			/* if (this.comparisonRestriction.value === '' || this.comparisonRestriction.min === '' || this.comparisonRestriction.max === '') {
 				this.comparisonRestriction.value = 0
@@ -238,8 +273,16 @@ export default {
 			this.selectedCharacteristics.push(...object)
 
 		},
+
+		deleteSelectedCriteria(index: number) {
+			this.selectedCriteria.splice(index, 1)
+		},
+
+		deleteCharacteristic(index: number) {
+			this.selectedCharacteristics.splice(index, 1)
+		},
 	},
-}
+})
 </script>
 <style scoped>
 
@@ -425,13 +468,14 @@ export default {
 	display: flex;
 	border: none;
 	outline: none;
+	height: 0px;
 	margin: 0px;
 	padding: 0px;
 	background-color: unset;
 }
 
 .selected-criteria-right button.delete-btn:active {
-	background-color: rgb(0, 0, 0);
+	background-color: unset;
 }
 
 /* .selected-criteria-right button:focus-visible {
@@ -439,7 +483,7 @@ export default {
 	color: red;
 }*/
 
-.delete-btn img {
+.delete-btn svg {
 	width: 25px;
 	height: 20px;
 }

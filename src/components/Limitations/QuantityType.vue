@@ -84,8 +84,29 @@
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+interface QuantityTypeData {
+    typeSymbol: {
+        'kein Filter': string,
+        gleich: string,
+        kleiner: string,
+        größer: string,
+        zwischen: string,
+    },
+    comparisonRestriction: {
+        type: string,
+        typeSymbol: string,
+        unit: string,
+        value: string,
+        min: string,
+        max: string,
+    },
+    isFilterOptional: boolean,
+}
+
+export default Vue.extend({
 	name: 'QuantityType',
 	components: {},
 	props: {
@@ -106,7 +127,7 @@ export default {
 			default: true,
 		},
 	},
-	data() {
+	data(): QuantityTypeData {
 		return {
 			typeSymbol: {
 				'kein Filter': 'kein Filter',
@@ -196,7 +217,7 @@ export default {
 			}
 		},
 	},
-}
+})
 </script>
 
 <style scoped>
@@ -253,6 +274,7 @@ select, input {
 
 .dialog-card {
 	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
+	/* border: solid 1px #adbcd7; */
 	border-radius: 4px;
 	padding: 10px 20px;
 	margin-bottom: 20px;

@@ -43,8 +43,23 @@
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData.ts'
+
+interface CriteriaNestedTreeNodeData {
+	state: boolean;
+	imgCollapse: string;
+	imgExpand: string;
+	// isChecked: boolean;
+}
+
+interface CheckedItem {
+	action: string;
+	node: CriteriaResponse[];
+}
+
+export default Vue.extend({
 	name: 'CriteriaNestedTreeNode',
 	components: {},
 	props: {
@@ -57,11 +72,13 @@ export default {
 			default: false,
 		},
 	},
-	data() {
+
+	data(): CriteriaNestedTreeNodeData {
 		return {
 			state: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			// isChecked: false,
 		}
 	},
 
@@ -82,6 +99,16 @@ export default {
 		},
 	},
 
+	/* watch: {
+		isChecked() {
+			if (this.isChecked) {
+				this.$emit('input', { action: 'add', node: this.criterion })
+			} else {
+				this.$emit('input', { action: 'delete', node: this.criterion })
+			}
+		},
+	}, */
+
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
@@ -91,8 +118,7 @@ export default {
 			this.state = true
 		}
 	},
-	beforeMount() {
-	},
+	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
@@ -100,15 +126,15 @@ export default {
 	destroyed() {},
 
 	methods: {
-		isExpanded(key) {
+		/* isExpanded(key) {
 			return this.expandedGroup.indexOf(key) !== -1
-		},
+		}, */
 
-		checkboxTrigger(checkedItem) {
+		checkboxTrigger(checkedItem: CheckedItem) {
 			this.$emit('input', checkedItem)
 		},
 	},
-}
+})
 </script>
 
 <style scoped>

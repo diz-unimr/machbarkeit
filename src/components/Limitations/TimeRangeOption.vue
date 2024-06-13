@@ -59,14 +59,28 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="timeRangeRestriction.type === 'zwischen' && (timeRangeRestriction.fromDate > timeRangeRestriction.toDate)">
+		<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+// import type { TimeRangOptaionData } from '../../types/TimeRangeOptionData.ts'
+
+interface TimeRangOptaionData {
+    timeRangeRestriction: {
+        type: string,
+        fromDate: string | null,
+        fromDateFormatted: string | null,
+        toDate: string | null,
+        toDateFormatted: string | null,
+    },
+    isFilterOptional: boolean
+}
+
+export default Vue.extend({
 	name: 'TimeRangeOption',
 	props: {
 		profile: {
@@ -86,7 +100,7 @@ export default {
 			default: true,
 		},
 	},
-	data() {
+	data(): TimeRangOptaionData {
 		return {
 			timeRangeRestriction: {
 				type: 'kein Filter',
@@ -179,7 +193,7 @@ export default {
 			this.timeRangeRestriction[event.target.name + 'Formatted'] = formattedDate
 		},
 	},
-}
+})
 </script>
 
 <style scoped>

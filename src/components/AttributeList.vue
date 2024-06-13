@@ -31,7 +31,7 @@
 							<!-- eslint-disable -->
 							<div
 								class="attribute-items"
-								v-for="(item, key) in filteredArr"
+								v-for="(item, key) in filteredAttribute"
 								:key="key"
 								v-if="
 									item[
@@ -40,17 +40,18 @@
 								"
 							>
 								<!-- eslint-enable -->
-								<input :id="key"
+
+								<input :id="String(key)"
 									v-model="selectedArr"
 									type="checkbox"
 									:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
-									@change="showSelectedAttribute">
-								<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
+									@change="selectAttribute">
+
 								<p :for="key"
-									@mouseover="tooltipPosition">
+									@mouseover="getTooltipPosition($event)">
 									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
 								</p>
-								<span class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
+								<span ref="tooltip" class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
 							</div>
 						</div>
 					</div>
@@ -91,38 +92,53 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 
-export default {
+interface AttributeListData {
+    attributeList: Array<object>,
+    attributeName: Array<string>,
+    modulName: Array<string>,
+    expandedGroup: Array<number>,
+    txtSearch: string,
+    selectedArr: Array<object>,
+    selectedAttribute: Array<object>,
+    selectedArrModulName: Array<string>,
+    tooltipPosition: number,
+    imgExpand: string,
+    imgCollapse:string,
+}
+
+export default Vue.extend({
 	name: 'AttributeList',
 	components: {
 		NcTextField,
 		Magnify,
 	},
-	data() {
+
+	data(): AttributeListData {
 		return {
-			responseArray: [],
+			txtSearch: '',
+			attributeList: [],
+			attributeName: [],
+			modulName: [],
+			expandedGroup: [],
 			selectedArr: [],
 			selectedAttribute: [],
-			expandedGroup: [],
-			modulName: [],
 			selectedArrModulName: [],
-			txtSearch: '',
-			tooltip_Position: 0,
-			jsonData: [],
-			data: [],
+			tooltipPosition: 0,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
 
 	computed: {
-		filteredArr() {
-			return this.responseArray.filter((item) =>
+		filteredAttribute(): Array<object> {
+			return this.attributeList.filter((item) =>
 				item[
 					'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
 				]
@@ -147,72 +163,73 @@ export default {
 	destroyed() {},
 
 	methods: {
-		async getCsv() {
-			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			this.responseArray = objData.data
-			this.responseArray = this.responseArray
-				.filter(
+		async getCsv(): Promise<void> {
+			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			this.attributeList = response.data
+			this.modulName = this.getModuleName(this.attributeList)
+			// initialize keys from modulName.length (default: expand all attributelists)
+			this.expandedGroup = [...Array(this.modulName.length).keys()]
+			this.attributeName = this.getAttributeName(this.attributeList)
+		},
+
+		getAttributeName(attributeList: Array<object>): Array<string> {
+			const attributeName = attributeList
+				.map(
 					(item) =>
 						item[
 							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
 						],
+				).filter((attr) => attr !== '' && attr !== undefined)
+
+			return attributeName
+		},
+
+		getModuleName(attributeList: Array<object>) {
+			const modulName: Array<string> = attributeList
+				.map(
+					(item) =>
+						item[
+							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
+						],
+				).filter(
+					(item, index, array) => array.indexOf(item) === index && item !== undefined && item !== '',
 				)
-				.filter((attr) => attr !== '' && attr !== undefined)
-
-			// get modul name
-			this.modulName = this.getModulName(this.responseArray)
-			// initialize keys from modulName.length (default: expand all attributelists)
-			this.expandedGroup = [...Array(this.modulName.length).keys()]
+			return modulName
 		},
 
-		isExpanded(key) {
-			return this.expandedGroup.indexOf(key) !== -1
-		},
-
-		toggleExpansion(key) {
+		toggleExpansion(key: number) {
 			if (this.isExpanded(key)) {
 				// .splice(start, deleteCount, item1, ..., itemN)
 				this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1)
 			} else this.expandedGroup.push(key)
 		},
 
-		getModulName(inputArr) {
-			let name
-			name = inputArr.map(
-				(item) =>
-					item[
-						'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-					],
-			)
-			// filter duplicate
-			name = name.filter(
-				(item, index) =>
-					name.indexOf(item) === index && item !== undefined && item !== '',
-			)
-			return name
+		isExpanded(key: number): boolean {
+			return this.expandedGroup.indexOf(key) !== -1
 		},
 
-		showSelectedAttribute() {
-			this.selectedAttribute = this.responseArray.filter((filteredItem) =>
+		selectAttribute() {
+			this.selectedAttribute = this.attributeList.filter((filteredItem) =>
 				this.selectedArr.includes(
 					filteredItem[
 						'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
 					],
 				),
 			)
-			this.selectedArrModulName = this.getModulName(this.selectedAttribute)
+			this.selectedArrModulName = this.getModuleName(this.selectedAttribute)
 		},
 
-		tooltipPosition(event) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		getTooltipPosition(event: any) {
 			const labelPosition = event.target.getBoundingClientRect()
-			this.tooltip_Position = labelPosition.top - 136
-			const tooltip = document.getElementsByClassName('attribute-tooltip')
-			for (let i = 0; i < tooltip.length; i++) {
-				tooltip[i].style.top = this.tooltip_Position + 'px'
+			this.tooltipPosition = labelPosition.top - 136
+			const tooltips = document.getElementsByClassName('attribute-tooltip') as HTMLCollectionOf<HTMLElement>
+			for (let i = 0; i < tooltips.length; i++) {
+				tooltips[i].style.top = this.tooltipPosition + 'px'
 			}
 		},
 	},
-}
+})
 </script>
 
 <style scoped>

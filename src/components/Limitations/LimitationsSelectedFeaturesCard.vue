@@ -8,26 +8,26 @@
 			<p style="font-weight: 500;">
 				{{ selectedOntology.display }}
 			</p>
-			<button class="delete-btn" @click="deleteCard($vnode.data.attrs.id)">
+			<button class="delete-btn" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
 		</div>
-		<template v-if="uiProfile != null || uiProfile != undefined">
+		<template v-if="uiProfile != null && uiProfile != undefined">
 			<template v-for="(attribute, index) in ['timeRestrictionAllowed', 'valueDefinition']">
-				<template v-if="attribute === 'timeRestrictionAllowed' && profile.timeRestrictionAllowed">
+				<template v-if="attribute === 'timeRestrictionAllowed' && profile?.timeRestrictionAllowed">
 					<FilterCard :key="attribute + index"
 						:profile="profile"
 						display="Zeitraum"
 						attribute="timeRestrictionAllowed"
 						@get-selected-options="getSelectedOptions" />
 				</template>
-				<template v-if="attribute === 'valueDefinition' && profile.valueDefinition?.type">
+				<template v-if="attribute === 'valueDefinition' && profile?.valueDefinition?.type">
 					<FilterCard :key="attribute + index"
 						:profile="profile"
 						display="Wertebereicht"
 						:selected-ontology="selectedOntology"
-						:is-filter-optional="profile.valueDefinition.optional"
+						:is-filter-optional="profile?.valueDefinition.optional"
 						attribute="valueDefinition"
 						@get-selected-options="getSelectedOptions" />
 				</template>
@@ -36,17 +36,21 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { type PropType } from 'vue'
 import FilterCard from './FilterCard.vue'
+import type { LimitationsSelectedFeaturesCardData } from '../../types/LimitationsSelectedFeaturesCardData.ts'
+import type { UiProfile } from '../../types/FeasibilityQueryBuilderData.ts'
+import type { SelectedOptionData } from '../Limitations/FilterCard.vue'
 
-export default {
+export default Vue.extend({
 	name: 'LimitationsSelectedFeaturesCard',
 	components: {
 		FilterCard,
 	},
 	props: {
 		uiProfile: {
-			type: Object,
+			type: Object as PropType<UiProfile>,
 			default: Object,
 		},
 		selectedOntology: {
@@ -63,10 +67,10 @@ export default {
 			default: () => {},
 		},
 	},
-	data() {
+
+	data(): LimitationsSelectedFeaturesCardData {
 		return {
-			profile: null,
-			profileFilterInfo: {
+			/* profileFilterInfo: {
 				type: null,
 				timeRestrictionAllowed: {
 					display: 'Zeitraum',
@@ -80,35 +84,25 @@ export default {
 					selectedConcepts: null,
 					selectedTimeRange: null,
 				},
-			},
+			}, */
+			profile: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
 		}
-	},
-
-	watch: {
-		uiProfile() {
-			if (Object.keys(this.uiProfile).length > 0) {
-				this.getProfile()
-				this.setProfile()
-			}
-		},
-		selectedOntology() {
-			this.getProfile()
-		},
 	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.getProfile()
+		this.setProfile()
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-	},
-	beforeDestroy() {
-	},
+	updated() {},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
@@ -121,19 +115,19 @@ export default {
 		},
 
 		setProfile() {
-			if (this.profile.timeRestrictionAllowed) {
+			if (this.profile !== null && this.profile.timeRestrictionAllowed) {
 				this.selectedOntology.timeRestriction = null
 			}
-			if (this.profile.valueDefinition?.type === 'quantity') {
+			if (this.profile !== null && this.profile?.valueDefinition.type === 'quantity') {
 				this.selectedOntology.quantityType = null
 			}
-			if (this.profile.valueDefinition?.type === 'concept') {
+			if (this.profile !== null && this.profile?.valueDefinition?.type === 'concept') {
 				this.selectedOntology.conceptType = null
 			}
 		},
 
-		getSelectedOptions(data) {
-			data.map((obj) => {
+		getSelectedOptions(selectedOptions: SelectedOptionData[]) {
+			selectedOptions.map((obj: SelectedOptionData) => {
 				switch (obj.type) {
 				case 'conceptType':
 					this.selectedOntology.conceptType = obj
@@ -156,20 +150,21 @@ export default {
 
 		},
 
-		toggleResetButton(attribute) {
+		/* toggleResetButton(attribute) {
 			this.profileFilter[attribute].isResetDisabled = false
 		},
 
 		getLimitationInfo(info) {
 			this.selectedOptionArray.splice(this.$vnode.key, 1, info)
-		},
+		}, */
 
-		deleteCard(key) {
+		deleteCard(key: number) {
 			this.$emit('delete-dialog-card', key)
 		},
 	},
-}
+})
 </script>
+
 <style scoped>
 .selection-dialog-card {
 	display: flex;

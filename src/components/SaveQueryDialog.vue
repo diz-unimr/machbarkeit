@@ -30,15 +30,21 @@
 	</div>
 </template>
 
-<script>
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
+<script lang="ts">
+import Vue from 'vue'
+import { NcTextField } from '@nextcloud/vue'
 
-export default {
+interface SaveQueryDialogData {
+	fileName: string;
+	isDialogVisible: boolean;
+}
+
+export default Vue.extend({
 	name: 'SaveQueryDialog',
 	components: {
 		NcTextField,
 	},
-	data() {
+	data(): SaveQueryDialogData {
 		return {
 			fileName: '',
 			isDialogVisible: true,
@@ -50,7 +56,9 @@ export default {
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		// this.fileName = 'test'
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -59,7 +67,7 @@ export default {
 	destroyed() {},
 
 	methods: {},
-}
+})
 </script>
 
 <style scoped>

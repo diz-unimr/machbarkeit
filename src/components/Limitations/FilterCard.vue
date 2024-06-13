@@ -44,11 +44,27 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import TimeRangeOption from './TimeRangeOption.vue'
 import ConceptType from './ConceptType.vue'
 import QuantityType from './QuantityType.vue'
-export default {
+
+interface FilterCardData {
+	state: boolean,
+	isResetDisabled: boolean,
+	groupFilter: Array<object>,
+	imgExpand: string
+}
+
+export interface SelectedOptionData {
+	type: string;
+	value: object;
+	isFilterOptional: boolean;
+	completeFilter: boolean;
+}
+
+export default Vue.extend({
 	name: 'FilterCard',
 	components: {
 		TimeRangeOption,
@@ -81,7 +97,7 @@ export default {
 			default: () => {},
 		},
 	},
-	data() {
+	data(): FilterCardData {
 		return {
 			state: !this.isFilterOptional,
 			isResetDisabled: true,
@@ -99,8 +115,8 @@ export default {
 			}
 		},
 
-		getSelectedOption(data) {
-			this.groupFilter.push(data)
+		getSelectedOption(selectedOption: SelectedOptionData) {
+			this.groupFilter.push(selectedOption)
 			this.$emit('get-selected-options', this.groupFilter)
 		},
 
@@ -112,7 +128,7 @@ export default {
 			this.isResetDisabled = true
 		},
 	},
-}
+})
 </script>
 
 <style scoped>

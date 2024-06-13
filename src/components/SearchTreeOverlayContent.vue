@@ -4,11 +4,11 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="search-tree-overlay-container">
-		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaId === 'Ausschlusskriterien' }">
+		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaType === 'Ausschlusskriterien' }">
 			<div class="criteria-name">
-				{{ criteriaId }}
+				{{ criteriaType }}
 			</div>
-			<div v-if="criteriaResponse.length > 0">
+			<div v-if="criteriaResponse && criteriaResponse.length > 0">
 				<div class="criteria-search-tree-header">
 					<div class="search-tree-button">
 						<div v-for="(modulName, modulName_index) in criteriaResponse.map((item) => item.display)"
@@ -32,10 +32,10 @@
 						</div>
 					</div>
 					<div class="button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="submitSelectedItems({criteriaId: criteriaId, items:selectedItems})">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
 							AUSWÄHLEN
 						</button>
-						<button @click="$emit('toggle-search-criteria', criteriaId)">
+						<button @click="$emit('toggle-search-criteria', criteriaType)">
 							ABBRECHEN
 						</button>
 					</div>
@@ -48,12 +48,14 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import type { SearchTreeOverlayContentData } from '../types/SearchTreeOverlayContentData.ts'
 
-export default {
+export default Vue.extend({
 	name: 'SearchTreeOverlayContent',
 	components: {
 		CriteriaNestedTreeNode,
@@ -63,7 +65,11 @@ export default {
 			type: Function,
 			default: () => {},
 		},
-		criteriaId: {
+		/* criteriaResponse: {
+			type: Array<CriteriaResponse>,
+			default: [],
+		}, */
+		criteriaType: {
 			type: String,
 			default: '',
 		},
@@ -73,34 +79,36 @@ export default {
 		},
 
 	},
-	data() {
+
+	data(): SearchTreeOverlayContentData {
 		return {
 			activeTab: 0,
-			criteriaResponse: [],
+			criteriaResponse: null,
 			selectedItems: [],
 		}
 	},
 
-	computed: {},
-
 	// life cycle of vue js
 	// Call functions before all component are rendered
-	async beforeCreate() {
-		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-		this.criteriaResponse = jsonData.data
-	},
+	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.getOntology()
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {
-	},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		activateTab(index) {
+		async getOntology() {
+			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+			this.criteriaResponse = jsonData.data
+		},
+
+		activateTab(index: string | number) {
 			this.activeTab = index
 		},
 
@@ -108,15 +116,17 @@ export default {
 			if (checkedItem.action === 'add') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'delete') {
-				this.selectedItems = this.selectedItems.filter(function(name) { return name !== checkedItem.node })
+				this.selectedItems = this.selectedItems.filter(function(name) {
+					return name !== checkedItem.node
+				})
 			}
 		},
 
-		submitSelectedItems(selectedItems) {
-			this.$emit('get-selected-criteria', selectedItems)
-		},
+		/* submitSelectedItems(c: string, selectedItems: CriteriaResponse, num: number) {
+			this.$emit('get-selected-criteria', num)
+		}, */
 	},
-}
+})
 
 </script>
 <style scoped>
