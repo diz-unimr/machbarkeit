@@ -274,7 +274,6 @@ select, input {
 
 .dialog-card {
 	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
-	/* border: solid 1px #adbcd7; */
 	border-radius: 4px;
 	padding: 10px 20px;
 	margin-bottom: 20px;

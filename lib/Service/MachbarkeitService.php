@@ -31,10 +31,7 @@ class MachbarkeitService {
 	public function readOntology() {
 		$json_files = [
 			'Person.json',
-<<<<<<< HEAD
 			'test.json',
-=======
->>>>>>> 593e5f1557cd75d10bd7f62215f5431c9e9ad120
 			/* 'Diagnose.json',
 			'Laboruntersuchung.json',
 			'Prozedur.json' */

@@ -106,8 +106,18 @@ export default Vue.extend({
 		}
 	},
 
+	// life cycle of vue js
+	// Call functions before all component are rendered
+	beforeCreate() {},
+	// Call functions before the template is rendered
 	created() {},
+	beforeMount() {},
+	mounted() {},
+	beforeUpdate() {},
 	updated() {},
+	beforeDestroy() {},
+	destroyed() {},
+
 	methods: {
 		setState() {
 			if (!this.profile.valueDefinition.optional) {
@@ -120,7 +130,7 @@ export default Vue.extend({
 			this.$emit('get-selected-options', this.groupFilter)
 		},
 
-		toggleResetButton(isReset) {
+		toggleResetButton(isReset: boolean) {
 			this.isResetDisabled = !isReset
 		},
 

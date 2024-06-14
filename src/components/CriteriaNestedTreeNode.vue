@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData.ts'
+import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData'
 
 interface CriteriaNestedTreeNodeData {
 	state: boolean;
@@ -54,9 +54,9 @@ interface CriteriaNestedTreeNodeData {
 	// isChecked: boolean;
 }
 
-interface CheckedItem {
+export interface CheckedItem {
 	action: string;
-	node: CriteriaResponse[];
+	node: CriteriaResponse;
 }
 
 export default Vue.extend({
@@ -72,11 +72,10 @@ export default Vue.extend({
 			default: false,
 		},
 	},
-
 	data(): CriteriaNestedTreeNodeData {
 		return {
 			state: false,
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			// isChecked: false,
 		}
@@ -127,6 +126,7 @@ export default Vue.extend({
 
 	methods: {
 		/* isExpanded(key) {
+			console.log('isExpanded????')
 			return this.expandedGroup.indexOf(key) !== -1
 		}, */
 

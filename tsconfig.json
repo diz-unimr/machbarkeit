@@ -2,8 +2,8 @@
   "extends": "@vue/tsconfig/tsconfig.json",
   "include": ["./src/**/*.ts", "./src/**/*.vue", "./*.d.ts"],
   "compilerOptions": {
-    "types": ["webpack-env", "jest", "node", "vue", "vue-router", "@nextcloud/typings"],
-    "target": "esnext",
+    "types": ["jest", "node", "vue", "vue-router", "@nextcloud/typings"],
+    "target": "ESNext",
     "module": "esnext",
     // Set module resolution to bundler and `noEmit` to be able to set `allowImportingTsExtensions`, so we can import Typescript with .ts extension
     "moduleResolution": "bundler",
@@ -18,15 +18,6 @@
     "resolveJsonModule": true,
     "strict": true,
     "sourceMap": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "lib": ["esnext", "dom"]
+    "isolatedModules": true
   }
 }

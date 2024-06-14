@@ -6,9 +6,7 @@
 	<div class="footer-container">
 		<div class="load-save-button">
 			<input id="upload" type="file" hidden>
-			<label for="upload"
-				class="query-upload-button"
-				@click="$emit('dialog-close')">
+			<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">
 				ABFRAGE LADEN
 			</label>
 			<button @click="$emit('dialog-open')">
@@ -17,6 +15,7 @@
 		</div>
 	</div>
 </template>
+
 <script lang="ts">
 import Vue from 'vue'
 
@@ -24,6 +23,7 @@ export default Vue.extend({
 	name: 'FooterContent',
 })
 </script>
+
 <style scoped>
 .footer-container {
 	display: flex;

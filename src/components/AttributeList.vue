@@ -40,18 +40,17 @@
 								"
 							>
 								<!-- eslint-enable -->
-
 								<input :id="String(key)"
 									v-model="selectedArr"
 									type="checkbox"
 									:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
 									@change="selectAttribute">
-
+								<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
 								<p :for="key"
-									@mouseover="getTooltipPosition($event)">
+									@mouseover="getTooltipPosition">
 									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
 								</p>
-								<span ref="tooltip" class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
+								<span class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
 							</div>
 						</div>
 					</div>
@@ -119,20 +118,19 @@ export default Vue.extend({
 		NcTextField,
 		Magnify,
 	},
-
 	data(): AttributeListData {
 		return {
-			txtSearch: '',
 			attributeList: [],
 			attributeName: [],
 			modulName: [],
 			expandedGroup: [],
+			txtSearch: '',
 			selectedArr: [],
 			selectedAttribute: [],
 			selectedArrModulName: [],
 			tooltipPosition: 0,
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 		}
 	},
 
@@ -172,18 +170,6 @@ export default Vue.extend({
 			this.attributeName = this.getAttributeName(this.attributeList)
 		},
 
-		getAttributeName(attributeList: Array<object>): Array<string> {
-			const attributeName = attributeList
-				.map(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-						],
-				).filter((attr) => attr !== '' && attr !== undefined)
-
-			return attributeName
-		},
-
 		getModuleName(attributeList: Array<object>) {
 			const modulName: Array<string> = attributeList
 				.map(
@@ -197,15 +183,45 @@ export default Vue.extend({
 			return modulName
 		},
 
-		toggleExpansion(key: number) {
+		getAttributeName(attributeList: Array<object>): Array<string> {
+			const attributeName = attributeList
+				.map(
+					(item) =>
+						item[
+							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+						],
+				).filter((attr) => attr !== '' && attr !== undefined)
+
+			return attributeName
+		},
+
+		/* async getCsv() {
+			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+			this.responseArray = objData.data
+			this.responseArray = this.responseArray
+				.filter(
+					(item) =>
+						item[
+							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
+						],
+				)
+				.filter((attr) => attr !== '' && attr !== undefined)
+
+			// get modul name
+			this.modulName = this.getModulName(this.responseArray)
+			// initialize keys from modulName.length (default: expand all attributelists)
+			this.expandedGroup = [...Array(this.modulName.length).keys()]
+		}, */
+
+		isExpanded(key) {
+			return this.expandedGroup.indexOf(key) !== -1
+		},
+
+		toggleExpansion(key) {
 			if (this.isExpanded(key)) {
 				// .splice(start, deleteCount, item1, ..., itemN)
 				this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1)
 			} else this.expandedGroup.push(key)
-		},
-
-		isExpanded(key: number): boolean {
-			return this.expandedGroup.indexOf(key) !== -1
 		},
 
 		selectAttribute() {

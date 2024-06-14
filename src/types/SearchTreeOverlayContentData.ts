@@ -1,9 +1,14 @@
+import type { ConceptType, QuantityType, TimeRange } from '../types/LimitationsSelectedFeaturesData.ts'
+
 export interface CriteriaResponse {
     children: Array<object>;
     context: object;
     display: string;
     id: string;
     leaf: boolean;
+    conceptType: ConceptType | undefined;
+	timeRange: TimeRange | undefined;
+	quantityType: QuantityType | undefined;
     selectable: boolean;
     termCodes: Array<object>;
 }

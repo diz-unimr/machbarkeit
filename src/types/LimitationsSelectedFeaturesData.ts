@@ -32,7 +32,7 @@ export interface TimeRange {
     };
 }
 
-/* interface ValueDefinition {
+interface ValueDefinition {
     allowedUnits: Array<object>;
     max: number | null;
     min: number | null;
@@ -55,7 +55,7 @@ export interface UiProfile {
     Prozedur: UiProfileDetails;
     'Gegenwärtiges chronologisches Alter': UiProfileDetails;
     Geschlecht: UiProfileDetails;
-} */
+}
 
 export interface LimitationsSelectedFeaturesData {
     filterInfo: Array<{

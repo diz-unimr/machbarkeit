@@ -67,7 +67,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-// import type { TimeRangOptaionData } from '../../types/TimeRangeOptionData.ts'
 
 interface TimeRangOptaionData {
     timeRangeRestriction: {
@@ -111,9 +110,6 @@ export default Vue.extend({
 			},
 			isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
 		}
-	},
-
-	computed: {
 	},
 
 	watch: {

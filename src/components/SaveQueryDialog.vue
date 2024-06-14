@@ -50,7 +50,6 @@ export default Vue.extend({
 			isDialogVisible: true,
 		}
 	},
-	computed: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered

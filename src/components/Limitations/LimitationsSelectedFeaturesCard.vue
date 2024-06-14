@@ -13,7 +13,7 @@
 				<img :src="imgDelete">
 			</button>
 		</div>
-		<template v-if="uiProfile != null && uiProfile != undefined">
+		<template v-if="uiProfile != null || uiProfile != undefined">
 			<template v-for="(attribute, index) in ['timeRestrictionAllowed', 'valueDefinition']">
 				<template v-if="attribute === 'timeRestrictionAllowed' && profile?.timeRestrictionAllowed">
 					<FilterCard :key="attribute + index"
@@ -27,7 +27,7 @@
 						:profile="profile"
 						display="Wertebereicht"
 						:selected-ontology="selectedOntology"
-						:is-filter-optional="profile?.valueDefinition.optional"
+						:is-filter-optional="profile.valueDefinition.optional"
 						attribute="valueDefinition"
 						@get-selected-options="getSelectedOptions" />
 				</template>
@@ -51,7 +51,7 @@ export default Vue.extend({
 	props: {
 		uiProfile: {
 			type: Object as PropType<UiProfile>,
-			default: Object,
+			required: true,
 		},
 		selectedOntology: {
 			type: Object,
@@ -61,30 +61,13 @@ export default Vue.extend({
 			type: Function,
 			default: () => {},
 		},
-
 		deleteDialogCard: {
 			type: Function,
 			default: () => {},
 		},
 	},
-
 	data(): LimitationsSelectedFeaturesCardData {
 		return {
-			/* profileFilterInfo: {
-				type: null,
-				timeRestrictionAllowed: {
-					display: 'Zeitraum',
-					state: false,
-					isResetDisabled: true,
-				},
-				valueDefinition: {
-					display: 'Wertebereich',
-					state: false,
-					isResetDisabled: true,
-					selectedConcepts: null,
-					selectedTimeRange: null,
-				},
-			}, */
 			profile: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
 		}
@@ -96,13 +79,15 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getProfile()
-		this.setProfile()
+		// this.setProfile()
 	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
-	beforeDestroy() {},
+	updated() {
+	},
+	beforeDestroy() {
+	},
 	destroyed() {},
 
 	methods: {
@@ -114,29 +99,35 @@ export default Vue.extend({
 			}
 		},
 
-		setProfile() {
+		/* setProfile() {
 			if (this.profile !== null && this.profile.timeRestrictionAllowed) {
+				// this.$emit('update-ontology-profile', 'timeRestriction')
 				this.selectedOntology.timeRestriction = null
 			}
-			if (this.profile !== null && this.profile?.valueDefinition.type === 'quantity') {
+			if (this.profile !== null && this.profile.valueDefinition?.type === 'quantity') {
+				// this.$emit('update-ontology-profile', 'quantity')
 				this.selectedOntology.quantityType = null
 			}
-			if (this.profile !== null && this.profile?.valueDefinition?.type === 'concept') {
+			if (this.profile !== null && this.profile.valueDefinition?.type === 'concept') {
+				// this.$emit('update-ontology-profile', 'concept')
 				this.selectedOntology.conceptType = null
 			}
-		},
+		}, */
 
 		getSelectedOptions(selectedOptions: SelectedOptionData[]) {
-			selectedOptions.map((obj: SelectedOptionData) => {
+			selectedOptions.map((obj) => {
 				switch (obj.type) {
 				case 'conceptType':
-					this.selectedOntology.conceptType = obj
+					this.$emit('update-selected-ontology', { type: 'conceptType', item: obj })
+					// this.selectedOntology.conceptType = obj
 					break
 				case 'quantityType':
-					this.selectedOntology.quantityType = obj
+					this.$emit('update-selected-ontology', { type: 'quantityType', item: obj })
+					// this.selectedOntology.quantityType = obj
 					break
 				case 'timeRange':
-					this.selectedOntology.timeRange = obj
+					this.$emit('update-selected-ontology', { type: 'timeRange', item: obj })
+					// this.selectedOntology.timeRange = obj
 					break
 				default:
 				}
@@ -151,10 +142,13 @@ export default Vue.extend({
 		},
 
 		/* toggleResetButton(attribute) {
+			console.log('abc')
+			console.log(this.profileFilte)
 			this.profileFilter[attribute].isResetDisabled = false
-		},
+		}, */
 
-		getLimitationInfo(info) {
+		/* getLimitationInfo(info) {
+			console.log('getLimitationInfo')
 			this.selectedOptionArray.splice(this.$vnode.key, 1, info)
 		}, */
 

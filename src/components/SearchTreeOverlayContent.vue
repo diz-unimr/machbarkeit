@@ -50,10 +50,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
 import type { SearchTreeOverlayContentData } from '../types/SearchTreeOverlayContentData.ts'
+import type { CheckedItem } from '../components/CriteriaNestedTreeNode.vue'
 
 export default Vue.extend({
 	name: 'SearchTreeOverlayContent',
@@ -65,10 +66,6 @@ export default Vue.extend({
 			type: Function,
 			default: () => {},
 		},
-		/* criteriaResponse: {
-			type: Array<CriteriaResponse>,
-			default: [],
-		}, */
 		criteriaType: {
 			type: String,
 			default: '',
@@ -79,7 +76,6 @@ export default Vue.extend({
 		},
 
 	},
-
 	data(): SearchTreeOverlayContentData {
 		return {
 			activeTab: 0,
@@ -99,7 +95,8 @@ export default Vue.extend({
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {},
+	beforeDestroy() {
+	},
 	destroyed() {},
 
 	methods: {
@@ -112,7 +109,7 @@ export default Vue.extend({
 			this.activeTab = index
 		},
 
-		getCheckboxItems(checkedItem) {
+		getCheckboxItems(checkedItem: CheckedItem) {
 			if (checkedItem.action === 'add') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'delete') {
@@ -122,15 +119,14 @@ export default Vue.extend({
 			}
 		},
 
-		/* submitSelectedItems(c: string, selectedItems: CriteriaResponse, num: number) {
-			this.$emit('get-selected-criteria', num)
+		/* submitSelectedItems(selectedItems) {
+			this.$emit('get-selected-criteria', selectedItems)
 		}, */
 	},
 })
-
 </script>
-<style scoped>
 
+<style scoped>
 .search-tree-overlay-container {
 	display:flex;
 	z-index: 100;

@@ -18,7 +18,7 @@
 					</button>
 				</div>
 			</div>
-			<SaveQueryDialog v-if="isDialogOpen" ref="saveQueryRef" @dialog-close="querySaveDiaglogClose" />
+			<SaveQueryDialog v-if="isDialogOpen" @dialog-close="querySaveDiaglogClose" />
 			<FeasibilityQueryBuilder />
 		</div>
 		<MachbarkeitFooter @dialog-open="querySaveDialogOpen" @dialog-close="querySaveDiaglogClose" />
@@ -43,14 +43,13 @@ export default Vue.extend({
 		SaveQueryDialog,
 		MachbarkeitFooter,
 	},
-
 	data(): FeasibilityQueryContainerData {
 		return {
 			numberOfPatients: 0,
 			isDialogOpen: false,
 		}
 	},
-
+	computed: {},
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
@@ -65,18 +64,18 @@ export default Vue.extend({
 
 	methods: {
 		// clearText(text) {
-		// 	text = ''
+		// text = ''
 		// },
 		querySaveDialogOpen() {
 			this.isDialogOpen = true
 		},
-
-		querySaveDiaglogClose(): void {
+		querySaveDiaglogClose() {
 			this.isDialogOpen = false
 		},
 		/* queryCancel() {
 			this.isDialogOpen = false
-		} */
+		}, */
+
 	},
 })
 </script>

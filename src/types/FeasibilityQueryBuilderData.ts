@@ -49,6 +49,7 @@ export interface FeasibilityQueryBuilderData {
     isAusschlusskriterienOverlayOpen: boolean;
     criteriaOverlayType: string;
     selectedCriteria: CriteriaResponse[] | null;
-    selectedCharacteristics: Array<FilterInfo>;
+    selectedCharacteristicsEin: Array<FilterInfo>;
+    selectedCharacteristicsAus: Array<FilterInfo>;
     imgDelete: string;
 }
