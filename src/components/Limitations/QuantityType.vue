@@ -75,12 +75,6 @@
 		<div v-if="comparisonRestriction.type === 'zwischen' && (comparisonRestriction.min >= comparisonRestriction.max)">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
-		<!-- <div v-else-if="comparisonRestriction.type === 'zwischen' && (comparisonRestriction.min.length === 0 || comparisonRestriction.max.length === 0)">
-			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
-		</div>
-		<div v-else-if="comparisonRestriction.type !== 'zwischen' && comparisonRestriction.value.length === 0">
-			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
-		</div> -->
 	</div>
 </template>
 

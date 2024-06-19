@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div id="criteria-nested-tree" class="criteria-nested-tree-node">
+	<div class="criteria-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="criteria-head-node">
 				<button :class="{'default-cursor': !criterion.children}" @click="() => (state = !state)">
@@ -37,6 +37,8 @@
 				<CriteriaNestedTreeNode v-for="child in criterion.children"
 					:key="child.id"
 					:criterion="child"
+					:einschluss-text-serach="einschlussTextSerach"
+					:ausschluss-text-serach="ausschlussTextSerach"
 					@input="checkboxTrigger" />
 			</ul>
 		</li>
@@ -51,7 +53,19 @@ interface CriteriaNestedTreeNodeData {
 	state: boolean;
 	imgCollapse: string;
 	imgExpand: string;
-	// isChecked: boolean;
+}
+
+export interface FilteredCriteriaData {
+	context: object;
+	display: string;
+	id: string;
+	leaf: boolean;
+	selectable: boolean;
+	termCodes: [{
+		code: string,
+		display: string,
+		system: string,
+	}];
 }
 
 export interface CheckedItem {
@@ -63,13 +77,21 @@ export default Vue.extend({
 	name: 'CriteriaNestedTreeNode',
 	components: {},
 	props: {
+		isRootNode: {
+			type: Boolean,
+			default: false,
+		},
 		criterion: {
 			type: Object,
 			default: Object,
 		},
-		isRootNode: {
-			type: Boolean,
-			default: false,
+		einschlussTextSerach: {
+			type: String,
+			default: '',
+		},
+		ausschlussTextSerach: {
+			type: String,
+			default: '',
 		},
 	},
 	data(): CriteriaNestedTreeNodeData {
@@ -77,7 +99,6 @@ export default Vue.extend({
 			state: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
-			// isChecked: false,
 		}
 	},
 
@@ -98,16 +119,6 @@ export default Vue.extend({
 		},
 	},
 
-	/* watch: {
-		isChecked() {
-			if (this.isChecked) {
-				this.$emit('input', { action: 'add', node: this.criterion })
-			} else {
-				this.$emit('input', { action: 'delete', node: this.criterion })
-			}
-		},
-	}, */
-
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
@@ -125,11 +136,6 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		/* isExpanded(key) {
-			console.log('isExpanded????')
-			return this.expandedGroup.indexOf(key) !== -1
-		}, */
-
 		checkboxTrigger(checkedItem: CheckedItem) {
 			this.$emit('input', checkedItem)
 		},
@@ -143,7 +149,7 @@ input[type='checkbox'] {
 	height: 15px;
 }
 
-#criteria-nested-tree {
+.criteria-nested-tree-node {
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
@@ -154,7 +160,7 @@ input[type='checkbox'] {
 	box-sizing: border-box;
 	display: flex;
 	place-content: center flex-start;
-	align-items: center;
+	align-items: flex-start
 }
 
 .criteria-head-node button {
@@ -175,6 +181,7 @@ input[type='checkbox'] {
 	flex-direction: row;
 	align-items: center;
 	margin-left: 5px;
+	margin-top: 4px;
 }
 
 .search-tree-term-entry input {

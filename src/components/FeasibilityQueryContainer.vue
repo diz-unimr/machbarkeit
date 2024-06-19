@@ -63,19 +63,12 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		// clearText(text) {
-		// text = ''
-		// },
 		querySaveDialogOpen() {
 			this.isDialogOpen = true
 		},
 		querySaveDiaglogClose() {
 			this.isDialogOpen = false
 		},
-		/* queryCancel() {
-			this.isDialogOpen = false
-		}, */
-
 	},
 })
 </script>

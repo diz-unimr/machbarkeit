@@ -25,9 +25,18 @@
 						v-show="activeTab === criterion_index"
 						:key="criterion_index">
 						<div class="criteria-node">
-							<CriteriaNestedTreeNode v-if="criterion.children"
+							<CriteriaNestedTreeNode v-if="criterion.children && (einschlussTextSerach.length === 0 && ausschlussTextSerach.length === 0)"
 								:is-root-node="true"
 								:criterion="criterion"
+								:einschluss-text-serach="einschlussTextSerach"
+								:ausschluss-text-serach="ausschlussTextSerach"
+								@input="getCheckboxItems" />
+
+							<CriteriaNestedTreeNodeSearch v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
+								class="criteria-nested-tree-node"
+								:criterion="criterion"
+								:einschluss-text-serach="einschlussTextSerach"
+								:ausschluss-text-serach="ausschlussTextSerach"
 								@input="getCheckboxItems" />
 						</div>
 					</div>
@@ -53,6 +62,7 @@ import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
+import CriteriaNestedTreeNodeSearch from './CriteriaNestedTreeNodeSearch.vue'
 import type { SearchTreeOverlayContentData } from '../types/SearchTreeOverlayContentData.ts'
 import type { CheckedItem } from '../components/CriteriaNestedTreeNode.vue'
 
@@ -60,29 +70,42 @@ export default Vue.extend({
 	name: 'SearchTreeOverlayContent',
 	components: {
 		CriteriaNestedTreeNode,
+		CriteriaNestedTreeNodeSearch,
 	},
 	props: {
-		getSelectedCriteria: {
-			type: Function,
-			default: () => {},
-		},
 		criteriaType: {
 			type: String,
 			default: '',
+		},
+		einschlussTextSerach: {
+			type: String,
+			default: '',
+		},
+		ausschlussTextSerach: {
+			type: String,
+			default: '',
+		},
+		getSelectedCriteria: {
+			type: Function,
+			default: () => {},
 		},
 		toggleSearchCriteria: {
 			type: Function,
 			default: () => {},
 		},
-
 	},
+
 	data(): SearchTreeOverlayContentData {
 		return {
 			activeTab: 0,
 			criteriaResponse: null,
+			criteriaData: null,
 			selectedItems: [],
+			tempArray: [],
 		}
 	},
+
+	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -118,15 +141,19 @@ export default Vue.extend({
 				})
 			}
 		},
-
-		/* submitSelectedItems(selectedItems) {
-			this.$emit('get-selected-criteria', selectedItems)
-		}, */
 	},
 })
 </script>
 
 <style scoped>
+.criteria-nested-tree-node {
+	overflow-y: auto;
+	overflow-x: hidden;
+	scrollbar-width: auto;
+	height: 100%;
+	width: 100;
+}
+
 .search-tree-overlay-container {
 	display:flex;
 	z-index: 100;
@@ -232,5 +259,4 @@ export default Vue.extend({
 	height: 150px;
 	border-top: 2px solid #adbcd7;
 }
-
 </style>

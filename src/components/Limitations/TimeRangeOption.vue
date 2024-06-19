@@ -132,7 +132,6 @@ export default Vue.extend({
 							completeFilter: validDate,
 						})
 					}
-
 				} else {
 					if (this.timeRangeRestriction.fromDate) {
 						this.$emit('get-selected-option', {
@@ -142,7 +141,6 @@ export default Vue.extend({
 							completeFilter: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
 						})
 					}
-
 				}
 			},
 			deep: true,
@@ -180,7 +178,8 @@ export default Vue.extend({
 		addTimeRangeOption() {
 		},
 
-		formatDate(event) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		formatDate(event: any) {
 			const date = new Date(event.target.value)
 			const day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
 			const month = (date.getMonth() + 1) >= 10 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)

@@ -1,3 +1,7 @@
+/*
+	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+	SPDX-License-Identifier: AGPL-3.0-or-later
+*/
 import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData.ts'
 import type { ConceptType, QuantityType, TimeRange } from '../types/LimitationsSelectedFeaturesData.ts'
 
@@ -39,7 +43,6 @@ export interface UiProfile {
 }
 
 export interface FeasibilityQueryBuilderData {
-    // criteriaResponse: CriteriaResponse[] | null,
     uiProfile: UiProfile | null;
     einschlussTextSerach: string;
     ausschlussTextSerach: string;

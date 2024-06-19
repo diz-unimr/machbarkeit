@@ -17,7 +17,3 @@ export default Vue.extend({
 	name: 'MyQueryContent',
 })
 </script>
-
-<style scoped>
-
-</style>

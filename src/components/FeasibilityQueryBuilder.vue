@@ -27,13 +27,15 @@
 							</button>
 						</div>
 						<div class="search-input">
-							<NcTextField :value.sync="einschlussTextSerach"
+							<NcTextField ref="einschlussTextSerach"
+								:value.sync="einschlussTextSerach"
 								style="font-size: 16px;"
 								label="Code oder Suchbegriff eingeben"
 								trailing-button-icon="close"
 								placeholder=" "
 								:show-trailing-button="einschlussTextSerach !== ''"
 								@trailing-button-click="einschlussTextSerach = ''"
+								@focus="focusInput('Einschlusskriterien')"
 								@input="searchCodeEinschlusskriterien">
 								<Magnify :size="20" />
 							</NcTextField>
@@ -69,6 +71,7 @@
 								placeholder=" "
 								:show-trailing-button="ausschlussTextSerach !== ''"
 								@trailing-button-click="ausschlussTextSerach = ''"
+								@focus="focusInput('Ausschlusskriterien')"
 								@input="searchCodeAusschlusskriterien">
 								<Magnify :size="20" />
 							</NcTextField>
@@ -78,6 +81,8 @@
 			</div>
 			<SearchTreeOverlayContent v-if="isCriteriaOverlayOpen"
 				:criteria-type="criteriaOverlayType"
+				:einschluss-text-serach="einschlussTextSerach"
+				:ausschluss-text-serach="ausschlussTextSerach"
 				@get-selected-criteria="getSelectedCriteria"
 				@toggle-search-criteria="toggleSearchCriteria" />
 		</div>
@@ -127,10 +132,7 @@
 									</div>
 								</div>
 								<div class="selected-criteria-right">
-									<!-- @click="deleteCard($vnode.data.attrs.id)" -->
 									<button class="delete-btn" @click="deleteCharacteristic(index, 'Einschlusskriterien')">
-										<!-- <img :src="imgDelete"> -->
-
 										<svg role="img"
 											width="20px"
 											height="20px"
@@ -146,17 +148,6 @@
 							</div>
 						</div>
 					</div>
-
-					<!-- <template v-if="selectedOntologyArr.length > 0">
-						<ul v-for="(selectedElement, index) in selectedOntologyArr" :key="index">
-							<div>
-								{{ selectedElement.display }}
-								<button @click="deleteItem(selectedElement.id)">
-									Delete
-								</button>
-							</div>
-						</ul>
-					</template> -->
 				</div>
 				<div class="pipe" />
 				<div id="Ausschlusskriterien" class="output-textfield">
@@ -191,13 +182,10 @@
 									</div>
 								</div>
 								<div class="selected-criteria-right">
-									<!-- @click="deleteCard($vnode.data.attrs.id)" -->
 									<button class="delete-btn" @click="deleteCharacteristic(index, 'Ausschlusskriterien')">
-										<!-- <img :src="imgDelete"> -->
-
 										<svg role="img"
-											width="20px"
-											height="20px"
+											width="18px"
+											height="18px"
 											aria-hidden="true"
 											focusable="false"
 											data-prefix="fas"
@@ -210,17 +198,6 @@
 							</div>
 						</div>
 					</div>
-
-					<!-- <template v-if="selectedOntologyArr.length > 0">
-						<ul v-for="(selectedElement, index) in selectedOntologyArr" :key="index">
-							<div>
-								{{ selectedElement.display }}
-								<button @click="deleteItem(selectedElement.id)">
-									Delete
-								</button>
-							</div>
-						</ul>
-					</template> -->
 				</div>
 			</div>
 		</div>
@@ -237,7 +214,6 @@ import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
 import LimitationsSelectedFeatures from './Limitations/LimitationsSelectedFeatures.vue'
 import type { FilterInfo, FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
 import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData.ts'
-// import type { updatedOntologyData } from './Limitations/LimitationsSelectedFeatures.vue'
 
 interface SelectedCriteriaData {
 	criteriaType: string;
@@ -276,6 +252,22 @@ export default Vue.extend({
 			selectedCharacteristicsAus: [],
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
+	},
+
+	watch: {
+		einschlussTextSerach() {
+			if (this.einschlussTextSerach.length > 0) {
+				this.criteriaOverlayType = 'Einschlusskriterien'
+				this.isCriteriaOverlayOpen = true
+			} else this.isCriteriaOverlayOpen = false
+		},
+
+		ausschlussTextSerach() {
+			if (this.ausschlussTextSerach.length > 0) {
+				this.criteriaOverlayType = 'Ausschlusskriterien'
+				this.isCriteriaOverlayOpen = true
+			} else this.isCriteriaOverlayOpen = false
+		},
 	},
 
 	// life cycle of vue js
@@ -321,25 +313,30 @@ export default Vue.extend({
 			this.isEinschlusskriterienOverlayOpen = false
 		},
 
+		focusInput(criteriaType: string) {
+			if (criteriaType === 'Einschlusskriterien') {
+				this.ausschlussTextSerach = ''
+				this.isAusschlusskriterienOverlayOpen = false
+			} else if (criteriaType === 'Ausschlusskriterien') {
+				this.einschlussTextSerach = ''
+				this.isEinschlusskriterienOverlayOpen = false
+			}
+		},
+
 		getSelectedCriteria(items: SelectedCriteriaData) {
+			this.einschlussTextSerach = ''
+			this.ausschlussTextSerach = ''
 			this.toggleSearchCriteria(items.criteriaType)
 			this.selectionOntologyDialogOpen()
 			this.selectedCriteria = items.selectedItems
 		},
 
 		getFilterInfo(object: FilterInfo[]) {
-			// check
-			/* if (this.comparisonRestriction.value === '' || this.comparisonRestriction.min === '' || this.comparisonRestriction.max === '') {
-				this.comparisonRestriction.value = 0
-				this.comparisonRestriction.min = 0
-				this.comparisonRestriction.max = 0
-			} */
 			if (this.criteriaOverlayType === 'Einschlusskriterien') {
 				this.selectedCharacteristicsEin.push(...object)
 			} else if (this.criteriaOverlayType === 'Ausschlusskriterien') {
 				this.selectedCharacteristicsAus.push(...object)
 			}
-
 		},
 
 		updateSelectedCriteria(data: updatedCriteriaData) {
@@ -514,7 +511,7 @@ export default Vue.extend({
 .selected-criteria-right {
 	display: flex;
 	justify-content: center;
-	width: 5%;
+	width: 7%;
 	background-color: #5270a7;
 	padding: 10px 0px;
 }

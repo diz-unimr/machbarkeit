@@ -1,19 +1,7 @@
-/* interface timeRestrictionAllowed {
-    display: string,
-    state: boolean,
-    isResetDisabled: boolean
-} */
-
-/* interface valueDefinition extends timeRestrictionAllowed {
-    selectedConcepts: Array<object> | null,
-    selectedTimeRange: Array<object> | null
-} */
-
-/* interface profileFilterInfo {
-    type: string | null,
-    timeRestrictionAllowed: timeRestrictionAllowed,
-    valueDefinition: valueDefinition
-} */
+/*
+	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+	SPDX-License-Identifier: AGPL-3.0-or-later
+*/
 
 interface ValueDefinition {
     allowedUnits: Array<object>;
@@ -34,9 +22,6 @@ interface profile {
 }
 
 export interface LimitationsSelectedFeaturesCardData {
-    // timeRestrictionAllowed: timeRestrictionAllowed,
-    // valueDefinition: valueDefinition,
-    // profileFilterInfo: profileFilterInfo,
     profile: profile | null,
     imgDelete: string,
 }

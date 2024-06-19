@@ -195,29 +195,11 @@ export default Vue.extend({
 			return attributeName
 		},
 
-		/* async getCsv() {
-			const objData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			this.responseArray = objData.data
-			this.responseArray = this.responseArray
-				.filter(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-						],
-				)
-				.filter((attr) => attr !== '' && attr !== undefined)
-
-			// get modul name
-			this.modulName = this.getModulName(this.responseArray)
-			// initialize keys from modulName.length (default: expand all attributelists)
-			this.expandedGroup = [...Array(this.modulName.length).keys()]
-		}, */
-
-		isExpanded(key) {
+		isExpanded(key: number) {
 			return this.expandedGroup.indexOf(key) !== -1
 		},
 
-		toggleExpansion(key) {
+		toggleExpansion(key: number) {
 			if (this.isExpanded(key)) {
 				// .splice(start, deleteCount, item1, ..., itemN)
 				this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1)

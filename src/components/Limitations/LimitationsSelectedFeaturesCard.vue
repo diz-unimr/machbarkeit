@@ -141,17 +141,6 @@ export default Vue.extend({
 
 		},
 
-		/* toggleResetButton(attribute) {
-			console.log('abc')
-			console.log(this.profileFilte)
-			this.profileFilter[attribute].isResetDisabled = false
-		}, */
-
-		/* getLimitationInfo(info) {
-			console.log('getLimitationInfo')
-			this.selectedOptionArray.splice(this.$vnode.key, 1, info)
-		}, */
-
 		deleteCard(key: number) {
 			this.$emit('delete-dialog-card', key)
 		},
@@ -173,7 +162,7 @@ export default Vue.extend({
 .selection-dialog-card__header {
 	display: flex;
 	flex-direction: row;
-	column-gap: 10px;
+	column-gap: 10%;
 	align-items: center;
 	justify-content:space-between;
 	margin: 0px 10px 20px 10px;
