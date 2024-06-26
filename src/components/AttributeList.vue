@@ -41,7 +41,7 @@
 							>
 								<!-- eslint-enable -->
 								<input :id="String(key)"
-									v-model="selectedArr"
+									v-model="checkedAttribute"
 									type="checkbox"
 									:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
 									@change="selectAttribute">
@@ -57,13 +57,14 @@
 				</div>
 			</div>
 		</div>
+
 		<div class="attribute-list">
 			<div class="attribute-list__header">
 				ausgewählte Attributliste
 			</div>
 			<div class="attribute-list__content">
 				<div class="attribute-display">
-					<div v-for="(modul, index) in selectedArrModulName" :key="index">
+					<div v-for="(modul, index) in selectedModulName" :key="index">
 						<div class="modul-name">
 							{{ modul }}
 						</div>
@@ -104,9 +105,9 @@ interface AttributeListData {
     modulName: Array<string>,
     expandedGroup: Array<number>,
     txtSearch: string,
-    selectedArr: Array<object>,
+    checkedAttribute: Array<string>,
     selectedAttribute: Array<object>,
-    selectedArrModulName: Array<string>,
+    selectedModulName: Array<string>,
     tooltipPosition: number,
     imgExpand: string,
     imgCollapse:string,
@@ -125,9 +126,9 @@ export default Vue.extend({
 			modulName: [],
 			expandedGroup: [],
 			txtSearch: '',
-			selectedArr: [],
+			checkedAttribute: [],
 			selectedAttribute: [],
-			selectedArrModulName: [],
+			selectedModulName: [],
 			tooltipPosition: 0,
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
@@ -170,7 +171,7 @@ export default Vue.extend({
 			this.attributeName = this.getAttributeName(this.attributeList)
 		},
 
-		getModuleName(attributeList: Array<object>) {
+		getModuleName(attributeList: Array<object>): Array<string> {
 			const modulName: Array<string> = attributeList
 				.map(
 					(item) =>
@@ -195,31 +196,31 @@ export default Vue.extend({
 			return attributeName
 		},
 
-		isExpanded(key: number) {
+		isExpanded(key: number): boolean {
 			return this.expandedGroup.indexOf(key) !== -1
 		},
 
-		toggleExpansion(key: number) {
+		toggleExpansion(key: number): void {
 			if (this.isExpanded(key)) {
 				// .splice(start, deleteCount, item1, ..., itemN)
 				this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1)
 			} else this.expandedGroup.push(key)
 		},
 
-		selectAttribute() {
+		selectAttribute(): void {
 			this.selectedAttribute = this.attributeList.filter((filteredItem) =>
-				this.selectedArr.includes(
+				this.checkedAttribute.includes(
 					filteredItem[
 						'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
 					],
 				),
 			)
-			this.selectedArrModulName = this.getModuleName(this.selectedAttribute)
+			this.selectedModulName = this.getModuleName(this.selectedAttribute)
 		},
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		getTooltipPosition(event: any) {
-			const labelPosition = event.target.getBoundingClientRect()
+		getTooltipPosition(event: MouseEvent): void {
+			const targetElement = event.target as HTMLElement
+			const labelPosition = targetElement.getBoundingClientRect()
 			this.tooltipPosition = labelPosition.top - 136
 			const tooltips = document.getElementsByClassName('attribute-tooltip') as HTMLCollectionOf<HTMLElement>
 			for (let i = 0; i < tooltips.length; i++) {
@@ -341,5 +342,4 @@ export default Vue.extend({
 .attribute-items p:hover + .attribute-tooltip {
 	visibility: visible;
 }
-
 </style>

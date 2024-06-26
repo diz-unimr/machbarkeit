@@ -8,7 +8,7 @@
 			<p style="font-weight: 500;">
 				{{ selectedOntology.display }}
 			</p>
-			<button class="delete-btn" @click="deleteCard($vnode?.data?.attrs?.id)">
+			<button v-if="!isLimitationEditFeature" class="delete-btn" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
@@ -25,10 +25,10 @@
 				<template v-if="attribute === 'valueDefinition' && profile?.valueDefinition?.type">
 					<FilterCard :key="attribute + index"
 						:profile="profile"
-						display="Wertebereicht"
+						display="Wertebereich"
+						attribute="valueDefinition"
 						:selected-ontology="selectedOntology"
 						:is-filter-optional="profile.valueDefinition.optional"
-						attribute="valueDefinition"
 						@get-selected-options="getSelectedOptions" />
 				</template>
 			</template>
@@ -39,12 +39,17 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import FilterCard from './FilterCard.vue'
-import type { LimitationsSelectedFeaturesCardData } from '../../types/LimitationsSelectedFeaturesCardData.ts'
-import type { UiProfile } from '../../types/FeasibilityQueryBuilderData.ts'
-import type { SelectedOptionData } from '../Limitations/FilterCard.vue'
+import type { UiProfile, Profile } from '../../types/FeasibilityQueryBuilderData.ts'
+import type { SelectedOptionData } from '../../types/FilterCardData'
+import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
+
+interface LimitationsSelectedCriteriaCardData {
+    profile: Profile | null,
+    imgDelete: string,
+}
 
 export default Vue.extend({
-	name: 'LimitationsSelectedFeaturesCard',
+	name: 'LimitationsSelectedCriteriaCard',
 	components: {
 		FilterCard,
 	},
@@ -54,8 +59,12 @@ export default Vue.extend({
 			required: true,
 		},
 		selectedOntology: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<OntologyTreeElement>,
+			required: true,
+		},
+		isLimitationEditFeature: {
+			type: Boolean,
+			default: false,
 		},
 		getSelectedFeatureFilter: {
 			type: Function,
@@ -66,7 +75,7 @@ export default Vue.extend({
 			default: () => {},
 		},
 	},
-	data(): LimitationsSelectedFeaturesCardData {
+	data(): LimitationsSelectedCriteriaCardData {
 		return {
 			profile: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
@@ -79,7 +88,7 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getProfile()
-		// this.setProfile()
+		console.log('selectedOntology: ', this.selectedOntology)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -91,7 +100,7 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		getProfile() {
+		getProfile(): void {
 			if (this.selectedOntology.context.display === 'Diagnose' || this.selectedOntology.context.display === 'Prozedur') {
 				this.profile = this.uiProfile[this.selectedOntology.context.display]
 			} else {
@@ -99,49 +108,32 @@ export default Vue.extend({
 			}
 		},
 
-		/* setProfile() {
-			if (this.profile !== null && this.profile.timeRestrictionAllowed) {
-				// this.$emit('update-ontology-profile', 'timeRestriction')
-				this.selectedOntology.timeRestriction = null
-			}
-			if (this.profile !== null && this.profile.valueDefinition?.type === 'quantity') {
-				// this.$emit('update-ontology-profile', 'quantity')
-				this.selectedOntology.quantityType = null
-			}
-			if (this.profile !== null && this.profile.valueDefinition?.type === 'concept') {
-				// this.$emit('update-ontology-profile', 'concept')
-				this.selectedOntology.conceptType = null
-			}
-		}, */
-
-		getSelectedOptions(selectedOptions: SelectedOptionData[]) {
+		getSelectedOptions(selectedOptions: SelectedOptionData[]): void {
 			selectedOptions.map((obj) => {
 				switch (obj.type) {
 				case 'conceptType':
-					this.$emit('update-selected-ontology', { type: 'conceptType', item: obj })
-					// this.selectedOntology.conceptType = obj
+					this.$emit('update-selected-ontology', { item: obj }) // { type: 'conceptType', item: obj }
 					break
 				case 'quantityType':
-					this.$emit('update-selected-ontology', { type: 'quantityType', item: obj })
-					// this.selectedOntology.quantityType = obj
+					this.$emit('update-selected-ontology', { item: obj }) // { type: 'quantityType', item: obj }
 					break
 				case 'timeRange':
-					this.$emit('update-selected-ontology', { type: 'timeRange', item: obj })
-					// this.selectedOntology.timeRange = obj
+					this.$emit('update-selected-ontology', { item: obj }) // { type: 'timeRange', item: obj }
 					break
 				default:
 				}
 				return this.selectedOntology
 			})
 
+			console.log('this.selectedOntology: ', this.selectedOntology)
 			this.$emit('get-selected-feature-filter', this.selectedOntology)
 		},
 
-		validateEmptyInput() {
+		validateEmptyInput(): void {
 
 		},
 
-		deleteCard(key: number) {
+		deleteCard(key: number): void {
 			this.$emit('delete-dialog-card', key)
 		},
 	},
@@ -293,5 +285,4 @@ img {
 	width: 25px;
 	height: 20px;
 }
-
 </style>

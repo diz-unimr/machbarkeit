@@ -2,18 +2,19 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
+import type { FilterInfo } from './FeasibilityQueryBuilderData.ts'
 
-export interface ConceptType {
+interface OptionType {
     completeFilter: boolean;
     isFilterOptional: boolean;
     type: string;
+}
+
+export interface ConceptType extends OptionType {
     value: Array<string>;
 }
 
-export interface QuantityType {
-    completeFilter: boolean;
-    isFilterOptional: boolean;
-    type: string;
+export interface QuantityType extends OptionType {
     value: {
         max: string;
         min: string;
@@ -24,10 +25,7 @@ export interface QuantityType {
     };
 }
 
-export interface TimeRange {
-    completeFilter: boolean;
-    isFilterOptional: boolean;
-    type: string;
+export interface TimeRange extends OptionType {
     value: {
         fromDate: string;
         fromDateFormatted: string;
@@ -62,13 +60,8 @@ export interface UiProfile {
     Geschlecht: UiProfileDetails;
 }
 
-export interface LimitationsSelectedFeaturesData {
-    filterInfo: Array<{
-        display: string;
-        conceptType: ConceptType | undefined;
-        quantityType: QuantityType | undefined;
-        timeRange: TimeRange | undefined;
-    }>,
+export interface LimitationsSelectedCriteriaModalData {
+    filterInfo: FilterInfo[],
     notEmptyProfileName: Array<object>;
     isFilterComplete: boolean;
 }

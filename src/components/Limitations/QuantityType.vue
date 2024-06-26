@@ -61,7 +61,7 @@
 						class="input-wrapper">
 						<select v-model="comparisonRestriction.unit"
 							class="input-selection-textbox">
-							<option v-for="(unit_display, index) in profile.valueDefinition.allowedUnits"
+							<option v-for="(unit_display, index) in profile.valueDefinition?.allowedUnits"
 								:key="index"
 								:value="unit_display.display">
 								{{ unit_display.display }}
@@ -79,34 +79,17 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-
-interface QuantityTypeData {
-    typeSymbol: {
-        'kein Filter': string,
-        gleich: string,
-        kleiner: string,
-        größer: string,
-        zwischen: string,
-    },
-    comparisonRestriction: {
-        type: string,
-        typeSymbol: string,
-        unit: string,
-        value: string,
-        min: string,
-        max: string,
-    },
-    isFilterOptional: boolean,
-}
+import Vue, { type PropType } from 'vue'
+import type { Profile } from '../../types/FeasibilityQueryBuilderData'
+import type { QuantityTypeData } from '../../types/QuantityTypeData.ts'
 
 export default Vue.extend({
 	name: 'QuantityType',
 	components: {},
 	props: {
 		profile: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<Profile>,
+			required: true,
 		},
 		toggleResetButton: {
 			type: Function,
@@ -133,7 +116,7 @@ export default Vue.extend({
 			comparisonRestriction: {
 				type: 'kein Filter',
 				typeSymbol: 'kein Filter',
-				unit: this.profile.valueDefinition.allowedUnits[0].display,
+				unit: this.profile.valueDefinition?.allowedUnits[0].display,
 				value: '0',
 				min: '0',
 				max: '0',
@@ -143,7 +126,7 @@ export default Vue.extend({
 	},
 
 	watch: {
-		'comparisonRestriction.type'() {
+		'comparisonRestriction.type'(): void {
 			this.comparisonRestriction.typeSymbol = this.typeSymbol[this.comparisonRestriction.type]
 
 			if (this.comparisonRestriction.type !== 'kein Filter') {
@@ -187,7 +170,7 @@ export default Vue.extend({
 			if (this.isResetDisabled && this.comparisonRestriction.type !== 'kein Filter') {
 				this.comparisonRestriction.type = 'kein Filter'
 				this.comparisonRestriction.typeSymbol = 'kein Filter'
-				this.comparisonRestriction.unit = this.profile.valueDefinition.allowedUnits[0].display
+				this.comparisonRestriction.unit = this.profile.valueDefinition?.allowedUnits[0].display
 				this.comparisonRestriction.value = '0'
 				this.comparisonRestriction.min = '0'
 				this.comparisonRestriction.max = '0'
@@ -204,9 +187,11 @@ export default Vue.extend({
 			completeFilter: false,
 		})
 	},
+
 	methods: {
-		checkEmptyValue(event, tag) {
-			if (event.target.value.length === 0) {
+		checkEmptyValue(event: Event, tag: string): void {
+			const eventTarget = event.target as HTMLInputElement
+			if (eventTarget.value.length === 0) {
 				this.comparisonRestriction[tag] = '0'
 			}
 		},

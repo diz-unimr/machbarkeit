@@ -63,11 +63,11 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
 import CriteriaNestedTreeNodeSearch from './CriteriaNestedTreeNodeSearch.vue'
-import type { SearchTreeOverlayContentData } from '../types/SearchTreeOverlayContentData.ts'
+import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
 import type { CheckedItem } from '../components/CriteriaNestedTreeNode.vue'
 
 export default Vue.extend({
-	name: 'SearchTreeOverlayContent',
+	name: 'OntologySearchTreeModal',
 	components: {
 		CriteriaNestedTreeNode,
 		CriteriaNestedTreeNodeSearch,
@@ -95,17 +95,14 @@ export default Vue.extend({
 		},
 	},
 
-	data(): SearchTreeOverlayContentData {
+	data(): OntologySearchTreeModalData {
 		return {
 			activeTab: 0,
 			criteriaResponse: null,
 			criteriaData: null,
 			selectedItems: [],
-			tempArray: [],
 		}
 	},
-
-	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -123,16 +120,16 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		async getOntology() {
+		async getOntology(): Promise<void> {
 			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
 			this.criteriaResponse = jsonData.data
 		},
 
-		activateTab(index: string | number) {
+		activateTab(index: string | number): void {
 			this.activeTab = index
 		},
 
-		getCheckboxItems(checkedItem: CheckedItem) {
+		getCheckboxItems(checkedItem: CheckedItem): void {
 			if (checkedItem.action === 'add') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'delete') {
@@ -151,7 +148,7 @@ export default Vue.extend({
 	overflow-x: hidden;
 	scrollbar-width: auto;
 	height: 100%;
-	width: 100;
+	padding-right: 10px;
 }
 
 .search-tree-overlay-container {

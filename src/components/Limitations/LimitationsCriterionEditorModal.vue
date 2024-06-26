@@ -6,24 +6,20 @@
 	<div class="selection-dialog-wrapper">
 		<div class="selection-dialog-pane">
 			<div class="selection-dialog">
-				<h2 class="selection-dialog-title">
-					Einschränkungen der ausgewählten Merkmale
-				</h2>
 				<div class="selection-dialog-panel">
-					<LimitationsSelectedFeaturesCard v-for="(selectedOntology, index) in selectedCriteria"
+					<LimitationsSelectedCriteriaCard v-for="(selectedOntology, index) in selectedEditedCriteria"
 						:id="index"
 						:key="selectedOntology.id"
 						:ui-profile="uiProfile"
 						:selected-ontology="selectedOntology"
+						:is-limitation-edit-feature="true"
 						@get-selected-feature-filter="getSelectedFeatureFilter"
 						@update-ontology-profile="updateOntologyProfile(index, $event)"
-						@update-selected-ontology="updateSelectedOntology(index, $event)"
-						@delete-dialog-card="deleteDialogCard" />
+						@update-selected-ontology="updateSelectedOntology(index, $event)" />
 				</div>
-
 				<div class="dialog-button">
 					<button :disabled="!isFilterComplete" @click="submit">
-						HINZUFÜGEN
+						SPEICHERN
 					</button>
 					<button @click="$emit('dialog-close')">
 						ABBRECHEN
@@ -36,37 +32,25 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import LimitationsSelectedFeaturesCard from './LimitationsSelectedFeaturesCard.vue'
-import type { ConceptType, QuantityType, TimeRange, LimitationsSelectedFeaturesData } from '../../types/LimitationsSelectedFeaturesData.ts'
-import type { CriteriaResponse } from '../../types/SearchTreeOverlayContentData'
+import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
+import type { ConceptType, QuantityType, TimeRange, LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
+import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
 import type { UiProfile } from '../../types/FeasibilityQueryBuilderData'
 
-interface FilteredCriteriaData {
-	context: object;
-	display: string;
-	id: string;
-	leaf: string;
-	conceptType: ConceptType | undefined;
-	timeRange: TimeRange | undefined;
-	quantityType: QuantityType | undefined;
-	selectable: boolean;
-	termCodes: Array<object>;
-}
-
-export interface updatedOntologyData {
+interface updatedOntologyData {
 	type: string;
-	item: object;
+	item: ConceptType | QuantityType | TimeRange | undefined;
 }
 
 export default Vue.extend({
-	name: 'LimitationsSelectedFeatures',
+	name: 'LimitationsCriterionEditorModal',
 	components: {
-		LimitationsSelectedFeaturesCard,
+		LimitationsSelectedCriteriaCard,
 	},
 	props: {
-		selectedCriteria: { // selectedOntologyArray
-			type: Array<CriteriaResponse>,
-			required: true,
+		selectedEditedCriteria: {
+			type: Array<OntologyTreeElement>,
+			default: null,
 		},
 		uiProfile: {
 			type: Object as PropType<UiProfile>,
@@ -78,7 +62,7 @@ export default Vue.extend({
 		},
 	},
 
-	data(): LimitationsSelectedFeaturesData {
+	data(): LimitationsSelectedCriteriaModalData {
 		return {
 			filterInfo: [],
 			notEmptyProfileName: [],
@@ -90,17 +74,18 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		console.log('selectedEditedCriteria: ', this.selectedEditedCriteria)
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {
-	},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		getNotEmptyProfile(uiProfile: UiProfile) {
+		getNotEmptyProfile(uiProfile: UiProfile): void {
 			const profileKeys = Object.keys(uiProfile)
 			for (let i = 0; i < profileKeys.length; i++) {
 				const key = profileKeys[i]
@@ -110,25 +95,14 @@ export default Vue.extend({
 			}
 		},
 
-		deleteDialogCard(index: number) {
-			if (this.selectedCriteria !== null) {
-				this.$emit('delete-selected-criteria', index)
-				// this.selectedCriteria.splice(index, 1)
-				this.filterInfo.splice(index, 1)
-				if (this.selectedCriteria.length === 0) {
-					this.$emit('dialog-close')
-				} else this.checkCompleteFilter()
-			}
-		},
-
-		getSelectedFeatureFilter(filteredCriteria: FilteredCriteriaData) {
+		getSelectedFeatureFilter(filteredCriteria: OntologyTreeElement): void {
 			const filter = {
+				id: filteredCriteria.id,
 				display: filteredCriteria.display,
 				conceptType: filteredCriteria.conceptType,
 				quantityType: filteredCriteria.quantityType,
 				timeRange: filteredCriteria.timeRange,
 			}
-
 			const index = this.filterInfo.findIndex(item => item.display === filter.display)
 			if (index === -1) {
 				this.filterInfo.push(filter)
@@ -137,11 +111,11 @@ export default Vue.extend({
 			this.checkCompleteFilter()
 		},
 
-		checkCompleteFilter() {
+		checkCompleteFilter(): void {
 			const notCompleteFilter = this.filterInfo.filter(item => {
 				let notComplete = false
 				for (const key in item) {
-					if (item[key] && key !== 'display') {
+					if (item[key] && key !== 'display' && key !== 'id') {
 						notComplete = item[key].isFilterOptional ? false : !item[key].completeFilter
 						if (notComplete) {
 							return notComplete
@@ -156,15 +130,16 @@ export default Vue.extend({
 			} else this.isFilterComplete = true
 		},
 
-		updateOntologyProfile(index: string | number, profileType: string) {
-			this.$emit('update-selected-criteria', { id: index, type: profileType })
+		updateOntologyProfile(index: string | number, profileType: string): void {
+			this.$emit('update-edited-criteria', { id: index, type: profileType })
 		},
 
-		updateSelectedOntology(index: string | number, item: updatedOntologyData) {
-			this.$emit('update-selected-criteria', { id: index, data: item })
+		updateSelectedOntology(index: string | number, item: updatedOntologyData): void {
+			console.log('item: ', item)
+			this.$emit('update-edited-criteria', { id: index, ...item })
 		},
 
-		submit() {
+		submit(): void {
 			this.$emit('get-filter-info', this.filterInfo)
 			this.$emit('dialog-close')
 		},
@@ -239,5 +214,4 @@ export default Vue.extend({
 .dialog-button button {
 	border-radius: 8px;
 }
-
 </style>

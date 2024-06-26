@@ -12,7 +12,7 @@
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
 				</button>
 				<p>{{ display }} </p>
-				<p v-if="display === 'Zeitraum' || profile.valueDefinition.optional">
+				<p v-if="display === 'Zeitraum' || profile.valueDefinition?.optional">
 					(optional)
 				</p>
 			</div>
@@ -22,20 +22,19 @@
 				</button>
 			</div>
 		</div>
-
-		<TimeRangeOption v-if="profile.timeRestrictionAllowed"
+		<TimeRangeOption v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
 			@toggle-reset-button="toggleResetButton"
 			@get-selected-option="getSelectedOption" />
 
-		<QuantityType v-if="profile.valueDefinition?.type === 'quantity'"
+		<QuantityType v-if="profile.valueDefinition?.type === 'quantity' && display === 'Wertebereich'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
 			@toggle-reset-button="toggleResetButton"
 			@get-selected-option="getSelectedOption" />
 
-		<ConceptType v-if="profile.valueDefinition?.type === 'concept'"
+		<ConceptType v-if="profile.valueDefinition?.type === 'concept' && display === 'Wertebereich'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
 			:selected-ontology="selectedOntology"
@@ -45,24 +44,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { type PropType } from 'vue'
 import TimeRangeOption from './TimeRangeOption.vue'
 import ConceptType from './ConceptType.vue'
 import QuantityType from './QuantityType.vue'
-
-interface FilterCardData {
-	state: boolean,
-	isResetDisabled: boolean,
-	groupFilter: Array<object>,
-	imgExpand: string
-}
-
-export interface SelectedOptionData {
-	type: string;
-	value: object;
-	isFilterOptional: boolean;
-	completeFilter: boolean;
-}
+import type { FilterCardData, SelectedOptionData } from '../../types/FilterCardData'
+import type { Profile } from '../../types/FeasibilityQueryBuilderData'
+import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'FilterCard',
@@ -73,8 +61,8 @@ export default Vue.extend({
 	},
 	props: {
 		profile: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<Profile>,
+			required: true,
 		},
 		attribute: {
 			type: String,
@@ -85,8 +73,8 @@ export default Vue.extend({
 			default: true,
 		},
 		selectedOntology: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<OntologyTreeElement>,
+			default: Object as PropType<OntologyTreeElement>,
 		},
 		display: {
 			type: String,
@@ -99,7 +87,8 @@ export default Vue.extend({
 	},
 	data(): FilterCardData {
 		return {
-			state: !this.isFilterOptional,
+			state: this.profile.valueDefinition ? !this.profile.valueDefinition?.optional : false, // set state = false for optional Filter
+			// state: !this.isFilterOptional,
 			isResetDisabled: true,
 			groupFilter: [],
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
@@ -119,22 +108,29 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		setState() {
-			if (!this.profile.valueDefinition.optional) {
+		setState(): void {
+			if (!this.profile.valueDefinition?.optional) {
 				this.state = true
 			}
 		},
 
-		getSelectedOption(selectedOption: SelectedOptionData) {
-			this.groupFilter.push(selectedOption)
+		getSelectedOption(selectedOption: SelectedOptionData): void {
+			console.log('selectedOption: ', selectedOption)
+			const index = this.groupFilter.findIndex(item => item.type === selectedOption.type)
+			if (index === -1) {
+				this.groupFilter.push(selectedOption)
+			} else {
+				this.groupFilter.splice(index, 1, selectedOption)
+			}
+			console.log('this.groupFilter: ', this.groupFilter)
 			this.$emit('get-selected-options', this.groupFilter)
 		},
 
-		toggleResetButton(isReset: boolean) {
+		toggleResetButton(isReset: boolean): void {
 			this.isResetDisabled = !isReset
 		},
 
-		reset() {
+		reset(): void {
 			this.isResetDisabled = true
 		},
 	},

@@ -3,11 +3,10 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-
 	<div class="criteria-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="criteria-head-node">
-				<button :class="{'default-cursor': !criterion.children}" @click="() => (state = !state)">
+				<button :class="{'default-cursor': !criterion.children, 'display-none': !criterion.children}" @click="() => (state = !state)">
 					<img v-if="criterion.children"
 						:src="state
 							? imgExpand
@@ -46,8 +45,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData'
+import Vue, { type PropType } from 'vue'
+import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
 
 interface CriteriaNestedTreeNodeData {
 	state: boolean;
@@ -55,22 +54,9 @@ interface CriteriaNestedTreeNodeData {
 	imgExpand: string;
 }
 
-export interface FilteredCriteriaData {
-	context: object;
-	display: string;
-	id: string;
-	leaf: boolean;
-	selectable: boolean;
-	termCodes: [{
-		code: string,
-		display: string,
-		system: string,
-	}];
-}
-
 export interface CheckedItem {
 	action: string;
-	node: CriteriaResponse;
+	node: OntologyTreeElement;
 }
 
 export default Vue.extend({
@@ -82,8 +68,8 @@ export default Vue.extend({
 			default: false,
 		},
 		criterion: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<OntologyTreeElement>,
+			required: true,
 		},
 		einschlussTextSerach: {
 			type: String,
@@ -94,6 +80,7 @@ export default Vue.extend({
 			default: '',
 		},
 	},
+
 	data(): CriteriaNestedTreeNodeData {
 		return {
 			state: false,
@@ -105,11 +92,11 @@ export default Vue.extend({
 	computed: {
 		isChecked: {
 			// Determines if the current item is checked
-			get() {
+			get(): string {
 				return ''
 			},
 			// Updates checked items when checkbox state changes
-			set(checked) {
+			set(checked): void {
 				if (checked) {
 					this.$emit('input', { action: 'add', node: this.criterion })
 				} else {
@@ -136,7 +123,7 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		checkboxTrigger(checkedItem: CheckedItem) {
+		checkboxTrigger(checkedItem: CheckedItem): void {
 			this.$emit('input', checkedItem)
 		},
 	},
@@ -153,6 +140,7 @@ input[type='checkbox'] {
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
+	padding-right: 10px;
 }
 
 .criteria-head-node {
@@ -160,7 +148,8 @@ input[type='checkbox'] {
 	box-sizing: border-box;
 	display: flex;
 	place-content: center flex-start;
-	align-items: flex-start
+	align-items: flex-start;
+	margin-top: 4px;
 }
 
 .criteria-head-node button {
@@ -179,9 +168,9 @@ input[type='checkbox'] {
 .search-tree-term-entry {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	align-items: flex-start;
 	margin-left: 5px;
-	margin-top: 4px;
+	/* margin-top: 4px; */
 }
 
 .search-tree-term-entry input {
@@ -192,6 +181,7 @@ input[type='checkbox'] {
 	font-size: 16px;
 	font-weight: 400;
 	padding-left: 10px;
+	margin-top: 5px;
 }
 
 .search-tree-term-entry p:hover {
@@ -202,6 +192,10 @@ input[type='checkbox'] {
 	cursor: default
 }
 
+.display-none {
+	display: none !important;
+}
+
 img {
 	height: 12px;
 	width: 12px;
@@ -210,5 +204,4 @@ img {
 ul {
 	margin-left: 40px;
 }
-
 </style>

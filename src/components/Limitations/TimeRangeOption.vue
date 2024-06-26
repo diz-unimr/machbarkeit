@@ -66,25 +66,16 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-
-interface TimeRangOptaionData {
-    timeRangeRestriction: {
-        type: string,
-        fromDate: string | null,
-        fromDateFormatted: string | null,
-        toDate: string | null,
-        toDateFormatted: string | null,
-    },
-    isFilterOptional: boolean
-}
+import Vue, { type PropType } from 'vue'
+import type { TimeRangOptaionData } from '../../types/TimeRangeOptionData'
+import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 
 export default Vue.extend({
 	name: 'TimeRangeOption',
 	props: {
 		profile: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<Profile>,
+			required: true,
 		},
 		toggleResetButton: {
 			type: Function,
@@ -99,6 +90,7 @@ export default Vue.extend({
 			default: true,
 		},
 	},
+
 	data(): TimeRangOptaionData {
 		return {
 			timeRangeRestriction: {
@@ -115,6 +107,7 @@ export default Vue.extend({
 	watch: {
 		timeRangeRestriction: {
 			handler() {
+				console.log('this.timeRangeRestriction.type: ', this.timeRangeRestriction.type)
 				if (this.timeRangeRestriction.type === 'kein Filter') {
 					this.$emit('get-selected-option', {
 						type: 'timeRange',
@@ -172,20 +165,18 @@ export default Vue.extend({
 			isFilterOptional: this.isFilterOptional,
 			completeFilter: false,
 		})
+		console.log('timeRangeRestriction: ', this.timeRangeRestriction)
 	},
 
 	methods: {
-		addTimeRangeOption() {
-		},
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		formatDate(event: any) {
-			const date = new Date(event.target.value)
+		formatDate(event: Event): void {
+			const eventTarget = event.target as HTMLInputElement
+			const date = new Date(eventTarget.value)
 			const day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
 			const month = (date.getMonth() + 1) >= 10 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
 			const year = date.getFullYear()
 			const formattedDate = day + '-' + month + '-' + year
-			this.timeRangeRestriction[event.target.name + 'Formatted'] = formattedDate
+			this.timeRangeRestriction[eventTarget.name + 'Formatted'] = formattedDate
 		},
 	},
 })
