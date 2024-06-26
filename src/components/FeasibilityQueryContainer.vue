@@ -10,7 +10,7 @@
 					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
 				</div>
 				<div class="query-button">
-					<button>
+					<button :disabled="true">
 						ZURÜCKSETZEN
 					</button>
 					<button>
@@ -49,7 +49,7 @@ export default Vue.extend({
 			isDialogOpen: false,
 		}
 	},
-	computed: {},
+
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
@@ -63,10 +63,10 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		querySaveDialogOpen() {
+		querySaveDialogOpen(): void {
 			this.isDialogOpen = true
 		},
-		querySaveDiaglogClose() {
+		querySaveDiaglogClose(): void {
 			this.isDialogOpen = false
 		},
 	},

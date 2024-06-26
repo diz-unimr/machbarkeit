@@ -3,7 +3,6 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-
 	<div>
 		<div v-if="filteredCriteria !== null && filteredCriteria.selectable === true"
 			class="search-tree-term-entry">
@@ -32,29 +31,15 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData'
-
-interface FilteredCriteriaData {
-	children: Array<FilteredCriteriaData> | undefined;
-	context: object;
-	display: string;
-	id: string;
-	leaf: boolean;
-	selectable: boolean;
-	termCodes: [{
-		code: string,
-		display: string,
-		system: string,
-	}];
-}
+import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
 
 interface CriteriaNestedTreeNodeSearchData {
-	filteredCriteria: FilteredCriteriaData | null
+	filteredCriteria: OntologyTreeElement | null
 }
 
 export interface CheckedItem {
 	action: string;
-	node: CriteriaResponse;
+	node: OntologyTreeElement;
 }
 
 export default Vue.extend({
@@ -62,7 +47,7 @@ export default Vue.extend({
 	components: {},
 	props: {
 		criterion: {
-			type: Object as PropType<FilteredCriteriaData>,
+			type: Object as PropType<OntologyTreeElement>,
 			required: true,
 		},
 		einschlussTextSerach: {
@@ -74,6 +59,7 @@ export default Vue.extend({
 			default: '',
 		},
 	},
+
 	data(): CriteriaNestedTreeNodeSearchData {
 		return {
 			filteredCriteria: null,
@@ -132,11 +118,11 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		checkboxTrigger(checkedItem: CheckedItem) {
+		checkboxTrigger(checkedItem: CheckedItem): void {
 			this.$emit('input', checkedItem)
 		},
 
-		filterCriteria(textSearch: string, criterion: FilteredCriteriaData) {
+		filterCriteria(textSearch: string, criterion: OntologyTreeElement): void {
 			const filteredItem = criterion.termCodes[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes[0].display.toLowerCase().includes(textSearch.toLowerCase())
 
 			if (filteredItem) {
@@ -178,5 +164,4 @@ input[type='checkbox'] {
 	width: 15%;
 	margin-top: 4px;
 }
-
 </style>

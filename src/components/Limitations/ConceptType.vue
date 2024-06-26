@@ -9,7 +9,7 @@
 		</div>
 		<div class="content-option__body">
 			<div class="content-option-checkbox">
-				<div v-for="(code, index) in profile.valueDefinition.selectableConcepts"
+				<div v-for="(code, index) in profile.valueDefinition?.selectableConcepts"
 					:key="index"
 					class="checkbox-option">
 					<!-- https://kyoshee.medium.com/building-custom-checkbox-using-only-html-and-css-no-js-1-babd79d5e2e9 -->
@@ -27,19 +27,17 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-
-interface ConceptTypeData {
-	selectedConcepts: Array<object>;
-	isFilterOptional: boolean;
-}
+import Vue, { type PropType } from 'vue'
+import type { ConceptTypeData } from '../../types/ConceoptTypeData'
+import type { Profile } from '../../types/FeasibilityQueryBuilderData'
+import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'ConceptType',
 	props: {
 		profile: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<Profile>,
+			required: true,
 		},
 		toggleResetButton: {
 			type: Function,
@@ -54,13 +52,13 @@ export default Vue.extend({
 			default: true,
 		},
 		selectedOntology: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<OntologyTreeElement>,
+			required: true,
 		},
 	},
 	data(): ConceptTypeData {
 		return {
-			selectedConcepts: this.selectedOntology.conceptType ? this.selectedOntology.conceptType : [],
+			selectedConcepts: this.selectedOntology.conceptType ? this.selectedOntology.conceptType.value : [],
 			isFilterOptional: this.profile.valueDefinition?.optional,
 		}
 	},
@@ -79,7 +77,7 @@ export default Vue.extend({
 				this.$emit('toggle-reset-button', false)
 			}
 		},
-		isResetDisabled() {
+		isResetDisabled(): void {
 			if (this.isResetDisabled) {
 				this.selectedConcepts = []
 			}
@@ -158,5 +156,4 @@ input[type='checkbox'] {
 	padding: 10px 20px;
 	margin-bottom: 20px;
 }
-
 </style>

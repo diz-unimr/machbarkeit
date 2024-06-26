@@ -33,6 +33,7 @@ class MachbarkeitService {
 			'Person.json',
 			'test.json',
 			/* 'Diagnose.json',
+			'test.json',
 			'Laboruntersuchung.json',
 			'Prozedur.json' */
 		];

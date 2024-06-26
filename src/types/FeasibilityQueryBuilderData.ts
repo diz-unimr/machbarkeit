@@ -2,33 +2,48 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData.ts'
-import type { ConceptType, QuantityType, TimeRange } from '../types/LimitationsSelectedFeaturesData.ts'
+import type { OntologyTreeElement } from './OntologySearchTreeModalData.ts'
+import type { ConceptType, QuantityType, TimeRange } from './LimitationsSelectedCriteriaModalData.ts'
 
 export interface SelectedCriteriaData {
 	criteriaType: string;
-	selectedItems: CriteriaResponse[];
+	selectedItems: OntologyTreeElement[];
 }
 
 export interface FilterInfo {
+    id: string;
     display: string;
-    conceptType: ConceptType;
-    quantityType: QuantityType;
-    timeRange: TimeRange;
+    conceptType: ConceptType | undefined;
+    quantityType: QuantityType | undefined;
+    timeRange: TimeRange | undefined;
 }
 
-interface ValueDefinition {
-    allowedUnits: Array<object>;
+export interface ValueDefinition {
+    allowedUnits: [
+        {
+            code: string;
+            display: string;
+            system: string;
+            version: string | null | undefined;
+        }
+    ];
     max: number | null;
     min: number | null;
     optional: boolean;
     precision: number;
     referenceCriteriaSet: null;
-    selectableConcepts: Array<object>;
+    selectableConcepts: [
+        {
+            code: string;
+            display: string;
+            system: string;
+            version: string;
+        }
+    ];
     type: string;
 }
 
-interface UiProfileDetails {
+export interface Profile {
     attributeDefinitions: Array<object>;
     name: string;
     timeRestrictionAllowed: boolean;
@@ -36,10 +51,10 @@ interface UiProfileDetails {
 }
 
 export interface UiProfile {
-    Diagnose: UiProfileDetails;
-    Prozedur: UiProfileDetails;
-    'Gegenwärtiges chronologisches Alter': UiProfileDetails;
-    Geschlecht: UiProfileDetails;
+    Diagnose: Profile;
+    Prozedur: Profile;
+    'Gegenwärtiges chronologisches Alter': Profile;
+    Geschlecht: Profile;
 }
 
 export interface FeasibilityQueryBuilderData {
@@ -47,12 +62,14 @@ export interface FeasibilityQueryBuilderData {
     einschlussTextSerach: string;
     ausschlussTextSerach: string;
     isCriteriaOptionOpen: boolean;
-    isCriteriaOverlayOpen: boolean;
-    isEinschlusskriterienOverlayOpen: boolean;
-    isAusschlusskriterienOverlayOpen: boolean;
+    isCriteriaOptionEditorOpen: boolean;
+    isCriteriaContentOpen: boolean;
     criteriaOverlayType: string;
-    selectedCriteria: CriteriaResponse[] | null;
+    selectedCriteria: OntologyTreeElement[] | null;
+    selectedEditedCriteria: OntologyTreeElement[] | null;
+    selectedEditedCriteriaIndex: number | null
     selectedCharacteristicsEin: Array<FilterInfo>;
     selectedCharacteristicsAus: Array<FilterInfo>;
+    btnLastChild: number | null;
     imgDelete: string;
 }

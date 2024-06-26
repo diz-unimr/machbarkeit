@@ -27,16 +27,14 @@
 							</button>
 						</div>
 						<div class="search-input">
-							<NcTextField ref="einschlussTextSerach"
-								:value.sync="einschlussTextSerach"
+							<NcTextField :value.sync="einschlussTextSerach"
 								style="font-size: 16px;"
 								label="Code oder Suchbegriff eingeben"
 								trailing-button-icon="close"
 								placeholder=" "
 								:show-trailing-button="einschlussTextSerach !== ''"
 								@trailing-button-click="einschlussTextSerach = ''"
-								@focus="focusInput('Einschlusskriterien')"
-								@input="searchCodeEinschlusskriterien">
+								@focus="focusInput('Einschlusskriterien')">
 								<Magnify :size="20" />
 							</NcTextField>
 						</div>
@@ -71,15 +69,14 @@
 								placeholder=" "
 								:show-trailing-button="ausschlussTextSerach !== ''"
 								@trailing-button-click="ausschlussTextSerach = ''"
-								@focus="focusInput('Ausschlusskriterien')"
-								@input="searchCodeAusschlusskriterien">
+								@focus="focusInput('Ausschlusskriterien')">
 								<Magnify :size="20" />
 							</NcTextField>
 						</div>
 					</div>
 				</div>
 			</div>
-			<SearchTreeOverlayContent v-if="isCriteriaOverlayOpen"
+			<OntologySearchTreeModal v-if="isCriteriaContentOpen"
 				:criteria-type="criteriaOverlayType"
 				:einschluss-text-serach="einschlussTextSerach"
 				:ausschluss-text-serach="ausschlussTextSerach"
@@ -87,7 +84,7 @@
 				@toggle-search-criteria="toggleSearchCriteria" />
 		</div>
 
-		<LimitationsSelectedFeatures v-if="isCriteriaOptionOpen"
+		<LimitationsSelectedCriteriaModal v-if="isCriteriaOptionOpen"
 			:selected-criteria="selectedCriteria"
 			:ui-profile="uiProfile"
 			@dialog-close="selectionOntologyDiaglogClose"
@@ -95,112 +92,18 @@
 			@update-selected-criteria="updateSelectedCriteria"
 			@delete-selected-criteria="deleteSelectedCriteria" />
 
-		<div class="feasibility-query__output">
-			<div class="output-header">
-				<p>Ausgewählte Merkmale</p>
-			</div>
-			<div class="output-content">
-				<div id="Einschlusskriterien" class="output-textfield">
-					<div v-if="selectedCharacteristicsEin.length > 0">
-						<div>
-							<div v-for="(characteristic, index) in selectedCharacteristicsEin" :key="index" class="selected-criteria-container">
-								<div class="selected-criteria-left" />
-								<div class="selected-criteria-middle">
-									<div class="selected-criteria-display">
-										{{ characteristic.display }}
-									</div>
-									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-										<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-											{{ type }}
-										</span>
-									</div>
-									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
-										</p>
-										<p v-else>
-											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
-										</p>
-									</div>
-									<div v-if="characteristic.timeRange" class="selected-criteria-condition">
-										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
-										</p>
-										<p v-else>
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
-										</p>
-									</div>
-								</div>
-								<div class="selected-criteria-right">
-									<button class="delete-btn" @click="deleteCharacteristic(index, 'Einschlusskriterien')">
-										<svg role="img"
-											width="20px"
-											height="20px"
-											aria-hidden="true"
-											focusable="false"
-											data-prefix="fas"
-											data-icon="times"
-											class="svg-inline--fa fa-times fa-w-11 fa-lg"
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 352 512"><path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" /></svg>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="pipe" />
-				<div id="Ausschlusskriterien" class="output-textfield">
-					<div v-if="selectedCharacteristicsAus.length > 0">
-						<div>
-							<div v-for="(characteristic, index) in selectedCharacteristicsAus" :key="index" class="selected-criteria-container">
-								<div class="selected-criteria-left" />
-								<div class="selected-criteria-middle">
-									<div class="selected-criteria-display">
-										{{ characteristic.display }}
-									</div>
-									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-										<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-											{{ type }}
-										</span>
-									</div>
-									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
-										</p>
-										<p v-else>
-											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
-										</p>
-									</div>
-									<div v-if="characteristic.timeRange" class="selected-criteria-condition">
-										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
-										</p>
-										<p v-else>
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
-										</p>
-									</div>
-								</div>
-								<div class="selected-criteria-right">
-									<button class="delete-btn" @click="deleteCharacteristic(index, 'Ausschlusskriterien')">
-										<svg role="img"
-											width="18px"
-											height="18px"
-											aria-hidden="true"
-											focusable="false"
-											data-prefix="fas"
-											data-icon="times"
-											class="svg-inline--fa fa-times fa-w-11 fa-lg"
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 352 512"><path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" /></svg>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		<LimitationsCriterionEditorModal v-if="isCriteriaOptionEditorOpen"
+			:selected-edited-criteria="selectedEditedCriteria"
+			:ui-profile="uiProfile"
+			@dialog-close="selectionOntologyDiaglogClose"
+			@get-filter-info="getFilterInfo"
+			@update-edited-criteria="updateEditedCriteria"
+			@delete-selected-criteria="deleteSelectedCriteria" />
+
+		<FeasibilityQueryDisplay :selected-characteristics-ein="selectedCharacteristicsEin"
+			:selected-characteristics-aus="selectedCharacteristicsAus"
+			@edit-criteria-limitation="editCriteriaLimitation"
+			@delete-characteristic="deleteCharacteristic" />
 	</div>
 </template>
 
@@ -210,22 +113,22 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
-import SearchTreeOverlayContent from './SearchTreeOverlayContent.vue'
-import LimitationsSelectedFeatures from './Limitations/LimitationsSelectedFeatures.vue'
+import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
+import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
+import LimitationsCriterionEditorModal from './Limitations/LimitationsCriterionEditorModal.vue'
+import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
 import type { FilterInfo, FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
-import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData.ts'
+import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import type { ConceptType, QuantityType, TimeRange } from '../types/LimitationsSelectedCriteriaModalData.ts'
 
 interface SelectedCriteriaData {
 	criteriaType: string;
-	selectedItems: CriteriaResponse[];
+	selectedItems: OntologyTreeElement[];
 }
 
 interface updatedCriteriaData {
-	id: string | number
-	data: {
-		type: string;
-		item: object;
-	};
+	id: string | number;
+	item: ConceptType | QuantityType | TimeRange;
 }
 
 export default Vue.extend({
@@ -233,8 +136,10 @@ export default Vue.extend({
 	components: {
 		NcTextField,
 		Magnify,
-		SearchTreeOverlayContent,
-		LimitationsSelectedFeatures,
+		OntologySearchTreeModal,
+		LimitationsSelectedCriteriaModal,
+		LimitationsCriterionEditorModal,
+		FeasibilityQueryDisplay,
 	},
 
 	data(): FeasibilityQueryBuilderData {
@@ -243,13 +148,15 @@ export default Vue.extend({
 			einschlussTextSerach: '',
 			ausschlussTextSerach: '',
 			isCriteriaOptionOpen: false,
-			isCriteriaOverlayOpen: false,
-			isEinschlusskriterienOverlayOpen: false,
-			isAusschlusskriterienOverlayOpen: false,
+			isCriteriaOptionEditorOpen: false,
+			isCriteriaContentOpen: false,
 			criteriaOverlayType: '',
 			selectedCriteria: null,
+			selectedEditedCriteria: null,
+			selectedEditedCriteriaIndex: null,
 			selectedCharacteristicsEin: [],
 			selectedCharacteristicsAus: [],
+			btnLastChild: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
 	},
@@ -258,15 +165,15 @@ export default Vue.extend({
 		einschlussTextSerach() {
 			if (this.einschlussTextSerach.length > 0) {
 				this.criteriaOverlayType = 'Einschlusskriterien'
-				this.isCriteriaOverlayOpen = true
-			} else this.isCriteriaOverlayOpen = false
+				this.isCriteriaContentOpen = true
+			} else this.isCriteriaContentOpen = false
 		},
 
 		ausschlussTextSerach() {
 			if (this.ausschlussTextSerach.length > 0) {
 				this.criteriaOverlayType = 'Ausschlusskriterien'
-				this.isCriteriaOverlayOpen = true
-			} else this.isCriteriaOverlayOpen = false
+				this.isCriteriaContentOpen = true
+			} else this.isCriteriaContentOpen = false
 		},
 	},
 
@@ -280,50 +187,58 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
+	updated() {
+		/* if (document.getElementsByClassName('einschlusscriteria-combining-operator').length > 0) {
+			console.log('update')
+			const buttonElements = document.getElementsByClassName('einschlusscriteria-combining-operator') as HTMLCollectionOf<HTMLElement>
+			// const lastButton = buttonElements.length - 1
+			if (this.firstAusschlussCriteria === true) {
+				buttonElements[0].style.display = 'none'
+			}
+
+		}
+		console.log(document.getElementsByClassName('ausschlusscriteria-combining-operator').length)
+		if (document.getElementsByClassName('ausschlusscriteria-combining-operator').length > 0) {
+			const buttonElements = document.getElementsByClassName('ausschlusscriteria-combining-operator') as HTMLCollectionOf<HTMLElement>
+			const lastButton = buttonElements.length - 1
+			console.log('lastButton Aus: ', lastButton)
+			buttonElements[lastButton].style.display = 'none'
+		} */
+	},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		async getUiProfile() {
+		async getUiProfile(): Promise<void> {
 			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
 			this.uiProfile = response.data
 		},
 
-		toggleSearchCriteria(type: string) {
+		toggleSearchCriteria(type: string): void {
 			this.criteriaOverlayType = type
-			this.isCriteriaOverlayOpen = !this.isCriteriaOverlayOpen
+			this.isCriteriaContentOpen = !this.isCriteriaContentOpen
+			this.einschlussTextSerach = ''
+			this.ausschlussTextSerach = ''
 		},
 
-		selectionOntologyDialogOpen() {
+		selectionOntologyDialogOpen(): void {
 			this.isCriteriaOptionOpen = true
 		},
 
-		selectionOntologyDiaglogClose() {
+		selectionOntologyDiaglogClose(): void {
 			this.isCriteriaOptionOpen = false
+			this.isCriteriaOptionEditorOpen = false
 		},
 
-		searchCodeEinschlusskriterien() {
-			this.isEinschlusskriterienOverlayOpen = true
-			this.isAusschlusskriterienOverlayOpen = false
-		},
-
-		searchCodeAusschlusskriterien() {
-			this.isAusschlusskriterienOverlayOpen = true
-			this.isEinschlusskriterienOverlayOpen = false
-		},
-
-		focusInput(criteriaType: string) {
+		focusInput(criteriaType: string): void {
 			if (criteriaType === 'Einschlusskriterien') {
 				this.ausschlussTextSerach = ''
-				this.isAusschlusskriterienOverlayOpen = false
 			} else if (criteriaType === 'Ausschlusskriterien') {
 				this.einschlussTextSerach = ''
-				this.isEinschlusskriterienOverlayOpen = false
 			}
 		},
 
-		getSelectedCriteria(items: SelectedCriteriaData) {
+		getSelectedCriteria(items: SelectedCriteriaData): void {
 			this.einschlussTextSerach = ''
 			this.ausschlussTextSerach = ''
 			this.toggleSearchCriteria(items.criteriaType)
@@ -331,34 +246,52 @@ export default Vue.extend({
 			this.selectedCriteria = items.selectedItems
 		},
 
-		getFilterInfo(object: FilterInfo[]) {
+		getFilterInfo(filterInfo: FilterInfo[]): void {
 			if (this.criteriaOverlayType === 'Einschlusskriterien') {
-				this.selectedCharacteristicsEin.push(...object)
+				if (this.selectedEditedCriteriaIndex !== null) {
+					this.selectedCharacteristicsEin.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
+					this.selectedEditedCriteriaIndex = null
+				} else this.selectedCharacteristicsEin.push(...filterInfo)
 			} else if (this.criteriaOverlayType === 'Ausschlusskriterien') {
-				this.selectedCharacteristicsAus.push(...object)
+				if (this.selectedEditedCriteriaIndex !== null) {
+					this.selectedCharacteristicsAus.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
+					this.selectedEditedCriteriaIndex = null
+				} else this.selectedCharacteristicsAus.push(...filterInfo)
 			}
 		},
 
-		updateSelectedCriteria(data: updatedCriteriaData) {
-			this.selectedCriteria![data.id][data.data.type] = data.data.item
+		updateSelectedCriteria(data: updatedCriteriaData): void {
+			this.selectedCriteria![data.id][data.item.type] = data.item
 		},
 
-		deleteSelectedCriteria(index: number) {
+		deleteSelectedCriteria(index: number): void {
 			this.selectedCriteria?.splice(index, 1)
 		},
 
-		deleteCharacteristic(index: number, criteriaType: string) {
+		deleteCharacteristic(index: number, criteriaType: string): void {
 			if (criteriaType === 'Einschlusskriterien') {
 				this.selectedCharacteristicsEin.splice(index, 1)
 			} else if (criteriaType === 'Ausschlusskriterien') {
 				this.selectedCharacteristicsAus.splice(index, 1)
 			}
 		},
+
+		editCriteriaLimitation(characteristic: FilterInfo, index: number): void {
+			this.selectedEditedCriteria = this.selectedCriteria?.filter((item) => item.id === characteristic.id) as OntologyTreeElement[]
+			this.selectedEditedCriteriaIndex = index
+			this.isCriteriaOptionEditorOpen = true
+		},
+
+		updateEditedCriteria(data: updatedCriteriaData): void {
+			/* console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria)
+			this.selectedEditedCriteria![data.id][data.item.type] = data.item
+			console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria) */
+			this.selectedCriteria![this.selectedEditedCriteriaIndex!][data.item.type] = data.item
+		},
 	},
 })
 </script>
 <style scoped>
-
 .query-builder-container {
 	display: flex;
 	flex-direction: column;
@@ -518,11 +451,17 @@ export default Vue.extend({
 
 .selected-criteria-display {
 	font-weight: 700;
+	margin-bottom: 10px;
 }
 
 .selected-criteria-condition {
 	padding-left: 5px;
+	margin-bottom: 5px;
 	background-color: #adbcd7;
+}
+
+.selected-criteria-condition:last-child {
+	margin-bottom: 0px;
 }
 
 .selected-criteria-condition span {
@@ -535,6 +474,14 @@ export default Vue.extend({
 
 .selected-criteria-condition span:first-child::before {
 	content: none;
+}
+
+.einschlusscriteria-combining-operator {
+	margin-left: 10px;
+}
+
+.ausschlusscriteria-combining-operator {
+	margin-left: 10px;
 }
 
 .delete-btn {
@@ -550,11 +497,6 @@ export default Vue.extend({
 .selected-criteria-right button.delete-btn:active {
 	background-color: unset;
 }
-
-/* .selected-criteria-right button:focus-visible {
-	background-color: red;
-	color: red;
-}*/
 
 .delete-btn img {
 	width: 25px;
