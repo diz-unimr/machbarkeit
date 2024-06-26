@@ -8,16 +8,51 @@ namespace OCA\Machbarkeit\Service;
 
 class MachbarkeitService {
 	public function readCsv() {
-		$result = array_map("str_getcsv", file(__DIR__ . '/../../csvfile/diz_metadaten.csv'));
-		$headers = $result[0];
+		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
+		$data = [];
+		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
+		while (($row = fgetcsv($file)) !== false) {
+			$data[] = $row;
+		}
 
+		$headers = $data[0];
 		$jsonArray = [];
-		$rowCount = count($result);
+		$rowCount = count($data);
 		for ($i = 1; $i < $rowCount; $i++) {
-			foreach ($result[$i] as $key => $column) {
+			foreach ($data[$i] as $key => $column) {
 				$jsonArray[$i][$headers[$key]] = $column;
 			}
 		}
+
+		fclose($file);
 		return array_values($jsonArray);
+	}
+
+	public function readOntology() {
+		$json_files = [
+			'Person.json',
+			'test.json',
+			/* 'Diagnose.json',
+			'Laboruntersuchung.json',
+			'Prozedur.json' */
+		];
+		$merged_file = [];
+
+		foreach ($json_files as $file) {
+			// Read JSON file contents
+			$json_content = file_get_contents(__DIR__ . '/../../ontology/ui_trees/'.$file);
+			// Decode JSON content into associative array (decode string to json)
+			$json_data = json_decode($json_content, true);
+			// Merge data from current file into merged_file array
+			$merged_file = array_merge($merged_file, [$json_data]);
+		};
+
+		return $merged_file;
+	}
+
+	public function readUiProfile() {
+		$ui_profile = file_get_contents(__DIR__ . '/../../ontology/ui_profile.json');
+		$json_ui_profile = json_decode($ui_profile, true);
+		return $json_ui_profile;
 	}
 }

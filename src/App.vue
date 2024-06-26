@@ -3,25 +3,29 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<!-- eslint no-trailing-spaces: "error" -->
 	<div id="content" class="app-machbarkeit">
-		<div id="machbarkeit-container">
-			<FeasibilityContent @update-status="querySave" />
+		<div id="machbarkeit" class="machbarkeit">
+			<div class="machbarkeit machbarkeit__body">
+				<AttributeList />
+				<FeasibilityQueryContainer />
+			</div>
 		</div>
 	</div>
 </template>
 
-<script>
-import FeasibilityContent from './components/FeasibilityContent.vue'
-export default {
+<script lang="ts">
+import Vue from 'vue'
+import AttributeList from './components/AttributeList.vue'
+import FeasibilityQueryContainer from './components/FeasibilityQueryContainer.vue'
+
+export default Vue.extend({
 	name: 'App',
 	components: {
-		FeasibilityContent,
+		AttributeList,
+		FeasibilityQueryContainer,
 	},
 	data() {
-		return {
-			isDialogVisible: false,
-		}
+		return {}
 	},
 
 	computed: {},
@@ -38,22 +42,22 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		querySave() {
-			this.isDialogVisible = true
-		},
-		queryCancel() {
-			this.isDialogVisible = false
-		},
-	},
-}
+	methods: {},
+})
 </script>
 
-<style scoped>
-#machbarkeit-container {
+<style>
+.machbarkeit {
 	display: flex;
-	flex-wrap: wrap;
 	width: 100%;
 	background-color: white;
+}
+
+.machbarkeit__body {
+	height: 97%;
+}
+
+.input-field__input {
+	border: 1px solid #c0c7ce !important;
 }
 </style>

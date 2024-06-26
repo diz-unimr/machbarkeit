@@ -18,11 +18,11 @@
       "request": "launch",
       "name": "Vuejs: Chrome",
       "url": "http://localhost:8080",
-      //   "webRoot": "${workspaceFolder}",
+      "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
-        "webpack:///machbarkeit/src/*": "${webRoot}/src/*"
-        // "webpack:///machbarkeit/node_modules/*": "${workspaceFolder}/node_modules/*"
+        "webpack:///machbarkeit/src/*": "${webRoot}/src/*",
+        "webpack:///machbarkeit/node_modules/*": "${workspaceFolder}/node_modules/*"
       }
     }
   ]

@@ -5,11 +5,11 @@
 	-->
 	<div class="save-overlay-wrapper">
 		<div class="save-overlay-pane">
-			<div class="save-dialog-container">
+			<div class="save-dialog">
 				<h2 class="save-dialog-title">
 					Abspeichern der aktuellen Suchanfrage
 				</h2>
-				<div class="save-query-box">
+				<div class="save-dialog-folder-name">
 					<NcTextField :value.sync="fileName"
 						label="Dateiname"
 						trailing-button-icon="close"
@@ -17,11 +17,11 @@
 						:show-trailing-button="fileName !== ''"
 						@trailing-button-click="fileName = ''" />
 				</div>
-				<div class="save-button-container">
-					<button style="border-radius: 8px;">
+				<div class="save-dialog-button">
+					<button>
 						SPEICHERN
 					</button>
-					<button style="border-radius: 8px;" @click="hideDialog">
+					<button @click="$emit('dialog-close')">
 						ABBRECHEN
 					</button>
 				</div>
@@ -30,21 +30,26 @@
 	</div>
 </template>
 
-<script>
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
+<script lang="ts">
+import Vue from 'vue'
+import { NcTextField } from '@nextcloud/vue'
 
-export default {
-	name: 'SaveQuery',
+interface SaveQueryDialogData {
+	fileName:string;
+	isDialogVisible: boolean;
+}
+
+export default Vue.extend({
+	name: 'SaveQueryDialog',
 	components: {
 		NcTextField,
 	},
-	data() {
+	data(): SaveQueryDialogData {
 		return {
 			fileName: '',
 			isDialogVisible: true,
 		}
 	},
-	computed: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -58,38 +63,28 @@ export default {
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		hideDialog() {
-			this.$emit('update-status')
-		},
-	},
-}
+	methods: {},
+})
 </script>
 
-<style>
+<style scoped>
 .save-overlay-wrapper {
 	display: flex;
-	position: absolute;
+	position: sticky;
 	z-index: 1000;
-	justify-content: center;
-	align-items: center;
-	width: 73%;
+	width: 50%;
 	top: 20%;
-	left: 25%;
+	margin: 0px auto 0px auto;
 }
 
 .save-overlay-pane {
-	position: static;
-	pointer-events: auto;
-	box-sizing: border-box;
 	display: flex;
-	max-width: 100%;
-	max-height: 100%;
-	justify-content: center;
-	align-items: center;
+	position: absolute;
+	pointer-events: auto;
+	width: 100%;
 }
 
-.save-dialog-container {
+.save-dialog {
 	display: block;
 	width: 100%;
 	height: 100%;
@@ -111,35 +106,22 @@ export default {
 	font-family: Roboto,Helvetica Neue,sans-serif;
 }
 
-.save-query-box {
-	min-width: 480px;
-	margin-bottom: 30px;
-	flex-direction: column;
-	box-sizing: border-box;
+.save-dialog-folder-name {
 	display: flex;
+	flex-direction: column;
 	place-content: center space-around;
-	align-items: center;
+	margin-bottom: 30px;
 }
 
-.file-name-input {
-	border: 1px solid #c0c7ce;
-	border-radius: 10px;
-	display: inline-flex;
-	align-items: baseline;
-	box-sizing: border-box;
-	width: 100%;
-	padding: 10px;
-}
-
-.input-field__input {
-	border: 1px solid #c0c7ce !important;
-}
-
-.save-button-container {
+.save-dialog-button {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-end;
-	column-gap: 8px;
+	column-gap: 15px;
+}
+
+button {
+	border-radius: 8px;
 }
 </style>
