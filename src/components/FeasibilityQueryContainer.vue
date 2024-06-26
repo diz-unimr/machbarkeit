@@ -18,36 +18,35 @@
 					</button>
 				</div>
 			</div>
+			<SaveQueryDialog v-if="isDialogOpen" @dialog-close="querySaveDiaglogClose" />
 			<FeasibilityQueryBuilder />
-			<SaveQueryDialog v-if="isDialogOpen" ref="saveQueryRef" @dialog-close="querySaveDiaglogClose" />
 		</div>
 		<MachbarkeitFooter @dialog-open="querySaveDialogOpen" @dialog-close="querySaveDiaglogClose" />
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryDialog from './SaveQueryDialog.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 
-export default {
+interface FeasibilityQueryContainerData {
+	numberOfPatients: number;
+	isDialogOpen: boolean;
+}
+
+export default Vue.extend({
 	name: 'FeasibilityQueryContainer',
 	components: {
 		FeasibilityQueryBuilder,
 		SaveQueryDialog,
 		MachbarkeitFooter,
 	},
-	data() {
+	data(): FeasibilityQueryContainerData {
 		return {
-			boardConsent1: 'Broad Consent (der MII oder MII-kompatibel)',
-			boardConsent2: 'voraussetzen (Daten können zentral zusammengeführt werden)',
-			boardConsentTooltip: 'Bei der zentralen Analyse erhalten Sie von der MII pseudonymisierte Daten zu den Patienten, die zu Ihrem Forschungsprojekt passen. Pseudonyme Daten (die durch die Pseudonyme automatisch einen Bezug zu den Patienten ermöglichen) können aber nur genutzt werden, wenn die Patienten ihre Einwilligung in die Nutzung erteilt haben. Die Forschenden bekommen die pseudonymisierten Daten zum Download zur Verfügung gestellt und können darin ihre Analysen mit großer Flexibilität und Tiefe sowie häufig mit größerem Tempo ausführen, als es bei verteilten Analysen',
-			noBoardConsent: 'Kein „Broad Consent“ voraussetzen (Daten stehen nur für „Verteilte Analysen“ zur Verfügung)',
-			noBoardConsentTooltip: 'Bei verteilten Analysen findet die Analyse auf den Daten an den Standorten statt. Die Forschenden erhalten anonyme Ergebnisdaten. An vielen Standorten kann bei verteilten Analysen auf einer anderen Rechtsgrundlage als der Einwilligung der Patienten gerechnet werden. Dadurch wird häufig eine größere Menge an Patienten gefunden, die zu Ihrer Forschungsfrage passen. Bei manchen Standorten erfolgen Machbarkeitsanfragen auch auf Basis der Patienteneinwilligung. Diese Standorte antworten auf',
-			selectedOption: 'no-broad-consent',
-			patientConsentLink: 'https://www.medizininformatik-initiative.de/de/mustertext-zur-patienteneinwilligung',
-			isDialogOpen: false,
 			numberOfPatients: 0,
+			isDialogOpen: false,
 		}
 	},
 	computed: {},
@@ -64,21 +63,14 @@ export default {
 	destroyed() {},
 
 	methods: {
-		clearText(text) {
-			text = ''
-		},
 		querySaveDialogOpen() {
 			this.isDialogOpen = true
 		},
 		querySaveDiaglogClose() {
 			this.isDialogOpen = false
 		},
-		/* queryCancel() {
-			this.isDialogOpen = false
-		}, */
-
 	},
-}
+})
 </script>
 
 <style scoped>

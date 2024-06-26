@@ -6,19 +6,24 @@
 	<div class="footer-container">
 		<div class="load-save-button">
 			<input id="upload" type="file" hidden>
-			<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">ABFRAGE LADEN</label>
+			<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">
+				ABFRAGE LADEN
+			</label>
 			<button @click="$emit('dialog-open')">
 				ABFRAGE SPEICHERN
 			</button>
 		</div>
 	</div>
 </template>
-<script>
 
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
 	name: 'FooterContent',
-}
+})
 </script>
+
 <style scoped>
 .footer-container {
 	display: flex;

@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div id="criteria-nested-tree" class="criteria-nested-tree-node">
+	<div class="criteria-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="criteria-head-node">
 				<button :class="{'default-cursor': !criterion.children}" @click="() => (state = !state)">
@@ -37,30 +37,67 @@
 				<CriteriaNestedTreeNode v-for="child in criterion.children"
 					:key="child.id"
 					:criterion="child"
+					:einschluss-text-serach="einschlussTextSerach"
+					:ausschluss-text-serach="ausschlussTextSerach"
 					@input="checkboxTrigger" />
 			</ul>
 		</li>
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+import type { CriteriaResponse } from '../types/SearchTreeOverlayContentData'
+
+interface CriteriaNestedTreeNodeData {
+	state: boolean;
+	imgCollapse: string;
+	imgExpand: string;
+}
+
+export interface FilteredCriteriaData {
+	context: object;
+	display: string;
+	id: string;
+	leaf: boolean;
+	selectable: boolean;
+	termCodes: [{
+		code: string,
+		display: string,
+		system: string,
+	}];
+}
+
+export interface CheckedItem {
+	action: string;
+	node: CriteriaResponse;
+}
+
+export default Vue.extend({
 	name: 'CriteriaNestedTreeNode',
 	components: {},
 	props: {
-		criterion: {
-			type: Object,
-			default: Object,
-		},
 		isRootNode: {
 			type: Boolean,
 			default: false,
 		},
+		criterion: {
+			type: Object,
+			default: Object,
+		},
+		einschlussTextSerach: {
+			type: String,
+			default: '',
+		},
+		ausschlussTextSerach: {
+			type: String,
+			default: '',
+		},
 	},
-	data() {
+	data(): CriteriaNestedTreeNodeData {
 		return {
 			state: false,
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse.png',
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
@@ -91,8 +128,7 @@ export default {
 			this.state = true
 		}
 	},
-	beforeMount() {
-	},
+	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
@@ -100,15 +136,11 @@ export default {
 	destroyed() {},
 
 	methods: {
-		isExpanded(key) {
-			return this.expandedGroup.indexOf(key) !== -1
-		},
-
-		checkboxTrigger(checkedItem) {
+		checkboxTrigger(checkedItem: CheckedItem) {
 			this.$emit('input', checkedItem)
 		},
 	},
-}
+})
 </script>
 
 <style scoped>
@@ -117,7 +149,7 @@ input[type='checkbox'] {
 	height: 15px;
 }
 
-#criteria-nested-tree {
+.criteria-nested-tree-node {
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
@@ -128,7 +160,7 @@ input[type='checkbox'] {
 	box-sizing: border-box;
 	display: flex;
 	place-content: center flex-start;
-	align-items: center;
+	align-items: flex-start
 }
 
 .criteria-head-node button {
@@ -149,6 +181,7 @@ input[type='checkbox'] {
 	flex-direction: row;
 	align-items: center;
 	margin-left: 5px;
+	margin-top: 4px;
 }
 
 .search-tree-term-entry input {

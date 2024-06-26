@@ -10,12 +10,14 @@
 					Einschränkungen der ausgewählten Merkmale
 				</h2>
 				<div class="selection-dialog-panel">
-					<LimitationsSelectedFeaturesCard v-for="(selectedOntology, index) in selectedOntologyArray"
+					<LimitationsSelectedFeaturesCard v-for="(selectedOntology, index) in selectedCriteria"
 						:id="index"
 						:key="selectedOntology.id"
 						:ui-profile="uiProfile"
 						:selected-ontology="selectedOntology"
 						@get-selected-feature-filter="getSelectedFeatureFilter"
+						@update-ontology-profile="updateOntologyProfile(index, $event)"
+						@update-selected-ontology="updateSelectedOntology(index, $event)"
 						@delete-dialog-card="deleteDialogCard" />
 				</div>
 
@@ -32,20 +34,43 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { type PropType } from 'vue'
 import LimitationsSelectedFeaturesCard from './LimitationsSelectedFeaturesCard.vue'
-import { generateUrl } from '@nextcloud/router'
-import axios from '@nextcloud/axios'
+import type { ConceptType, QuantityType, TimeRange, LimitationsSelectedFeaturesData } from '../../types/LimitationsSelectedFeaturesData.ts'
+import type { CriteriaResponse } from '../../types/SearchTreeOverlayContentData'
+import type { UiProfile } from '../../types/FeasibilityQueryBuilderData'
 
-export default {
+interface FilteredCriteriaData {
+	context: object;
+	display: string;
+	id: string;
+	leaf: string;
+	conceptType: ConceptType | undefined;
+	timeRange: TimeRange | undefined;
+	quantityType: QuantityType | undefined;
+	selectable: boolean;
+	termCodes: Array<object>;
+}
+
+export interface updatedOntologyData {
+	type: string;
+	item: object;
+}
+
+export default Vue.extend({
 	name: 'LimitationsSelectedFeatures',
 	components: {
 		LimitationsSelectedFeaturesCard,
 	},
 	props: {
-		selectedOntologyArray: {
-			type: Array,
-			default: Array,
+		selectedCriteria: { // selectedOntologyArray
+			type: Array<CriteriaResponse>,
+			required: true,
+		},
+		uiProfile: {
+			type: Object as PropType<UiProfile>,
+			required: true,
 		},
 		getFilterInfo: {
 			type: Function,
@@ -53,26 +78,19 @@ export default {
 		},
 	},
 
-	data() {
+	data(): LimitationsSelectedFeaturesData {
 		return {
 			filterInfo: [],
 			notEmptyProfileName: [],
-			uiProfile: null,
 			isFilterComplete: false,
 		}
 	},
-
-	computed: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	async created() {
-		const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
-		this.uiProfile = response.data
-		this.getNotEmptyProfile(this.uiProfile)
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -82,9 +100,8 @@ export default {
 	destroyed() {},
 
 	methods: {
-		getNotEmptyProfile(uiProfile) {
+		getNotEmptyProfile(uiProfile: UiProfile) {
 			const profileKeys = Object.keys(uiProfile)
-
 			for (let i = 0; i < profileKeys.length; i++) {
 				const key = profileKeys[i]
 				if (uiProfile[key].valueDefinition?.optional === false) {
@@ -93,15 +110,18 @@ export default {
 			}
 		},
 
-		deleteDialogCard(index) {
-			this.selectedOntologyArray.splice(index, 1)
-			this.filterInfo.splice(index, 1)
-			if (this.selectedOntologyArray.length === 0) {
-				this.$emit('dialog-close')
+		deleteDialogCard(index: number) {
+			if (this.selectedCriteria !== null) {
+				this.$emit('delete-selected-criteria', index)
+				// this.selectedCriteria.splice(index, 1)
+				this.filterInfo.splice(index, 1)
+				if (this.selectedCriteria.length === 0) {
+					this.$emit('dialog-close')
+				} else this.checkCompleteFilter()
 			}
 		},
 
-		getSelectedFeatureFilter(filteredCriteria) {
+		getSelectedFeatureFilter(filteredCriteria: FilteredCriteriaData) {
 			const filter = {
 				display: filteredCriteria.display,
 				conceptType: filteredCriteria.conceptType,
@@ -136,13 +156,21 @@ export default {
 			} else this.isFilterComplete = true
 		},
 
+		updateOntologyProfile(index: string | number, profileType: string) {
+			this.$emit('update-selected-criteria', { id: index, type: profileType })
+		},
+
+		updateSelectedOntology(index: string | number, item: updatedOntologyData) {
+			this.$emit('update-selected-criteria', { id: index, data: item })
+		},
+
 		submit() {
 			this.$emit('get-filter-info', this.filterInfo)
 			this.$emit('dialog-close')
 		},
 
 	},
-}
+})
 </script>
 
 <style scoped>

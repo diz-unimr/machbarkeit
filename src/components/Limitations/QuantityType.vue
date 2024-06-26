@@ -75,17 +75,32 @@
 		<div v-if="comparisonRestriction.type === 'zwischen' && (comparisonRestriction.min >= comparisonRestriction.max)">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
-		<!-- <div v-else-if="comparisonRestriction.type === 'zwischen' && (comparisonRestriction.min.length === 0 || comparisonRestriction.max.length === 0)">
-			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
-		</div>
-		<div v-else-if="comparisonRestriction.type !== 'zwischen' && comparisonRestriction.value.length === 0">
-			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
-		</div> -->
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+interface QuantityTypeData {
+    typeSymbol: {
+        'kein Filter': string,
+        gleich: string,
+        kleiner: string,
+        größer: string,
+        zwischen: string,
+    },
+    comparisonRestriction: {
+        type: string,
+        typeSymbol: string,
+        unit: string,
+        value: string,
+        min: string,
+        max: string,
+    },
+    isFilterOptional: boolean,
+}
+
+export default Vue.extend({
 	name: 'QuantityType',
 	components: {},
 	props: {
@@ -106,7 +121,7 @@ export default {
 			default: true,
 		},
 	},
-	data() {
+	data(): QuantityTypeData {
 		return {
 			typeSymbol: {
 				'kein Filter': 'kein Filter',
@@ -196,7 +211,7 @@ export default {
 			}
 		},
 	},
-}
+})
 </script>
 
 <style scoped>

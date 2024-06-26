@@ -4,11 +4,11 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="search-tree-overlay-container">
-		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaId === 'Ausschlusskriterien' }">
+		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaType === 'Ausschlusskriterien' }">
 			<div class="criteria-name">
-				{{ criteriaId }}
+				{{ criteriaType }}
 			</div>
-			<div v-if="criteriaResponse.length > 0">
+			<div v-if="criteriaResponse && criteriaResponse.length > 0">
 				<div class="criteria-search-tree-header">
 					<div class="search-tree-button">
 						<div v-for="(modulName, modulName_index) in criteriaResponse.map((item) => item.display)"
@@ -25,17 +25,26 @@
 						v-show="activeTab === criterion_index"
 						:key="criterion_index">
 						<div class="criteria-node">
-							<CriteriaNestedTreeNode v-if="criterion.children"
+							<CriteriaNestedTreeNode v-if="criterion.children && (einschlussTextSerach.length === 0 && ausschlussTextSerach.length === 0)"
 								:is-root-node="true"
 								:criterion="criterion"
+								:einschluss-text-serach="einschlussTextSerach"
+								:ausschluss-text-serach="ausschlussTextSerach"
+								@input="getCheckboxItems" />
+
+							<CriteriaNestedTreeNodeSearch v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
+								class="criteria-nested-tree-node"
+								:criterion="criterion"
+								:einschluss-text-serach="einschlussTextSerach"
+								:ausschluss-text-serach="ausschlussTextSerach"
 								@input="getCheckboxItems" />
 						</div>
 					</div>
 					<div class="button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="submitSelectedItems({criteriaId: criteriaId, items:selectedItems})">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
 							AUSWÄHLEN
 						</button>
-						<button @click="$emit('toggle-search-criteria', criteriaId)">
+						<button @click="$emit('toggle-search-criteria', criteriaType)">
 							ABBRECHEN
 						</button>
 					</div>
@@ -48,49 +57,63 @@
 	</div>
 </template>
 
-<script>
-import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
+<script lang="ts">
+import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
+import CriteriaNestedTreeNodeSearch from './CriteriaNestedTreeNodeSearch.vue'
+import type { SearchTreeOverlayContentData } from '../types/SearchTreeOverlayContentData.ts'
+import type { CheckedItem } from '../components/CriteriaNestedTreeNode.vue'
 
-export default {
+export default Vue.extend({
 	name: 'SearchTreeOverlayContent',
 	components: {
 		CriteriaNestedTreeNode,
+		CriteriaNestedTreeNodeSearch,
 	},
 	props: {
+		criteriaType: {
+			type: String,
+			default: '',
+		},
+		einschlussTextSerach: {
+			type: String,
+			default: '',
+		},
+		ausschlussTextSerach: {
+			type: String,
+			default: '',
+		},
 		getSelectedCriteria: {
 			type: Function,
 			default: () => {},
-		},
-		criteriaId: {
-			type: String,
-			default: '',
 		},
 		toggleSearchCriteria: {
 			type: Function,
 			default: () => {},
 		},
-
 	},
-	data() {
+
+	data(): SearchTreeOverlayContentData {
 		return {
 			activeTab: 0,
-			criteriaResponse: [],
+			criteriaResponse: null,
+			criteriaData: null,
 			selectedItems: [],
+			tempArray: [],
 		}
 	},
 
-	computed: {},
+	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
-	async beforeCreate() {
-		const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-		this.criteriaResponse = jsonData.data
-	},
+	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.getOntology()
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -100,26 +123,36 @@ export default {
 	destroyed() {},
 
 	methods: {
-		activateTab(index) {
+		async getOntology() {
+			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+			this.criteriaResponse = jsonData.data
+		},
+
+		activateTab(index: string | number) {
 			this.activeTab = index
 		},
 
-		getCheckboxItems(checkedItem) {
+		getCheckboxItems(checkedItem: CheckedItem) {
 			if (checkedItem.action === 'add') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'delete') {
-				this.selectedItems = this.selectedItems.filter(function(name) { return name !== checkedItem.node })
+				this.selectedItems = this.selectedItems.filter(function(name) {
+					return name !== checkedItem.node
+				})
 			}
 		},
-
-		submitSelectedItems(selectedItems) {
-			this.$emit('get-selected-criteria', selectedItems)
-		},
 	},
-}
-
+})
 </script>
+
 <style scoped>
+.criteria-nested-tree-node {
+	overflow-y: auto;
+	overflow-x: hidden;
+	scrollbar-width: auto;
+	height: 100%;
+	width: 100;
+}
 
 .search-tree-overlay-container {
 	display:flex;
@@ -226,5 +259,4 @@ export default {
 	height: 150px;
 	border-top: 2px solid #adbcd7;
 }
-
 </style>

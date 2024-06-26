@@ -26,8 +26,15 @@
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+interface ConceptTypeData {
+	selectedConcepts: Array<object>;
+	isFilterOptional: boolean;
+}
+
+export default Vue.extend({
 	name: 'ConceptType',
 	props: {
 		profile: {
@@ -51,7 +58,7 @@ export default {
 			default: Object,
 		},
 	},
-	data() {
+	data(): ConceptTypeData {
 		return {
 			selectedConcepts: this.selectedOntology.conceptType ? this.selectedOntology.conceptType : [],
 			isFilterOptional: this.profile.valueDefinition?.optional,
@@ -79,6 +86,10 @@ export default {
 		},
 	},
 
+	// life cycle of vue js
+	// Call functions before all component are rendered
+	beforeCreate() {},
+	// Call functions before the template is rendered
 	created() {
 		this.$emit('get-selected-option', {
 			type: 'conceptType',
@@ -87,8 +98,15 @@ export default {
 			completeFilter: false,
 		})
 	},
+	beforeMount() {},
+	mounted() {},
+	beforeUpdate() {},
+	updated() {},
+	beforeDestroy() {},
+	destroyed() {},
+
 	methods: {},
-}
+})
 </script>
 
 <style scoped>

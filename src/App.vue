@@ -13,11 +13,12 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import AttributeList from './components/AttributeList.vue'
 import FeasibilityQueryContainer from './components/FeasibilityQueryContainer.vue'
 
-export default {
+export default Vue.extend({
 	name: 'App',
 	components: {
 		AttributeList,
@@ -42,7 +43,7 @@ export default {
 	destroyed() {},
 
 	methods: {},
-}
+})
 </script>
 
 <style>

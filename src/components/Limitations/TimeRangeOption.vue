@@ -59,14 +59,27 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="timeRangeRestriction.type === 'zwischen' && (timeRangeRestriction.fromDate > timeRangeRestriction.toDate)">
+		<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+interface TimeRangOptaionData {
+    timeRangeRestriction: {
+        type: string,
+        fromDate: string | null,
+        fromDateFormatted: string | null,
+        toDate: string | null,
+        toDateFormatted: string | null,
+    },
+    isFilterOptional: boolean
+}
+
+export default Vue.extend({
 	name: 'TimeRangeOption',
 	props: {
 		profile: {
@@ -86,7 +99,7 @@ export default {
 			default: true,
 		},
 	},
-	data() {
+	data(): TimeRangOptaionData {
 		return {
 			timeRangeRestriction: {
 				type: 'kein Filter',
@@ -97,9 +110,6 @@ export default {
 			},
 			isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
 		}
-	},
-
-	computed: {
 	},
 
 	watch: {
@@ -122,7 +132,6 @@ export default {
 							completeFilter: validDate,
 						})
 					}
-
 				} else {
 					if (this.timeRangeRestriction.fromDate) {
 						this.$emit('get-selected-option', {
@@ -132,7 +141,6 @@ export default {
 							completeFilter: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
 						})
 					}
-
 				}
 			},
 			deep: true,
@@ -170,7 +178,8 @@ export default {
 		addTimeRangeOption() {
 		},
 
-		formatDate(event) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		formatDate(event: any) {
 			const date = new Date(event.target.value)
 			const day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
 			const month = (date.getMonth() + 1) >= 10 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
@@ -179,7 +188,7 @@ export default {
 			this.timeRangeRestriction[event.target.name + 'Formatted'] = formattedDate
 		},
 	},
-}
+})
 </script>
 
 <style scoped>

@@ -8,21 +8,21 @@
 			<p style="font-weight: 500;">
 				{{ selectedOntology.display }}
 			</p>
-			<button class="delete-btn" @click="deleteCard($vnode.data.attrs.id)">
+			<button class="delete-btn" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
 		</div>
 		<template v-if="uiProfile != null || uiProfile != undefined">
 			<template v-for="(attribute, index) in ['timeRestrictionAllowed', 'valueDefinition']">
-				<template v-if="attribute === 'timeRestrictionAllowed' && profile.timeRestrictionAllowed">
+				<template v-if="attribute === 'timeRestrictionAllowed' && profile?.timeRestrictionAllowed">
 					<FilterCard :key="attribute + index"
 						:profile="profile"
 						display="Zeitraum"
 						attribute="timeRestrictionAllowed"
 						@get-selected-options="getSelectedOptions" />
 				</template>
-				<template v-if="attribute === 'valueDefinition' && profile.valueDefinition?.type">
+				<template v-if="attribute === 'valueDefinition' && profile?.valueDefinition?.type">
 					<FilterCard :key="attribute + index"
 						:profile="profile"
 						display="Wertebereicht"
@@ -36,18 +36,22 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { type PropType } from 'vue'
 import FilterCard from './FilterCard.vue'
+import type { LimitationsSelectedFeaturesCardData } from '../../types/LimitationsSelectedFeaturesCardData.ts'
+import type { UiProfile } from '../../types/FeasibilityQueryBuilderData.ts'
+import type { SelectedOptionData } from '../Limitations/FilterCard.vue'
 
-export default {
+export default Vue.extend({
 	name: 'LimitationsSelectedFeaturesCard',
 	components: {
 		FilterCard,
 	},
 	props: {
 		uiProfile: {
-			type: Object,
-			default: Object,
+			type: Object as PropType<UiProfile>,
+			required: true,
 		},
 		selectedOntology: {
 			type: Object,
@@ -57,51 +61,26 @@ export default {
 			type: Function,
 			default: () => {},
 		},
-
 		deleteDialogCard: {
 			type: Function,
 			default: () => {},
 		},
 	},
-	data() {
+	data(): LimitationsSelectedFeaturesCardData {
 		return {
 			profile: null,
-			profileFilterInfo: {
-				type: null,
-				timeRestrictionAllowed: {
-					display: 'Zeitraum',
-					state: false,
-					isResetDisabled: true,
-				},
-				valueDefinition: {
-					display: 'Wertebereich',
-					state: false,
-					isResetDisabled: true,
-					selectedConcepts: null,
-					selectedTimeRange: null,
-				},
-			},
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
 		}
-	},
-
-	watch: {
-		uiProfile() {
-			if (Object.keys(this.uiProfile).length > 0) {
-				this.getProfile()
-				this.setProfile()
-			}
-		},
-		selectedOntology() {
-			this.getProfile()
-		},
 	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.getProfile()
+		// this.setProfile()
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -120,29 +99,35 @@ export default {
 			}
 		},
 
-		setProfile() {
-			if (this.profile.timeRestrictionAllowed) {
+		/* setProfile() {
+			if (this.profile !== null && this.profile.timeRestrictionAllowed) {
+				// this.$emit('update-ontology-profile', 'timeRestriction')
 				this.selectedOntology.timeRestriction = null
 			}
-			if (this.profile.valueDefinition?.type === 'quantity') {
+			if (this.profile !== null && this.profile.valueDefinition?.type === 'quantity') {
+				// this.$emit('update-ontology-profile', 'quantity')
 				this.selectedOntology.quantityType = null
 			}
-			if (this.profile.valueDefinition?.type === 'concept') {
+			if (this.profile !== null && this.profile.valueDefinition?.type === 'concept') {
+				// this.$emit('update-ontology-profile', 'concept')
 				this.selectedOntology.conceptType = null
 			}
-		},
+		}, */
 
-		getSelectedOptions(data) {
-			data.map((obj) => {
+		getSelectedOptions(selectedOptions: SelectedOptionData[]) {
+			selectedOptions.map((obj) => {
 				switch (obj.type) {
 				case 'conceptType':
-					this.selectedOntology.conceptType = obj
+					this.$emit('update-selected-ontology', { type: 'conceptType', item: obj })
+					// this.selectedOntology.conceptType = obj
 					break
 				case 'quantityType':
-					this.selectedOntology.quantityType = obj
+					this.$emit('update-selected-ontology', { type: 'quantityType', item: obj })
+					// this.selectedOntology.quantityType = obj
 					break
 				case 'timeRange':
-					this.selectedOntology.timeRange = obj
+					this.$emit('update-selected-ontology', { type: 'timeRange', item: obj })
+					// this.selectedOntology.timeRange = obj
 					break
 				default:
 				}
@@ -156,20 +141,13 @@ export default {
 
 		},
 
-		toggleResetButton(attribute) {
-			this.profileFilter[attribute].isResetDisabled = false
-		},
-
-		getLimitationInfo(info) {
-			this.selectedOptionArray.splice(this.$vnode.key, 1, info)
-		},
-
-		deleteCard(key) {
+		deleteCard(key: number) {
 			this.$emit('delete-dialog-card', key)
 		},
 	},
-}
+})
 </script>
+
 <style scoped>
 .selection-dialog-card {
 	display: flex;
@@ -184,7 +162,7 @@ export default {
 .selection-dialog-card__header {
 	display: flex;
 	flex-direction: row;
-	column-gap: 10px;
+	column-gap: 10%;
 	align-items: center;
 	justify-content:space-between;
 	margin: 0px 10px 20px 10px;

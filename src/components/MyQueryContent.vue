@@ -10,11 +10,10 @@
 	</div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
 	name: 'MyQueryContent',
-}
+})
 </script>
-<style scoped>
-/* Your component-specific styles */
-</style>
