@@ -276,9 +276,7 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-		console.log('selectedCharacteristicsEin: ', this.selectedCharacteristicsEin)
-	},
+	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -300,7 +298,6 @@ export default Vue.extend({
 		},
 
 		editLimitation(characteristic: FilterInfo, index: number) {
-			console.log(characteristic)
 			this.$emit('edit-criteria-limitation', characteristic, index)
 		},
 
@@ -403,8 +400,8 @@ export default Vue.extend({
 }
 
 .selected-criteria-display:hover {
-    text-decoration: underline;
-    cursor: pointer;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 .selected-criteria-condition {
@@ -431,16 +428,16 @@ export default Vue.extend({
 
 .combining-operator {
 	margin-left: 10px;
-    padding: 5px 10px;
-    border: solid 1px black;
-    font-size: small;
-    font-weight: 600;
-    min-height: 20px;
+	padding: 5px 10px;
+	border: solid 1px black;
+	font-size: small;
+	font-weight: 600;
+	min-height: 20px;
 }
 
 .or-operator {
-    position: absolute;
-    margin-top: -15px;
+	position: absolute;
+	margin-top: -15px;
 }
 
 .delete-btn {

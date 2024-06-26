@@ -74,9 +74,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		console.log('selectedEditedCriteria: ', this.selectedEditedCriteria)
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -135,7 +133,6 @@ export default Vue.extend({
 		},
 
 		updateSelectedOntology(index: string | number, item: updatedOntologyData): void {
-			console.log('item: ', item)
 			this.$emit('update-edited-criteria', { id: index, ...item })
 		},
 

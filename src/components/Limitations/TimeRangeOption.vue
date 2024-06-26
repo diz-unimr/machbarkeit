@@ -107,7 +107,6 @@ export default Vue.extend({
 	watch: {
 		timeRangeRestriction: {
 			handler() {
-				console.log('this.timeRangeRestriction.type: ', this.timeRangeRestriction.type)
 				if (this.timeRangeRestriction.type === 'kein Filter') {
 					this.$emit('get-selected-option', {
 						type: 'timeRange',
@@ -165,7 +164,6 @@ export default Vue.extend({
 			isFilterOptional: this.isFilterOptional,
 			completeFilter: false,
 		})
-		console.log('timeRangeRestriction: ', this.timeRangeRestriction)
 	},
 
 	methods: {

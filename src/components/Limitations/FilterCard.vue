@@ -115,14 +115,12 @@ export default Vue.extend({
 		},
 
 		getSelectedOption(selectedOption: SelectedOptionData): void {
-			console.log('selectedOption: ', selectedOption)
 			const index = this.groupFilter.findIndex(item => item.type === selectedOption.type)
 			if (index === -1) {
 				this.groupFilter.push(selectedOption)
 			} else {
 				this.groupFilter.splice(index, 1, selectedOption)
 			}
-			console.log('this.groupFilter: ', this.groupFilter)
 			this.$emit('get-selected-options', this.groupFilter)
 		},
 

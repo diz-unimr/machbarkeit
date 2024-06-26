@@ -183,13 +183,11 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getUiProfile()
-		console.log('this.selectedCriteria: ', this.selectedCriteria)
 	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
 	updated() {
-		console.log('this.selectedCriteria: ', this.selectedCriteria)
 		/* if (document.getElementsByClassName('einschlusscriteria-combining-operator').length > 0) {
 			console.log('update')
 			const buttonElements = document.getElementsByClassName('einschlusscriteria-combining-operator') as HTMLCollectionOf<HTMLElement>
@@ -250,10 +248,7 @@ export default Vue.extend({
 
 		getFilterInfo(filterInfo: FilterInfo[]): void {
 			if (this.criteriaOverlayType === 'Einschlusskriterien') {
-				console.log('this.selectedEditedCriteriaIndex: ', this.selectedEditedCriteriaIndex)
 				if (this.selectedEditedCriteriaIndex !== null) {
-					console.log(...filterInfo)
-					console.log('this.selectedEditedCriteriaIndex AGAIN: ', this.selectedEditedCriteriaIndex)
 					this.selectedCharacteristicsEin.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
 					this.selectedEditedCriteriaIndex = null
 				} else this.selectedCharacteristicsEin.push(...filterInfo)
@@ -263,12 +258,9 @@ export default Vue.extend({
 					this.selectedEditedCriteriaIndex = null
 				} else this.selectedCharacteristicsAus.push(...filterInfo)
 			}
-
-			console.log('this.selectedCharacteristicsEin: ', this.selectedCharacteristicsEin)
 		},
 
 		updateSelectedCriteria(data: updatedCriteriaData): void {
-			console.log('data: ', data)
 			this.selectedCriteria![data.id][data.item.type] = data.item
 		},
 
@@ -285,20 +277,16 @@ export default Vue.extend({
 		},
 
 		editCriteriaLimitation(characteristic: FilterInfo, index: number): void {
-			console.log('this.selectedCriteria: ', this.selectedCriteria)
 			this.selectedEditedCriteria = this.selectedCriteria?.filter((item) => item.id === characteristic.id) as OntologyTreeElement[]
 			this.selectedEditedCriteriaIndex = index
-			console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria)
 			this.isCriteriaOptionEditorOpen = true
 		},
 
 		updateEditedCriteria(data: updatedCriteriaData): void {
-			console.log('data: ', data)
 			/* console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria)
 			this.selectedEditedCriteria![data.id][data.item.type] = data.item
 			console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria) */
 			this.selectedCriteria![this.selectedEditedCriteriaIndex!][data.item.type] = data.item
-			console.log('this.selectedCriteria: ', this.selectedCriteria)
 		},
 	},
 })

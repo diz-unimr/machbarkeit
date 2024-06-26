@@ -88,7 +88,6 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getProfile()
-		console.log('selectedOntology: ', this.selectedOntology)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -124,8 +123,6 @@ export default Vue.extend({
 				}
 				return this.selectedOntology
 			})
-
-			console.log('this.selectedOntology: ', this.selectedOntology)
 			this.$emit('get-selected-feature-filter', this.selectedOntology)
 		},
 
