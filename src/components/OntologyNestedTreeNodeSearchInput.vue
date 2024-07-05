@@ -20,7 +20,7 @@
 			</div>
 		</div>
 
-		<CriteriaNestedTreeNodeSearch v-for="child in criterion.children"
+		<OntologyNestedTreeNodeSearch v-for="child in criterion.children"
 			:key="child.id"
 			:criterion="child"
 			:einschluss-text-serach="einschlussTextSerach"
@@ -33,7 +33,7 @@
 import Vue, { type PropType } from 'vue'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
 
-interface CriteriaNestedTreeNodeSearchData {
+interface OntologyNestedTreeNodeSearchInputData {
 	filteredCriteria: OntologyTreeElement | null
 }
 
@@ -43,7 +43,7 @@ export interface CheckedItem {
 }
 
 export default Vue.extend({
-	name: 'CriteriaNestedTreeNodeSearch',
+	name: 'OntologyNestedTreeNodeSearchInput',
 	components: {},
 	props: {
 		criterion: {
@@ -60,7 +60,7 @@ export default Vue.extend({
 		},
 	},
 
-	data(): CriteriaNestedTreeNodeSearchData {
+	data(): OntologyNestedTreeNodeSearchInputData {
 		return {
 			filteredCriteria: null,
 		}
@@ -75,9 +75,9 @@ export default Vue.extend({
 			// Updates checked items when checkbox state changes
 			set(checked) {
 				if (checked) {
-					this.$emit('input', { action: 'add', node: this.criterion })
+					this.$emit('input', { action: 'check', node: this.criterion })
 				} else {
-					this.$emit('input', { action: 'delete', node: this.criterion })
+					this.$emit('input', { action: 'uncheck', node: this.criterion })
 				}
 			},
 		},

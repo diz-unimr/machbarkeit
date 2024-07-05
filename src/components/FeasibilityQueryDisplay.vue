@@ -15,12 +15,12 @@
 						<div class="selected-criteria-container">
 							<div class="selected-criteria-left" />
 							<div class="selected-criteria-middle">
-								<div class="selected-criteria-display" @click="editLimitation(characteristic, index)">
+								<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'Einschlusskriterien')">
 									{{ characteristic.display }}
 								</div>
 								<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-									<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-										{{ type }}
+									<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
+										{{ value }}
 									</span>
 								</div>
 								<div v-if="characteristic.quantityType" class="selected-criteria-condition">
@@ -31,7 +31,7 @@
 										{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
 									</p>
 								</div>
-								<div v-if="characteristic.timeRange" class="selected-criteria-condition">
+								<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
 									<p v-if="characteristic.timeRange.value.type === 'zwischen'">
 										{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
 									</p>
@@ -99,12 +99,12 @@
 						<div class="selected-criteria-container">
 							<div class="selected-criteria-left" />
 							<div class="selected-criteria-middle">
-								<div class="selected-criteria-display">
+								<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'Ausschlusskriterien')">
 									{{ characteristic.display }}
 								</div>
 								<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-									<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-										{{ type }}
+									<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
+										{{ value }}
 									</span>
 								</div>
 								<div v-if="characteristic.quantityType" class="selected-criteria-condition">
@@ -115,7 +115,7 @@
 										{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
 									</p>
 								</div>
-								<div v-if="characteristic.timeRange" class="selected-criteria-condition">
+								<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
 									<p v-if="characteristic.timeRange.value.type === 'zwischen'">
 										{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
 									</p>
@@ -184,7 +184,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import type { FilterInfo } from '../types/FeasibilityQueryBuilderData'
+import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData'
 
 interface FeasibilityQueryDisplayData {
     criteriaLogic: {
@@ -297,8 +297,8 @@ export default Vue.extend({
 			}
 		},
 
-		editLimitation(characteristic: FilterInfo, index: number) {
-			this.$emit('edit-criteria-limitation', characteristic, index)
+		editLimitation(characteristic: FilterInfo, index: number, criteriaType: string) {
+			this.$emit('edit-criteria-limitation', characteristic, index, criteriaType)
 		},
 
 		deleteBtn(index: number, criteriaType: string) {
@@ -326,6 +326,7 @@ export default Vue.extend({
 	border-top-right-radius: 5px;
 	border-top-left-radius: 5px;
 	box-shadow: none!important;
+	margin-top: 20px;
 	width: 100%;
 }
 

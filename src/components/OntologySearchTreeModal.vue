@@ -25,14 +25,14 @@
 						v-show="activeTab === criterion_index"
 						:key="criterion_index">
 						<div class="criteria-node">
-							<CriteriaNestedTreeNode v-if="criterion.children && (einschlussTextSerach.length === 0 && ausschlussTextSerach.length === 0)"
+							<OntologyNestedTreeNode v-if="criterion.children && (einschlussTextSerach.length === 0 && ausschlussTextSerach.length === 0)"
 								:is-root-node="true"
 								:criterion="criterion"
 								:einschluss-text-serach="einschlussTextSerach"
 								:ausschluss-text-serach="ausschlussTextSerach"
 								@input="getCheckboxItems" />
 
-							<CriteriaNestedTreeNodeSearch v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
+							<OntologyNestedTreeNodeSearchInput v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
 								class="criteria-nested-tree-node"
 								:criterion="criterion"
 								:einschluss-text-serach="einschlussTextSerach"
@@ -44,7 +44,7 @@
 						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
 							AUSWÄHLEN
 						</button>
-						<button @click="$emit('toggle-search-criteria', criteriaType)">
+						<button @click="$emit('toggle-search-criteria-modal', criteriaType)">
 							ABBRECHEN
 						</button>
 					</div>
@@ -61,16 +61,16 @@
 import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
-import CriteriaNestedTreeNodeSearch from './CriteriaNestedTreeNodeSearch.vue'
+import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
+import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
 import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
-import type { CheckedItem } from '../components/CriteriaNestedTreeNode.vue'
+import type { CheckedItem } from '../components/OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
 	name: 'OntologySearchTreeModal',
 	components: {
-		CriteriaNestedTreeNode,
-		CriteriaNestedTreeNodeSearch,
+		OntologyNestedTreeNode,
+		OntologyNestedTreeNodeSearchInput,
 	},
 	props: {
 		criteriaType: {
@@ -89,7 +89,7 @@ export default Vue.extend({
 			type: Function,
 			default: () => {},
 		},
-		toggleSearchCriteria: {
+		toggleSearchCriteriaModal: {
 			type: Function,
 			default: () => {},
 		},
@@ -110,6 +110,7 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getOntology()
+		console.log('einschlussTextSerach: ', this.einschlussTextSerach)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -130,9 +131,9 @@ export default Vue.extend({
 		},
 
 		getCheckboxItems(checkedItem: CheckedItem): void {
-			if (checkedItem.action === 'add') {
+			if (checkedItem.action === 'check') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
-			} else if (checkedItem.action === 'delete') {
+			} else if (checkedItem.action === 'uncheck') {
 				this.selectedItems = this.selectedItems.filter(function(name) {
 					return name !== checkedItem.node
 				})
@@ -143,20 +144,20 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.criteria-nested-tree-node {
-	overflow-y: auto;
-	overflow-x: hidden;
-	scrollbar-width: auto;
-	height: 100%;
-	padding-right: 10px;
-}
-
 .search-tree-overlay-container {
 	display:flex;
 	z-index: 100;
 	max-width: 100%;
 	max-height: 100%;
 	position: sticky;
+}
+
+.criteria-nested-tree-node {
+	overflow-y: auto;
+	overflow-x: hidden;
+	scrollbar-width: auto;
+	height: 100%;
+	padding-right: 10px;
 }
 
 .search-tree-overlay-wrapper {

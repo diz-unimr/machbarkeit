@@ -80,11 +80,12 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
+import type { QuantityOptionsData } from '../../types/QuantityOptionsData.ts'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
-import type { QuantityTypeData } from '../../types/QuantityTypeData.ts'
+import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
-	name: 'QuantityType',
+	name: 'QuantityOptions',
 	components: {},
 	props: {
 		profile: {
@@ -95,7 +96,7 @@ export default Vue.extend({
 			type: Function,
 			default: () => {},
 		},
-		getSelectedOption: {
+		getSelectedFilterOption: {
 			type: Function,
 			default: () => {},
 		},
@@ -103,8 +104,12 @@ export default Vue.extend({
 			type: Boolean,
 			default: true,
 		},
+		selectedCriterion: {
+			type: Object as PropType<OntologyTreeElement>,
+			required: true,
+		},
 	},
-	data(): QuantityTypeData {
+	data(): QuantityOptionsData {
 		return {
 			typeSymbol: {
 				'kein Filter': 'kein Filter',
@@ -114,14 +119,25 @@ export default Vue.extend({
 				zwischen: 'zwischen',
 			},
 			comparisonRestriction: {
-				type: 'kein Filter',
-				typeSymbol: 'kein Filter',
-				unit: this.profile.valueDefinition?.allowedUnits[0].display,
-				value: '0',
-				min: '0',
-				max: '0',
+				type: this.selectedCriterion.quantityType?.value.type
+					? this.selectedCriterion.quantityType.value.type
+					: 'kein Filter',
+				typeSymbol: this.selectedCriterion.quantityType?.value.typeSymbol
+					? this.selectedCriterion.quantityType.value.typeSymbol
+					: 'kein Filter',
+				unit: this.selectedCriterion.quantityType?.value.unit
+					? this.selectedCriterion.quantityType.value.unit
+					: this.profile.valueDefinition?.allowedUnits[0].display,
+				value: this.selectedCriterion.quantityType?.value.value
+					? this.selectedCriterion.quantityType.value.value
+					: '0',
+				min: this.selectedCriterion.quantityType?.value.min
+					? this.selectedCriterion.quantityType.value.min
+					: '0',
+				max: this.selectedCriterion.quantityType?.value.max
+					? this.selectedCriterion.quantityType.value.max
+					: '0',
 			},
-			isFilterOptional: this.profile.valueDefinition?.optional,
 		}
 	},
 
@@ -139,29 +155,30 @@ export default Vue.extend({
 		comparisonRestriction: {
 			handler() {
 				if (this.comparisonRestriction.type === 'kein Filter') {
-					this.$emit('get-selected-option', {
+					this.$emit('get-selected-filter-option', 'update', {
 						type: 'quantityType',
+						display: this.selectedCriterion.display,
+						isFilterOptional: this.profile.valueDefinition?.optional,
+						isFilterComplete: this.profile.valueDefinition?.optional,
 						value: {},
-						isFilterOptional: this.isFilterOptional,
-						completeFilter: false,
 					})
 				} else if (this.comparisonRestriction.type === 'zwischen') {
-					this.$emit('get-selected-option', {
+					this.$emit('get-selected-filter-option', 'update', {
 						type: 'quantityType',
+						display: this.selectedCriterion.display,
+						isFilterOptional: this.profile.valueDefinition?.optional,
+						isFilterComplete: this.comparisonRestriction.type && (this.comparisonRestriction.min < this.comparisonRestriction.max),
 						value: this.comparisonRestriction,
-						isFilterOptional: this.isFilterOptional,
-						completeFilter: this.comparisonRestriction.type && (this.comparisonRestriction.min < this.comparisonRestriction.max),
 					})
-
 				} else {
-					this.$emit('get-selected-option', {
+					this.$emit('get-selected-filter-option', 'update', {
 						type: 'quantityType',
+						display: this.selectedCriterion.display,
+						isFilterOptional: this.profile.valueDefinition?.optional,
+						isFilterComplete: this.comparisonRestriction.type.length > 0 && this.comparisonRestriction.value.length > 0,
 						value: this.comparisonRestriction,
-						isFilterOptional: this.isFilterOptional,
-						completeFilter: this.comparisonRestriction.type.length > 0 && this.comparisonRestriction.value.length > 0,
 					 })
 				}
-
 			},
 			deep: true,
 		},
@@ -179,14 +196,27 @@ export default Vue.extend({
 
 	},
 
+	// life cycle of vue js
+	// Call functions before all component are rendered
+	beforeCreate() {},
+	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-option', {
+		this.$emit('get-selected-filter-option', 'initial', {
 			type: 'quantityType',
-			value: {},
-			isFilterOptional: this.isFilterOptional,
-			completeFilter: false,
+			display: this.selectedCriterion.display,
+			isFilterOptional: this.profile.valueDefinition?.optional,
+			isFilterComplete: this.selectedCriterion.quantityType?.isFilterComplete
+				? this.selectedCriterion.quantityType?.isFilterComplete
+				: this.profile.valueDefinition?.optional,
+			value: this.selectedCriterion.quantityType?.value
+				? this.comparisonRestriction
+				: {},
 		})
 	},
+	beforeMount() {},
+	mounted() {},
+	beforeUpdate() {},
+	updated() {},
 
 	methods: {
 		checkEmptyValue(event: Event, tag: string): void {

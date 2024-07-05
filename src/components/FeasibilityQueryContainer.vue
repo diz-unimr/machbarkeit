@@ -4,8 +4,8 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="feasibility-query-container">
-		<div class="feasibility-query">
-			<div class="feasibility-query__top">
+		<div class="feasibility-query-body">
+			<div class="feasibility-query__result">
 				<div class="number-patients">
 					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
 				</div>
@@ -86,13 +86,13 @@ export default Vue.extend({
 	overflow-x: hidden;
 }
 
-.feasibility-query {
+.feasibility-query-body {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 100%;
 }
 
-.feasibility-query__top {
+.feasibility-query__result {
 	display: flex;
 	flex-direction: row;
 	place-content: center space-between;

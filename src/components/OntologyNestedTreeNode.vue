@@ -3,9 +3,9 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="criteria-nested-tree-node">
+	<div class="ontology-nested-tree-node">
 		<li style="list-style-type: none;">
-			<div class="criteria-head-node">
+			<div class="ontology-head-node">
 				<button :class="{'default-cursor': !criterion.children, 'display-none': !criterion.children}" @click="() => (state = !state)">
 					<img v-if="criterion.children"
 						:src="state
@@ -33,7 +33,7 @@
 				</div>
 			</div>
 			<ul v-show="state">
-				<CriteriaNestedTreeNode v-for="child in criterion.children"
+				<OntologyNestedTreeNode v-for="child in criterion.children"
 					:key="child.id"
 					:criterion="child"
 					:einschluss-text-serach="einschlussTextSerach"
@@ -48,7 +48,7 @@
 import Vue, { type PropType } from 'vue'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
 
-interface CriteriaNestedTreeNodeData {
+interface OntologyNestedTreeNodeData {
 	state: boolean;
 	imgCollapse: string;
 	imgExpand: string;
@@ -60,7 +60,7 @@ export interface CheckedItem {
 }
 
 export default Vue.extend({
-	name: 'CriteriaNestedTreeNode',
+	name: 'OntologyNestedTreeNode',
 	components: {},
 	props: {
 		isRootNode: {
@@ -81,7 +81,7 @@ export default Vue.extend({
 		},
 	},
 
-	data(): CriteriaNestedTreeNodeData {
+	data(): OntologyNestedTreeNodeData {
 		return {
 			state: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
@@ -98,9 +98,9 @@ export default Vue.extend({
 			// Updates checked items when checkbox state changes
 			set(checked): void {
 				if (checked) {
-					this.$emit('input', { action: 'add', node: this.criterion })
+					this.$emit('input', { action: 'check', node: this.criterion })
 				} else {
-					this.$emit('input', { action: 'delete', node: this.criterion })
+					this.$emit('input', { action: 'uncheck', node: this.criterion })
 				}
 			},
 		},
@@ -136,14 +136,14 @@ input[type='checkbox'] {
 	height: 15px;
 }
 
-.criteria-nested-tree-node {
+.ontology-nested-tree-node {
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
 	padding-right: 10px;
 }
 
-.criteria-head-node {
+.ontology-head-node {
 	flex-direction: row;
 	box-sizing: border-box;
 	display: flex;
@@ -152,7 +152,7 @@ input[type='checkbox'] {
 	margin-top: 4px;
 }
 
-.criteria-head-node button {
+.ontology-head-node button {
 	display: flex;
 	flex-direction: row;
 	align-items: center;

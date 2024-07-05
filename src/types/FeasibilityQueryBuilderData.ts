@@ -3,19 +3,11 @@
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
 import type { OntologyTreeElement } from './OntologySearchTreeModalData.ts'
-import type { ConceptType, QuantityType, TimeRange } from './LimitationsSelectedCriteriaModalData.ts'
+import type { FilterInfo } from './LimitationsSelectedCriteriaCardData.ts'
 
 export interface SelectedCriteriaData {
 	criteriaType: string;
 	selectedItems: OntologyTreeElement[];
-}
-
-export interface FilterInfo {
-    id: string;
-    display: string;
-    conceptType: ConceptType | undefined;
-    quantityType: QuantityType | undefined;
-    timeRange: TimeRange | undefined;
 }
 
 export interface ValueDefinition {
@@ -37,7 +29,7 @@ export interface ValueDefinition {
             code: string;
             display: string;
             system: string;
-            version: string;
+            version: string | null | undefined;
         }
     ];
     type: string;
@@ -61,15 +53,15 @@ export interface FeasibilityQueryBuilderData {
     uiProfile: UiProfile | null;
     einschlussTextSerach: string;
     ausschlussTextSerach: string;
-    isCriteriaOptionOpen: boolean;
-    isCriteriaOptionEditorOpen: boolean;
+    isLimitationsCriteriaOpen: boolean;
+    isLimitationsCriteriaEditorOpen: boolean;
     isCriteriaContentOpen: boolean;
     criteriaOverlayType: string;
     selectedCriteria: OntologyTreeElement[] | null;
-    selectedEditedCriteria: OntologyTreeElement[] | null;
+    selectedEditedCriteria: FilterInfo[] | null;
     selectedEditedCriteriaIndex: number | null
     selectedCharacteristicsEin: Array<FilterInfo>;
     selectedCharacteristicsAus: Array<FilterInfo>;
-    btnLastChild: number | null;
+    isEditFilterState: boolean;
     imgDelete: string;
 }

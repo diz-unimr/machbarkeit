@@ -22,42 +22,47 @@
 				</button>
 			</div>
 		</div>
-		<TimeRangeOption v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
+		<TimeRangeOptions v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
+			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-option="getSelectedOption" />
+			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<QuantityType v-if="profile.valueDefinition?.type === 'quantity' && display === 'Wertebereich'"
+		<QuantityOptions v-if="profile.valueDefinition?.type === 'quantity' && display === 'Wertebereich'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
+			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-option="getSelectedOption" />
+			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<ConceptType v-if="profile.valueDefinition?.type === 'concept' && display === 'Wertebereich'"
+		<ConceptOptions v-if="profile.valueDefinition?.type === 'concept' && display === 'Wertebereich'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
-			:selected-ontology="selectedOntology"
+			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-option="getSelectedOption" />
+			@get-selected-filter-option="getSelectedFilterOption" />
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import TimeRangeOption from './TimeRangeOption.vue'
-import ConceptType from './ConceptType.vue'
-import QuantityType from './QuantityType.vue'
-import type { FilterCardData, SelectedOptionData } from '../../types/FilterCardData'
+import TimeRangeOptions from './TimeRangeOptions.vue'
+import ConceptOptions from './ConceptOptions.vue'
+import QuantityOptions from './QuantityOptions.vue'
+import type { FilterCardData } from '../../types/FilterCardData'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { ConceptType } from '../../types/ConceptOptionsData'
+import type { QuantityType } from '../../types/QuantityOptionsData'
+import type { TimeRange } from '../../types/TimeRangeOptionsData'
 
 export default Vue.extend({
 	name: 'FilterCard',
 	components: {
-		TimeRangeOption,
-		ConceptType,
-		QuantityType,
+		TimeRangeOptions,
+		ConceptOptions,
+		QuantityOptions,
 	},
 	props: {
 		profile: {
@@ -72,15 +77,15 @@ export default Vue.extend({
 			type: Boolean,
 			default: true,
 		},
-		selectedOntology: {
+		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			default: Object as PropType<OntologyTreeElement>,
+			required: true,
 		},
 		display: {
 			type: String,
 			default: String,
 		},
-		getSelectedOptions: {
+		getSelectedFilters: {
 			type: Function,
 			default: () => {},
 		},
@@ -88,9 +93,7 @@ export default Vue.extend({
 	data(): FilterCardData {
 		return {
 			state: this.profile.valueDefinition ? !this.profile.valueDefinition?.optional : false, // set state = false for optional Filter
-			// state: !this.isFilterOptional,
-			isResetDisabled: true,
-			groupFilter: [],
+			isResetDisabled: this.display === 'Wertebereich' ? !(this.selectedCriterion.conceptType?.value || this.selectedCriterion.quantityType?.value) : (!this.selectedCriterion.timeRange?.value.type || this.selectedCriterion.timeRange?.value.type === 'kein Filter'),
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
@@ -99,7 +102,13 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		console.log(this.selectedCriterion)
+		console.log('profile: ', this.profile)
+		console.log('isResetDisabled: ', this.isResetDisabled)
+		console.log('this.display === Wertebereich ', this.display === 'Wertebereich')
+		console.log(this.selectedCriterion.timeRange?.value.type === 'kein Filter')
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -114,14 +123,8 @@ export default Vue.extend({
 			}
 		},
 
-		getSelectedOption(selectedOption: SelectedOptionData): void {
-			const index = this.groupFilter.findIndex(item => item.type === selectedOption.type)
-			if (index === -1) {
-				this.groupFilter.push(selectedOption)
-			} else {
-				this.groupFilter.splice(index, 1, selectedOption)
-			}
-			this.$emit('get-selected-options', this.groupFilter)
+		getSelectedFilterOption(status: string, selectedFilterInfo: ConceptType | QuantityType | TimeRange) {
+			this.$emit('get-selected-filters', status, selectedFilterInfo)
 		},
 
 		toggleResetButton(isReset: boolean): void {

@@ -67,11 +67,12 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { TimeRangOptaionData } from '../../types/TimeRangeOptionData'
+import type { TimeRangeOptionsData } from '../../types/TimeRangeOptionsData'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
+import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
-	name: 'TimeRangeOption',
+	name: 'TimeRangeOptions',
 	props: {
 		profile: {
 			type: Object as PropType<Profile>,
@@ -81,7 +82,7 @@ export default Vue.extend({
 			type: Function,
 			default: () => {},
 		},
-		getSelectedOption: {
+		getSelectedFilterOption: {
 			type: Function,
 			default: () => {},
 		},
@@ -89,18 +90,31 @@ export default Vue.extend({
 			type: Boolean,
 			default: true,
 		},
+		selectedCriterion: {
+			type: Object as PropType<OntologyTreeElement>,
+			required: true,
+		},
 	},
 
-	data(): TimeRangOptaionData {
+	data(): TimeRangeOptionsData {
 		return {
 			timeRangeRestriction: {
-				type: 'kein Filter',
-				fromDate: null,
-				fromDateFormatted: null,
-				toDate: null,
-				toDateFormatted: null,
+				type: this.selectedCriterion.timeRange?.value.type
+					? this.selectedCriterion.timeRange.value.type
+					: 'kein Filter',
+				fromDate: this.selectedCriterion.timeRange?.value.fromDate
+					? this.selectedCriterion.timeRange.value.fromDate
+					: null,
+				fromDateFormatted: this.selectedCriterion.timeRange?.value.fromDateFormatted
+					? this.selectedCriterion.timeRange.value.fromDateFormatted
+					: null,
+				toDate: this.selectedCriterion.timeRange?.value.toDate
+					? this.selectedCriterion.timeRange.value.toDate
+					: null,
+				toDateFormatted: this.selectedCriterion.timeRange?.value.toDateFormatted
+					? this.selectedCriterion.timeRange.value.toDateFormatted
+					: null,
 			},
-			isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
 		}
 	},
 
@@ -108,29 +122,33 @@ export default Vue.extend({
 		timeRangeRestriction: {
 			handler() {
 				if (this.timeRangeRestriction.type === 'kein Filter') {
-					this.$emit('get-selected-option', {
+					this.$emit('get-selected-filter-option', 'update', {
 						type: 'timeRange',
+						display: this.selectedCriterion.display,
+						isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
+						isFilterComplete: true,
 						value: {},
-						isFilterOptional: this.isFilterOptional,
-						completeFilter: false,
 					})
 				} else if (this.timeRangeRestriction.type === 'zwischen') {
 					if (!!this.timeRangeRestriction.fromDate && !!this.timeRangeRestriction.toDate) {
 						const validDate = !(this.timeRangeRestriction.fromDate > this.timeRangeRestriction.toDate)
-						this.$emit('get-selected-option', {
+						this.$emit('get-selected-filter-option', 'update', {
 							type: 'timeRange',
-							value: this.timeRangeRestriction,
+							display: this.selectedCriterion.display,
 							isFilterOptional: validDate,
-							completeFilter: validDate,
+							isFilterComplete: validDate,
+							value: this.timeRangeRestriction,
 						})
 					}
 				} else {
 					if (this.timeRangeRestriction.fromDate) {
-						this.$emit('get-selected-option', {
+						this.$emit('get-selected-filter-option', 'update', {
 							type: 'timeRange',
+							display: this.selectedCriterion.display,
+							isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
+							// isFilterComplete: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
+							isFilterComplete: true,
 							value: this.timeRangeRestriction,
-							isFilterOptional: this.isFilterOptional,
-							completeFilter: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
 						})
 					}
 				}
@@ -157,14 +175,25 @@ export default Vue.extend({
 		},
 	},
 
+	// life cycle of vue js
+	// Call functions before all component are rendered
+	beforeCreate() {},
+	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-option', {
+		this.$emit('get-selected-filter-option', 'initial', {
 			type: 'timeRange',
-			value: {},
-			isFilterOptional: this.isFilterOptional,
-			completeFilter: false,
+			display: this.selectedCriterion.display,
+			isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
+			isFilterComplete: true,
+			value: this.selectedCriterion.timeRange?.value
+				? this.timeRangeRestriction
+				: {},
 		})
 	},
+	beforeMount() {},
+	mounted() {},
+	beforeUpdate() {},
+	updated() {},
 
 	methods: {
 		formatDate(event: Event): void {

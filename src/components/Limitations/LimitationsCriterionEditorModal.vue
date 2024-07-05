@@ -7,15 +7,14 @@
 		<div class="selection-dialog-pane">
 			<div class="selection-dialog">
 				<div class="selection-dialog-panel">
-					<LimitationsSelectedCriteriaCard v-for="(selectedOntology, index) in selectedEditedCriteria"
+					<LimitationsSelectedCriteriaCard v-for="(selectedEditedCriterion, index) in selectedEditedCriteria"
 						:id="index"
-						:key="selectedOntology.id"
+						:key="selectedEditedCriterion.id"
 						:ui-profile="uiProfile"
-						:selected-ontology="selectedOntology"
+						:selected-edited-criterion="selectedEditedCriterion"
 						:is-limitation-edit-feature="true"
-						@get-selected-feature-filter="getSelectedFeatureFilter"
-						@update-ontology-profile="updateOntologyProfile(index, $event)"
-						@update-selected-ontology="updateSelectedOntology(index, $event)" />
+						@get-selected-criteria-filter="getSelectedCriteriaFilter(index, $event)" />
+						<!-- @update-ontology-profile="updateOntologyProfile(index, $event)" -->
 				</div>
 				<div class="dialog-button">
 					<button :disabled="!isFilterComplete" @click="submit">
@@ -33,13 +32,13 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
-import type { ConceptType, QuantityType, TimeRange, LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
+import type { LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { UiProfile } from '../../types/FeasibilityQueryBuilderData'
+import type { FilterInfo } from '../../types/LimitationsSelectedCriteriaCardData'
 
-interface updatedOntologyData {
-	type: string;
-	item: ConceptType | QuantityType | TimeRange | undefined;
+interface SelectedCriteriaFilter {
+	status: string;
+	item: FilterInfo;
 }
 
 export default Vue.extend({
@@ -49,7 +48,7 @@ export default Vue.extend({
 	},
 	props: {
 		selectedEditedCriteria: {
-			type: Array<OntologyTreeElement>,
+			type: Array<FilterInfo>,
 			default: null,
 		},
 		uiProfile: {
@@ -65,7 +64,7 @@ export default Vue.extend({
 	data(): LimitationsSelectedCriteriaModalData {
 		return {
 			filterInfo: [],
-			notEmptyProfileName: [],
+			selectedCriteriaFiltersInfo: [],
 			isFilterComplete: false,
 		}
 	},
@@ -76,50 +75,32 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {},
 	beforeMount() {},
-	mounted() {},
+	mounted() {
+		this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
+	},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		getNotEmptyProfile(uiProfile: UiProfile): void {
-			const profileKeys = Object.keys(uiProfile)
-			for (let i = 0; i < profileKeys.length; i++) {
-				const key = profileKeys[i]
-				if (uiProfile[key].valueDefinition?.optional === false) {
-					this.notEmptyProfileName.push(uiProfile[key].name)
-				}
-			}
-		},
-
-		getSelectedFeatureFilter(filteredCriteria: OntologyTreeElement): void {
-			const filter = {
-				id: filteredCriteria.id,
-				display: filteredCriteria.display,
-				conceptType: filteredCriteria.conceptType,
-				quantityType: filteredCriteria.quantityType,
-				timeRange: filteredCriteria.timeRange,
-			}
-			const index = this.filterInfo.findIndex(item => item.display === filter.display)
-			if (index === -1) {
-				this.filterInfo.push(filter)
-			} else this.filterInfo[index] = filter
-
-			this.checkCompleteFilter()
-		},
-
-		checkCompleteFilter(): void {
-			const notCompleteFilter = this.filterInfo.filter(item => {
+		checkCompleteFilter(filtersInfo: FilterInfo[]): void {
+			const notCompleteFilter = filtersInfo.filter(item => {
 				let notComplete = false
-				for (const key in item) {
-					if (item[key] && key !== 'display' && key !== 'id') {
-						notComplete = item[key].isFilterOptional ? false : !item[key].completeFilter
-						if (notComplete) {
-							return notComplete
-						}
-					}
+				item.timeRange && item.timeRange?.isFilterComplete === false && (notComplete = true)
+				item.quantityType?.isFilterComplete === false && (notComplete = true)
+				item.conceptType?.isFilterComplete === false && (notComplete = true)
+				/* if (item.timeRange?.isFilterComplete! === false) {
+					return true
 				}
+
+				if (item.quantityType?.isFilterComplete! === false) {
+					return true
+				}
+
+				if (item.conceptType?.isFilterComplete! === false) {
+					return true
+				} */
 				return notComplete
 			})
 
@@ -128,16 +109,15 @@ export default Vue.extend({
 			} else this.isFilterComplete = true
 		},
 
-		updateOntologyProfile(index: string | number, profileType: string): void {
-			this.$emit('update-edited-criteria', { id: index, type: profileType })
-		},
-
-		updateSelectedOntology(index: string | number, item: updatedOntologyData): void {
-			this.$emit('update-edited-criteria', { id: index, ...item })
+		getSelectedCriteriaFilter(index: string | number, data: SelectedCriteriaFilter): void {
+			if (this.selectedEditedCriteria[index].display === data.item.display) {
+				this.selectedCriteriaFiltersInfo[index] = data.item
+			}
+			data.status === 'update' && this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
 		},
 
 		submit(): void {
-			this.$emit('get-filter-info', this.filterInfo)
+			this.$emit('get-selected-filter-info', this.selectedCriteriaFiltersInfo)
 			this.$emit('dialog-close')
 		},
 

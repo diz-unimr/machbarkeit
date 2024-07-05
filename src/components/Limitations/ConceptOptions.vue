@@ -28,12 +28,12 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { ConceptTypeData } from '../../types/ConceoptTypeData'
+import type { ConceptOptionsData } from '../../types/ConceptOptionsData'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
-	name: 'ConceptType',
+	name: 'ConceptOptions',
 	props: {
 		profile: {
 			type: Object as PropType<Profile>,
@@ -43,7 +43,7 @@ export default Vue.extend({
 			type: Function,
 			default: () => {},
 		},
-		getSelectedOption: {
+		getSelectedFilterOption: {
 			type: Function,
 			default: () => {},
 		},
@@ -51,24 +51,26 @@ export default Vue.extend({
 			type: Boolean,
 			default: true,
 		},
-		selectedOntology: {
+		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
 			required: true,
 		},
 	},
-	data(): ConceptTypeData {
+	data(): ConceptOptionsData {
 		return {
-			selectedConcepts: this.selectedOntology.conceptType ? this.selectedOntology.conceptType.value : [],
-			isFilterOptional: this.profile.valueDefinition?.optional,
+			selectedConcepts: this.selectedCriterion.conceptType?.value
+				? this.selectedCriterion.conceptType.value
+				: [],
 		}
 	},
 	watch: {
 		selectedConcepts() {
-			this.$emit('get-selected-option', {
+			this.$emit('get-selected-filter-option', 'update', {
 				type: 'conceptType',
+				display: this.selectedCriterion.display,
+				isFilterOptional: this.profile.valueDefinition?.optional,
+				isFilterComplete: this.selectedConcepts.length > 0,
 				value: this.selectedConcepts,
-				isFilterOptional: this.isFilterOptional,
-				completeFilter: this.selectedConcepts.length > 0,
 			})
 
 			if (this.selectedConcepts.length > 0) {
@@ -77,6 +79,7 @@ export default Vue.extend({
 				this.$emit('toggle-reset-button', false)
 			}
 		},
+
 		isResetDisabled(): void {
 			if (this.isResetDisabled) {
 				this.selectedConcepts = []
@@ -89,13 +92,17 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-option', {
+		this.$emit('get-selected-filter-option', 'initial', {
 			type: 'conceptType',
+			display: this.selectedCriterion.display,
+			isFilterOptional: this.profile.valueDefinition?.optional,
+			isFilterComplete: this.selectedCriterion.conceptType?.isFilterComplete
+				? this.selectedCriterion.conceptType?.isFilterComplete
+				: this.profile.valueDefinition?.optional,
 			value: this.selectedConcepts,
-			isFilterOptional: this.isFilterOptional,
-			completeFilter: false,
 		})
 	},
+
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

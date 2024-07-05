@@ -3,7 +3,7 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="query-builder-container">
+	<div class="feasibility-query-builder">
 		<div class="feasibility-query__input">
 			<div class="criteria-wrapper">
 				<div class="criteria">
@@ -12,7 +12,7 @@
 					</div>
 					<div class="criteria-search-input">
 						<div class="search-button">
-							<button id="einschlusskriterien" @click="toggleSearchCriteria('Einschlusskriterien')">
+							<button id="einschlusskriterien" @click="toggleSearchCriteriaModal('Einschlusskriterien')">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -47,7 +47,7 @@
 					</div>
 					<div class="criteria-search-input">
 						<div class="search-button">
-							<button id="ausschlusskriterien" @click="toggleSearchCriteria('Ausschlusskriterien')">
+							<button id="ausschlusskriterien" @click="toggleSearchCriteriaModal('Ausschlusskriterien')">
 								<svg role="img"
 									aria-hidden="true"
 									focusable="false"
@@ -76,34 +76,27 @@
 					</div>
 				</div>
 			</div>
+
 			<OntologySearchTreeModal v-if="isCriteriaContentOpen"
 				:criteria-type="criteriaOverlayType"
 				:einschluss-text-serach="einschlussTextSerach"
 				:ausschluss-text-serach="ausschlussTextSerach"
 				@get-selected-criteria="getSelectedCriteria"
-				@toggle-search-criteria="toggleSearchCriteria" />
+				@toggle-search-criteria-modal="toggleSearchCriteriaModal" />
+
+			<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
+				:selected-criteria="selectedCriteria"
+				:ui-profile="uiProfile"
+				:is-edit-filter-state="isEditFilterState"
+				@get-selected-filter-info="getSelectedFilterInfo"
+				@dialog-close="selectionOntologyDiaglogClose"
+				@delete-selected-criteria="deleteSelectedCriteria" />
+
+			<FeasibilityQueryDisplay :selected-characteristics-ein="selectedCharacteristicsEin"
+				:selected-characteristics-aus="selectedCharacteristicsAus"
+				@edit-criteria-limitation="editCriteriaLimitation"
+				@delete-characteristic="deleteCharacteristic" />
 		</div>
-
-		<LimitationsSelectedCriteriaModal v-if="isCriteriaOptionOpen"
-			:selected-criteria="selectedCriteria"
-			:ui-profile="uiProfile"
-			@dialog-close="selectionOntologyDiaglogClose"
-			@get-filter-info="getFilterInfo"
-			@update-selected-criteria="updateSelectedCriteria"
-			@delete-selected-criteria="deleteSelectedCriteria" />
-
-		<LimitationsCriterionEditorModal v-if="isCriteriaOptionEditorOpen"
-			:selected-edited-criteria="selectedEditedCriteria"
-			:ui-profile="uiProfile"
-			@dialog-close="selectionOntologyDiaglogClose"
-			@get-filter-info="getFilterInfo"
-			@update-edited-criteria="updateEditedCriteria"
-			@delete-selected-criteria="deleteSelectedCriteria" />
-
-		<FeasibilityQueryDisplay :selected-characteristics-ein="selectedCharacteristicsEin"
-			:selected-characteristics-aus="selectedCharacteristicsAus"
-			@edit-criteria-limitation="editCriteriaLimitation"
-			@delete-characteristic="deleteCharacteristic" />
 	</div>
 </template>
 
@@ -115,20 +108,14 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
-import LimitationsCriterionEditorModal from './Limitations/LimitationsCriterionEditorModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
-import type { FilterInfo, FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
+import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
+import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData.ts'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
-import type { ConceptType, QuantityType, TimeRange } from '../types/LimitationsSelectedCriteriaModalData.ts'
 
 interface SelectedCriteriaData {
 	criteriaType: string;
 	selectedItems: OntologyTreeElement[];
-}
-
-interface updatedCriteriaData {
-	id: string | number;
-	item: ConceptType | QuantityType | TimeRange;
 }
 
 export default Vue.extend({
@@ -138,7 +125,6 @@ export default Vue.extend({
 		Magnify,
 		OntologySearchTreeModal,
 		LimitationsSelectedCriteriaModal,
-		LimitationsCriterionEditorModal,
 		FeasibilityQueryDisplay,
 	},
 
@@ -147,8 +133,8 @@ export default Vue.extend({
 			uiProfile: null,
 			einschlussTextSerach: '',
 			ausschlussTextSerach: '',
-			isCriteriaOptionOpen: false,
-			isCriteriaOptionEditorOpen: false,
+			isLimitationsCriteriaOpen: false,
+			isLimitationsCriteriaEditorOpen: false,
 			isCriteriaContentOpen: false,
 			criteriaOverlayType: '',
 			selectedCriteria: null,
@@ -156,7 +142,7 @@ export default Vue.extend({
 			selectedEditedCriteriaIndex: null,
 			selectedCharacteristicsEin: [],
 			selectedCharacteristicsAus: [],
-			btnLastChild: null,
+			isEditFilterState: false,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
 	},
@@ -187,24 +173,7 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-		/* if (document.getElementsByClassName('einschlusscriteria-combining-operator').length > 0) {
-			console.log('update')
-			const buttonElements = document.getElementsByClassName('einschlusscriteria-combining-operator') as HTMLCollectionOf<HTMLElement>
-			// const lastButton = buttonElements.length - 1
-			if (this.firstAusschlussCriteria === true) {
-				buttonElements[0].style.display = 'none'
-			}
-
-		}
-		console.log(document.getElementsByClassName('ausschlusscriteria-combining-operator').length)
-		if (document.getElementsByClassName('ausschlusscriteria-combining-operator').length > 0) {
-			const buttonElements = document.getElementsByClassName('ausschlusscriteria-combining-operator') as HTMLCollectionOf<HTMLElement>
-			const lastButton = buttonElements.length - 1
-			console.log('lastButton Aus: ', lastButton)
-			buttonElements[lastButton].style.display = 'none'
-		} */
-	},
+	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -214,7 +183,7 @@ export default Vue.extend({
 			this.uiProfile = response.data
 		},
 
-		toggleSearchCriteria(type: string): void {
+		toggleSearchCriteriaModal(type: string): void {
 			this.criteriaOverlayType = type
 			this.isCriteriaContentOpen = !this.isCriteriaContentOpen
 			this.einschlussTextSerach = ''
@@ -222,12 +191,12 @@ export default Vue.extend({
 		},
 
 		selectionOntologyDialogOpen(): void {
-			this.isCriteriaOptionOpen = true
+			this.isLimitationsCriteriaOpen = true
 		},
 
 		selectionOntologyDiaglogClose(): void {
-			this.isCriteriaOptionOpen = false
-			this.isCriteriaOptionEditorOpen = false
+			this.isLimitationsCriteriaOpen = false
+			this.isLimitationsCriteriaEditorOpen = false
 		},
 
 		focusInput(criteriaType: string): void {
@@ -241,14 +210,15 @@ export default Vue.extend({
 		getSelectedCriteria(items: SelectedCriteriaData): void {
 			this.einschlussTextSerach = ''
 			this.ausschlussTextSerach = ''
-			this.toggleSearchCriteria(items.criteriaType)
-			this.selectionOntologyDialogOpen()
 			this.selectedCriteria = items.selectedItems
+			this.toggleSearchCriteriaModal(items.criteriaType)
+			this.isLimitationsCriteriaOpen = true
 		},
 
-		getFilterInfo(filterInfo: FilterInfo[]): void {
+		getSelectedFilterInfo(filterInfo: FilterInfo[]) {
+			// packt filterInfo in this.selectedCharacteristicsEin with for loop, condition with id and display
 			if (this.criteriaOverlayType === 'Einschlusskriterien') {
-				if (this.selectedEditedCriteriaIndex !== null) {
+				if (this.selectedEditedCriteriaIndex !== null) { // when criterion is edited
 					this.selectedCharacteristicsEin.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
 					this.selectedEditedCriteriaIndex = null
 				} else this.selectedCharacteristicsEin.push(...filterInfo)
@@ -258,10 +228,6 @@ export default Vue.extend({
 					this.selectedEditedCriteriaIndex = null
 				} else this.selectedCharacteristicsAus.push(...filterInfo)
 			}
-		},
-
-		updateSelectedCriteria(data: updatedCriteriaData): void {
-			this.selectedCriteria![data.id][data.item.type] = data.item
 		},
 
 		deleteSelectedCriteria(index: number): void {
@@ -276,23 +242,23 @@ export default Vue.extend({
 			}
 		},
 
-		editCriteriaLimitation(characteristic: FilterInfo, index: number): void {
-			this.selectedEditedCriteria = this.selectedCriteria?.filter((item) => item.id === characteristic.id) as OntologyTreeElement[]
+		editCriteriaLimitation(characteristic: FilterInfo, index: number, criteriaType: string): void {
+			if (criteriaType === 'Einschlusskriterien') {
+				this.selectedEditedCriteria = this.selectedCharacteristicsEin?.filter((item) => item.id === characteristic.id)
+				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
+			} else if (criteriaType === 'Ausschlusskriterien') {
+				this.selectedEditedCriteria = this.selectedCharacteristicsAus?.filter((item) => item.id === characteristic.id)
+				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
+			}
 			this.selectedEditedCriteriaIndex = index
-			this.isCriteriaOptionEditorOpen = true
-		},
-
-		updateEditedCriteria(data: updatedCriteriaData): void {
-			/* console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria)
-			this.selectedEditedCriteria![data.id][data.item.type] = data.item
-			console.log('this.selectedEditedCriteria: ', this.selectedEditedCriteria) */
-			this.selectedCriteria![this.selectedEditedCriteriaIndex!][data.item.type] = data.item
+			this.isLimitationsCriteriaOpen = true
+			this.isEditFilterState = true
 		},
 	},
 })
 </script>
 <style scoped>
-.query-builder-container {
+.feasibility-query-builder {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
