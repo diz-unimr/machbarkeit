@@ -7,7 +7,7 @@
 		<div v-if="filteredCriteria !== null && filteredCriteria.selectable === true"
 			class="search-tree-term-entry">
 			<p class="filteredCriteriaCode">
-				{{ filteredCriteria.termCodes[0].code }}
+				{{ filteredCriteria.termCodes?.[0].code }}
 			</p>
 			<div style="display: flex; align-items: flex-start; width: 85%;">
 				<input :id="criterion.id"
@@ -20,7 +20,7 @@
 			</div>
 		</div>
 
-		<OntologyNestedTreeNodeSearch v-for="child in criterion.children"
+		<OntologyNestedTreeNodeSearchInput v-for="child in criterion.children"
 			:key="child.id"
 			:criterion="child"
 			:einschluss-text-serach="einschlussTextSerach"
@@ -123,7 +123,7 @@ export default Vue.extend({
 		},
 
 		filterCriteria(textSearch: string, criterion: OntologyTreeElement): void {
-			const filteredItem = criterion.termCodes[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes[0].display.toLowerCase().includes(textSearch.toLowerCase())
+			const filteredItem = criterion.termCodes?.[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes?.[0].display.toLowerCase().includes(textSearch.toLowerCase())
 
 			if (filteredItem) {
 				this.filteredCriteria = criterion

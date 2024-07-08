@@ -102,13 +102,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		console.log(this.selectedCriterion)
-		console.log('profile: ', this.profile)
-		console.log('isResetDisabled: ', this.isResetDisabled)
-		console.log('this.display === Wertebereich ', this.display === 'Wertebereich')
-		console.log(this.selectedCriterion.timeRange?.value.type === 'kein Filter')
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

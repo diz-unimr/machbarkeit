@@ -110,7 +110,6 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getOntology()
-		console.log('einschlussTextSerach: ', this.einschlussTextSerach)
 	},
 	beforeMount() {},
 	mounted() {},

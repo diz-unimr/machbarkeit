@@ -185,7 +185,7 @@ export default Vue.extend({
 			display: this.selectedCriterion.display,
 			isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
 			isFilterComplete: true,
-			value: this.selectedCriterion.timeRange?.value
+			value: this.selectedCriterion.timeRange?.value.fromDate
 				? this.timeRangeRestriction
 				: {},
 		})
@@ -194,6 +194,8 @@ export default Vue.extend({
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
+	beforeDestroy() {},
+	destroyed() {},
 
 	methods: {
 		formatDate(event: Event): void {
