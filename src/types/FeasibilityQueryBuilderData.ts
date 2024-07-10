@@ -56,6 +56,7 @@ export interface FeasibilityQueryBuilderData {
     isLimitationsCriteriaOpen: boolean;
     isLimitationsCriteriaEditorOpen: boolean;
     isCriteriaContentOpen: boolean;
+    isOntologyButtonClicked: boolean;
     criteriaOverlayType: string;
     selectedCriteria: OntologyTreeElement[] | null;
     selectedEditedCriteria: FilterInfo[] | null;

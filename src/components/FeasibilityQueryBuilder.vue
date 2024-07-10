@@ -33,7 +33,7 @@
 								trailing-button-icon="close"
 								placeholder=" "
 								:show-trailing-button="einschlussTextSerach !== ''"
-								@trailing-button-click="einschlussTextSerach = ''"
+								@trailing-button-click="closeDialog"
 								@focus="focusInput('Einschlusskriterien')">
 								<Magnify :size="20" />
 							</NcTextField>
@@ -68,7 +68,7 @@
 								trailing-button-icon="close"
 								placeholder=" "
 								:show-trailing-button="ausschlussTextSerach !== ''"
-								@trailing-button-click="ausschlussTextSerach = ''"
+								@trailing-button-click="closeDialog"
 								@focus="focusInput('Ausschlusskriterien')">
 								<Magnify :size="20" />
 							</NcTextField>
@@ -81,6 +81,7 @@
 				:criteria-type="criteriaOverlayType"
 				:einschluss-text-serach="einschlussTextSerach"
 				:ausschluss-text-serach="ausschlussTextSerach"
+				:is-ontology-button-clicked="isOntologyButtonClicked"
 				@get-selected-criteria="getSelectedCriteria"
 				@toggle-search-criteria-modal="toggleSearchCriteriaModal" />
 
@@ -112,6 +113,7 @@ import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
 import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData.ts'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import debounce from 'lodash.debounce'
 
 interface SelectedCriteriaData {
 	criteriaType: string;
@@ -136,6 +138,7 @@ export default Vue.extend({
 			isLimitationsCriteriaOpen: false,
 			isLimitationsCriteriaEditorOpen: false,
 			isCriteriaContentOpen: false,
+			isOntologyButtonClicked: false,
 			criteriaOverlayType: '',
 			selectedCriteria: null,
 			selectedEditedCriteria: null,
@@ -148,19 +151,21 @@ export default Vue.extend({
 	},
 
 	watch: {
-		einschlussTextSerach() {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		einschlussTextSerach: debounce(function(this: any) {
 			if (this.einschlussTextSerach.length > 0) {
 				this.criteriaOverlayType = 'Einschlusskriterien'
 				this.isCriteriaContentOpen = true
 			} else this.isCriteriaContentOpen = false
-		},
+		}, 300),
 
-		ausschlussTextSerach() {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		ausschlussTextSerach: debounce(function(this: any) {
 			if (this.ausschlussTextSerach.length > 0) {
 				this.criteriaOverlayType = 'Ausschlusskriterien'
 				this.isCriteriaContentOpen = true
 			} else this.isCriteriaContentOpen = false
-		},
+		}, 300),
 	},
 
 	// life cycle of vue js
@@ -184,6 +189,7 @@ export default Vue.extend({
 		},
 
 		toggleSearchCriteriaModal(type: string): void {
+			this.isOntologyButtonClicked = !this.isOntologyButtonClicked
 			this.criteriaOverlayType = type
 			this.isCriteriaContentOpen = !this.isCriteriaContentOpen
 			this.einschlussTextSerach = ''
@@ -200,11 +206,19 @@ export default Vue.extend({
 		},
 
 		focusInput(criteriaType: string): void {
+			// this.isCriteriaContentOpen = false
+			// this.isOntologyButtonClicked = false
 			if (criteriaType === 'Einschlusskriterien') {
 				this.ausschlussTextSerach = ''
 			} else if (criteriaType === 'Ausschlusskriterien') {
 				this.einschlussTextSerach = ''
 			}
+		},
+
+		closeDialog() {
+			this.isCriteriaContentOpen = false
+			this.einschlussTextSerach = ''
+			this.ausschlussTextSerach = ''
 		},
 
 		getSelectedCriteria(items: SelectedCriteriaData): void {

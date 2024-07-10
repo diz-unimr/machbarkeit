@@ -25,6 +25,7 @@
 			:criterion="child"
 			:einschluss-text-serach="einschlussTextSerach"
 			:ausschluss-text-serach="ausschlussTextSerach"
+			@check-no-data="checkNoData"
 			@input="checkboxTrigger" />
 	</div>
 </template>
@@ -34,7 +35,7 @@ import Vue, { type PropType } from 'vue'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
 
 interface OntologyNestedTreeNodeSearchInputData {
-	filteredCriteria: OntologyTreeElement | null
+	filteredCriteria: OntologyTreeElement | null;
 }
 
 export interface CheckedItem {
@@ -58,6 +59,10 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
+		/* checkNoData: {
+			type: Function,
+			default: () => {},
+		}, */
 	},
 
 	data(): OntologyNestedTreeNodeSearchInputData {
@@ -86,13 +91,15 @@ export default Vue.extend({
 	watch: {
 		einschlussTextSerach() {
 			if (this.einschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-				this.filterCriteria(this.einschlussTextSerach, this.criterion)
+				const filteredCriteria = this.filterCriteria(this.einschlussTextSerach, this.criterion)
+				this.$emit('check-no-data', filteredCriteria)
 			}
 		},
 
 		ausschlussTextSerach() {
 			if (this.ausschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-				this.filterCriteria(this.ausschlussTextSerach, this.criterion)
+				const filteredCriteria = this.filterCriteria(this.ausschlussTextSerach, this.criterion)
+				filteredCriteria && this.$emit('check-no-data', filteredCriteria)
 			}
 		},
 	},
@@ -103,11 +110,13 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		if (this.einschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-			this.filterCriteria(this.einschlussTextSerach, this.criterion)
+			const filteredCriteria = this.filterCriteria(this.einschlussTextSerach, this.criterion)
+			filteredCriteria && this.$emit('check-no-data', filteredCriteria)
 		}
 
 		if (this.ausschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-			this.filterCriteria(this.ausschlussTextSerach, this.criterion)
+			const filteredCriteria = this.filterCriteria(this.ausschlussTextSerach, this.criterion)
+			filteredCriteria && this.$emit('check-no-data', filteredCriteria)
 		}
 	},
 	beforeMount() {},
@@ -122,12 +131,19 @@ export default Vue.extend({
 			this.$emit('input', checkedItem)
 		},
 
-		filterCriteria(textSearch: string, criterion: OntologyTreeElement): void {
+		filterCriteria(textSearch: string, criterion: OntologyTreeElement): OntologyTreeElement | null {
 			const filteredItem = criterion.termCodes?.[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes?.[0].display.toLowerCase().includes(textSearch.toLowerCase())
 
 			if (filteredItem) {
 				this.filteredCriteria = criterion
+				// eslint-disable-next-line vue/no-mutating-props
 			} else this.filteredCriteria = null
+
+			return this.filteredCriteria
+		},
+
+		checkNoData(filteredCriteria: OntologyTreeElement | null) {
+			this.$emit('check-no-data', filteredCriteria)
 		},
 	},
 })
@@ -135,8 +151,8 @@ export default Vue.extend({
 
 <style scoped>
 input[type='checkbox'] {
-	width: 15px;
-	height: 15px;
+	width: 16px;
+	height: 16px;
 	margin-top: 0px;
 }
 

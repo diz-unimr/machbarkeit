@@ -21,15 +21,18 @@
 					</div>
 				</div>
 				<div class="criteria-container">
-					<div v-for="(criterion, criterion_index) in criteriaResponse"
-						v-show="activeTab === criterion_index"
-						:key="criterion_index">
+					<div v-for="(criterion, criterionIndex) in criteriaResponse"
+						v-show="activeTab === criterionIndex"
+						:key="criterionIndex">
 						<div class="criteria-node">
-							<OntologyNestedTreeNode v-if="criterion.children && (einschlussTextSerach.length === 0 && ausschlussTextSerach.length === 0)"
+							{{ isNoData }}
+							<div v-if="isNoData && !isOntologyButtonClicked" class="noData">
+								Kein Daten
+							</div>
+							<!-- isOntologyButtonClicked -->
+							<OntologyNestedTreeNode v-if="criterion.children && einschlussTextSerach.length <= 0"
 								:is-root-node="true"
 								:criterion="criterion"
-								:einschluss-text-serach="einschlussTextSerach"
-								:ausschluss-text-serach="ausschlussTextSerach"
 								@input="getCheckboxItems" />
 
 							<OntologyNestedTreeNodeSearchInput v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
@@ -37,7 +40,8 @@
 								:criterion="criterion"
 								:einschluss-text-serach="einschlussTextSerach"
 								:ausschluss-text-serach="ausschlussTextSerach"
-								@input="getCheckboxItems" />
+								@input="getCheckboxItems"
+								@check-no-data="checkNoData" />
 						</div>
 					</div>
 					<div class="button-group">
@@ -63,7 +67,7 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
-import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
+import type { OntologySearchTreeModalData, OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
 import type { CheckedItem } from '../components/OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
@@ -79,11 +83,15 @@ export default Vue.extend({
 		},
 		einschlussTextSerach: {
 			type: String,
-			default: '',
+			default: null,
 		},
 		ausschlussTextSerach: {
 			type: String,
-			default: '',
+			default: null,
+		},
+		isOntologyButtonClicked: {
+			type: Boolean,
+			default: false,
 		},
 		getSelectedCriteria: {
 			type: Function,
@@ -101,8 +109,11 @@ export default Vue.extend({
 			criteriaResponse: null,
 			criteriaData: null,
 			selectedItems: [],
+			isNoData: true,
 		}
 	},
+
+	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -137,6 +148,10 @@ export default Vue.extend({
 					return name !== checkedItem.node
 				})
 			}
+		},
+
+		checkNoData(filteredCriteria: OntologyTreeElement | null): void {
+			filteredCriteria ? (this.isNoData = false) : (this.isNoData = true)
 		},
 	},
 })
@@ -173,6 +188,7 @@ export default Vue.extend({
 .criteria-name {
 	text-align: center;
 	margin: 5px 0px;
+	font-size: 18px;
 	font-weight: bold;
 }
 
@@ -255,5 +271,12 @@ export default Vue.extend({
 	justify-content: center;
 	height: 150px;
 	border-top: 2px solid #adbcd7;
+}
+
+.noData {
+	text-align: center;
+	font-weight: bold;
+	font-size: large;
+	margin-top: 20px;
 }
 </style>

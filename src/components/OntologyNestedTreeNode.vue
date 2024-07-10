@@ -6,7 +6,7 @@
 	<div class="ontology-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
-				<button :class="{'default-cursor': !criterion.children, 'display-none': !criterion.children}" @click="() => (state = !state)">
+				<button :class="{'default-cursor': !criterion.children}" @click="() => (state = !state)">
 					<img v-if="criterion.children"
 						:src="state
 							? imgExpand
@@ -36,8 +36,6 @@
 				<OntologyNestedTreeNode v-for="child in criterion.children"
 					:key="child.id"
 					:criterion="child"
-					:einschluss-text-serach="einschlussTextSerach"
-					:ausschluss-text-serach="ausschlussTextSerach"
 					@input="checkboxTrigger" />
 			</ul>
 		</li>
@@ -71,14 +69,14 @@ export default Vue.extend({
 			type: Object as PropType<OntologyTreeElement>,
 			required: true,
 		},
-		einschlussTextSerach: {
+		/* einschlussTextSerach: {
 			type: String,
 			default: '',
 		},
 		ausschlussTextSerach: {
 			type: String,
 			default: '',
-		},
+		}, */
 	},
 
 	data(): OntologyNestedTreeNodeData {
@@ -131,11 +129,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-input[type='checkbox'] {
-	width: 15px;
-	height: 15px;
-}
-
 .ontology-nested-tree-node {
 	overflow-y: auto;
 	scrollbar-width: auto;
@@ -145,11 +138,11 @@ input[type='checkbox'] {
 
 .ontology-head-node {
 	flex-direction: row;
-	box-sizing: border-box;
 	display: flex;
 	place-content: center flex-start;
 	align-items: flex-start;
 	margin-top: 4px;
+	gap: 10px;
 }
 
 .ontology-head-node button {
@@ -169,18 +162,18 @@ input[type='checkbox'] {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
-	margin-left: 5px;
-	/* margin-top: 4px; */
+	gap: 10px;
 }
 
-.search-tree-term-entry input {
+.search-tree-term-entry input[type='checkbox'] {
+	width: 16px;
+	height: 16px;
 	margin: 0px 10px;
 }
 
 .search-tree-term-entry p {
-	font-size: 16px;
-	font-weight: 400;
-	padding-left: 10px;
+	margin: 0;
+	flex: 1;
 	margin-top: 5px;
 }
 
@@ -197,8 +190,8 @@ input[type='checkbox'] {
 }
 
 img {
-	height: 12px;
-	width: 12px;
+	height: 15px;
+	width: 15px;
 }
 
 ul {

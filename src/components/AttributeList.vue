@@ -18,7 +18,7 @@
 					<Magnify :size="20" />
 				</NcTextField>
 				<div class="attribute-display">
-					<div v-for="(modul, index) in modulName" :key="index">
+					<div v-for="(modul, index) in modulName" :key="index" class="attribute-display__header">
 						<a class="modul-name" @click="toggleExpansion(index)">
 							<img class="expandImg"
 								:src="isExpanded(index)
@@ -279,6 +279,10 @@ export default Vue.extend({
 	overflow-x: hidden;
 }
 
+.attribute-display__header {
+	margin: 10px 0px;
+}
+
 .modul-name {
 	font-weight: bold;
 	margin-bottom: 2px;
@@ -291,15 +295,17 @@ export default Vue.extend({
 .attribute-items {
 	display: flex;
 	flex-direction: row;
-	column-gap: 8px;
+	column-gap: 10px;
 	min-height: 30px;
-	padding-left: 15px;
+	padding-left: 20px;
 }
 
 .attribute-items input {
-	margin: 0px;
 	position: relative;
+	margin: 0px;
 	top: -6px;
+	width: 14px;
+	height: 14px;
 }
 
 .attribute-items p {
@@ -312,8 +318,8 @@ export default Vue.extend({
 }
 
 .expandImg {
-	width: 10px;
-	height: 10px
+	width: 14px;
+	height: 14px
 }
 
 .attribute-tooltip {
