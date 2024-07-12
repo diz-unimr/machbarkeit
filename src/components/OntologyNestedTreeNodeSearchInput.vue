@@ -23,9 +23,10 @@
 		<OntologyNestedTreeNodeSearchInput v-for="child in criterion.children"
 			:key="child.id"
 			:criterion="child"
+			:index="index"
 			:einschluss-text-serach="einschlussTextSerach"
 			:ausschluss-text-serach="ausschlussTextSerach"
-			@check-no-data="checkNoData"
+			@check-existing-data="checkExistingData"
 			@input="checkboxTrigger" />
 	</div>
 </template>
@@ -51,6 +52,10 @@ export default Vue.extend({
 			type: Object as PropType<OntologyTreeElement>,
 			required: true,
 		},
+		index: {
+			type: Number,
+			default: Number,
+		},
 		einschlussTextSerach: {
 			type: String,
 			default: '',
@@ -59,10 +64,6 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
-		/* checkNoData: {
-			type: Function,
-			default: () => {},
-		}, */
 	},
 
 	data(): OntologyNestedTreeNodeSearchInputData {
@@ -92,14 +93,14 @@ export default Vue.extend({
 		einschlussTextSerach() {
 			if (this.einschlussTextSerach.length > 0 && this.criterion.selectable === true) {
 				const filteredCriteria = this.filterCriteria(this.einschlussTextSerach, this.criterion)
-				this.$emit('check-no-data', filteredCriteria)
+				filteredCriteria && this.$emit('check-existing-data')
 			}
 		},
 
 		ausschlussTextSerach() {
 			if (this.ausschlussTextSerach.length > 0 && this.criterion.selectable === true) {
 				const filteredCriteria = this.filterCriteria(this.ausschlussTextSerach, this.criterion)
-				filteredCriteria && this.$emit('check-no-data', filteredCriteria)
+				filteredCriteria && this.$emit('check-existing-data')
 			}
 		},
 	},
@@ -111,12 +112,12 @@ export default Vue.extend({
 	created() {
 		if (this.einschlussTextSerach.length > 0 && this.criterion.selectable === true) {
 			const filteredCriteria = this.filterCriteria(this.einschlussTextSerach, this.criterion)
-			filteredCriteria && this.$emit('check-no-data', filteredCriteria)
+			filteredCriteria && this.$emit('check-existing-data')
 		}
 
 		if (this.ausschlussTextSerach.length > 0 && this.criterion.selectable === true) {
 			const filteredCriteria = this.filterCriteria(this.ausschlussTextSerach, this.criterion)
-			filteredCriteria && this.$emit('check-no-data', filteredCriteria)
+			filteredCriteria && this.$emit('check-existing-data')
 		}
 	},
 	beforeMount() {},
@@ -138,12 +139,11 @@ export default Vue.extend({
 				this.filteredCriteria = criterion
 				// eslint-disable-next-line vue/no-mutating-props
 			} else this.filteredCriteria = null
-
 			return this.filteredCriteria
 		},
 
-		checkNoData(filteredCriteria: OntologyTreeElement | null) {
-			this.$emit('check-no-data', filteredCriteria)
+		checkExistingData() {
+			this.$emit('check-existing-data', this.index)
 		},
 	},
 })

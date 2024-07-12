@@ -25,12 +25,11 @@
 						v-show="activeTab === criterionIndex"
 						:key="criterionIndex">
 						<div class="criteria-node">
-							{{ isNoData }}
-							<div v-if="isNoData && !isOntologyButtonClicked" class="noData">
+							<div v-if="isSearchInputNoData[criterionIndex] && !isOntologyButtonClicked && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)" class="noData">
 								Kein Daten
 							</div>
 							<!-- isOntologyButtonClicked -->
-							<OntologyNestedTreeNode v-if="criterion.children && einschlussTextSerach.length <= 0"
+							<OntologyNestedTreeNode v-if="criterion.children && einschlussTextSerach.length <= 0 && ausschlussTextSerach.length <= 0"
 								:is-root-node="true"
 								:criterion="criterion"
 								@input="getCheckboxItems" />
@@ -38,10 +37,11 @@
 							<OntologyNestedTreeNodeSearchInput v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
 								class="criteria-nested-tree-node"
 								:criterion="criterion"
+								:index="criterionIndex"
 								:einschluss-text-serach="einschlussTextSerach"
 								:ausschluss-text-serach="ausschlussTextSerach"
 								@input="getCheckboxItems"
-								@check-no-data="checkNoData" />
+								@check-existing-data="checkExistingData" />
 						</div>
 					</div>
 					<div class="button-group">
@@ -67,7 +67,7 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
-import type { OntologySearchTreeModalData, OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
 import type { CheckedItem } from '../components/OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
@@ -109,11 +109,15 @@ export default Vue.extend({
 			criteriaResponse: null,
 			criteriaData: null,
 			selectedItems: [],
-			isNoData: true,
+			isSearchInputNoData: [],
 		}
 	},
 
-	watch: {},
+	watch: {
+		einschlussTextSerach() {
+			this.isSearchInputNoData = Array(this.criteriaResponse?.length).fill(true)
+		},
+	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -126,14 +130,14 @@ export default Vue.extend({
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {
-	},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
 		async getOntology(): Promise<void> {
 			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
 			this.criteriaResponse = jsonData.data
+			this.isSearchInputNoData = Array(this.criteriaResponse?.length).fill(true)
 		},
 
 		activateTab(index: string | number): void {
@@ -150,8 +154,8 @@ export default Vue.extend({
 			}
 		},
 
-		checkNoData(filteredCriteria: OntologyTreeElement | null): void {
-			filteredCriteria ? (this.isNoData = false) : (this.isNoData = true)
+		checkExistingData(index: number): void {
+			this.isSearchInputNoData.splice(index, 1, false)
 		},
 	},
 })
@@ -187,7 +191,7 @@ export default Vue.extend({
 
 .criteria-name {
 	text-align: center;
-	margin: 5px 0px;
+	margin: 10px 0px;
 	font-size: 18px;
 	font-weight: bold;
 }
@@ -204,6 +208,7 @@ export default Vue.extend({
 	border-top: 2px solid #adbcd7;
 	border-bottom: 2px solid #adbcd7;
 	overflow-x: auto;
+	padding: 3px 0px;
 }
 
 .search-tree-button {

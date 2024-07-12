@@ -46,5 +46,5 @@ export interface OntologySearchTreeModalData {
 	criteriaResponse: OntologyTreeElement[] | null;
     criteriaData: CriteriaData[] | null;
 	selectedItems: OntologyTreeElement[];
-    isNoData: boolean;
+    isSearchInputNoData: Array<boolean>;
 }
