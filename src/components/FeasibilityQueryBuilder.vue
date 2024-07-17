@@ -95,6 +95,7 @@
 
 			<FeasibilityQueryDisplay :selected-characteristics-ein="selectedCharacteristicsEin"
 				:selected-characteristics-aus="selectedCharacteristicsAus"
+				@update-div-sequence="updateDivSequence"
 				@edit-criteria-limitation="editCriteriaLimitation"
 				@delete-characteristic="deleteCharacteristic" />
 		</div>
@@ -157,7 +158,7 @@ export default Vue.extend({
 				this.criteriaOverlayType = 'Einschlusskriterien'
 				this.isCriteriaContentOpen = true
 			} else this.isCriteriaContentOpen = false
-		}, 300),
+		}, 5000),
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		ausschlussTextSerach: debounce(function(this: any) {
@@ -258,15 +259,19 @@ export default Vue.extend({
 
 		editCriteriaLimitation(characteristic: FilterInfo, index: number, criteriaType: string): void {
 			if (criteriaType === 'Einschlusskriterien') {
-				this.selectedEditedCriteria = this.selectedCharacteristicsEin?.filter((item) => item.id === characteristic.id)
+				this.selectedEditedCriteria = this.selectedCharacteristicsEin?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
 				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
 			} else if (criteriaType === 'Ausschlusskriterien') {
-				this.selectedEditedCriteria = this.selectedCharacteristicsAus?.filter((item) => item.id === characteristic.id)
+				this.selectedEditedCriteria = this.selectedCharacteristicsAus?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
 				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
 			}
 			this.selectedEditedCriteriaIndex = index
 			this.isLimitationsCriteriaOpen = true
 			this.isEditFilterState = true
+		},
+
+		updateDivSequence(type: string, newOrder: Array<FilterInfo>) {
+			type === 'einschlusskriterien' ? (this.selectedCharacteristicsEin = newOrder) : (this.selectedCharacteristicsAus = newOrder)
 		},
 	},
 })

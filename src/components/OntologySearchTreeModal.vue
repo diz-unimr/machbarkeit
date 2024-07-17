@@ -26,9 +26,9 @@
 						:key="criterionIndex">
 						<div class="criteria-node">
 							<div v-if="isSearchInputNoData[criterionIndex] && !isOntologyButtonClicked && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)" class="noData">
-								Kein Daten
+								Keine Daten
 							</div>
-							<!-- isOntologyButtonClicked -->
+
 							<OntologyNestedTreeNode v-if="criterion.children && einschlussTextSerach.length <= 0 && ausschlussTextSerach.length <= 0"
 								:is-root-node="true"
 								:criterion="criterion"
@@ -115,6 +115,10 @@ export default Vue.extend({
 
 	watch: {
 		einschlussTextSerach() {
+			this.isSearchInputNoData = Array(this.criteriaResponse?.length).fill(true)
+		},
+
+		auschlussTextSerach() {
 			this.isSearchInputNoData = Array(this.criteriaResponse?.length).fill(true)
 		},
 	},
