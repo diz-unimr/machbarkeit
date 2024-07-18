@@ -3,28 +3,26 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="save-overlay-wrapper">
-		<div class="save-overlay-pane">
-			<div class="save-dialog">
-				<h2 class="save-dialog-title">
-					Abspeichern der aktuellen Suchanfrage
-				</h2>
-				<div class="save-dialog-folder-name">
-					<NcTextField :value.sync="fileName"
-						label="Dateiname"
-						trailing-button-icon="close"
-						placeholder=" "
-						:show-trailing-button="fileName !== ''"
-						@trailing-button-click="fileName = ''" />
-				</div>
-				<div class="save-dialog-button">
-					<button>
-						SPEICHERN
-					</button>
-					<button @click="$emit('dialog-close')">
-						ABBRECHEN
-					</button>
-				</div>
+	<div class="save-query-modal-container">
+		<div class="save-query-modal-wrapper">
+			<h2 class="save-query-modal__title">
+				Abspeichern der aktuellen Suchanfrage
+			</h2>
+			<div class="save-query-modal__folder-name">
+				<NcTextField :value.sync="fileName"
+					label="Dateiname"
+					trailing-button-icon="close"
+					placeholder=" "
+					:show-trailing-button="fileName !== ''"
+					@trailing-button-click="fileName = ''" />
+			</div>
+			<div class="save-query-modal__button-container">
+				<button>
+					SPEICHERN
+				</button>
+				<button @click="$emit('close-save-modal')">
+					ABBRECHEN
+				</button>
 			</div>
 		</div>
 	</div>
@@ -34,20 +32,20 @@
 import Vue from 'vue'
 import { NcTextField } from '@nextcloud/vue'
 
-interface SaveQueryDialogData {
+interface SaveQueryModalData {
 	fileName:string;
-	isDialogVisible: boolean;
+	isModalVisible: boolean;
 }
 
 export default Vue.extend({
-	name: 'SaveQueryDialog',
+	name: 'SaveQueryModal',
 	components: {
 		NcTextField,
 	},
-	data(): SaveQueryDialogData {
+	data(): SaveQueryModalData {
 		return {
 			fileName: '',
-			isDialogVisible: true,
+			isModalVisible: true,
 		}
 	},
 
@@ -68,33 +66,27 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.save-overlay-wrapper {
+.save-query-modal-container {
 	display: flex;
-	position: sticky;
-	z-index: 1000;
-	width: 50%;
-	top: 20%;
+	position: relative;
+	z-index: 100;
 	margin: 0px auto 0px auto;
+	top: 15%;
+	width: 50%;
 }
 
-.save-overlay-pane {
+.save-query-modal-wrapper {
 	display: flex;
+	flex-direction: column;
 	position: absolute;
-	pointer-events: auto;
 	width: 100%;
-}
-
-.save-dialog {
-	display: block;
-	width: 100%;
-	height: 100%;
 	padding: 24px;
 	background-color: white;
 	border-radius: 5px;
 	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
 }
 
-.save-dialog-title {
+.save-query-modal__title {
 	z-index: 1000;
 	opacity: 1;
 	padding: 5px;
@@ -106,14 +98,14 @@ export default Vue.extend({
 	font-family: Roboto,Helvetica Neue,sans-serif;
 }
 
-.save-dialog-folder-name {
+.save-query-modal__folder-name {
 	display: flex;
 	flex-direction: column;
 	place-content: center space-around;
 	margin-bottom: 30px;
 }
 
-.save-dialog-button {
+.save-query-modal__button-container {
 	display: flex;
 	flex-direction: row;
 	align-items: center;

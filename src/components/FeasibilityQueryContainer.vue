@@ -18,36 +18,36 @@
 					</button>
 				</div>
 			</div>
-			<SaveQueryDialog v-if="isDialogOpen" @dialog-close="querySaveDiaglogClose" />
+			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
 			<FeasibilityQueryBuilder />
 		</div>
-		<MachbarkeitFooter @dialog-open="querySaveDialogOpen" @dialog-close="querySaveDiaglogClose" />
+		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
 	</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
-import SaveQueryDialog from './SaveQueryDialog.vue'
+import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 
 interface FeasibilityQueryContainerData {
 	numberOfPatients: number;
-	isDialogOpen: boolean;
+	isSaveModalOpen: boolean;
 }
 
 export default Vue.extend({
 	name: 'FeasibilityQueryContainer',
 	components: {
 		FeasibilityQueryBuilder,
-		SaveQueryDialog,
+		SaveQueryModal,
 		MachbarkeitFooter,
 	},
 
 	data(): FeasibilityQueryContainerData {
 		return {
 			numberOfPatients: 0,
-			isDialogOpen: false,
+			isSaveModalOpen: false,
 		}
 	},
 
@@ -64,12 +64,12 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		querySaveDialogOpen(): void {
-			this.isDialogOpen = true
+		openSaveModal(): void {
+			this.isSaveModalOpen = true
 		},
 
-		querySaveDiaglogClose(): void {
-			this.isDialogOpen = false
+		closeSaveModal(): void {
+			this.isSaveModalOpen = false
 		},
 	},
 })

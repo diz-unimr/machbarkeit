@@ -33,7 +33,7 @@
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="einschlussSearchInput !== ''"
-							@trailing-button-click="closeSearchDialog"
+							@trailing-button-click="closeSearchCriteriaModal"
 							@focus="focusInput('Einschlusskriterien')">
 							<Magnify :size="20" />
 						</NcTextField>
@@ -68,7 +68,7 @@
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="ausschlussSearchInput !== ''"
-							@trailing-button-click="closeSearchDialog"
+							@trailing-button-click="closeSearchCriteriaModal"
 							@focus="focusInput('Ausschlusskriterien')">
 							<Magnify :size="20" />
 						</NcTextField>
@@ -220,7 +220,7 @@ export default Vue.extend({
 			}
 		},
 
-		closeSearchDialog() {
+		closeSearchCriteriaModal() {
 			this.isCriteriaContentOpen = false
 			this.einschlussSearchInput = ''
 			this.ausschlussSearchInput = ''
