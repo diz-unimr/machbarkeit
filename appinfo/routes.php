@@ -20,10 +20,20 @@ return [
 	],
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
-			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
+		[
+			'name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
+			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']
+		],
 		['name' => 'machbarkeit#getMetadata', 'url' => '/machbarkeit/metadata', 'verb' => 'GET'],
 		['name' => 'machbarkeit#getOntology', 'url' => '/machbarkeit/ontology', 'verb' => 'GET'],
-		['name' => 'machbarkeit#getUiProfile', 'url' => '/machbarkeit/ui_profile', 'verb' => 'GET']
+		['name' => 'machbarkeit#getUiProfile', 'url' => '/machbarkeit/ui_profile', 'verb' => 'GET'],
+
+		// TODO
+		// get module names
+		['name' => 'machbarkeit#getModules', 'url' => '/machbarkeit/modules', 'verb' => 'GET'],
+		// ontology tree for module
+		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{module_id}', 'verb' => 'GET'],
+		// get filters (for concepts)
+		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters/{concept_ids}', 'verb' => 'GET']
 	]
 ];

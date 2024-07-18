@@ -12,18 +12,21 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<Note>
+ * @template-extends QBMapper<Module>
  */
-class NoteMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'machbarkeit', Note::class);
+class ModuleMapper extends QBMapper
+{
+	public function __construct(IDBConnection $db)
+	{
+		parent::__construct($db, 'module', Module::class);
 	}
 
 	/**
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function find(int $id, string $userId): Note {
+	public function find(int $id, string $userId): Module
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -34,15 +37,15 @@ class NoteMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $userId
 	 * @return array
 	 */
-	public function findAll(string $userId): array {
+	public function findModules(): array
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
-			->from('machbarkeit')
-			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)));
+			->from('module');
+		// ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)));
 		return $this->findEntities($qb);
 	}
 }

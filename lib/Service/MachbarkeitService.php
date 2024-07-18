@@ -6,8 +6,19 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Service;
 
-class MachbarkeitService {
-	public function readCsv() {
+use OCA\Machbarkeit\Db\ModuleMapper;
+
+class MachbarkeitService
+{
+	private $mapper;
+
+	public function __construct(ModuleMapper $mapper)
+	{
+		$this->mapper = $mapper;
+	}
+
+	public function readCsv()
+	{
 		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
 		$data = [];
 		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
@@ -28,20 +39,21 @@ class MachbarkeitService {
 		return array_values($jsonArray);
 	}
 
-	public function readOntology() {
+	public function readOntology()
+	{
 		$json_files = [
 			'Person.json',
-			'test.json',
+			// 'test.json',
 			/* 'Diagnose.json',
 			'test.json',
-			'Laboruntersuchung.json',
-			'Prozedur.json' */
+			'Laboruntersuchung.json', */
+			'Prozedur.json'
 		];
 		$merged_file = [];
 
 		foreach ($json_files as $file) {
 			// Read JSON file contents
-			$json_content = file_get_contents(__DIR__ . '/../../ontology/ui_trees/'.$file);
+			$json_content = file_get_contents(__DIR__ . '/../../ontology/ui_trees/' . $file);
 			// Decode JSON content into associative array (decode string to json)
 			$json_data = json_decode($json_content, true);
 			// Merge data from current file into merged_file array
@@ -51,9 +63,15 @@ class MachbarkeitService {
 		return $merged_file;
 	}
 
-	public function readUiProfile() {
+	public function readUiProfile()
+	{
 		$ui_profile = file_get_contents(__DIR__ . '/../../ontology/ui_profile.json');
 		$json_ui_profile = json_decode($ui_profile, true);
 		return $json_ui_profile;
+	}
+
+	public function getModules()
+	{
+		return $this->mapper->findModules();
 	}
 }
