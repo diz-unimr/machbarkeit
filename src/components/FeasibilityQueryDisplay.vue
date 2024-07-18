@@ -340,8 +340,14 @@ export default Vue.extend({
 })
 </script>
 <style scoped>
-.pipe--criteria {
+/* .pipe--criteria {
 	border-radius: 4px;
+} */
+
+.pipe {
+	flex: 1 1 100%;
+	max-width: 1%;
+	background-color: #5270a7;
 }
 
 .feasibility-query__display {
@@ -393,14 +399,10 @@ export default Vue.extend({
 	margin-bottom: 0px;
 }
 
-/* .selected-criteria-container:hover {
-    opacity: 0.2;
-    cursor: pointer;
-} */
-
 .selected-criteria-left {
 	width: 15%;
 	padding: 10px 0px;
+	cursor: all-scroll;
 	background-color: #5270a7;
 }
 

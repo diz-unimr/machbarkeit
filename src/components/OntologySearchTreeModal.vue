@@ -171,7 +171,8 @@ export default Vue.extend({
 	z-index: 100;
 	max-width: 100%;
 	max-height: 100%;
-	position: sticky;
+	position: relative;  /* sticky */
+	/* top: -20px; */
 }
 
 .criteria-nested-tree-node {

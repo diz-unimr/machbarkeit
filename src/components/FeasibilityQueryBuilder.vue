@@ -4,101 +4,101 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="feasibility-query-builder">
-		<div class="feasibility-query__input">
-			<div class="criteria-wrapper">
-				<div class="criteria">
-					<div class="criteria-title">
-						Einschlusskriterien
-					</div>
-					<div class="criteria-search-input">
-						<div class="search-button">
-							<button id="einschlusskriterien" @click="toggleSearchCriteriaModal('Einschlusskriterien')">
-								<svg role="img"
-									aria-hidden="true"
-									focusable="false"
-									data-prefix="fas"
-									data-icon="folder"
-									class="svg-inline--fa fa-folder fa-w-16 fa-2x"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512">
-									<path fill="currentColor"
-										d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
-								</svg>
-							</button>
-						</div>
-						<div class="search-input">
-							<NcTextField :value.sync="einschlussTextSerach"
-								style="font-size: 16px;"
-								label="Code oder Suchbegriff eingeben"
-								trailing-button-icon="close"
-								placeholder=" "
-								:show-trailing-button="einschlussTextSerach !== ''"
-								@trailing-button-click="closeDialog"
-								@focus="focusInput('Einschlusskriterien')">
-								<Magnify :size="20" />
-							</NcTextField>
-						</div>
-					</div>
+		<!-- <div class="feasibility-query__input"> -->
+		<div class="feasibility-query-criteria-wrapper">
+			<div class="criteria">
+				<div class="criteria__title">
+					Einschlusskriterien
 				</div>
-				<div class="pipe pipe--criteria" />
-				<div class="criteria">
-					<div class="criteria-title">
-						Ausschlusskriterien
+				<div class="criteria__search-input">
+					<div class="criteria__search-input__button">
+						<button id="einschlusskriterien" @click="toggleSearchCriteriaModal('Einschlusskriterien')">
+							<svg role="img"
+								aria-hidden="true"
+								focusable="false"
+								data-prefix="fas"
+								data-icon="folder"
+								class="svg-inline--fa fa-folder fa-w-16 fa-2x"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 512 512">
+								<path fill="currentColor"
+									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
+							</svg>
+						</button>
 					</div>
-					<div class="criteria-search-input">
-						<div class="search-button">
-							<button id="ausschlusskriterien" @click="toggleSearchCriteriaModal('Ausschlusskriterien')">
-								<svg role="img"
-									aria-hidden="true"
-									focusable="false"
-									data-prefix="fas"
-									data-icon="folder"
-									class="svg-inline--fa fa-folder fa-w-16 fa-2x"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512">
-									<path fill="currentColor"
-										d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
-								</svg>
-							</button>
-						</div>
-						<div class="search-input">
-							<NcTextField :value.sync="ausschlussTextSerach"
-								style="font-size: 16px;"
-								label="Code oder Suchbegriff eingeben"
-								trailing-button-icon="close"
-								placeholder=" "
-								:show-trailing-button="ausschlussTextSerach !== ''"
-								@trailing-button-click="closeDialog"
-								@focus="focusInput('Ausschlusskriterien')">
-								<Magnify :size="20" />
-							</NcTextField>
-						</div>
+					<div class="criteria__search-input__textbox">
+						<NcTextField :value.sync="einschlussSearchInput"
+							style="font-size: 16px;"
+							label="Code oder Suchbegriff eingeben"
+							trailing-button-icon="close"
+							placeholder=" "
+							:show-trailing-button="einschlussSearchInput !== ''"
+							@trailing-button-click="closeSearchDialog"
+							@focus="focusInput('Einschlusskriterien')">
+							<Magnify :size="20" />
+						</NcTextField>
 					</div>
 				</div>
 			</div>
-
-			<OntologySearchTreeModal v-if="isCriteriaContentOpen"
-				:criteria-type="criteriaOverlayType"
-				:einschluss-text-serach="einschlussTextSerach"
-				:ausschluss-text-serach="ausschlussTextSerach"
-				:is-ontology-button-clicked="isOntologyButtonClicked"
-				@get-selected-criteria="getSelectedCriteria"
-				@toggle-search-criteria-modal="toggleSearchCriteriaModal" />
-
-			<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
-				:selected-criteria="selectedCriteria"
-				:ui-profile="uiProfile"
-				:is-edit-filter-state="isEditFilterState"
-				@get-selected-filter-info="getSelectedFilterInfo"
-				@dialog-close="selectionOntologyDiaglogClose"
-				@delete-selected-criteria="deleteSelectedCriteria" />
-
-			<FeasibilityQueryDisplay :selected-characteristics-ein="selectedCharacteristicsEin"
-				:selected-characteristics-aus="selectedCharacteristicsAus"
-				@update-div-sequence="updateDivSequence"
-				@edit-criteria-limitation="editCriteriaLimitation"
-				@delete-characteristic="deleteCharacteristic" />
+			<div class="pipe" />
+			<div class="criteria">
+				<div class="criteria__title">
+					Ausschlusskriterien
+				</div>
+				<div class="criteria__search-input">
+					<div class="criteria__search-input__button">
+						<button id="ausschlusskriterien" @click="toggleSearchCriteriaModal('Ausschlusskriterien')">
+							<svg role="img"
+								aria-hidden="true"
+								focusable="false"
+								data-prefix="fas"
+								data-icon="folder"
+								class="svg-inline--fa fa-folder fa-w-16 fa-2x"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 512 512">
+								<path fill="currentColor"
+									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
+							</svg>
+						</button>
+					</div>
+					<div class="criteria__search-input__textbox">
+						<NcTextField :value.sync="ausschlussSearchInput"
+							style="font-size: 16px;"
+							label="Code oder Suchbegriff eingeben"
+							trailing-button-icon="close"
+							placeholder=" "
+							:show-trailing-button="ausschlussSearchInput !== ''"
+							@trailing-button-click="closeSearchDialog"
+							@focus="focusInput('Ausschlusskriterien')">
+							<Magnify :size="20" />
+						</NcTextField>
+					</div>
+				</div>
+			</div>
 		</div>
+
+		<OntologySearchTreeModal v-if="isCriteriaContentOpen"
+			:criteria-type="criteriaOverlayType"
+			:einschluss-text-serach="einschlussTextSerach"
+			:ausschluss-text-serach="ausschlussTextSerach"
+			:is-ontology-button-clicked="isOntologyButtonClicked"
+			@get-selected-criteria="getSelectedCriteria"
+			@toggle-search-criteria-modal="toggleSearchCriteriaModal" />
+
+		<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
+			:selected-criteria="selectedCriteria"
+			:ui-profile="uiProfile"
+			:is-edit-filter-state="isEditFilterState"
+			@get-selected-filter-info="getSelectedFilterInfo"
+			@dialog-close="selectionOntologyDiaglogClose"
+			@delete-selected-criteria="deleteSelectedCriteria" />
+
+		<FeasibilityQueryDisplay :selected-characteristics-ein="selectedCharacteristicsEin"
+			:selected-characteristics-aus="selectedCharacteristicsAus"
+			@update-div-sequence="updateDivSequence"
+			@edit-criteria-limitation="editCriteriaLimitation"
+			@delete-characteristic="deleteCharacteristic" />
+		<!-- </div> -->
 	</div>
 </template>
 
@@ -134,6 +134,8 @@ export default Vue.extend({
 	data(): FeasibilityQueryBuilderData {
 		return {
 			uiProfile: null,
+			einschlussSearchInput: '',
+			ausschlussSearchInput: '',
 			einschlussTextSerach: '',
 			ausschlussTextSerach: '',
 			isLimitationsCriteriaOpen: false,
@@ -153,20 +155,22 @@ export default Vue.extend({
 
 	watch: {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		einschlussTextSerach: debounce(function(this: any) {
+		einschlussSearchInput: debounce(function(this: any) {
+			this.einschlussTextSerach = this.einschlussSearchInput
 			if (this.einschlussTextSerach.length > 0) {
 				this.criteriaOverlayType = 'Einschlusskriterien'
 				this.isCriteriaContentOpen = true
 			} else this.isCriteriaContentOpen = false
-		}, 5000),
+		}, 500),
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		ausschlussTextSerach: debounce(function(this: any) {
+		ausschlussSearchInput: debounce(function(this: any) {
+			this.ausschlussTextSerach = this.ausschlussSearchInput
 			if (this.ausschlussTextSerach.length > 0) {
 				this.criteriaOverlayType = 'Ausschlusskriterien'
 				this.isCriteriaContentOpen = true
 			} else this.isCriteriaContentOpen = false
-		}, 300),
+		}, 500),
 	},
 
 	// life cycle of vue js
@@ -216,15 +220,15 @@ export default Vue.extend({
 			}
 		},
 
-		closeDialog() {
+		closeSearchDialog() {
 			this.isCriteriaContentOpen = false
-			this.einschlussTextSerach = ''
-			this.ausschlussTextSerach = ''
+			this.einschlussSearchInput = ''
+			this.ausschlussSearchInput = ''
 		},
 
 		getSelectedCriteria(items: SelectedCriteriaData): void {
-			this.einschlussTextSerach = ''
-			this.ausschlussTextSerach = ''
+			this.einschlussSearchInput = ''
+			this.ausschlussSearchInput = ''
 			this.selectedCriteria = items.selectedItems
 			this.toggleSearchCriteriaModal(items.criteriaType)
 			this.isLimitationsCriteriaOpen = true
@@ -281,7 +285,7 @@ export default Vue.extend({
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	row-gap: 20px;
+	/* row-gap: 20px; */
 	font-size: 16px;
 }
 
@@ -291,10 +295,11 @@ export default Vue.extend({
 	width: 100%;
 }
 
-.criteria-wrapper {
+.feasibility-query-criteria-wrapper {
 	display: flex;
 	flex-direction: row;
 	column-gap: 20px;
+	/* margin-bottom: 20px; */
 	width: 100%;
 }
 
@@ -305,7 +310,7 @@ export default Vue.extend({
 	border-radius: 5px;
 }
 
-.criteria-title {
+.criteria__title {
 	min-width: min-content;
 	background-color: #5270a7;
 	color: #ffffff;
@@ -315,7 +320,7 @@ export default Vue.extend({
 	padding: 2px 0;
 }
 
-.criteria-search-input {
+.criteria__search-input {
 	flex-direction: row;
 	display: flex;
 	justify-content: space-around;
@@ -323,14 +328,14 @@ export default Vue.extend({
 	margin: 10px;
 }
 
-.search-button {
+.criteria__search-input__button {
 	place-content: stretch center;
 	align-items: stretch;
 	flex-direction: row;
 	display: flex;
 }
 
-.search-button button {
+.criteria__search-input__button button {
 	border-radius: 4px;
 	border-width: 1px;
 	border-style: solid;
@@ -341,16 +346,16 @@ export default Vue.extend({
 	background-color: #5e6c78;
 }
 
-.search-button button:hover {
+.criteria__search-input__button button:hover {
 	background-color: #9ea9b3;
 }
 
-.search-button button:active {
+.criteria__search-input__button button:active {
 	background-color: #5e6c78 !important;
 	color: white !important;
 }
 
-.search-input {
+.criteria__search-input__textbox {
 	flex: 1 1 100%;
 	max-width: 85%;
 	font-size: 14px;
@@ -359,12 +364,13 @@ export default Vue.extend({
 .pipe {
 	flex: 1 1 100%;
 	max-width: 1%;
+	border-radius: 4px;
 	background-color: #5270a7;
 }
 
-.pipe--criteria {
+/* .pipe--criteria {
 	border-radius: 4px;
-}
+} */
 
 .feasibility-query__output {
 	border: 1px solid #9ea9b3;

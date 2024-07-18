@@ -6,15 +6,15 @@
 	<div class="ontology-nested-tree-node">
 		<li style="list-style-type: none;">
 			<div class="ontology-head-node">
-				<button :class="{'default-cursor': !criterion.children}" @click="() => (state = !state)">
+				<button @click="() => (state = !state)">
+					<!-- :class="{'temp': !criterion.children}" -->
 					<img v-if="criterion.children"
 						:src="state
 							? imgExpand
 							: imgCollapse
 						">
-					<img v-if="!criterion.children"
-						class="default-cursor"
-						src="">
+					<div v-if="!criterion.children"
+						class="temp" />
 				</button>
 				<div v-if="criterion.selectable === true" class="search-tree-term-entry">
 					<input :id="criterion.id"
@@ -155,6 +155,7 @@ export default Vue.extend({
 	border: none;
 	outline: none;
 	margin: 0px;
+	margin-right: 5px;
 	padding: 0px;
 }
 
@@ -168,21 +169,24 @@ export default Vue.extend({
 .search-tree-term-entry input[type='checkbox'] {
 	width: 16px;
 	height: 16px;
-	margin: 0px 10px;
+	/* margin: 0px 10px; */
 }
 
 .search-tree-term-entry p {
 	margin: 0;
 	flex: 1;
 	margin-top: 5px;
+	margin-left: 5px;
 }
 
 .search-tree-term-entry p:hover {
 	cursor: pointer;
 }
 
-.default-cursor {
-	cursor: default
+.temp {
+	cursor: default;
+	height: 15px;
+	width: 15px;
 }
 
 .display-none {

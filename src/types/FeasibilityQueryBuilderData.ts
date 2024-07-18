@@ -51,6 +51,8 @@ export interface UiProfile {
 
 export interface FeasibilityQueryBuilderData {
     uiProfile: UiProfile | null;
+    einschlussSearchInput: string;
+    ausschlussSearchInput: string;
     einschlussTextSerach: string;
     ausschlussTextSerach: string;
     isLimitationsCriteriaOpen: boolean;

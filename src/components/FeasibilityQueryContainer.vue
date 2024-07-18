@@ -4,12 +4,12 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="feasibility-query-container">
-		<div class="feasibility-query-body">
-			<div class="feasibility-query__result">
+		<div class="feasibility-query-wrapper">
+			<div class="feasibility-query__result-output">
 				<div class="number-patients">
 					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
 				</div>
-				<div class="query-button">
+				<div class="query-button-container">
 					<button :disabled="true">
 						ZURÜCKSETZEN
 					</button>
@@ -43,6 +43,7 @@ export default Vue.extend({
 		SaveQueryDialog,
 		MachbarkeitFooter,
 	},
+
 	data(): FeasibilityQueryContainerData {
 		return {
 			numberOfPatients: 0,
@@ -66,6 +67,7 @@ export default Vue.extend({
 		querySaveDialogOpen(): void {
 			this.isDialogOpen = true
 		},
+
 		querySaveDiaglogClose(): void {
 			this.isDialogOpen = false
 		},
@@ -86,13 +88,13 @@ export default Vue.extend({
 	overflow-x: hidden;
 }
 
-.feasibility-query-body {
+.feasibility-query-wrapper {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 100%;
 }
 
-.feasibility-query__result {
+.feasibility-query__result-output {
 	display: flex;
 	flex-direction: row;
 	place-content: center space-between;
@@ -120,64 +122,13 @@ export default Vue.extend({
 	font-size: medium;
 }
 
-.query-button {
+.query-button-container {
 	display: flex;
 	flex-direction: row;
 	column-gap: 15px;
 }
 
-.feasibility-query__consent {
-	margin: 10px 0 15px 5px;
-}
-
-.consent-title {
-	font-size: 16px;
-	font-weight: 500;
-	color: #5270a7;
-}
-
-.consent-text {
-	display: flex;
-	flex-direction: row;
-	column-gap: 10px;
-	align-items: center;
-}
-
-.consent-link {
-	color:#5270a7;
-	text-decoration: underline;
-}
-
-.consent-tooltip {
-	position: relative;
-	display: inline-block;
-}
-
-.consent-tooltip span {
-	display: flex;
-	visibility: hidden;
-	width: 300px;
-	height: auto;
-	background-color: white;
-	padding: 10px;
-	position: absolute;
-	z-index: 100;
-	left: 150%;
-	top: -160%;
-	border-radius: 5px;
-	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
-}
-
-.consent-tooltip:hover span {
-	visibility: visible;
-}
-
 button {
 	border-radius: 8px;
-}
-
-svg {
-	width: 15px;
-	height: 15px;
 }
 </style>
