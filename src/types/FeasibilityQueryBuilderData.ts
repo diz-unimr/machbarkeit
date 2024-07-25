@@ -5,12 +5,12 @@
 import type { OntologyTreeElement } from './OntologySearchTreeModalData.ts'
 import type { FilterInfo } from './LimitationsSelectedCriteriaCardData.ts'
 
-export interface SelectedCriteriaData {
+export interface SelectedCriteria {
 	criteriaType: string;
 	selectedItems: OntologyTreeElement[];
 }
 
-export interface ValueDefinition {
+interface ValueDefinition {
     allowedUnits: [
         {
             code: string;
@@ -51,20 +51,19 @@ export interface UiProfile {
 
 export interface FeasibilityQueryBuilderData {
     uiProfile: UiProfile | null;
-    einschlussSearchInput: string;
-    ausschlussSearchInput: string;
-    einschlussTextSerach: string;
-    ausschlussTextSerach: string;
+    inclusionSearchInputTemp: string;
+    exclusionSearchInputTemp: string;
+    inclusionSearchInput: string;
+    exclusionSearchInput: string;
     isLimitationsCriteriaOpen: boolean;
-    isLimitationsCriteriaEditorOpen: boolean;
-    isCriteriaContentOpen: boolean;
-    isOntologyButtonClicked: boolean;
+    isOntologySearchTreeOpen: boolean;
     criteriaOverlayType: string;
     selectedCriteria: OntologyTreeElement[] | null;
     selectedEditedCriteria: FilterInfo[] | null;
     selectedEditedCriteriaIndex: number | null
-    selectedCharacteristicsEin: Array<FilterInfo>;
-    selectedCharacteristicsAus: Array<FilterInfo>;
-    isEditFilterState: boolean;
+    selectedInclusionCharacteristics: Array<FilterInfo>;
+    selectedExclusionCharacteristics: Array<FilterInfo>;
+    isStateEditFilter: boolean;
+    debouncedHandler: _.DebouncedFunc<() => void> | null;
     imgDelete: string;
 }

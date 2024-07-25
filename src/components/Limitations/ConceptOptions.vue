@@ -3,12 +3,12 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="content-option dialog-card">
-		<div class="content-option__header">
+	<div class="content-option-container dialog-border">
+		<div class="content-option__text">
 			<span>*</span> Geben Sie einen oder mehrere zulässige Werte an:
 		</div>
 		<div class="content-option__body">
-			<div class="content-option-checkbox">
+			<div class="content-option__checkbox">
 				<div v-for="(code, index) in profile.valueDefinition?.selectableConcepts"
 					:key="index"
 					class="checkbox-option">
@@ -115,24 +115,25 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-input[type='checkbox'] {
-	width: 15px;
-	height: 15px;
-	margin: 0px;
-}
-
-.content-option {
+.content-option-container {
 	display: flex;
 	flex-direction: column;
 	column-gap: 20px;
 	margin: 10px 20px;
 }
 
-.content-option__header {
+.dialog-border {
+	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
+	border-radius: 4px;
+	padding: 10px 20px;
+	margin-bottom: 20px;
+}
+
+.content-option__text {
 	font-weight: 500;
 }
 
-.content-option__header span {
+.content-option__text span {
 	color: red;
 }
 
@@ -141,13 +142,8 @@ input[type='checkbox'] {
 	max-height: 170px;
 }
 
-.content-option-checkbox {
+.content-option__checkbox {
 	margin: 20px 20px 5px 20px;
-}
-
-.content-option-alert {
-	font-weight: 500;
-	color: red;
 }
 
 .checkbox-option {
@@ -157,10 +153,14 @@ input[type='checkbox'] {
 	align-items: center;
 }
 
-.dialog-card {
-	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
-	border-radius: 4px;
-	padding: 10px 20px;
-	margin-bottom: 20px;
+.content-option-alert {
+	font-weight: 500;
+	color: red;
+}
+
+input[type='checkbox'] {
+	width: 15px;
+	height: 15px;
+	margin: 0px;
 }
 </style>

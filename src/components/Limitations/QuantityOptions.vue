@@ -3,14 +3,13 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="content-option dialog-card">
-		<div class="content-option__header">
+	<div class="content-option-container dialog-border">
+		<div class="content-option__text">
 			<span>*</span> Geben Sie einen Wertebereich ein:
 		</div>
 		<div class="content-option__body">
-			<div class="content-option-dropdown">
-				<select v-model="comparisonRestriction.type"
-					class="input-selection-textbox">
+			<div class="content-option-wrapper">
+				<select v-model="comparisonRestriction.type">
 					<option value="kein Filter">
 						kein Filter
 					</option>
@@ -27,47 +26,43 @@
 						zwischen
 					</option>
 				</select>
-				<div class="flex-row value-unit">
+				<div class="input-wrapper">
 					<div v-if="comparisonRestriction.type === 'gleich' || comparisonRestriction.type === 'kleiner' || comparisonRestriction.type === 'größer'"
-						class="input-wrapper">
+						class="text-floating-wrapper">
 						<input v-model="comparisonRestriction.value"
-							class="input-selection-textbox"
 							type="number"
 							@change="checkEmptyValue($event, 'value')">
-						<label class="value-floating">Wert</label>
+						<label class="text-floating">Wert</label>
 					</div>
 					<div v-if="comparisonRestriction.type === 'zwischen'"
-						class="flex-row">
-						<div class="input-wrapper">
+						class="input-wrapper input-wrapper--between">
+						<div class="text-floating-wrapper">
 							<input v-model="comparisonRestriction.min"
-								class="input-selection-textbox"
 								style="width: 100px !important;"
 								type="number"
 								@change="checkEmptyValue($event, 'min')">
-							<label class="value-floating">Min</label>
+							<label class="text-floating">Min</label>
 						</div>
 						<span class="font-bold">und</span>
-						<div class="input-wrapper">
+						<div class="text-floating-wrapper">
 							<input v-model="comparisonRestriction.max"
-								class="input-selection-textbox"
 								style="width: 100px !important;"
 								type="number"
 								@change="checkEmptyValue($event, 'max')">
-							<label class="value-floating">Max</label>
+							<label class="text-floating">Max</label>
 						</div>
 					</div>
 					<!-- Unit will be shown if type != 'kein Filter' -->
 					<div v-if="comparisonRestriction.type !== 'kein Filter'"
-						class="input-wrapper">
-						<select v-model="comparisonRestriction.unit"
-							class="input-selection-textbox">
+						class="text-floating-wrapper">
+						<select v-model="comparisonRestriction.unit">
 							<option v-for="(unit_display, index) in profile.valueDefinition?.allowedUnits"
 								:key="index"
 								:value="unit_display.display">
 								{{ unit_display.display }}
 							</option>
 						</select>
-						<label class="value-floating">Einheit</label>
+						<label class="text-floating">Einheit</label>
 					</div>
 				</div>
 			</div>
@@ -230,30 +225,25 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-select, input {
-	margin: 3px !important;
-}
-
-.flex-row {
+.content-option-container {
 	display: flex;
-	flex-direction: row;
-	column-gap: 10px;
-	align-items: center;
+	flex-direction: column;
+	column-gap: 20px;
+	margin: 10px 20px;
 }
 
-.font-bold {
+.dialog-border {
+	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
+	border-radius: 4px;
+	padding: 10px 20px;
+	margin-bottom: 20px;
+}
+
+.content-option__text {
 	font-weight: 500;
 }
 
-.value-unit {
-	column-gap: 20px !important;
-}
-
-.content-option__header {
-	font-weight: 500;
-}
-
-.content-option__header span {
+.content-option__text span {
 	color: red;
 }
 
@@ -262,44 +252,27 @@ select, input {
 	max-height: 150px;
 }
 
-.content-option-alert {
-	font-weight: 500;
-	color: red;
-}
-
-.content-option-dropdown {
+.content-option-wrapper {
 	display: flex;
-	flex-direction: row;
 	column-gap: 50px;
 	margin: 20px 0px;
 }
 
-.content-option {
-	display: flex;
-	flex-direction: column;
-	column-gap: 20px;
-	margin: 10px 20px;
-}
-
-.dialog-card {
-	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
-	border-radius: 4px;
-	padding: 10px 20px;
-	margin-bottom: 20px;
-}
-
-.input-selection-textbox {
-	height: 45px !important;
-	width: 150px !important;
-	border: 1px solid gray;
-	border-radius: 5px;
-}
-
 .input-wrapper {
+	display: flex;
+	column-gap: 20px;
+	align-items: center;
+}
+
+.input-wrapper--between {
+	column-gap: 10px !important;
+}
+
+.text-floating-wrapper {
 	position: relative;
 }
 
-.value-floating {
+.text-floating {
 	position: absolute;
 	left: 0;
 	top: -20%;
@@ -307,5 +280,22 @@ select, input {
 	padding: 0px 5px;
 	background-color: white;
 	font-size: 12px;
+}
+
+.content-option-alert {
+	font-weight: 500;
+	color: red;
+}
+
+.font-bold {
+	font-weight: 500;
+}
+
+select, input {
+	border: 1px solid gray;
+	border-radius: 5px;
+	height: 45px !important;
+	width: 150px !important;
+	margin: 3px !important;
 }
 </style>

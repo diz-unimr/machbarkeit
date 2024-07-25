@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="footer-container">
-		<div class="footer__button-container">
+		<div class="footer__button-group">
 			<input id="upload" type="file" hidden>
 			<label for="upload" class="upload-query-button" @click="$emit('close-save-modal')">
 				ABFRAGE LADEN
@@ -33,7 +33,7 @@ export default Vue.extend({
 	width: 100%;
 }
 
-.footer__button-container {
+.footer__button-group {
 	display: flex;
 	flex-direction: row;
 	column-gap: 15px;

@@ -3,12 +3,12 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="selection-dialog-card">
-		<div class="selection-dialog-card__header">
-			<p style="font-weight: 500;">
+	<div class="limitations-card">
+		<div class="limitations-card__header">
+			<p class="limitations-card__title">
 				{{ selectedCriterion.display }}
 			</p>
-			<button v-if="!isEditFilterState" class="delete-btn" @click="deleteCard($vnode?.data?.attrs?.id)">
+			<button v-if="!isEditFilterState" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
@@ -59,7 +59,6 @@ export default Vue.extend({
 		},
 		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			// required: true,
 			default: undefined,
 		},
 		isEditFilterState: {
@@ -148,7 +147,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.selection-dialog-card {
+.limitations-card {
 	display: flex;
 	flex-direction: column;
 	place-content: center space-around;
@@ -158,69 +157,20 @@ export default Vue.extend({
 	border-radius: 4px;
 }
 
-.selection-dialog-card__header {
+.limitations-card__header {
 	display: flex;
-	flex-direction: row;
 	column-gap: 10%;
 	align-items: center;
 	justify-content:space-between;
 	margin: 0px 10px 20px 10px;
 }
 
-.selection-dialog-card__content {
-	height: 52px;
-	transition: height 0.25s ease;
-	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
-	border-radius: 4px;
-	padding: 5px 20px;
-	margin-bottom: 20px;
-	overflow: hidden;
-	position: relative;
+.limitations-card__title {
+	font-weight: 500;
 }
 
-.card-content__expand {
-	height: 100%;
-}
-
-.selection-dialog-card__content img {
-	transition: all .25s ease-in
-}
-
-.card-content__header {
+.limitations-card__delete-button {
 	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-}
-
-.card-content-header__button {
-	display: flex;
-	flex-direction: row;
-	column-gap: 10px;
-	align-items: center;
-	justify-content: flex-start;
-}
-
-.card-content-header__button button {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: auto;
-	text-decoration: none;
-	background-color: white;
-	border: none;
-	outline: none;
-	margin: 0px;
-	padding: 0px;
-}
-
-.card-content-header__reset button {
-	font-size: 14px;
-}
-
-.delete-btn {
-	display: flex;
-	flex-direction: row;
 	column-gap: 5px;
 	border: none;
 	outline: none;
@@ -230,65 +180,11 @@ export default Vue.extend({
 	align-items: center;
 }
 
-.from-option {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-	column-gap: 10px;
-	position: relative;
-}
-
-.between__head{
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	border: 1px solid grey;
-	padding: 12px;
-	border-radius: 8px;
-	justify-content: space-between;
-	align-items: center;
-	cursor: pointer;
-}
-
-.between__dropdown {
-	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
-	background: white;
-	width: 100%;
-	max-height: 275px;
-	outline: 0;
-	margin: 0;
-	list-style-type: none;
-	position: sticky;
-}
-
-.content-header__option img {
-	height: 14px;
-	width: 14px;
-}
-
-.selection-dialog-card__footer {
-	margin: 0px 10px 20px 10px;
-}
-
-.dialog-button {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-end;
-	column-gap: 15px;
-}
-
 button {
 	border-radius: 8px;
 }
 
 img {
-	height: 16px;
-	width: 16px;
-}
-
-.delete-btn img {
 	width: 25px;
 	height: 20px;
 }

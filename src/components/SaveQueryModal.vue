@@ -16,7 +16,7 @@
 					:show-trailing-button="fileName !== ''"
 					@trailing-button-click="fileName = ''" />
 			</div>
-			<div class="save-query-modal__button-container">
+			<div class="save-query-modal__button-group">
 				<button>
 					SPEICHERN
 				</button>
@@ -105,7 +105,7 @@ export default Vue.extend({
 	margin-bottom: 30px;
 }
 
-.save-query-modal__button-container {
+.save-query-modal__button-group {
 	display: flex;
 	flex-direction: row;
 	align-items: center;

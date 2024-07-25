@@ -3,11 +3,10 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="content-option dialog-card">
+	<div class="content-option-container">
 		<div class="content-option__body">
-			<div class="content-option-dropdown">
-				<select v-model="timeRangeRestriction.type"
-					class="input-selection-textbox">
+			<div class="content-option-wrapper">
+				<select v-model="timeRangeRestriction.type">
 					<option value="kein Filter">
 						kein Filter
 					</option>
@@ -24,43 +23,39 @@
 						nach
 					</option>
 				</select>
-				<div class="flex-row value-unit">
-					<div v-if="timeRangeRestriction.type === 'am' || timeRangeRestriction.type === 'vor' || timeRangeRestriction.type === 'nach'"
-						class="input-wrapper">
+				<!-- show different input filter depend on timeRangeRestriction.type -->
+				<div v-if="timeRangeRestriction.type === 'am' || timeRangeRestriction.type === 'vor' || timeRangeRestriction.type === 'nach'"
+					class="text-floating-wrapper">
+					<input id="fromDate"
+						v-model="timeRangeRestriction.fromDate"
+						type="date"
+						name="fromDate"
+						@input="formatDate($event)">
+					<label class="text-floating">{{ timeRangeRestriction.type }}</label>
+				</div>
+				<div v-if="timeRangeRestriction.type === 'zwischen'"
+					class="input-wrapper">
+					<div class="text-floating-wrapper">
 						<input id="fromDate"
 							v-model="timeRangeRestriction.fromDate"
-							class="input-selection-textbox"
 							type="date"
 							name="fromDate"
 							@input="formatDate($event)">
-						<label class="value-floating">{{ timeRangeRestriction.type }}</label>
+						<label class="text-floating">von</label>
 					</div>
-					<div v-if="timeRangeRestriction.type === 'zwischen'"
-						class="flex-row">
-						<div class="input-wrapper">
-							<input id="fromDate"
-								v-model="timeRangeRestriction.fromDate"
-								class="input-selection-textbox"
-								type="date"
-								name="fromDate"
-								@input="formatDate($event)">
-							<label class="value-floating">von</label>
-						</div>
-						<div class="input-wrapper">
-							<input id="toDate"
-								v-model="timeRangeRestriction.toDate"
-								class="input-selection-textbox"
-								type="date"
-								name="toDate"
-								@input="formatDate($event)">
-							<label class="value-floating">bis</label>
-						</div>
+					<div class="text-floating-wrapper">
+						<input id="toDate"
+							v-model="timeRangeRestriction.toDate"
+							type="date"
+							name="toDate"
+							@input="formatDate($event)">
+						<label class="text-floating">bis</label>
 					</div>
 				</div>
+				<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
+					<label class="text-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
+				</div>
 			</div>
-		</div>
-		<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
-			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
 </template>
@@ -212,29 +207,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-select {
-	margin: 3px !important;
-}
-
-.flex-row {
-	display: flex;
-	flex-direction: row;
-	column-gap: 20px;
-	align-items: center;
-}
-
-.font-bold {
-	font-weight: 500;
-}
-
-.content-header__option {
-	display: flex;
-	flex-direction: row;
-	column-gap: 20px;
-	margin: 10px 0;
-}
-
-.content-option {
+.content-option-container {
 	display: flex;
 	flex-direction: column;
 	column-gap: 20px;
@@ -246,30 +219,35 @@ select {
 	max-height: 150px;
 }
 
-.content-option-alert {
-	font-weight: 500;
-	color: red;
-}
-
-.content-option-dropdown {
+.content-option-wrapper {
 	display: flex;
-	flex-direction: row;
 	column-gap: 50px;
 	margin: 20px 0px;
 }
 
-.input-selection-textbox {
-	height: 45px !important;
-	width: 150px !important;
-	border: 1px solid gray;
-	border-radius: 5px;
+.input-wrapper {
+	display: flex;
+	column-gap: 20px;
+	align-items: center;
 }
 
-.input-wrapper {
+.content-header__option {
+	display: flex;
+	flex-direction: row;
+	column-gap: 20px;
+	margin: 10px 0;
+}
+
+.text-alert {
+	font-weight: 500;
+	color: red;
+}
+
+.text-floating-wrapper {
 	position: relative;
 }
 
-.value-floating {
+.text-floating {
 	position: absolute;
 	left: 0;
 	top: -20%;
@@ -278,5 +256,13 @@ select {
 	background-color: white;
 	font-size: 12px;
 	cursor: unset;
+}
+
+select, input {
+	border: 1px solid gray;
+	border-radius: 5px;
+	height: 45px !important;
+	width: 150px !important;
+	margin: 3px !important;
 }
 </style>

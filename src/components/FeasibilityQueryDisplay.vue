@@ -9,15 +9,17 @@
 			<p>Ausgewählte Merkmale</p>
 		</div>
 		<div class="display-content">
-			<div id="Einschlusskriterien" class="display-textfield">
-				<div v-if="selectedCharacteristicsEin.length > 0">
-					<draggable v-model="selectedCharacteristicsEinLocal" @end="$emit('update-div-sequence', 'einschlusskriterien', selectedCharacteristicsEinLocal)">
-						<div v-for="(characteristic, index) in selectedCharacteristicsEinLocal" :key="index" style="position: relative">
+			<div id="einschlusskriterien" class="display-textfield">
+				<div v-if="selectedInclusionCharacteristics.length > 0">
+					<draggable v-model="draggableInclusionCharacteristics" @end="$emit('update-display-sequence', 'einschlusskriterien', draggableInclusionCharacteristics)">
+						<div v-for="(characteristic, index) in selectedInclusionCharacteristics"
+							:key="index"
+							style="position: relative">
 							<!-- can be changed sequence -->
 							<div class="selected-criteria-container">
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
-									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'Einschlusskriterien')">
+									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
 										{{ characteristic.display }}
 									</div>
 									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
@@ -43,7 +45,7 @@
 									</div>
 								</div>
 								<div class="selected-criteria-right">
-									<button class="delete-btn" @click="deleteBtn(index, 'Einschlusskriterien')">
+									<button class="delete-btn" @click="deleteBtn(index, 'einschlusskriterien')">
 										<svg role="img"
 											width="20px"
 											height="20px"
@@ -57,7 +59,7 @@
 									</button>
 								</div>
 							</div>
-							<button v-if="index !== (selectedCharacteristicsEin.length - 1) && (criteriaLogic.einschlussCriteria[index] === 'and')"
+							<button v-if="index !== (selectedInclusionCharacteristics.length - 1) && (characteristicsLogic.inclusionCriteria[index] === 'and')"
 								class="combining-operator"
 								@click="switchLogic('einschlussCriteria', index, 'and')">
 								UND
@@ -74,7 +76,7 @@
 									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
 								</svg>
 							</button>
-							<button v-if="criteriaLogic.einschlussCriteria[index] === 'or'"
+							<button v-if="characteristicsLogic.inclusionCriteria[index] === 'or'"
 								class="combining-operator or-operator"
 								@click="switchLogic('einschlussCriteria', index, 'or')">
 								<svg role="img"
@@ -96,14 +98,14 @@
 				</div>
 			</div>
 			<div class="pipe" />
-			<div id="Ausschlusskriterien" class="display-textfield">
-				<div v-if="selectedCharacteristicsAus.length > 0">
-					<draggable v-model="selectedCharacteristicsAusLocal" @end="$emit('update-div-sequence', 'ausschlusskriterien', selectedCharacteristicsAusLocal)">
-						<div v-for="(characteristic, index) in selectedCharacteristicsAusLocal" :key="index" style="position: relative">
+			<div id="ausschlusskriterien" class="display-textfield">
+				<div v-if="selectedExclusionCharacteristics.length > 0">
+					<draggable v-model="draggableExclusionCharacteristics" @end="$emit('update-display-sequence', 'ausschlusskriterien', draggableExclusionCharacteristics)">
+						<div v-for="(characteristic, index) in selectedExclusionCharacteristics" :key="index" style="position: relative">
 							<div class="selected-criteria-container">
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
-									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'Ausschlusskriterien')">
+									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'ausschlusskriterien')">
 										{{ characteristic.display }}
 									</div>
 									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
@@ -129,7 +131,7 @@
 									</div>
 								</div>
 								<div class="selected-criteria-right">
-									<button class="delete-btn" @click="deleteBtn(index, 'Ausschlusskriterien')">
+									<button class="delete-btn" @click="deleteBtn(index, 'ausschlusskriterien')">
 										<svg role="img"
 											width="18px"
 											height="18px"
@@ -145,7 +147,7 @@
 									</button>
 								</div>
 							</div>
-							<button v-if="index !== (selectedCharacteristicsAus.length - 1) && (criteriaLogic.ausschlussCriteria[index] === 'and')"
+							<button v-if="index !== (selectedExclusionCharacteristics.length - 1) && (characteristicsLogic.exclusionCriteria[index] === 'and')"
 								class="combining-operator"
 								@click="switchLogic('ausschlussCriteria', index, 'and')">
 								UND
@@ -162,7 +164,7 @@
 									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
 								</svg>
 							</button>
-							<button v-if="criteriaLogic.ausschlussCriteria[index] === 'or'"
+							<button v-if="characteristicsLogic.exclusionCriteria[index] === 'or'"
 								class="combining-operator or-operator"
 								@click="switchLogic('ausschlussCriteria', index, 'or')">
 								<svg role="img"
@@ -184,12 +186,12 @@
 				</div>
 			</div>
 		</div>
-		<!-- <span v-for="(ein, ein_index) in selectedCharacteristicsEin" :key="ein_index">
-			{{ ein.display }} / {{ criteriaLogic.einschlussCriteria[ein_index] }} /
+		<!-- <span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
+			{{ ein.display }} / {{ characteristicsLogic.einschlussCriteria[ein_index] }} /
 		</span>
 		<br>
-		<span v-for="(aus, aus_index) in selectedCharacteristicsAus" :key="aus_index">
-			{{ aus.display }} / {{ criteriaLogic.ausschlussCriteria[aus_index] }} /
+		<span v-for="(aus, aus_index) in selectedExclusionCharacteristics" :key="aus_index">
+			{{ aus.display }} / {{ characteristicsLogic.ausschlussCriteria[aus_index] }} /
 		</span> -->
 	</div>
 </template>
@@ -200,14 +202,14 @@ import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData'
 import draggable from 'vuedraggable'
 
 interface FeasibilityQueryDisplayData {
-    criteriaLogic: {
-        einschlussCriteria: Array<string>;
-        ausschlussCriteria: Array<string>;
+    characteristicsLogic: {
+        inclusionCriteria: Array<string>;
+        exclusionCriteria: Array<string>;
     }
-    einschlussCriteriaOld: Array<string>;
-    ausschlussCriteriaOld: Array<string>;
-	selectedCharacteristicsEinLocal: Array<FilterInfo>;
-	selectedCharacteristicsAusLocal: Array<FilterInfo>;
+    inclusionCriteriaOld: Array<string>;
+	exclusionCriteriaOld: Array<string>;
+	draggableInclusionCharacteristics: Array<FilterInfo>;
+	draggableExclusionCharacteristics: Array<FilterInfo>;
 }
 
 export default Vue.extend({
@@ -217,12 +219,12 @@ export default Vue.extend({
 	},
 
 	props: {
-		selectedCharacteristicsEin: {
+		selectedInclusionCharacteristics: {
 			type: Array<FilterInfo>,
 			required: true,
 		},
 
-		selectedCharacteristicsAus: {
+		selectedExclusionCharacteristics: {
 			type: Array<FilterInfo>,
 			required: true,
 		},
@@ -240,52 +242,52 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryDisplayData {
 		return {
-			selectedCharacteristicsEinLocal: [...this.selectedCharacteristicsEin],
-			selectedCharacteristicsAusLocal: [...this.selectedCharacteristicsAus],
-			criteriaLogic: {
-				einschlussCriteria: [],
-				ausschlussCriteria: [],
+			draggableInclusionCharacteristics: [...this.selectedInclusionCharacteristics],
+			draggableExclusionCharacteristics: [...this.selectedExclusionCharacteristics],
+			characteristicsLogic: {
+				inclusionCriteria: [],
+				exclusionCriteria: [],
 			},
-			einschlussCriteriaOld: [],
-			ausschlussCriteriaOld: [],
+			inclusionCriteriaOld: [],
+			exclusionCriteriaOld: [],
 		}
 	},
 
 	watch: {
-		selectedCharacteristicsEin(newVal) {
-			this.selectedCharacteristicsEinLocal = [...newVal]
+		selectedInclusionCharacteristics(newVal) {
+			this.draggableInclusionCharacteristics = [...newVal]
 
 			// first input
-			if (this.einschlussCriteriaOld.length === 0) {
-				const length = newVal.length - this.einschlussCriteriaOld.length
+			if (this.inclusionCriteriaOld.length === 0) {
+				const length = newVal.length - this.inclusionCriteriaOld.length
 				for (let i = 1; i < length; i++) {
-					this.criteriaLogic.einschlussCriteria.push('and')
+					this.characteristicsLogic.inclusionCriteria.push('and')
 				}
 			} else if (newVal.length > 0) {
-				const length = newVal.length - this.einschlussCriteriaOld.length
+				const length = newVal.length - this.inclusionCriteriaOld.length
 				for (let i = 1; i <= length; i++) {
-					this.criteriaLogic.einschlussCriteria.push('and')
+					this.characteristicsLogic.inclusionCriteria.push('and')
 				}
 			}
-			this.einschlussCriteriaOld = [...newVal]
+			this.inclusionCriteriaOld = [...newVal]
 		},
 
-		selectedCharacteristicsAus(newVal) {
-			this.selectedCharacteristicsAusLocal = [...newVal]
+		selectedExclusionCharacteristics(newVal) {
+			this.draggableExclusionCharacteristics = [...newVal]
 
 			// first input
-			if (this.ausschlussCriteriaOld.length === 0) {
-				const length = newVal.length - this.ausschlussCriteriaOld.length
+			if (this.exclusionCriteriaOld.length === 0) {
+				const length = newVal.length - this.exclusionCriteriaOld.length
 				for (let i = 1; i < length; i++) {
-					this.criteriaLogic.ausschlussCriteria.push('and')
+					this.characteristicsLogic.exclusionCriteria.push('and')
 				}
-			} else if (this.selectedCharacteristicsAus.length > 0) {
-				const length = newVal.length - this.ausschlussCriteriaOld.length
+			} else if (this.selectedExclusionCharacteristics.length > 0) {
+				const length = newVal.length - this.exclusionCriteriaOld.length
 				for (let i = 1; i <= length; i++) {
-					this.criteriaLogic.ausschlussCriteria.push('and')
+					this.characteristicsLogic.exclusionCriteria.push('and')
 				}
 			}
-			this.ausschlussCriteriaOld = [...newVal]
+			this.exclusionCriteriaOld = [...newVal]
 		},
 	},
 
@@ -307,15 +309,15 @@ export default Vue.extend({
 		switchLogic(criteria: string, index: number, logic: string): void {
 			if (criteria === 'einschlussCriteria') {
 				if (logic === 'and') {
-					this.criteriaLogic.einschlussCriteria.splice(index, 1, 'or')
+					this.characteristicsLogic.inclusionCriteria.splice(index, 1, 'or')
 				} else if (logic === 'or') {
-					this.criteriaLogic.einschlussCriteria.splice(index, 1, 'and')
+					this.characteristicsLogic.inclusionCriteria.splice(index, 1, 'and')
 				}
 			} else if (criteria === 'ausschlussCriteria') {
 				if (logic === 'and') {
-					this.criteriaLogic.ausschlussCriteria.splice(index, 1, 'or')
+					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'or')
 				} else if (logic === 'or') {
-					this.criteriaLogic.ausschlussCriteria.splice(index, 1, 'and')
+					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'and')
 				}
 			}
 		},
@@ -326,24 +328,21 @@ export default Vue.extend({
 
 		deleteBtn(index: number, criteriaType: string) {
 			this.$emit('delete-characteristic', index, criteriaType)
-			if (criteriaType === 'Einschlusskriterien') {
-				if (this.criteriaLogic.einschlussCriteria[index - 1] === 'or') {
-					this.criteriaLogic.einschlussCriteria.splice(index - 1, 1)
-				} else this.criteriaLogic.einschlussCriteria.splice(index, 1)
-			} else if (criteriaType === 'Ausschlusskriterien') {
-				if (this.criteriaLogic.ausschlussCriteria[index - 1] === 'or') {
-					this.criteriaLogic.ausschlussCriteria.splice(index - 1, 1)
-				} else this.criteriaLogic.ausschlussCriteria.splice(index, 1)
+			if (criteriaType === 'einschlusskriterien') {
+				if (this.characteristicsLogic.inclusionCriteria[index - 1] === 'or') {
+					this.characteristicsLogic.inclusionCriteria.splice(index - 1, 1)
+				} else this.characteristicsLogic.inclusionCriteria.splice(index, 1)
+			} else if (criteriaType === 'ausschlusskriterien') {
+				if (this.characteristicsLogic.exclusionCriteria[index - 1] === 'or') {
+					this.characteristicsLogic.exclusionCriteria.splice(index - 1, 1)
+				} else this.characteristicsLogic.exclusionCriteria.splice(index, 1)
 			}
 		},
 	},
 })
 </script>
-<style scoped>
-/* .pipe--criteria {
-	border-radius: 4px;
-} */
 
+<style scoped>
 .pipe {
 	flex: 1 1 100%;
 	max-width: 1%;
@@ -392,7 +391,6 @@ export default Vue.extend({
 	display: flex;
 	border: 1px solid #5270a7;
 	justify-content: flex-end;
-	/* margin-bottom: 15px; */
 }
 
 .selected-criteria-container:last-child {

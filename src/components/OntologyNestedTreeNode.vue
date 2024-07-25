@@ -4,17 +4,16 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="ontology-nested-tree-node">
-		<li style="list-style-type: none;">
+		<li>
 			<div class="ontology-head-node">
 				<button @click="() => (state = !state)">
-					<!-- :class="{'temp': !criterion.children}" -->
 					<img v-if="criterion.children"
 						:src="state
 							? imgExpand
 							: imgCollapse
 						">
 					<div v-if="!criterion.children"
-						class="temp" />
+						class="img-display-none" />
 				</button>
 				<div v-if="criterion.selectable === true" class="search-tree-term-entry">
 					<input :id="criterion.id"
@@ -69,14 +68,6 @@ export default Vue.extend({
 			type: Object as PropType<OntologyTreeElement>,
 			required: true,
 		},
-		/* einschlussTextSerach: {
-			type: String,
-			default: '',
-		},
-		ausschlussTextSerach: {
-			type: String,
-			default: '',
-		}, */
 	},
 
 	data(): OntologyNestedTreeNodeData {
@@ -136,18 +127,20 @@ export default Vue.extend({
 	padding-right: 10px;
 }
 
+.ontology-nested-tree-node li {
+	list-style-type: none;
+}
+
 .ontology-head-node {
-	flex-direction: row;
 	display: flex;
 	place-content: center flex-start;
 	align-items: flex-start;
-	margin-top: 4px;
-	gap: 10px;
+	margin-top: 5px;
+	gap: 20px;
 }
 
 .ontology-head-node button {
 	display: flex;
-	flex-direction: row;
 	align-items: center;
 	width: auto;
 	text-decoration: none;
@@ -155,42 +148,34 @@ export default Vue.extend({
 	border: none;
 	outline: none;
 	margin: 0px;
-	margin-right: 5px;
 	padding: 0px;
 }
 
 .search-tree-term-entry {
 	display: flex;
-	flex-direction: row;
 	align-items: flex-start;
-	gap: 10px;
+	gap: 20px;
 }
 
 .search-tree-term-entry input[type='checkbox'] {
 	width: 16px;
 	height: 16px;
-	/* margin: 0px 10px; */
+	margin: 0px;
 }
 
 .search-tree-term-entry p {
-	margin: 0;
 	flex: 1;
 	margin-top: 5px;
-	margin-left: 5px;
 }
 
 .search-tree-term-entry p:hover {
 	cursor: pointer;
 }
 
-.temp {
+.img-display-none {
 	cursor: default;
 	height: 15px;
 	width: 15px;
-}
-
-.display-none {
-	display: none !important;
 }
 
 img {

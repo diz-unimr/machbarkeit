@@ -30,21 +30,16 @@ export interface OntologyTreeElement {
 	quantityType: QuantityType | undefined;
 }
 
-export interface CriteriaData extends OntologyTreeElement {
+/* interface CriteriaData extends OntologyTreeElement {
     conceptType: ConceptType | undefined;
 	timeRange: TimeRange | undefined;
 	quantityType: QuantityType | undefined;
-}
-
-export interface SubmittedItems {
-    criteriaType: string;
-    items: OntologyTreeElement;
-}
+} */
 
 export interface OntologySearchTreeModalData {
 	activeTab: number | string;
-	criteriaResponse: OntologyTreeElement[] | null;
-    criteriaData: CriteriaData[] | null;
+	ontologyResponse: OntologyTreeElement[] | null;
+    /* criteriaData: CriteriaData[] | null; */
 	selectedItems: OntologyTreeElement[];
-    isSearchInputNoData: Array<boolean>;
+    isSearchResultNoData: Array<boolean>;
 }

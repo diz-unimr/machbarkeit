@@ -5,11 +5,11 @@
 	-->
 	<div class="feasibility-query-container">
 		<div class="feasibility-query-wrapper">
-			<div class="feasibility-query__result-output">
+			<div class="feasibility-query__output">
 				<div class="number-patients">
 					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
 				</div>
-				<div class="query-button-container">
+				<div class="feasibility-query__button-group">
 					<button :disabled="true">
 						ZURÜCKSETZEN
 					</button>
@@ -94,7 +94,7 @@ export default Vue.extend({
 	flex: 1 1 100%;
 }
 
-.feasibility-query__result-output {
+.feasibility-query__output {
 	display: flex;
 	flex-direction: row;
 	place-content: center space-between;
@@ -122,7 +122,7 @@ export default Vue.extend({
 	font-size: medium;
 }
 
-.query-button-container {
+.feasibility-query__button-group {
 	display: flex;
 	flex-direction: row;
 	column-gap: 15px;

@@ -3,25 +3,25 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="selection-dialog-wrapper">
-		<div class="selection-dialog-pane">
-			<div class="selection-dialog">
-				<h2 class="selection-dialog-title">
+	<div class="limitations-dialog-container">
+		<div class="limitations-dialog-wrapper">
+			<div class="limitations-dialog">
+				<h2 class="limitations-dialog__title">
 					Einschränkungen der ausgewählten Merkmale
 				</h2>
-				<div class="selection-dialog-panel">
+				<div class="limitations-dialog__panel">
 					<LimitationsSelectedCriteriaCard v-for="(selectedCriterion, index) in selectedCriteria"
 						:id="index"
 						:key="selectedCriterion.id"
 						:ui-profile="uiProfile"
 						:selected-criterion="selectedCriterion"
-						:is-edit-filter-state="isEditFilterState"
+						:is-edit-filter-state="isStateEditFilter"
 						@get-selected-criteria-filter="getSelectedCriteriaFilter(index, $event)"
 						@delete-dialog-card="deleteDialogCard" />
 				</div>
-				<div class="dialog-button">
+				<div class="limitations-dialog__button-group">
 					<button :disabled="!isFilterComplete" @click="submit">
-						<template v-if="isEditFilterState">
+						<template v-if="isStateEditFilter">
 							SPEICHERN
 						</template>
 						<template v-else>
@@ -40,16 +40,11 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
-import type { LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
+import type { SelectedCriteriaFilter, LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
 import type { UiProfile } from '../../types/FeasibilityQueryBuilderData'
 import type { FilterInfo } from '../../types/LimitationsSelectedCriteriaCardData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
-
-interface SelectedCriteriaFilter {
-	status: string;
-	item: FilterInfo;
-}
 
 export default Vue.extend({
 	name: 'LimitationsSelectedCriteriaModal',
@@ -65,7 +60,7 @@ export default Vue.extend({
 			type: Object as PropType<UiProfile>,
 			required: true,
 		},
-		isEditFilterState: {
+		isStateEditFilter: {
 			type: Boolean,
 			default: false,
 		},
@@ -116,9 +111,6 @@ export default Vue.extend({
 			})
 
 			notCompleteFilter.length > 0 ? (this.isFilterComplete = false) : (this.isFilterComplete = true)
-			/* if (notCompleteFilter.length > 0) {
-				this.isFilterComplete = false
-			} else this.isFilterComplete = true */
 		},
 
 		getSelectedCriteriaFilter(index: string | number, data: SelectedCriteriaFilter): void {
@@ -146,24 +138,23 @@ export default Vue.extend({
 
 <style scoped>
 @media (max-width: 1300px) {
-	.selection-dialog-wrapper {
+	.limitations-dialog-container {
 		top: -55%;
 	}
-	.selection-dialog {
+	.limitations-dialog-container {
 		max-height: 480px;
 	}
 }
 
-.selection-dialog-wrapper {
+.limitations-dialog-container {
 	display: flex;
 	position: relative;
 	z-index: 100;
 	width: 85%;
-	/* top: 20%; */
 	margin: 0px auto 0px auto;
 }
 
-.selection-dialog-pane {
+.limitations-dialog-wrapper {
 	display: flex;
 	position: absolute;
 	pointer-events: auto;
@@ -171,7 +162,7 @@ export default Vue.extend({
 	max-height: 850px;
 }
 
-.selection-dialog {
+.limitations-dialog {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
@@ -181,7 +172,7 @@ export default Vue.extend({
 	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
 }
 
-.selection-dialog-title {
+.limitations-dialog__title {
 	z-index: 1000;
 	opacity: 1;
 	padding: 5px;
@@ -193,13 +184,13 @@ export default Vue.extend({
 	font-family: Roboto,Helvetica Neue,sans-serif;
 }
 
-.selection-dialog-panel {
+.limitations-dialog__panel {
 	overflow-y: auto;
 	overflow-x: hidden;
 	margin-bottom: 20px;
 }
 
-.dialog-button {
+.limitations-dialog__button-group {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -207,7 +198,7 @@ export default Vue.extend({
 	column-gap: 15px;
 }
 
-.dialog-button button {
+.limitations-dialog__button-group button {
 	border-radius: 8px;
 }
 </style>

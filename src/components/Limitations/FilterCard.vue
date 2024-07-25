@@ -3,10 +3,10 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="selection-dialog-card__content"
-		:class="{'card-content__expand': state}">
-		<div class="card-content__header">
-			<div class="card-content-header__button">
+	<div class="filter-card-wrapper"
+		:class="{'filter-card__expand': state}">
+		<div class="filter-card__header">
+			<div class="filter-card__button--expand-filter">
 				<button @click="state = !state">
 					<img :src="imgExpand"
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
@@ -16,7 +16,7 @@
 					(optional)
 				</p>
 			</div>
-			<div class="card-content-header__reset">
+			<div class="filter-card__button--reset">
 				<button :disabled="isResetDisabled" @click="reset">
 					ZURÜCKSETZEN
 				</button>
@@ -50,12 +50,17 @@ import Vue, { type PropType } from 'vue'
 import TimeRangeOptions from './TimeRangeOptions.vue'
 import ConceptOptions from './ConceptOptions.vue'
 import QuantityOptions from './QuantityOptions.vue'
-import type { FilterCardData } from '../../types/FilterCardData'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 import type { ConceptType } from '../../types/ConceptOptionsData'
 import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
+
+interface FilterCardData {
+	state: boolean,
+	isResetDisabled: boolean,
+	imgExpand: string
+}
 
 export default Vue.extend({
 	name: 'FilterCard',
@@ -133,7 +138,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.selection-dialog-card__content {
+.filter-card-wrapper {
 	height: 52px;
 	transition: height 0.25s ease;
 	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
@@ -144,22 +149,18 @@ export default Vue.extend({
 	position: relative;
 }
 
-.card-content__expand {
+.filter-card__expand {
 	height: 100%;
 }
 
-.selection-dialog-card__content img {
-	transition: all .25s ease-in
-}
-
-.card-content__header {
+.filter-card__header {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
 }
 
-.card-content-header__button {
+.filter-card__button--expand-filter {
 	display: flex;
 	flex-direction: row;
 	column-gap: 10px;
@@ -167,7 +168,7 @@ export default Vue.extend({
 	justify-content: flex-start;
 }
 
-.card-content-header__button button {
+.filter-card__button--expand-filter button {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -180,7 +181,11 @@ export default Vue.extend({
 	padding: 0px;
 }
 
-.card-content-header__reset button {
+.filter-card__button--expand-filter img {
+	transition: all .25s ease-in
+}
+
+.filter-card__button--reset button {
 	font-size: 14px;
 }
 

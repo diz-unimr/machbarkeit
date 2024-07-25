@@ -4,18 +4,17 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div>
-		<div v-if="filteredCriteria !== null && filteredCriteria.selectable === true"
-			class="search-tree-term-entry">
-			<p class="filteredCriteriaCode">
-				{{ filteredCriteria.termCodes?.[0].code }}
+		<div v-if="filteredCriterion !== null && filteredCriterion.selectable === true" class="ontology-nested-tree-node-wrapper">
+			<p class="criterion-code">
+				{{ filteredCriterion.termCodes?.[0].code }}
 			</p>
-			<div style="display: flex; align-items: flex-start; width: 85%;">
+			<div class="search-tree-term-entry">
 				<input :id="criterion.id"
 					v-model="isChecked"
 					type="checkbox"
 					:value="criterion.display">
-				<p style="margin-top: 4px;">
-					{{ filteredCriteria.display }}
+				<p>
+					{{ filteredCriterion.display }}
 				</p>
 			</div>
 		</div>
@@ -24,8 +23,8 @@
 			:key="child.id"
 			:criterion="child"
 			:index="index"
-			:einschluss-text-serach="einschlussTextSerach"
-			:ausschluss-text-serach="ausschlussTextSerach"
+			:inclusion-search-input="inclusionSearchInput"
+			:exclusion-search-input="exclusionSearchInput"
 			@check-existing-data="checkExistingData"
 			@input="checkboxTrigger" />
 	</div>
@@ -36,7 +35,7 @@ import Vue, { type PropType } from 'vue'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
 
 interface OntologyNestedTreeNodeSearchInputData {
-	filteredCriteria: OntologyTreeElement | null;
+	filteredCriterion: OntologyTreeElement | null;
 }
 
 export interface CheckedItem {
@@ -56,11 +55,11 @@ export default Vue.extend({
 			type: Number,
 			default: Number,
 		},
-		einschlussTextSerach: {
+		inclusionSearchInput: {
 			type: String,
 			default: '',
 		},
-		ausschlussTextSerach: {
+		exclusionSearchInput: {
 			type: String,
 			default: '',
 		},
@@ -68,7 +67,7 @@ export default Vue.extend({
 
 	data(): OntologyNestedTreeNodeSearchInputData {
 		return {
-			filteredCriteria: null,
+			filteredCriterion: null,
 		}
 	},
 
@@ -90,17 +89,17 @@ export default Vue.extend({
 	},
 
 	watch: {
-		einschlussTextSerach() {
-			if (this.einschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-				const filteredCriteria = this.filterCriteria(this.einschlussTextSerach, this.criterion)
-				filteredCriteria && this.$emit('check-existing-data')
+		inclusionSearchInput() {
+			if (this.inclusionSearchInput.length > 0 && this.criterion.selectable === true) {
+				const filteredCriterionResult = this.filterCriteria(this.inclusionSearchInput, this.criterion)
+				filteredCriterionResult && this.$emit('check-existing-data')
 			}
 		},
 
-		ausschlussTextSerach() {
-			if (this.ausschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-				const filteredCriteria = this.filterCriteria(this.ausschlussTextSerach, this.criterion)
-				filteredCriteria && this.$emit('check-existing-data')
+		exclusionSearchInput() {
+			if (this.exclusionSearchInput.length > 0 && this.criterion.selectable === true) {
+				const filteredCriterionResult = this.filterCriteria(this.exclusionSearchInput, this.criterion)
+				filteredCriterionResult && this.$emit('check-existing-data')
 			}
 		},
 	},
@@ -110,14 +109,14 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		if (this.einschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-			const filteredCriteria = this.filterCriteria(this.einschlussTextSerach, this.criterion)
-			filteredCriteria && this.$emit('check-existing-data')
+		if (this.inclusionSearchInput.length > 0 && this.criterion.selectable === true) {
+			const filteredCriterionResult = this.filterCriteria(this.inclusionSearchInput, this.criterion)
+			filteredCriterionResult && this.$emit('check-existing-data')
 		}
 
-		if (this.ausschlussTextSerach.length > 0 && this.criterion.selectable === true) {
-			const filteredCriteria = this.filterCriteria(this.ausschlussTextSerach, this.criterion)
-			filteredCriteria && this.$emit('check-existing-data')
+		if (this.exclusionSearchInput.length > 0 && this.criterion.selectable === true) {
+			const filteredCriterionResult = this.filterCriteria(this.exclusionSearchInput, this.criterion)
+			filteredCriterionResult && this.$emit('check-existing-data')
 		}
 	},
 	beforeMount() {},
@@ -136,10 +135,9 @@ export default Vue.extend({
 			const filteredItem = criterion.termCodes?.[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes?.[0].display.toLowerCase().includes(textSearch.toLowerCase())
 
 			if (filteredItem) {
-				this.filteredCriteria = criterion
-				// eslint-disable-next-line vue/no-mutating-props
-			} else this.filteredCriteria = null
-			return this.filteredCriteria
+				this.filteredCriterion = criterion
+			} else this.filteredCriterion = null
+			return this.filteredCriterion
 		},
 
 		checkExistingData() {
@@ -150,34 +148,34 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-input[type='checkbox'] {
-	width: 16px;
-	height: 16px;
-	margin-top: 0px;
+.ontology-nested-tree-node-wrapper {
+	display: flex;
+	margin-top: 5px;
 }
 
 .search-tree-term-entry {
 	display: flex;
-	flex-direction: row;
 	align-items: flex-start;
 	margin-left: 5px;
 	width: 100%;
 	height: 100%;
+	gap: 20px;
 }
 
-.search-tree-term-entry input {
-	margin: 0px 10px;
+.search-tree-term-entry input[type='checkbox'] {
+	width: 16px;
+	height: 16px;
+	margin: 0px;
 }
 
 .search-tree-term-entry p {
-	font-size: 16px;
-	font-weight: 400;
-	padding-left: 10px;
+	flex: 1;
+	margin-top: 5px;
 }
 
-.filteredCriteriaCode {
+.criterion-code {
 	font-weight: 500;
 	width: 15%;
-	margin-top: 4px;
+	margin-top: 5px;
 }
 </style>

@@ -4,6 +4,11 @@
 */
 import type { FilterInfo } from './LimitationsSelectedCriteriaCardData.ts'
 
+export interface SelectedCriteriaFilter {
+	status: string;
+	item: FilterInfo;
+}
+
 export interface LimitationsSelectedCriteriaModalData {
     filterInfo: FilterInfo[],
     selectedCriteriaFiltersInfo: FilterInfo[];
