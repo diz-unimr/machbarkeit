@@ -3,8 +3,7 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="filter-card-wrapper"
-		:class="{'filter-card__expand': state}">
+	<div :class="['filter-card-wrapper', {'filter-card__expand': state}]">
 		<div class="filter-card__header">
 			<div class="filter-card__button--expand-filter">
 				<button @click="state = !state">
@@ -89,10 +88,6 @@ export default Vue.extend({
 		display: {
 			type: String,
 			default: String,
-		},
-		getSelectedFilters: {
-			type: Function,
-			default: () => {},
 		},
 	},
 	data(): FilterCardData {

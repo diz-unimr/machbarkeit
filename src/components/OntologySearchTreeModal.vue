@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="ontology-search-tree-container">
-		<div class="ontology-search-tree-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaType === 'Ausschlusskriterien' }">
+		<div :class="['ontology-search-tree-wrapper', { 'ausschlusskriterien-overlay': criteriaType === 'Ausschlusskriterien'}]">
 			<div class="criteria-type">
 				{{ criteriaType }}
 			</div>
@@ -13,8 +13,7 @@
 					<div class="ontology-search-tree__tabs-container">
 						<div v-for="(modulName, modulName_index) in ontologyResponse.map((item) => item.display)"
 							:key="modulName_index"
-							class="ontology-tab"
-							:class="{ 'active': activeTab === modulName_index }"
+							:class="['ontology-tab', { 'active': activeTab === modulName_index }]"
 							@click="activateTab(modulName_index)">
 							{{ modulName }}
 						</div>

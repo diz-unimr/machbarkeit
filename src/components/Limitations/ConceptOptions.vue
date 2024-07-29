@@ -39,14 +39,6 @@ export default Vue.extend({
 			type: Object as PropType<Profile>,
 			required: true,
 		},
-		toggleResetButton: {
-			type: Function,
-			default: () => {},
-		},
-		getSelectedFilterOption: {
-			type: Function,
-			default: () => {},
-		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,

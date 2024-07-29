@@ -28,30 +28,23 @@
 							{{ module }}
 						</a>
 						<div v-show="isExpanded(index)">
-							<!-- eslint-disable -->
-							<div
-								class="attribute-name"
-								v-for="(item, key) in filteredAttribute"
-								:key="key"
-								v-if="
-									item[
-										'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-									] === module
-								"
-							>
-								<!-- eslint-enable -->
-								<input :id="String(key)"
-									v-model="checkedAttribute"
-									type="checkbox"
-									:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
-									@change="selectAttribute">
-								<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-								<p :for="key"
-									@mouseover="getTooltipPosition">
-									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
-								</p>
-								<span class="attribute-tooltip-text">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
-							</div>
+							<template v-for="(item, item_index) in filteredAttribute">
+								<div v-if="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'] === module"
+									:key="item_index"
+									class="attribute-name">
+									<input :id="String(item_index)"
+										v-model="checkedAttribute"
+										type="checkbox"
+										:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
+										@change="selectAttribute">
+									<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
+									<p :for="item_index"
+										@mouseover="getTooltipPosition">
+										{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
+									</p>
+									<span class="attribute-tooltip-text">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
+								</div>
+							</template>
 						</div>
 					</div>
 				</div>
@@ -65,26 +58,20 @@
 			<div class="attribute-list__content">
 				<div class="attribute-list__display">
 					<div v-for="(module, index) in selectedModulName" :key="index">
-						<div class="module-name">
+						<div class="module-name module-name--selected-attribute">
 							{{ module }}
 						</div>
-						<!-- eslint-disable -->
-						<div
-							class="attribute-name"
-							v-for="item in selectedAttribute"
-							v-if="
-								item[
-									'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-								] === module
-							"
-						>
-							<!-- eslint-enable -->
-							<label style="cursor: auto">{{
-								item[
-									"Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
-								]
-							}}</label>
-						</div>
+						<template v-for="(item, item_index) in selectedAttribute">
+							<div v-if="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'] === module"
+								:key="item_index"
+								class="attribute-name">
+								<label style="cursor: auto">{{
+									item[
+										"Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
+									]
+								}}</label>
+							</div>
+						</template>
 					</div>
 				</div>
 			</div>
@@ -279,6 +266,9 @@ export default Vue.extend({
 }
 
 .attribute-list__display {
+	display: flex;
+	flex-direction: column;
+	row-gap: 10px;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -291,6 +281,10 @@ export default Vue.extend({
 	display: inline-block;
 	font-weight: bold;
 	margin-bottom: 10px;
+}
+
+.module-name--selected-attribute {
+	margin-bottom: 5px;
 }
 
 .attribute-name {
