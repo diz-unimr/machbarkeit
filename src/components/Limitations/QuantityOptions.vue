@@ -246,6 +246,7 @@ export default Vue.extend({
 
 .content-option-wrapper {
 	display: flex;
+	align-items: center;
 	column-gap: 50px;
 	margin: 20px 0px;
 }

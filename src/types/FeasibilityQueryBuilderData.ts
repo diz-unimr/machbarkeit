@@ -5,11 +5,6 @@
 import type { OntologyTreeElement } from './OntologySearchTreeModalData.ts'
 import type { FilterInfo } from './LimitationsSelectedCriteriaCardData.ts'
 
-export interface SelectedCriteria {
-	criteriaType: string;
-	selectedItems: OntologyTreeElement[];
-}
-
 interface ValueDefinition {
     allowedUnits: [
         {

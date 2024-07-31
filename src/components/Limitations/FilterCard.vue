@@ -21,7 +21,13 @@
 				</button>
 			</div>
 		</div>
-		<TimeRangeOptions v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
+		<component :is="filterType"
+			:profile="profile"
+			:is-reset-disabled="isResetDisabled"
+			:selected-criterion="selectedCriterion"
+			@toggle-reset-button="toggleResetButton"
+			@get-selected-filter-option="getSelectedFilterOption" />
+		<!-- <TimeRangeOptions v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
@@ -40,7 +46,7 @@
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-filter-option="getSelectedFilterOption" />
+			@get-selected-filter-option="getSelectedFilterOption" /> -->
 	</div>
 </template>
 
@@ -56,9 +62,10 @@ import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
 
 interface FilterCardData {
-	state: boolean,
-	isResetDisabled: boolean,
-	imgExpand: string
+	state: boolean;
+	isResetDisabled: boolean;
+	filterType: string | null;
+	imgExpand: string;
 }
 
 export default Vue.extend({
@@ -94,6 +101,7 @@ export default Vue.extend({
 		return {
 			state: this.profile.valueDefinition ? !this.profile.valueDefinition?.optional : false, // set state = false for optional Filter
 			isResetDisabled: this.display === 'Wertebereich' ? !(this.selectedCriterion.conceptType?.value || this.selectedCriterion.quantityType?.value) : (!this.selectedCriterion.timeRange?.value.type || this.selectedCriterion.timeRange?.value.type === 'kein Filter'),
+			filterType: null,
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
@@ -102,7 +110,11 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		if (this.profile.timeRestrictionAllowed && this.display === 'Zeitraum') { this.filterType = 'time-range-options' }
+		if (this.profile.valueDefinition?.type === 'quantity' && this.display === 'Wertebereich') { this.filterType = 'quantity-options' }
+		if (this.profile.valueDefinition?.type === 'concept' && this.display === 'Wertebereich') { this.filterType = 'concept-options' }
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

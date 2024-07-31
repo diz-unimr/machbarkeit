@@ -141,7 +141,7 @@ export default Vue.extend({
 	.limitations-dialog-container {
 		top: -55%;
 	}
-	.limitations-dialog-container {
+	.limitations-dialog {
 		max-height: 480px;
 	}
 }

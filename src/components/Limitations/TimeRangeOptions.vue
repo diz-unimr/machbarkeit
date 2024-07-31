@@ -52,10 +52,10 @@
 						<label class="text-floating">bis</label>
 					</div>
 				</div>
-				<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
-					<label class="text-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
-				</div>
 			</div>
+		</div>
+		<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
+			<label class="text-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
 </template>
@@ -213,6 +213,7 @@ export default Vue.extend({
 
 .content-option-wrapper {
 	display: flex;
+	align-items: center;
 	column-gap: 50px;
 	margin: 20px 0px;
 }

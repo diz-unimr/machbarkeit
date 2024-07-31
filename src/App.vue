@@ -47,6 +47,10 @@ export default Vue.extend({
 </script>
 
 <style>
+html body {
+	font-size: 16px;
+}
+
 .machbarkeit {
 	display: flex;
 	width: 100%;

@@ -18,7 +18,7 @@
 					<Magnify :size="20" />
 				</NcTextField>
 				<div class="attribute-list__display">
-					<div v-for="(module, index) in moduleName" :key="index" class="attribute-list__display-wrapper">
+					<div v-for="(module, index) in moduleName" :key="index">
 						<a class="module-name" @click="toggleExpansion(index)">
 							<img class="module-expand-img"
 								:src="isExpanded(index)
@@ -273,10 +273,6 @@ export default Vue.extend({
 	overflow-x: hidden;
 }
 
-.attribute-list__display-wrapper {
-	margin: 10px 0px;
-}
-
 .module-name {
 	display: inline-block;
 	font-weight: bold;
@@ -339,5 +335,9 @@ export default Vue.extend({
 
 .attribute-name p:hover + .attribute-tooltip-text {
 	visibility: visible;
+}
+
+p {
+	font-size: 15px;
 }
 </style>

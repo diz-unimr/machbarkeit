@@ -10,7 +10,7 @@
 					Einschlusskriterien
 				</div>
 				<div class="search-input__body">
-					<button id="einschlusskriterien" @click="toggleOntologySearchTreeModal('Einschlusskriterien')">
+					<button id="einschlusskriterien" @click="toggleOntologySearchTreeModal('einschlusskriterien')">
 						<svg role="img"
 							aria-hidden="true"
 							focusable="false"
@@ -40,7 +40,7 @@
 					Ausschlusskriterien
 				</div>
 				<div class="search-input__body">
-					<button id="ausschlusskriterien" @click="toggleOntologySearchTreeModal('Ausschlusskriterien')">
+					<button id="ausschlusskriterien" @click="toggleOntologySearchTreeModal('ausschlusskriterien')">
 						<svg role="img"
 							aria-hidden="true"
 							focusable="false"
@@ -98,7 +98,7 @@ import Magnify from 'vue-material-design-icons/Magnify.vue'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
-import type { FeasibilityQueryBuilderData, SelectedCriteria } from '../types/FeasibilityQueryBuilderData'
+import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
 import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData.ts'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
 import debounce from 'lodash.debounce'
@@ -145,7 +145,7 @@ export default Vue.extend({
 			} else {
 				this.debouncedHandler = debounce(() => {
 					this.inclusionSearchInput = this.inclusionSearchInputTemp
-					this.criteriaOverlayType = 'Einschlusskriterien'
+					this.criteriaOverlayType = 'einschlusskriterien'
 					if (this.inclusionSearchInputTemp.length > 0) {
 						this.isOntologySearchTreeOpen = true
 					}
@@ -164,7 +164,7 @@ export default Vue.extend({
 			} else {
 				this.debouncedHandler = debounce(() => {
 					this.exclusionSearchInput = this.exclusionSearchInputTemp
-					this.criteriaOverlayType = 'Ausschlusskriterien'
+					this.criteriaOverlayType = 'ausschlusskriterien'
 					if (this.exclusionSearchInputTemp.length > 0) {
 						this.isOntologySearchTreeOpen = true
 					}
@@ -217,22 +217,22 @@ export default Vue.extend({
 			this.exclusionSearchInputTemp = ''
 		},
 
-		getSelectedCriteria(items: SelectedCriteria): void {
+		getSelectedCriteria(criteriaType: string, items: OntologyTreeElement[]): void {
 			this.inclusionSearchInputTemp = ''
 			this.exclusionSearchInputTemp = ''
-			this.selectedCriteria = items.selectedItems
-			this.toggleOntologySearchTreeModal(items.criteriaType)
+			this.selectedCriteria = items
+			this.toggleOntologySearchTreeModal(criteriaType)
 			this.isLimitationsCriteriaOpen = true
 		},
 
 		getSelectedFilterInfo(filterInfo: FilterInfo[]) {
 			// put filterInfo into this.selectedInclusionCharacteristics with for loop, condition with id and display
-			if (this.criteriaOverlayType === 'Einschlusskriterien') {
+			if (this.criteriaOverlayType === 'einschlusskriterien') {
 				if (this.selectedEditedCriteriaIndex !== null) { // when criterion is edited
 					this.selectedInclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
 					this.selectedEditedCriteriaIndex = null
 				} else this.selectedInclusionCharacteristics.push(...filterInfo)
-			} else if (this.criteriaOverlayType === 'Ausschlusskriterien') {
+			} else if (this.criteriaOverlayType === 'ausschlusskriterien') {
 				if (this.selectedEditedCriteriaIndex !== null) {
 					this.selectedExclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
 					this.selectedEditedCriteriaIndex = null
@@ -253,6 +253,7 @@ export default Vue.extend({
 		},
 
 		editCriteriaLimitation(characteristic: FilterInfo, index: number, criteriaType: string): void {
+			this.criteriaOverlayType = criteriaType
 			if (criteriaType === 'einschlusskriterien') {
 				this.selectedEditedCriteria = this.selectedInclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
 				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
@@ -276,7 +277,6 @@ export default Vue.extend({
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	font-size: 16px;
 }
 
 .feasibility-query__search-input {
@@ -298,7 +298,6 @@ export default Vue.extend({
 	background-color: #5270a7;
 	color: #ffffff;
 	text-align: center;
-	font-size: 16px;
 	font-weight: 500;
 	padding: 2px 0;
 }

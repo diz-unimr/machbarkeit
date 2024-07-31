@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="ontology-search-tree-container">
-		<div :class="['ontology-search-tree-wrapper', { 'ausschlusskriterien-overlay': criteriaType === 'Ausschlusskriterien'}]">
+		<div :class="['ontology-search-tree-wrapper', { 'ausschlusskriterien-overlay': criteriaType === 'ausschlusskriterien'}]">
 			<div class="criteria-type">
 				{{ criteriaType }}
 			</div>
@@ -44,7 +44,7 @@
 						</div>
 					</div>
 					<div class="ontology-search-tree__button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', criteriaType, selectedItems)">
 							AUSWÄHLEN
 						</button>
 						<button @click="$emit('toggle-ontology-search-tree-modal', criteriaType)">
@@ -67,7 +67,7 @@ import axios from '@nextcloud/axios'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
 import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
-import type { CheckedItem } from '../components/OntologyNestedTreeNode.vue'
+import type { CheckedItem } from './OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
 	name: 'OntologySearchTreeModal',
@@ -172,7 +172,7 @@ export default Vue.extend({
 	scrollbar-width: auto;
 	height: 100%;
 	padding: 0px 10px;
-    margin-top: 20px;
+	margin-top: 20px;
 }
 
 .ontology-search-tree-wrapper {
@@ -191,6 +191,7 @@ export default Vue.extend({
 	margin: 10px 0px;
 	font-size: 18px;
 	font-weight: bold;
+	text-transform: capitalize;
 }
 
 .ausschlusskriterien-overlay {
