@@ -29,20 +29,20 @@
 						</a>
 						<div v-show="isExpanded(index)">
 							<template v-for="(item, item_index) in filteredAttribute">
-								<div v-if="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'] === module"
+								<div v-if="item[metadata.kds_modul] === module"
 									:key="item_index"
 									class="attribute-name">
 									<input :id="String(item_index)"
 										v-model="checkedAttribute"
 										type="checkbox"
-										:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
+										:value="item[metadata.kds_name]"
 										@change="selectAttribute">
 									<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
 									<p :for="item_index"
 										@mouseover="getTooltipPosition">
-										{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
+										{{ item[metadata.kds_name] }}
 									</p>
-									<span class="attribute-tooltip-text">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
+									<span class="attribute-tooltip-text">{{ item[metadata.kds_description] }}</span>
 								</div>
 							</template>
 						</div>
@@ -62,14 +62,12 @@
 							{{ module }}
 						</div>
 						<template v-for="(item, item_index) in selectedAttribute">
-							<div v-if="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'] === module"
+							<div v-if="item[metadata.kds_modul] === module"
 								:key="item_index"
 								class="attribute-name">
-								<label style="cursor: auto">{{
-									item[
-										"Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
-									]
-								}}</label>
+								<label style="cursor: auto">
+									{{ item[metadata.kds_name] }}
+								</label>
 							</div>
 						</template>
 					</div>
@@ -87,17 +85,22 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 interface AttributeListData {
-    attributeList: Array<object>,
-    attributeName: Array<string>,
-    moduleName: Array<string>,
-    expandedGroup: Array<number>,
-	attributeTextSearch: string,
-    checkedAttribute: Array<string>,
-    selectedAttribute: Array<object>,
-    selectedModulName: Array<string>,
-    tooltipPosition: number,
-    imgExpand: string,
-    imgCollapse:string,
+    attributeList: Array<object>;
+    attributeName: Array<string>;
+    moduleName: Array<string>;
+    expandedGroup: Array<number>;
+	attributeTextSearch: string;
+    checkedAttribute: Array<string>;
+    selectedAttribute: Array<object>;
+    selectedModulName: Array<string>;
+    tooltipPosition: number;
+    imgExpand: string;
+    imgCollapse:string;
+	metadata: {
+		kds_modul: string;
+		kds_name: string;
+		kds_description: string;
+	},
 }
 
 export default Vue.extend({
@@ -119,17 +122,18 @@ export default Vue.extend({
 			tooltipPosition: 0,
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
+			metadata: {
+				kds_modul: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_KDS_MODUL',
+				kds_name: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_ATTRIBUT_NAME',
+				kds_description: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_ATTRIBUT_DESCRIPTION',
+			},
 		}
 	},
 
 	computed: {
 		filteredAttribute(): Array<object> {
 			return this.attributeList.filter((item) =>
-				item[
-					'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-				]
-					.toLowerCase()
-					.includes(this.attributeTextSearch.toLowerCase()),
+				item[this.metadata.kds_name].toLowerCase().includes(this.attributeTextSearch.toLowerCase()),
 			)
 		},
 	},
@@ -161,10 +165,7 @@ export default Vue.extend({
 		getModuleName(attributeList: Array<object>): Array<string> {
 			const moduleName: Array<string> = attributeList
 				.map(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-						],
+					(item) => item[this.metadata.kds_modul],
 				).filter(
 					(item, index, array) => array.indexOf(item) === index && item !== undefined && item !== '',
 				)
@@ -174,10 +175,7 @@ export default Vue.extend({
 		getAttributeName(attributeList: Array<object>): Array<string> {
 			const attributeName = attributeList
 				.map(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-						],
+					(item) => item[this.metadata.kds_name],
 				).filter((attr) => attr !== '' && attr !== undefined)
 
 			return attributeName
@@ -196,11 +194,7 @@ export default Vue.extend({
 
 		selectAttribute(): void {
 			this.selectedAttribute = this.attributeList.filter((filteredItem) =>
-				this.checkedAttribute.includes(
-					filteredItem[
-						'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-					],
-				),
+				this.checkedAttribute.includes(filteredItem[this.metadata.kds_name]),
 			)
 			this.selectedModulName = this.getModuleName(this.selectedAttribute)
 		},

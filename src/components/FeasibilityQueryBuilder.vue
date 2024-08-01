@@ -311,7 +311,7 @@ export default Vue.extend({
 }
 
 .search-input__body button {
-	border-radius: 4px;
+	border-radius: 5px;
 	border-width: 1px;
 	border-style: solid;
 	height: 44px;

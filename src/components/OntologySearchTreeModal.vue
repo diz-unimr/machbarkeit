@@ -11,12 +11,12 @@
 			<div v-if="ontologyResponse && ontologyResponse.length > 0">
 				<div class="ontology-search-tree__tabs">
 					<div class="ontology-search-tree__tabs-container">
-						<div v-for="(modulName, modulName_index) in ontologyResponse.map((item) => item.display)"
+						<button v-for="(modulName, modulName_index) in ontologyResponse.map((item) => item.display)"
 							:key="modulName_index"
 							:class="['ontology-tab', { 'active': activeTab === modulName_index }]"
 							@click="activateTab(modulName_index)">
 							{{ modulName }}
-						</div>
+						</button>
 					</div>
 				</div>
 				<div class="ontology-search-tree__display">
@@ -34,7 +34,7 @@
 								@input="getCheckboxItems" />
 
 							<OntologyNestedTreeNodeSearchInput v-if="criterion.children && (inclusionSearchInput.length > 0 || exclusionSearchInput.length > 0)"
-								class="ontology-nested-tree-node"
+								class="ontology-tree-node"
 								:criterion="criterion"
 								:index="criterionIndex"
 								:inclusion-search-input="inclusionSearchInput"
@@ -44,7 +44,7 @@
 						</div>
 					</div>
 					<div class="ontology-search-tree__button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', criteriaType, selectedItems)">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
 							AUSWÄHLEN
 						</button>
 						<button @click="$emit('toggle-ontology-search-tree-modal', criteriaType)">
@@ -167,19 +167,19 @@ export default Vue.extend({
 	position: relative;
 }
 
-.ontology-nested-tree-node {
+.ontology-tree-node {
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
 	padding: 0px 10px;
-	margin-top: 20px;
+    margin-top: 20px;
 }
 
 .ontology-search-tree-wrapper {
 	display: flex;
 	flex-direction: column;
 	position: absolute;
-	min-height: 12em;
+	min-height: 190px;
 	background-color: #fff;
 	box-shadow: 0px 10px 15px 0px #0003, 0px 0px 25px 2px #00000024, 0px 0px 10px 0px #0000001f;
 	pointer-events: auto;
@@ -215,20 +215,25 @@ export default Vue.extend({
 	padding: 0px 30px;
 }
 
-.ontology-search-tree__tabs-container div {
+.ontology-search-tree__tabs-container button {
 	background-color: #ffffff;
 	color: black;
 	border: 1px solid #2e4884;
 	border-radius: 5px;
-	padding: 0.4em 0.5em;
-	margin: 0.4em 0.5em;
+	padding: 8px;
+	margin: 10px;
 	text-align: center;
+	font-weight: normal;
 	cursor: pointer;
 	text-wrap: nowrap;
 	min-width: 70px;
 }
 
-.ontology-search-tree__tabs-container div:active {
+.ontology-search-tree__tabs-container button:hover {
+	border: 1px solid #004cff;
+}
+
+.ontology-search-tree__tabs-container button:active {
 	background-color: #738cba;
 	color: #ffffff;
 }

@@ -366,7 +366,7 @@ export default Vue.extend({
 	color: #ffffff;
 	border-top-right-radius: 4px;
 	border-top-left-radius: 4px;
-	min-height: 3.5em;
+	min-height: 55px;
 }
 
 .display-header p {
