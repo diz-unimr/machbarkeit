@@ -44,7 +44,7 @@
 						</div>
 					</div>
 					<div class="ontology-search-tree__button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', criteriaType, selectedItems)">
 							AUSWÄHLEN
 						</button>
 						<button @click="$emit('toggle-ontology-search-tree-modal', criteriaType)">
@@ -172,7 +172,7 @@ export default Vue.extend({
 	scrollbar-width: auto;
 	height: 100%;
 	padding: 0px 10px;
-    margin-top: 20px;
+	margin-top: 20px;
 }
 
 .ontology-search-tree-wrapper {

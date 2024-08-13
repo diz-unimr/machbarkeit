@@ -29,7 +29,8 @@
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "vue": "^2.7.0",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^2.24.3",
+    "vuex": "^4.1.0"
   },
   "browserslist": [
     "extends @nextcloud/browserslist-config"

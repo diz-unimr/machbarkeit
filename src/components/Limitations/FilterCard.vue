@@ -146,8 +146,8 @@ export default Vue.extend({
 
 <style scoped>
 .filter-card-wrapper {
-	height: 52px;
-	transition: height 0.25s ease;
+	max-height: 52px;
+	transition: max-height 1s linear;
 	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
 	border-radius: 4px;
 	padding: 5px 20px;
@@ -157,7 +157,7 @@ export default Vue.extend({
 }
 
 .filter-card__expand {
-	height: 100%;
+	max-height: 315px;
 }
 
 .filter-card__header {
@@ -189,7 +189,7 @@ export default Vue.extend({
 }
 
 .filter-card__button--expand-filter img {
-	transition: all .25s ease-in
+	transition: all 0.5s ease-in
 }
 
 .filter-card__button--reset button {

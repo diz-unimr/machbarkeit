@@ -17,7 +17,7 @@
 					@trailing-button-click="fileName = ''" />
 			</div>
 			<div class="save-query-modal__button-group">
-				<button>
+				<button @click="saveQuery">
 					SPEICHERN
 				</button>
 				<button @click="$emit('close-save-modal')">
@@ -61,7 +61,10 @@ export default Vue.extend({
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {},
+	methods: {
+		saveQuery() {
+		},
+	},
 })
 </script>
 

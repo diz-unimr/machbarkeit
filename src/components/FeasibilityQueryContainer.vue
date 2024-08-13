@@ -19,7 +19,7 @@
 				</div>
 			</div>
 			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
-			<FeasibilityQueryBuilder />
+			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen" />
 		</div>
 		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
 	</div>

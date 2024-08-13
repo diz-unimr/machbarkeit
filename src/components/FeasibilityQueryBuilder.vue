@@ -112,6 +112,12 @@ export default Vue.extend({
 		LimitationsSelectedCriteriaModal,
 		FeasibilityQueryDisplay,
 	},
+	props: {
+		isSaveModalOpen: {
+			type: Boolean,
+			required: true,
+		},
+	},
 
 	data(): FeasibilityQueryBuilderData {
 		return {
@@ -135,6 +141,10 @@ export default Vue.extend({
 	},
 
 	watch: {
+		isSaveModalOpen(value) {
+			if (value === true) this.isOntologySearchTreeOpen = false
+		},
+
 		inclusionSearchInputTemp(newVal) {
 			if (newVal.length <= 0) {
 				this.inclusionSearchInput = this.inclusionSearchInputTemp

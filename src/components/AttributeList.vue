@@ -33,9 +33,9 @@
 									:key="item_index"
 									class="attribute-name">
 									<input :id="String(item_index)"
-										v-model="checkedAttribute"
+										v-model="selectedAttribute"
 										type="checkbox"
-										:value="item[metadata.kds_name]"
+										:value="item"
 										@change="selectAttribute">
 									<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
 									<p :for="item_index"
@@ -90,7 +90,6 @@ interface AttributeListData {
     moduleName: Array<string>;
     expandedGroup: Array<number>;
 	attributeTextSearch: string;
-    checkedAttribute: Array<string>;
     selectedAttribute: Array<object>;
     selectedModulName: Array<string>;
     tooltipPosition: number;
@@ -116,7 +115,6 @@ export default Vue.extend({
 			moduleName: [],
 			expandedGroup: [],
 			attributeTextSearch: '',
-			checkedAttribute: [],
 			selectedAttribute: [],
 			selectedModulName: [],
 			tooltipPosition: 0,
@@ -156,10 +154,24 @@ export default Vue.extend({
 		async getCsv(): Promise<void> {
 			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
 			this.attributeList = response.data
+			this.attributeList = this.sortData(this.attributeList)
 			this.moduleName = this.getModuleName(this.attributeList)
 			// initialize keys from moduleName.length (default: expand all attributelists)
 			this.expandedGroup = [...Array(this.moduleName.length).keys()]
 			this.attributeName = this.getAttributeName(this.attributeList)
+		},
+
+		sortData(data: object[]): object[] {
+			data.sort((a, b) => {
+				const moduleNameComparison = a[this.metadata.kds_modul].localeCompare(b[this.metadata.kds_modul])
+				if (moduleNameComparison !== 0) return moduleNameComparison
+
+				const attributeNameComparison = a[this.metadata.kds_name].localeCompare(b[this.metadata.kds_name])
+				if (attributeNameComparison !== 0) return attributeNameComparison
+
+				return 0
+			})
+			return data
 		},
 
 		getModuleName(attributeList: Array<object>): Array<string> {
@@ -193,9 +205,6 @@ export default Vue.extend({
 		},
 
 		selectAttribute(): void {
-			this.selectedAttribute = this.attributeList.filter((filteredItem) =>
-				this.checkedAttribute.includes(filteredItem[this.metadata.kds_name]),
-			)
 			this.selectedModulName = this.getModuleName(this.selectedAttribute)
 		},
 

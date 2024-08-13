@@ -10,7 +10,7 @@ class MachbarkeitService
 {
 	public function readCsv()
 	{
-		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten_kds_module.csv', 'r');
+		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
 		$data = [];
 		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
 		while (($row = fgetcsv($file)) !== false) {
