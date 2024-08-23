@@ -129,11 +129,16 @@ export default Vue.extend({
 
 	methods: {
 		async getOntology(): Promise<void> {
-			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-			this.ontologyResponse = jsonData.data
+			try {
+				const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+				this.ontologyResponse = jsonData.data
 
-			if (this.inclusionSearchInput.length > 0 || this.exclusionSearchInput.length > 0) {
-				this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true)
+				if (this.inclusionSearchInput.length > 0 || this.exclusionSearchInput.length > 0) {
+					this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true)
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
 			}
 		},
 

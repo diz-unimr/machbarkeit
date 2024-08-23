@@ -152,13 +152,18 @@ export default Vue.extend({
 
 	methods: {
 		async getCsv(): Promise<void> {
-			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			this.attributeList = response.data
-			this.attributeList = this.sortData(this.attributeList)
-			this.moduleName = this.getModuleName(this.attributeList)
-			// initialize keys from moduleName.length (default: expand all attributelists)
-			this.expandedGroup = [...Array(this.moduleName.length).keys()]
-			this.attributeName = this.getAttributeName(this.attributeList)
+			try {
+				const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+				this.attributeList = response.data
+				this.attributeList = this.sortData(this.attributeList)
+				this.moduleName = this.getModuleName(this.attributeList)
+				// initialize keys from moduleName.length (default: expand all attributelists)
+				this.expandedGroup = [...Array(this.moduleName.length).keys()]
+				this.attributeName = this.getAttributeName(this.attributeList)
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+			}
 		},
 
 		sortData(data: object[]): object[] {

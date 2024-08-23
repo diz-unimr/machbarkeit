@@ -200,8 +200,13 @@ export default Vue.extend({
 
 	methods: {
 		async getUiProfile(): Promise<void> {
-			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
-			this.uiProfile = response.data
+			try {
+				const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
+				this.uiProfile = response.data
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+			}
 		},
 
 		toggleOntologySearchTreeModal(type: string): void {
