@@ -4,12 +4,12 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="footer-container">
-		<div class="load-save-button">
+		<div class="footer__button-group">
 			<input id="upload" type="file" hidden>
-			<label for="upload" class="query-upload-button" @click="$emit('dialog-close')">
+			<label for="upload" class="upload-query-button" @click="$emit('close-save-modal')">
 				ABFRAGE LADEN
 			</label>
-			<button @click="$emit('dialog-open')">
+			<button @click="$emit('open-save-modal')">
 				ABFRAGE SPEICHERN
 			</button>
 		</div>
@@ -33,20 +33,13 @@ export default Vue.extend({
 	width: 100%;
 }
 
-.footer-wrapper {
-	display: flex;
-	flex-direction: column;
-	row-gap: 8px;
-	align-items: center;
-}
-
-.load-save-button {
+.footer__button-group {
 	display: flex;
 	flex-direction: row;
 	column-gap: 15px;
 }
 
-.query-upload-button {
+.upload-query-button {
 	border-radius: 8px;
 	font-weight: bold;
 	padding: 8px 14px;
@@ -61,11 +54,11 @@ export default Vue.extend({
 	outline: none;
 }
 
-.query-upload-button:hover {
+.upload-query-button:hover {
 	border: 1px solid #006aa3;
 }
 
-.query-upload-button:active {
+.upload-query-button:active {
 	background-color: white;
 }
 

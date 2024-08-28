@@ -41,7 +41,7 @@ class MachbarkeitService {
 
 		foreach ($json_files as $file) {
 			// Read JSON file contents
-			$json_content = file_get_contents(__DIR__ . '/../../ontology/ui_trees/'.$file);
+			$json_content = file_get_contents(__DIR__ . '/../../ontology/ui_trees/' . $file);
 			// Decode JSON content into associative array (decode string to json)
 			$json_data = json_decode($json_content, true);
 			// Merge data from current file into merged_file array

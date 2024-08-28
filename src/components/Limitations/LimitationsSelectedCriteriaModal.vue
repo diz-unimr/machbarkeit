@@ -3,26 +3,30 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="selection-dialog-wrapper">
-		<div class="selection-dialog-pane">
-			<div class="selection-dialog">
-				<h2 class="selection-dialog-title">
+	<div class="limitations-dialog-container">
+		<div class="limitations-dialog-wrapper">
+			<div class="limitations-dialog">
+				<h2 class="limitations-dialog__title">
 					Einschränkungen der ausgewählten Merkmale
 				</h2>
-				<div class="selection-dialog-panel">
-					<LimitationsSelectedCriteriaCard v-for="(selectedOntology, index) in selectedCriteria"
+				<div class="limitations-dialog__panel">
+					<LimitationsSelectedCriteriaCard v-for="(selectedCriterion, index) in selectedCriteria"
 						:id="index"
-						:key="selectedOntology.id"
+						:key="selectedCriterion.id"
 						:ui-profile="uiProfile"
-						:selected-ontology="selectedOntology"
-						@get-selected-feature-filter="getSelectedFeatureFilter"
-						@update-ontology-profile="updateOntologyProfile(index, $event)"
-						@update-selected-ontology="updateSelectedOntology(index, $event)"
+						:selected-criterion="selectedCriterion"
+						:is-edit-filter-state="isStateEditFilter"
+						@get-selected-criteria-filter="getSelectedCriteriaFilter(index, $event)"
 						@delete-dialog-card="deleteDialogCard" />
 				</div>
-				<div class="dialog-button">
+				<div class="limitations-dialog__button-group">
 					<button :disabled="!isFilterComplete" @click="submit">
-						HINZUFÜGEN
+						<template v-if="isStateEditFilter">
+							SPEICHERN
+						</template>
+						<template v-else>
+							HINZUFÜGEN
+						</template>
 					</button>
 					<button @click="$emit('dialog-close')">
 						ABBRECHEN
@@ -36,14 +40,11 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
-import type { ConceptType, QuantityType, TimeRange, LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
+import type { SelectedCriteriaFilter, LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
 import type { UiProfile } from '../../types/FeasibilityQueryBuilderData'
-
-interface updatedOntologyData {
-	type: string;
-	item: ConceptType | QuantityType | TimeRange | undefined;
-}
+import type { FilterInfo } from '../../types/LimitationsSelectedCriteriaCardData'
+import type { TimeRange } from '../../types/TimeRangeOptionsData'
 
 export default Vue.extend({
 	name: 'LimitationsSelectedCriteriaModal',
@@ -59,16 +60,16 @@ export default Vue.extend({
 			type: Object as PropType<UiProfile>,
 			required: true,
 		},
-		getFilterInfo: {
-			type: Function,
-			default: () => {},
+		isStateEditFilter: {
+			type: Boolean,
+			default: false,
 		},
 	},
 
 	data(): LimitationsSelectedCriteriaModalData {
 		return {
 			filterInfo: [],
-			notEmptyProfileName: [],
+			selectedCriteriaFiltersInfo: [],
 			isFilterComplete: false,
 		}
 	},
@@ -79,79 +80,55 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {},
 	beforeMount() {},
-	mounted() {},
+	mounted() {
+		this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
+	},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		getNotEmptyProfile(uiProfile: UiProfile): void {
-			const profileKeys = Object.keys(uiProfile)
-			for (let i = 0; i < profileKeys.length; i++) {
-				const key = profileKeys[i]
-				if (uiProfile[key].valueDefinition?.optional === false) {
-					this.notEmptyProfileName.push(uiProfile[key].name)
-				}
-			}
-		},
-
 		deleteDialogCard(index: number): void {
 			if (this.selectedCriteria !== null) {
 				this.$emit('delete-selected-criteria', index)
-				// this.selectedCriteria.splice(index, 1)
-				this.filterInfo.splice(index, 1)
+				this.selectedCriteriaFiltersInfo.splice(index, 1)
 				if (this.selectedCriteria.length === 0) {
 					this.$emit('dialog-close')
-				} else this.checkCompleteFilter()
+				} else this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
 			}
 		},
 
-		getSelectedFeatureFilter(filteredCriteria: OntologyTreeElement): void {
-			const filter = {
-				id: filteredCriteria.id,
-				display: filteredCriteria.display,
-				conceptType: filteredCriteria.conceptType,
-				quantityType: filteredCriteria.quantityType,
-				timeRange: filteredCriteria.timeRange,
-			}
-			const index = this.filterInfo.findIndex(item => item.display === filter.display)
-			if (index === -1) {
-				this.filterInfo.push(filter)
-			} else this.filterInfo[index] = filter
-
-			this.checkCompleteFilter()
-		},
-
-		checkCompleteFilter(): void {
-			const notCompleteFilter = this.filterInfo.filter(item => {
+		checkCompleteFilter(filtersInfo: FilterInfo[]): void {
+			const notCompleteFilter = filtersInfo.filter(item => {
 				let notComplete = false
-				for (const key in item) {
-					if (item[key] && key !== 'display' && key !== 'id') {
-						notComplete = item[key].isFilterOptional ? false : !item[key].completeFilter
-						if (notComplete) {
-							return notComplete
-						}
-					}
-				}
+
+				item.timeRange && item.timeRange?.isFilterComplete === false && (notComplete = true)
+				item.quantityType?.isFilterComplete === false && (notComplete = true)
+				item.conceptType?.isFilterComplete === false && (notComplete = true)
+
 				return notComplete
 			})
 
-			if (notCompleteFilter.length > 0) {
-				this.isFilterComplete = false
-			} else this.isFilterComplete = true
+			notCompleteFilter.length > 0 ? (this.isFilterComplete = false) : (this.isFilterComplete = true)
 		},
 
-		updateOntologyProfile(index: string | number, profileType: string): void {
-			this.$emit('update-selected-criteria', { id: index, type: profileType })
+		getSelectedCriteriaFilter(index: string | number, data: SelectedCriteriaFilter): void {
+			if (this.selectedCriteria[index].display === data.item.display) {
+				this.selectedCriteriaFiltersInfo[index] = data.item
+			}
+
+			data.status === 'update' && this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
 		},
 
-		updateSelectedOntology(index: string | number, item: updatedOntologyData): void {
-			this.$emit('update-selected-criteria', { id: index, ...item })
+		checkCompleteFilterInput(items: FilterInfo[]) {
+			for (const item of items) {
+				item.timeRange?.value.type && !item.timeRange?.value.fromDate && (item.timeRange.value = {} as TimeRange['value'])
+			}
 		},
 
 		submit(): void {
-			this.$emit('get-filter-info', this.filterInfo)
+			this.$emit('get-selected-filter-info', this.selectedCriteriaFiltersInfo)
 			this.$emit('dialog-close')
 		},
 
@@ -161,24 +138,23 @@ export default Vue.extend({
 
 <style scoped>
 @media (max-width: 1300px) {
-	.selection-dialog-wrapper {
-		top: -40%;
+	.limitations-dialog-container {
+		top: -55%;
 	}
-	.selection-dialog {
-		max-height: 400px;
+	.limitations-dialog {
+		max-height: 480px;
 	}
 }
 
-.selection-dialog-wrapper {
+.limitations-dialog-container {
 	display: flex;
 	position: relative;
 	z-index: 100;
 	width: 85%;
-	/* top: 20%; */
 	margin: 0px auto 0px auto;
 }
 
-.selection-dialog-pane {
+.limitations-dialog-wrapper {
 	display: flex;
 	position: absolute;
 	pointer-events: auto;
@@ -186,7 +162,7 @@ export default Vue.extend({
 	max-height: 850px;
 }
 
-.selection-dialog {
+.limitations-dialog {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
@@ -196,7 +172,7 @@ export default Vue.extend({
 	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
 }
 
-.selection-dialog-title {
+.limitations-dialog__title {
 	z-index: 1000;
 	opacity: 1;
 	padding: 5px;
@@ -208,13 +184,13 @@ export default Vue.extend({
 	font-family: Roboto,Helvetica Neue,sans-serif;
 }
 
-.selection-dialog-panel {
+.limitations-dialog__panel {
 	overflow-y: auto;
 	overflow-x: hidden;
 	margin-bottom: 20px;
 }
 
-.dialog-button {
+.limitations-dialog__button-group {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -222,7 +198,7 @@ export default Vue.extend({
 	column-gap: 15px;
 }
 
-.dialog-button button {
+.limitations-dialog__button-group button {
 	border-radius: 8px;
 }
 </style>

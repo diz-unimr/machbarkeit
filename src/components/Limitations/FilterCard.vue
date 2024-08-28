@@ -3,10 +3,9 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="selection-dialog-card__content"
-		:class="{'card-content__expand': state}">
-		<div class="card-content__header">
-			<div class="card-content-header__button">
+	<div :class="['filter-card-wrapper', {'filter-card__expand': state}]">
+		<div class="filter-card__header">
+			<div class="filter-card__button--expand-filter">
 				<button @click="state = !state">
 					<img :src="imgExpand"
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
@@ -16,48 +15,65 @@
 					(optional)
 				</p>
 			</div>
-			<div class="card-content-header__reset">
+			<div class="filter-card__button--reset">
 				<button :disabled="isResetDisabled" @click="reset">
 					ZURÜCKSETZEN
 				</button>
 			</div>
 		</div>
-		<TimeRangeOption v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
+		<component :is="filterType"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
+			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-option="getSelectedOption" />
+			@get-selected-filter-option="getSelectedFilterOption" />
+		<!-- <TimeRangeOptions v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
+			:profile="profile"
+			:is-reset-disabled="isResetDisabled"
+			:selected-criterion="selectedCriterion"
+			@toggle-reset-button="toggleResetButton"
+			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<QuantityType v-if="profile.valueDefinition?.type === 'quantity' && display === 'Wertebereich'"
+		<QuantityOptions v-if="profile.valueDefinition?.type === 'quantity' && display === 'Wertebereich'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
+			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-option="getSelectedOption" />
+			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<ConceptType v-if="profile.valueDefinition?.type === 'concept' && display === 'Wertebereich'"
+		<ConceptOptions v-if="profile.valueDefinition?.type === 'concept' && display === 'Wertebereich'"
 			:profile="profile"
 			:is-reset-disabled="isResetDisabled"
-			:selected-ontology="selectedOntology"
+			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-option="getSelectedOption" />
+			@get-selected-filter-option="getSelectedFilterOption" /> -->
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import TimeRangeOption from './TimeRangeOption.vue'
-import ConceptType from './ConceptType.vue'
-import QuantityType from './QuantityType.vue'
-import type { FilterCardData, SelectedOptionData } from '../../types/FilterCardData'
+import TimeRangeOptions from './TimeRangeOptions.vue'
+import ConceptOptions from './ConceptOptions.vue'
+import QuantityOptions from './QuantityOptions.vue'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { ConceptType } from '../../types/ConceptOptionsData'
+import type { QuantityType } from '../../types/QuantityOptionsData'
+import type { TimeRange } from '../../types/TimeRangeOptionsData'
+
+interface FilterCardData {
+	state: boolean;
+	isResetDisabled: boolean;
+	filterType: string | null;
+	imgExpand: string;
+}
 
 export default Vue.extend({
 	name: 'FilterCard',
 	components: {
-		TimeRangeOption,
-		ConceptType,
-		QuantityType,
+		TimeRangeOptions,
+		ConceptOptions,
+		QuantityOptions,
 	},
 	props: {
 		profile: {
@@ -72,25 +88,20 @@ export default Vue.extend({
 			type: Boolean,
 			default: true,
 		},
-		selectedOntology: {
+		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			default: Object as PropType<OntologyTreeElement>,
+			required: true,
 		},
 		display: {
 			type: String,
 			default: String,
 		},
-		getSelectedOptions: {
-			type: Function,
-			default: () => {},
-		},
 	},
 	data(): FilterCardData {
 		return {
 			state: this.profile.valueDefinition ? !this.profile.valueDefinition?.optional : false, // set state = false for optional Filter
-			// state: !this.isFilterOptional,
-			isResetDisabled: true,
-			groupFilter: [],
+			isResetDisabled: this.display === 'Wertebereich' ? !(this.selectedCriterion.conceptType?.value || this.selectedCriterion.quantityType?.value) : (!this.selectedCriterion.timeRange?.value.type || this.selectedCriterion.timeRange?.value.type === 'kein Filter'),
+			filterType: null,
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
@@ -99,7 +110,11 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		if (this.profile.timeRestrictionAllowed && this.display === 'Zeitraum') { this.filterType = 'time-range-options' }
+		if (this.profile.valueDefinition?.type === 'quantity' && this.display === 'Wertebereich') { this.filterType = 'quantity-options' }
+		if (this.profile.valueDefinition?.type === 'concept' && this.display === 'Wertebereich') { this.filterType = 'concept-options' }
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -114,14 +129,8 @@ export default Vue.extend({
 			}
 		},
 
-		getSelectedOption(selectedOption: SelectedOptionData): void {
-			const index = this.groupFilter.findIndex(item => item.type === selectedOption.type)
-			if (index === -1) {
-				this.groupFilter.push(selectedOption)
-			} else {
-				this.groupFilter.splice(index, 1, selectedOption)
-			}
-			this.$emit('get-selected-options', this.groupFilter)
+		getSelectedFilterOption(status: string, selectedFilterInfo: ConceptType | QuantityType | TimeRange) {
+			this.$emit('get-selected-filters', status, selectedFilterInfo)
 		},
 
 		toggleResetButton(isReset: boolean): void {
@@ -136,9 +145,9 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.selection-dialog-card__content {
-	height: 52px;
-	transition: height 0.25s ease;
+.filter-card-wrapper {
+	max-height: 52px;
+	transition: max-height 1s linear;
 	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
 	border-radius: 4px;
 	padding: 5px 20px;
@@ -147,22 +156,18 @@ export default Vue.extend({
 	position: relative;
 }
 
-.card-content__expand {
-	height: 100%;
+.filter-card__expand {
+	max-height: 315px;
 }
 
-.selection-dialog-card__content img {
-	transition: all .25s ease-in
-}
-
-.card-content__header {
+.filter-card__header {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
 }
 
-.card-content-header__button {
+.filter-card__button--expand-filter {
 	display: flex;
 	flex-direction: row;
 	column-gap: 10px;
@@ -170,7 +175,7 @@ export default Vue.extend({
 	justify-content: flex-start;
 }
 
-.card-content-header__button button {
+.filter-card__button--expand-filter button {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -183,7 +188,11 @@ export default Vue.extend({
 	padding: 0px;
 }
 
-.card-content-header__reset button {
+.filter-card__button--expand-filter img {
+	transition: all 0.5s ease-in
+}
+
+.filter-card__button--reset button {
 	font-size: 14px;
 }
 

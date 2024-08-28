@@ -3,12 +3,12 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="content-option dialog-card">
-		<div class="content-option__header">
+	<div class="content-option-container dialog-border">
+		<div class="content-option__text">
 			<span>*</span> Geben Sie einen oder mehrere zulässige Werte an:
 		</div>
 		<div class="content-option__body">
-			<div class="content-option-checkbox">
+			<div class="content-option__checkbox">
 				<div v-for="(code, index) in profile.valueDefinition?.selectableConcepts"
 					:key="index"
 					class="checkbox-option">
@@ -28,47 +28,41 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { ConceptTypeData } from '../../types/ConceoptTypeData'
+import type { ConceptOptionsData } from '../../types/ConceptOptionsData'
 import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
-	name: 'ConceptType',
+	name: 'ConceptOptions',
 	props: {
 		profile: {
 			type: Object as PropType<Profile>,
 			required: true,
 		},
-		toggleResetButton: {
-			type: Function,
-			default: () => {},
-		},
-		getSelectedOption: {
-			type: Function,
-			default: () => {},
-		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
 		},
-		selectedOntology: {
+		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
 			required: true,
 		},
 	},
-	data(): ConceptTypeData {
+	data(): ConceptOptionsData {
 		return {
-			selectedConcepts: this.selectedOntology.conceptType ? this.selectedOntology.conceptType.value : [],
-			isFilterOptional: this.profile.valueDefinition?.optional,
+			selectedConcepts: this.selectedCriterion.conceptType?.value
+				? this.selectedCriterion.conceptType.value
+				: [],
 		}
 	},
 	watch: {
 		selectedConcepts() {
-			this.$emit('get-selected-option', {
+			this.$emit('get-selected-filter-option', 'update', {
 				type: 'conceptType',
+				display: this.selectedCriterion.display,
+				isFilterOptional: this.profile.valueDefinition?.optional,
+				isFilterComplete: this.selectedConcepts.length > 0,
 				value: this.selectedConcepts,
-				isFilterOptional: this.isFilterOptional,
-				completeFilter: this.selectedConcepts.length > 0,
 			})
 
 			if (this.selectedConcepts.length > 0) {
@@ -77,6 +71,7 @@ export default Vue.extend({
 				this.$emit('toggle-reset-button', false)
 			}
 		},
+
 		isResetDisabled(): void {
 			if (this.isResetDisabled) {
 				this.selectedConcepts = []
@@ -89,13 +84,17 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-option', {
+		this.$emit('get-selected-filter-option', 'initial', {
 			type: 'conceptType',
+			display: this.selectedCriterion.display,
+			isFilterOptional: this.profile.valueDefinition?.optional,
+			isFilterComplete: this.selectedCriterion.conceptType?.isFilterComplete
+				? this.selectedCriterion.conceptType?.isFilterComplete
+				: this.profile.valueDefinition?.optional,
 			value: this.selectedConcepts,
-			isFilterOptional: this.isFilterOptional,
-			completeFilter: false,
 		})
 	},
+
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -108,24 +107,25 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-input[type='checkbox'] {
-	width: 15px;
-	height: 15px;
-	margin: 0px;
-}
-
-.content-option {
+.content-option-container {
 	display: flex;
 	flex-direction: column;
 	column-gap: 20px;
 	margin: 10px 20px;
 }
 
-.content-option__header {
+.dialog-border {
+	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
+	border-radius: 4px;
+	padding: 10px 20px;
+	margin-bottom: 20px;
+}
+
+.content-option__text {
 	font-weight: 500;
 }
 
-.content-option__header span {
+.content-option__text span {
 	color: red;
 }
 
@@ -134,13 +134,8 @@ input[type='checkbox'] {
 	max-height: 170px;
 }
 
-.content-option-checkbox {
+.content-option__checkbox {
 	margin: 20px 20px 5px 20px;
-}
-
-.content-option-alert {
-	font-weight: 500;
-	color: red;
 }
 
 .checkbox-option {
@@ -150,10 +145,14 @@ input[type='checkbox'] {
 	align-items: center;
 }
 
-.dialog-card {
-	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
-	border-radius: 4px;
-	padding: 10px 20px;
-	margin-bottom: 20px;
+.content-option-alert {
+	font-weight: 500;
+	color: red;
+}
+
+input[type='checkbox'] {
+	width: 15px;
+	height: 15px;
+	margin: 0px;
 }
 </style>

@@ -3,12 +3,12 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="selection-dialog-card">
-		<div class="selection-dialog-card__header">
-			<p style="font-weight: 500;">
-				{{ selectedOntology.display }}
+	<div class="limitations-card">
+		<div class="limitations-card__header">
+			<p class="limitations-card__title">
+				{{ selectedCriterion.display }}
 			</p>
-			<button v-if="!isLimitationEditFeature" class="delete-btn" @click="deleteCard($vnode?.data?.attrs?.id)">
+			<button v-if="!isEditFilterState" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
@@ -20,16 +20,17 @@
 						:profile="profile"
 						display="Zeitraum"
 						attribute="timeRestrictionAllowed"
-						@get-selected-options="getSelectedOptions" />
+						:selected-criterion="selectedCriterion"
+						@get-selected-filters="getSelectedFilters" />
 				</template>
 				<template v-if="attribute === 'valueDefinition' && profile?.valueDefinition?.type">
 					<FilterCard :key="attribute + index"
 						:profile="profile"
 						display="Wertebereich"
 						attribute="valueDefinition"
-						:selected-ontology="selectedOntology"
+						:selected-criterion="selectedCriterion"
 						:is-filter-optional="profile.valueDefinition.optional"
-						@get-selected-options="getSelectedOptions" />
+						@get-selected-filters="getSelectedFilters" />
 				</template>
 			</template>
 		</template>
@@ -39,14 +40,12 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import FilterCard from './FilterCard.vue'
-import type { UiProfile, Profile } from '../../types/FeasibilityQueryBuilderData.ts'
-import type { SelectedOptionData } from '../../types/FilterCardData'
+import type { UiProfile } from '../../types/FeasibilityQueryBuilderData.ts'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
-
-interface LimitationsSelectedCriteriaCardData {
-    profile: Profile | null,
-    imgDelete: string,
-}
+import type { LimitationsSelectedCriteriaCardData } from '../../types/LimitationsSelectedCriteriaCardData.ts'
+import type { ConceptType } from '../../types/ConceptOptionsData.ts'
+import type { QuantityType } from '../../types/QuantityOptionsData'
+import type { TimeRange } from '../../types/TimeRangeOptionsData'
 
 export default Vue.extend({
 	name: 'LimitationsSelectedCriteriaCard',
@@ -58,15 +57,15 @@ export default Vue.extend({
 			type: Object as PropType<UiProfile>,
 			required: true,
 		},
-		selectedOntology: {
+		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			required: true,
+			default: undefined,
 		},
-		isLimitationEditFeature: {
+		isEditFilterState: {
 			type: Boolean,
 			default: false,
 		},
-		getSelectedFeatureFilter: {
+		getSelectedCriteriaFilter: {
 			type: Function,
 			default: () => {},
 		},
@@ -78,6 +77,7 @@ export default Vue.extend({
 	data(): LimitationsSelectedCriteriaCardData {
 		return {
 			profile: null,
+			filterInfo: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
 		}
 	},
@@ -88,46 +88,55 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {
 		this.getProfile()
+		this.createFilterInfo()
 	},
 	beforeMount() {},
-	mounted() {},
+	mounted() {
+		this.$emit('get-selected-criteria-filter', { status: 'initial', item: this.filterInfo })
+	},
 	beforeUpdate() {},
-	updated() {
-	},
-	beforeDestroy() {
-	},
+	updated() {},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
 		getProfile(): void {
-			if (this.selectedOntology.context.display === 'Diagnose' || this.selectedOntology.context.display === 'Prozedur') {
-				this.profile = this.uiProfile[this.selectedOntology.context.display]
+			if (this.selectedCriterion.context.display === 'Diagnose' || this.selectedCriterion.context.display === 'Prozedur') {
+				this.profile = this.uiProfile[this.selectedCriterion.context.display]
 			} else {
-				this.profile = this.uiProfile[this.selectedOntology.display]
+				this.profile = this.uiProfile[this.selectedCriterion.display]
 			}
 		},
 
-		getSelectedOptions(selectedOptions: SelectedOptionData[]): void {
-			selectedOptions.map((obj) => {
-				switch (obj.type) {
-				case 'conceptType':
-					this.$emit('update-selected-ontology', { item: obj }) // { type: 'conceptType', item: obj }
-					break
-				case 'quantityType':
-					this.$emit('update-selected-ontology', { item: obj }) // { type: 'quantityType', item: obj }
-					break
-				case 'timeRange':
-					this.$emit('update-selected-ontology', { item: obj }) // { type: 'timeRange', item: obj }
-					break
-				default:
-				}
-				return this.selectedOntology
-			})
-			this.$emit('get-selected-feature-filter', this.selectedOntology)
+		createFilterInfo() {
+			this.filterInfo = {
+				id: this.selectedCriterion.id,
+				display: this.selectedCriterion.display,
+				context: this.selectedCriterion.context,
+				conceptType: null,
+				quantityType: null,
+				timeRange: null,
+			}
 		},
 
-		validateEmptyInput(): void {
-
+		// This function is called every time when user click/update a filter
+		getSelectedFilters(status: string, selectedFiltersInfo: ConceptType | QuantityType | TimeRange): void {
+			if (this.filterInfo?.display === selectedFiltersInfo.display) {
+				switch (selectedFiltersInfo.type) {
+				case 'conceptType':
+					this.filterInfo.conceptType = selectedFiltersInfo as ConceptType
+					status === 'update' && this.$emit('get-selected-criteria-filter', { status, item: this.filterInfo })
+					break
+				case 'quantityType':
+					this.filterInfo.quantityType = selectedFiltersInfo as QuantityType
+					status === 'update' && this.$emit('get-selected-criteria-filter', { status, item: this.filterInfo })
+					break
+				case 'timeRange':
+					this.filterInfo.timeRange = selectedFiltersInfo as TimeRange
+					status === 'update' && this.$emit('get-selected-criteria-filter', { status, item: this.filterInfo })
+					break
+				}
+			}
 		},
 
 		deleteCard(key: number): void {
@@ -138,7 +147,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.selection-dialog-card {
+.limitations-card {
 	display: flex;
 	flex-direction: column;
 	place-content: center space-around;
@@ -148,69 +157,20 @@ export default Vue.extend({
 	border-radius: 4px;
 }
 
-.selection-dialog-card__header {
+.limitations-card__header {
 	display: flex;
-	flex-direction: row;
 	column-gap: 10%;
 	align-items: center;
 	justify-content:space-between;
 	margin: 0px 10px 20px 10px;
 }
 
-.selection-dialog-card__content {
-	height: 52px;
-	transition: height 0.25s ease;
-	box-shadow: 0 3px 1px -2px #adbcd7, 0 2px 2px 0 #adbcd7, 0 1px 5px 0 #adbcd7;
-	border-radius: 4px;
-	padding: 5px 20px;
-	margin-bottom: 20px;
-	overflow: hidden;
-	position: relative;
+.limitations-card__title {
+	font-weight: 500;
 }
 
-.card-content__expand {
-	height: 100%;
-}
-
-.selection-dialog-card__content img {
-	transition: all .25s ease-in
-}
-
-.card-content__header {
+.limitations-card__delete-button {
 	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-}
-
-.card-content-header__button {
-	display: flex;
-	flex-direction: row;
-	column-gap: 10px;
-	align-items: center;
-	justify-content: flex-start;
-}
-
-.card-content-header__button button {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: auto;
-	text-decoration: none;
-	background-color: white;
-	border: none;
-	outline: none;
-	margin: 0px;
-	padding: 0px;
-}
-
-.card-content-header__reset button {
-	font-size: 14px;
-}
-
-.delete-btn {
-	display: flex;
-	flex-direction: row;
 	column-gap: 5px;
 	border: none;
 	outline: none;
@@ -220,65 +180,11 @@ export default Vue.extend({
 	align-items: center;
 }
 
-.from-option {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-	column-gap: 10px;
-	position: relative;
-}
-
-.between__head{
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	border: 1px solid grey;
-	padding: 12px;
-	border-radius: 8px;
-	justify-content: space-between;
-	align-items: center;
-	cursor: pointer;
-}
-
-.between__dropdown {
-	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
-	background: white;
-	width: 100%;
-	max-height: 275px;
-	outline: 0;
-	margin: 0;
-	list-style-type: none;
-	position: sticky;
-}
-
-.content-header__option img {
-	height: 14px;
-	width: 14px;
-}
-
-.selection-dialog-card__footer {
-	margin: 0px 10px 20px 10px;
-}
-
-.dialog-button {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-end;
-	column-gap: 15px;
-}
-
 button {
 	border-radius: 8px;
 }
 
 img {
-	height: 16px;
-	width: 16px;
-}
-
-.delete-btn img {
 	width: 25px;
 	height: 20px;
 }
