@@ -117,6 +117,11 @@ export default Vue.extend({
 			type: Boolean,
 			required: true,
 		},
+
+		enableStartQueryButton: {
+			type: Function,
+			default: () => {},
+		},
 	},
 
 	data(): FeasibilityQueryBuilderData {
@@ -140,9 +145,21 @@ export default Vue.extend({
 		}
 	},
 
+	computed: {
+		hasCharacteristics(): boolean {
+			return this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
+		},
+	},
+
 	watch: {
 		isSaveModalOpen(value) {
 			if (value === true) this.isOntologySearchTreeOpen = false
+		},
+
+		hasCharacteristics(hasValue) {
+			if (hasValue) {
+				this.$emit('enable-start-query-button', true)
+			} else this.$emit('enable-start-query-button', false)
 		},
 
 		inclusionSearchInputTemp(newVal) {

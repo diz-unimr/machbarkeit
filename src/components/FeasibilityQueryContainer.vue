@@ -13,13 +13,14 @@
 					<button :disabled="true">
 						ZURÜCKSETZEN
 					</button>
-					<button>
+					<button :disabled="hasNoQuery">
 						ABFRAGE STARTEN
 					</button>
 				</div>
 			</div>
 			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
-			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen" />
+			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen"
+				@enable-start-query-button="enableStartQueryButton" />
 		</div>
 		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
 	</div>
@@ -34,6 +35,7 @@ import MachbarkeitFooter from './FooterContent.vue'
 interface FeasibilityQueryContainerData {
 	numberOfPatients: number;
 	isSaveModalOpen: boolean;
+	hasNoQuery: boolean;
 }
 
 export default Vue.extend({
@@ -48,6 +50,7 @@ export default Vue.extend({
 		return {
 			numberOfPatients: 0,
 			isSaveModalOpen: false,
+			hasNoQuery: true,
 		}
 	},
 
@@ -70,6 +73,10 @@ export default Vue.extend({
 
 		closeSaveModal(): void {
 			this.isSaveModalOpen = false
+		},
+
+		enableStartQueryButton(hasData: boolean): void {
+			this.hasNoQuery = !hasData
 		},
 	},
 })
