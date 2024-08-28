@@ -3,6 +3,9 @@
 * SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
+# Machbarkeit App
+An app for Nextcloud that allows you to perform local feasibility queries against a FHRI server.
+
 # Nextcloud app development example
 [![ESLint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml)
 [![Lint app info](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml)
