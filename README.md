@@ -5,7 +5,12 @@
 
 # Machbarkeit App
 An app for Nextcloud that allows you to perform local feasibility queries against a FHRI server.
-
+## Functionalities
+- Attribute list
+- Inclusion and exclusion criteria can be used to estimate the availability of health data for medical research purposes.
+- Load queries
+- Save queries
+  
 # Nextcloud app development example
 [![ESLint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml)
 [![Lint app info](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml)
