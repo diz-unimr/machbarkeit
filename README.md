@@ -5,7 +5,7 @@
 
 # Machbarkeit App
 An app for Nextcloud that allows researchers to perform local feasibility queries against a FHRI server. <br />
-A feasibility request can be found out, how many data sets for your search criteria are available.
+A feasibility request can be found out, how many data sets for your search criteria are available. <br />
 The availability of health data for medical research purposes can be estimated using inclusion and exclusion criteria.
 
 ![image](https://github.com/user-attachments/assets/21841f73-4a9f-4121-a7ca-3226c8246eae)
