@@ -4,7 +4,7 @@
 -->
 
 # Machbarkeit App
-An app for Nextcloud that allows you to perform local feasibility queries against a FHRI server.
+An app for Nextcloud that allows researchers to perform local feasibility queries against a FHRI server.
 
 ![image](https://github.com/user-attachments/assets/21841f73-4a9f-4121-a7ca-3226c8246eae)
 
