@@ -13,6 +13,7 @@ The availability of health data for medical research purposes can be estimated u
 ## Functionalities
 - Attribute list define all attributes that will appear in the provided dataset
 - Inclusion and exclusion criteria can be used to estimate the availability of health data for medical research purposes.
+- With Feasibility query researchers can get an overview of the available data sets.
 - Load queries
 - Save queries
 <br />
