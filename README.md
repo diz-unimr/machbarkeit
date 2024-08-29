@@ -15,6 +15,7 @@ The availability of health data for medical research purposes can be estimated u
 - Inclusion and exclusion criteria can be used to estimate the availability of health data for medical research purposes.
 - Load queries
 - Save queries
+- <br />
   
 # Nextcloud app development example
 [![ESLint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml)
