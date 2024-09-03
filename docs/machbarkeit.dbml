@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2024 Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Use DBML to define your database structure
 // Docs: https://dbml.dbdiagram.io/docs
 

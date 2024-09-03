@@ -1,12 +1,15 @@
 <?php
 
+// SPDX-FileCopyrightText: 2024 Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace OCA\Machbarkeit\Migration;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use Psr\Log\LoggerInterface;
 
 class InitData implements IRepairStep
@@ -47,7 +50,7 @@ class InitData implements IRepairStep
 
     protected function storeInitialData()
     {
-        $this->logger->info("Loading ontology data", ["app" => "Machbarkeit"]);
+        $this->logger->info('Loading ontology data', ['app' => 'Machbarkeit']);
 
         $query = $this->db->getQueryBuilder();
 
@@ -55,91 +58,91 @@ class InitData implements IRepairStep
         $query
             ->insert('machbarkeit_modules')
             ->values(
-                array(
+                [
                     'id' => $this->db->quote(1),
                     'name' => $this->db->quote('Person'),
                     'version' => $this->db->quote('1.0.0')
-                )
+                ]
             )->executeStatement();
 
         $query
             ->insert('machbarkeit_modules')
             ->values(
-                array(
+                [
                     'id' => $this->db->quote(2),
                     'name' => $this->db->quote('Prozedur'),
                     'version' => $this->db->quote('1.0.0'),
-                )
+                ]
             )->executeStatement();
 
         // ontology concepts
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(1),
                 'name' => $this->db->quote('Gegenwärtiges chronologisches Alter'),
                 'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(1),
-            )
+            ]
         )->executeStatement();
 
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(2),
                 'name' => $this->db->quote('Bildgebende Diagnostik'),
                 'selectable' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(2),
-            )
+            ]
         )->executeStatement();
 
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(3),
                 'name' => $this->db->quote('Andere bildgebende Verfahren'),
                 'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(2),
                 'parent_id' => $this->db->quote(2),
-            )
+            ]
         )->executeStatement();
 
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(4),
                 'name' => $this->db->quote('Elektrische Impedanztomographie'),
                 'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(2),
                 'parent_id' => $this->db->quote(3),
-            )
+            ]
         )->executeStatement();
 
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(5),
                 'name' => $this->db->quote('Elektroimpedanzspektroskopie der Haut'),
                 'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(2),
                 'parent_id' => $this->db->quote(3),
-            )
+            ]
         )->executeStatement();
 
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(6),
                 'name' => $this->db->quote('Knochendichtemessung (alle Verfahren)'),
                 'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(2),
                 'parent_id' => $this->db->quote(3),
-            )
+            ]
         )->executeStatement();
 
 
         $query->insert('machbarkeit_concepts')->values(
-            array(
+            [
                 'id' => $this->db->quote(7),
                 'name' => $this->db->quote('Radiofrequenzspektroskopie von Brustgewebe'),
                 'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
                 'module_id' => $this->db->quote(2),
                 'parent_id' => $this->db->quote(3),
-            ),
+            ],
         )->executeStatement();
     }
 }
