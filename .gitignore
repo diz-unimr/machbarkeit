@@ -10,3 +10,4 @@ js/*hot-update.*
 node_modules/
 /js/
 ontology/
+dev/data/server

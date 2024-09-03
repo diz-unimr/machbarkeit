@@ -7,7 +7,6 @@ declare(strict_types=1);
 namespace OCA\Machbarkeit\Migration;
 
 use Closure;
-use OCA\Machbarkeit\Db\Module;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\Migration\IOutput;
@@ -21,82 +20,48 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		// ontology context
-		if (!$schema->hasTable('ontology_context')) {
-			$table = $schema->createTable('ontology_context');
-			$table->addColumn('id', Types::INTEGER, [
-				'autoincrement' => true,
-				'notnull' => true,
-			]);
-			$table->addColumn('system', Types::STRING, [
-				'notnull' => true,
-				'length' => 200
-			]);
-			$table->addColumn('code', Types::STRING, [
-				'notnull' => true,
-				'length' => 200,
-			]);
-			$table->addColumn('version', Types::STRING, [
-				'notnull' => true,
-				'length' => 64,
-			]);
-			$table->addColumn('display', Types::STRING, [
-				'notnull' => true,
-				'length' => 300,
-			]);
-
-
-			$table->setPrimaryKey(['id']);
-		}
-
-		// ontology termcode
-		if (!$schema->hasTable('ontology_termcode')) {
-			$table = $schema->createTable('ontology_termcode');
-			$table->addColumn('id', Types::INTEGER, [
-				'autoincrement' => true,
-				'notnull' => true,
-			]);
-			$table->addColumn('system', Types::STRING, [
-				'notnull' => true,
-				'length' => 200
-			]);
-			$table->addColumn('code', Types::STRING, [
-				'notnull' => true,
-				'length' => 200,
-			]);
-			$table->addColumn('version', Types::STRING, [
-				'notnull' => true,
-				'length' => 200,
-			]);
-			$table->addColumn('display', Types::STRING, [
-				'notnull' => true,
-				'length' => 300,
-			]);
-
-
-			$table->setPrimaryKey(['id']);
-		}
-
-		// module
-		if (!$schema->hasTable('module')) {
-			$table = $schema->createTable('module');
+		// modules
+		if (!$schema->hasTable('machbarkeit_modules')) {
+			$table = $schema->createTable('machbarkeit_modules');
 			$table->addColumn('id', Types::INTEGER, [
 				'autoincrement' => true,
 				'notnull' => true,
 			]);
 			$table->addColumn('name', Types::STRING, [
 				'notnull' => true,
-				'length' => 200
 			]);
-			$table->addColumn('ontology', Types::JSON, [
-				'notnull' => true,
-			]);
-
-			$table->addColumn('ui_profile', Types::TEXT, [
+			$table->addColumn('version', Types::STRING, [
 				'notnull' => true,
 			]);
 
 			$table->setPrimaryKey(['id']);
+		}
+
+		// ontology_concepts
+		if (!$schema->hasTable('machbarkeit_concepts')) {
+			$table = $schema->createTable('machbarkeit_concepts');
+			$table->addColumn('id', Types::INTEGER, [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+			]);
+			$table->addColumn('selectable', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('parent_id', Types::INTEGER, [
+				'notnull' => false,
+			]);
+			$table->addColumn('module_id', Types::INTEGER, [
+				'notnull' => true
+			]);
+
+
+			$table->setPrimaryKey(['id']);
+			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_modules'), ['module_id'], ['id'], [], 'fk_modules_id_concepts');
+			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_concepts'), ['parent_id'], ['id'], [], 'fk_concepts_id_concepts');
 		}
 
 		return $schema;

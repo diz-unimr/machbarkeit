@@ -5,15 +5,17 @@ name: "nc-dev"
 
 services:
   nextcloud:
-    image: ghcr.io/juliushaertl/nextcloud-dev-php80:latest
+    image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
     environment:
       SERVER_BRANCH: v27.1.5
       SQL: pgsql
-      VIRTUAL_HOST: nextcloud.local
       PHP_XDEBUG_MODE: debug #develop
+      NEXTCLOUD_AUTOINSTALL: "YES"
     volumes:
       - ./data/shared:/shared
       - ./data/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      # - ./data/server:/var/www/html
+      - ./bootstrap.sh:/usr/local/bin/bootstrap.sh
       - ../:/var/www/html/apps-extra/machbarkeit
     ports:
       - "8080:80"

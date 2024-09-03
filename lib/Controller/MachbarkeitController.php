@@ -43,7 +43,9 @@ class MachbarkeitController extends Controller
 
 	public function getUiProfile(): JSONResponse
 	{
+		// TODO remove test call
 		$modules = $this->getModules();
+
 		return new JSONResponse($this->service->readUiProfile());
 	}
 

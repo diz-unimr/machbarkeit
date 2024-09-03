@@ -21,18 +21,15 @@ use OCP\AppFramework\Db\Entity;
  */
 class Module extends Entity implements JsonSerializable
 {
-	// protected string $id = '';
-	protected string $name = '';
-	protected string $ontology = '';
-	protected string $uiProfile = '';
+	public string $name = '';
+	public string $version = '';
 
 	public function jsonSerialize(): array
 	{
 		return [
 			'id' => $this->id,
 			'name' => $this->name,
-			'ontology' => $this->ontology,
-			'uiProfile' => $this->uiProfile
+			'version' => $this->version,
 		];
 	}
 }

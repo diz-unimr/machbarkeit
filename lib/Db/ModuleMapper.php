@@ -25,14 +25,13 @@ class ModuleMapper extends QBMapper
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function find(int $id, string $userId): Module
+	public function find(int $id): Module
 	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
-			->from('machbarkeit')
-			->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)))
-			->andWhere($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)));
+			->from('machbarkeit_modules')
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)));
 		return $this->findEntity($qb);
 	}
 
@@ -44,8 +43,7 @@ class ModuleMapper extends QBMapper
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
-			->from('module');
-		// ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)));
+			->from('machbarkeit_modules');
 		return $this->findEntities($qb);
 	}
 }

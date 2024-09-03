@@ -44,9 +44,9 @@ class MachbarkeitService
 		$json_files = [
 			'Person.json',
 			// 'test.json',
-			/* 'Diagnose.json',
+			// 'Diagnose.json',
 			'test.json',
-			'Laboruntersuchung.json', */
+			// 'Laboruntersuchung.json',
 			'Prozedur.json'
 		];
 		$merged_file = [];
