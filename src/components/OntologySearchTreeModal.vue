@@ -3,54 +3,57 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="search-tree-overlay-container">
-		<div class="search-tree-overlay-wrapper" :class="{ 'ausschlusskriterien-overlay': criteriaType === 'Ausschlusskriterien' }">
-			<div class="criteria-name">
+	<div class="ontology-search-tree-container">
+		<div :class="['ontology-search-tree-wrapper', { 'ausschlusskriterien-overlay': criteriaType === 'ausschlusskriterien'}]">
+			<div class="criteria-type">
 				{{ criteriaType }}
 			</div>
-			<div v-if="criteriaResponse && criteriaResponse.length > 0">
-				<div class="criteria-search-tree-header">
-					<div class="search-tree-button">
-						<div v-for="(modulName, modulName_index) in criteriaResponse.map((item) => item.display)"
+			<div v-if="ontologyResponse && ontologyResponse.length > 0">
+				<div class="ontology-search-tree__tabs">
+					<div class="ontology-search-tree__tabs-container">
+						<button v-for="(modulName, modulName_index) in ontologyResponse.map((item) => item.display)"
 							:key="modulName_index"
-							class="criteria-tab"
-							:class="{ 'active': activeTab === modulName_index }"
+							:class="['ontology-tab', { 'active': activeTab === modulName_index }]"
 							@click="activateTab(modulName_index)">
 							{{ modulName }}
-						</div>
+						</button>
 					</div>
 				</div>
-				<div class="criteria-container">
-					<div v-for="(criterion, criterion_index) in criteriaResponse"
-						v-show="activeTab === criterion_index"
-						:key="criterion_index">
-						<div class="criteria-node">
-							<CriteriaNestedTreeNode v-if="criterion.children && (einschlussTextSerach.length === 0 && ausschlussTextSerach.length === 0)"
+				<div class="ontology-search-tree__display">
+					<div v-for="(criterion, criterionIndex) in ontologyResponse"
+						v-show="activeTab === criterionIndex"
+						:key="criterionIndex">
+						<div class="ontology-search-tree__body">
+							<div v-if="isSearchResultNoData[criterionIndex] && (inclusionSearchInput.length > 0 || exclusionSearchInput.length > 0)" class="no-result-data">
+								Keine Daten
+							</div>
+
+							<OntologyNestedTreeNode v-if="criterion.children && inclusionSearchInput.length <= 0 && exclusionSearchInput.length <= 0"
 								:is-root-node="true"
 								:criterion="criterion"
-								:einschluss-text-serach="einschlussTextSerach"
-								:ausschluss-text-serach="ausschlussTextSerach"
 								@input="getCheckboxItems" />
 
-							<CriteriaNestedTreeNodeSearch v-if="criterion.children && (einschlussTextSerach.length > 0 || ausschlussTextSerach.length > 0)"
-								class="criteria-nested-tree-node"
+							<OntologyNestedTreeNodeSearchInput v-if="criterion.children && (inclusionSearchInput.length > 0 || exclusionSearchInput.length > 0)"
+								class="ontology-tree-node"
 								:criterion="criterion"
-								:einschluss-text-serach="einschlussTextSerach"
-								:ausschluss-text-serach="ausschlussTextSerach"
-								@input="getCheckboxItems" />
+								:index="criterionIndex"
+								:inclusion-search-input="inclusionSearchInput"
+								:exclusion-search-input="exclusionSearchInput"
+								@input="getCheckboxItems"
+								@check-existing-data="checkExistingData" />
 						</div>
 					</div>
-					<div class="button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', {criteriaType, selectedItems})">
+					<div class="ontology-search-tree__button-group">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', criteriaType, selectedItems)">
 							AUSWÄHLEN
 						</button>
-						<button @click="$emit('toggle-search-criteria', criteriaType)">
+						<button @click="$emit('toggle-ontology-search-tree-modal', criteriaType)">
 							ABBRECHEN
 						</button>
 					</div>
 				</div>
 			</div>
-			<div v-else class="criteria-loading">
+			<div v-else class="loading-text">
 				Loading...
 			</div>
 		</div>
@@ -61,35 +64,31 @@
 import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-import CriteriaNestedTreeNode from './CriteriaNestedTreeNode.vue'
-import CriteriaNestedTreeNodeSearch from './CriteriaNestedTreeNodeSearch.vue'
+import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
+import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
 import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
-import type { CheckedItem } from '../components/CriteriaNestedTreeNode.vue'
+import type { CheckedItem } from './OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
 	name: 'OntologySearchTreeModal',
 	components: {
-		CriteriaNestedTreeNode,
-		CriteriaNestedTreeNodeSearch,
+		OntologyNestedTreeNode,
+		OntologyNestedTreeNodeSearchInput,
 	},
 	props: {
 		criteriaType: {
 			type: String,
 			default: '',
 		},
-		einschlussTextSerach: {
+		inclusionSearchInput: {
 			type: String,
-			default: '',
+			default: null,
 		},
-		ausschlussTextSerach: {
+		exclusionSearchInput: {
 			type: String,
-			default: '',
+			default: null,
 		},
 		getSelectedCriteria: {
-			type: Function,
-			default: () => {},
-		},
-		toggleSearchCriteria: {
 			type: Function,
 			default: () => {},
 		},
@@ -98,10 +97,20 @@ export default Vue.extend({
 	data(): OntologySearchTreeModalData {
 		return {
 			activeTab: 0,
-			criteriaResponse: null,
-			criteriaData: null,
+			ontologyResponse: null,
 			selectedItems: [],
+			isSearchResultNoData: [],
 		}
+	},
+
+	watch: {
+		inclusionSearchInput() {
+			this.inclusionSearchInput.length > 0 && (this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true))
+		},
+
+		exclusionSearchInput() {
+			this.exclusionSearchInput.length > 0 && (this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true))
+		},
 	},
 
 	// life cycle of vue js
@@ -115,14 +124,22 @@ export default Vue.extend({
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {
-	},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
 		async getOntology(): Promise<void> {
-			const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-			this.criteriaResponse = jsonData.data
+			try {
+				const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
+				this.ontologyResponse = jsonData.data
+
+				if (this.inclusionSearchInput.length > 0 || this.exclusionSearchInput.length > 0) {
+					this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true)
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+			}
 		},
 
 		activateTab(index: string | number): void {
@@ -130,57 +147,63 @@ export default Vue.extend({
 		},
 
 		getCheckboxItems(checkedItem: CheckedItem): void {
-			if (checkedItem.action === 'add') {
+			if (checkedItem.action === 'check') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
-			} else if (checkedItem.action === 'delete') {
+			} else if (checkedItem.action === 'uncheck') {
 				this.selectedItems = this.selectedItems.filter(function(name) {
 					return name !== checkedItem.node
 				})
 			}
+		},
+
+		checkExistingData(index: number): void {
+			this.isSearchResultNoData.splice(index, 1, false)
 		},
 	},
 })
 </script>
 
 <style scoped>
-.criteria-nested-tree-node {
-	overflow-y: auto;
-	overflow-x: hidden;
-	scrollbar-width: auto;
-	height: 100%;
-	padding-right: 10px;
-}
-
-.search-tree-overlay-container {
+.ontology-search-tree-container {
 	display:flex;
 	z-index: 100;
 	max-width: 100%;
 	max-height: 100%;
-	position: sticky;
+	position: relative;
 }
 
-.search-tree-overlay-wrapper {
+.ontology-tree-node {
+	overflow-y: auto;
+	scrollbar-width: auto;
+	height: 100%;
+	padding: 0px 10px;
+	margin-top: 20px;
+}
+
+.ontology-search-tree-wrapper {
 	display: flex;
 	flex-direction: column;
 	position: absolute;
-	min-height: 12em;
+	min-height: 190px;
 	background-color: #fff;
 	box-shadow: 0px 10px 15px 0px #0003, 0px 0px 25px 2px #00000024, 0px 0px 10px 0px #0000001f;
 	pointer-events: auto;
 	width: 95%;
 }
 
-.criteria-name {
+.criteria-type {
 	text-align: center;
-	margin: 5px 0px;
+	margin: 10px 0px;
+	font-size: 18px;
 	font-weight: bold;
+	text-transform: capitalize;
 }
 
 .ausschlusskriterien-overlay {
 	right: 0;
 }
 
-.criteria-search-tree-header {
+.ontology-search-tree__tabs {
 	display: flex;
 	flex-direction: row;
 	place-content: stretch flex-start;
@@ -188,56 +211,62 @@ export default Vue.extend({
 	border-top: 2px solid #adbcd7;
 	border-bottom: 2px solid #adbcd7;
 	overflow-x: auto;
+	padding: 3px 0px;
 }
 
-.search-tree-button {
+.ontology-search-tree__tabs-container {
 	display: flex;
 	margin: auto;
 	padding: 0px 30px;
 }
 
-.search-tree-button div {
+.ontology-search-tree__tabs-container button {
 	background-color: #ffffff;
 	color: black;
 	border: 1px solid #2e4884;
 	border-radius: 5px;
-	padding: 0.4em 0.5em;
-	margin: 0.4em 0.5em;
+	padding: 8px;
+	margin: 10px;
 	text-align: center;
+	font-weight: normal;
 	cursor: pointer;
 	text-wrap: nowrap;
 	min-width: 70px;
 }
 
-.search-tree-button div:active {
+.ontology-search-tree__tabs-container button:hover {
+	border: 1px solid #004cff;
+}
+
+.ontology-search-tree__tabs-container button:active {
 	background-color: #738cba;
 	color: #ffffff;
 }
 
-.criteria-tab {
+.ontology-tab {
 	padding: 10px 20px;
 	cursor: pointer;
 	border-bottom: none;
 }
 
-.criteria-tab.active {
+.ontology-tab.active {
 	background-color: #738cba;
 	color: white;
 }
 
-.criteria-container {
+.ontology-search-tree__display {
 	height: 650px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 }
 
-.criteria-node {
+.ontology-search-tree__body {
 	height: 570px;
 	padding: 20px 25px 20px 25px;
 }
 
-.button-group {
+.ontology-search-tree__button-group {
 	display: flex;
 	column-gap: 15px;
 	margin: 20px;
@@ -245,15 +274,22 @@ export default Vue.extend({
 	flex-direction: row;
 }
 
-.button-group button {
+.ontology-search-tree__button-group button {
 	border-radius: 8px;
 }
 
-.criteria-loading {
+.loading-text {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	height: 150px;
 	border-top: 2px solid #adbcd7;
+}
+
+.no-result-data {
+	text-align: center;
+	font-weight: bold;
+	font-size: large;
+	margin-top: 20px;
 }
 </style>

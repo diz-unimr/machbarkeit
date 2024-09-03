@@ -4,49 +4,53 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="feasibility-query-container">
-		<div class="feasibility-query">
-			<div class="feasibility-query__top">
+		<div class="feasibility-query-wrapper">
+			<div class="feasibility-query__output">
 				<div class="number-patients">
 					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
 				</div>
-				<div class="query-button">
+				<div class="feasibility-query__button-group">
 					<button :disabled="true">
 						ZURÜCKSETZEN
 					</button>
-					<button>
+					<button :disabled="hasNoQuery">
 						ABFRAGE STARTEN
 					</button>
 				</div>
 			</div>
-			<SaveQueryDialog v-if="isDialogOpen" @dialog-close="querySaveDiaglogClose" />
-			<FeasibilityQueryBuilder />
+			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
+			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen"
+				@enable-start-query-button="enableStartQueryButton" />
 		</div>
-		<MachbarkeitFooter @dialog-open="querySaveDialogOpen" @dialog-close="querySaveDiaglogClose" />
+		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
 	</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
-import SaveQueryDialog from './SaveQueryDialog.vue'
+import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 
 interface FeasibilityQueryContainerData {
 	numberOfPatients: number;
-	isDialogOpen: boolean;
+	isSaveModalOpen: boolean;
+	hasNoQuery: boolean;
 }
 
 export default Vue.extend({
 	name: 'FeasibilityQueryContainer',
 	components: {
 		FeasibilityQueryBuilder,
-		SaveQueryDialog,
+		SaveQueryModal,
 		MachbarkeitFooter,
 	},
+
 	data(): FeasibilityQueryContainerData {
 		return {
 			numberOfPatients: 0,
-			isDialogOpen: false,
+			isSaveModalOpen: false,
+			hasNoQuery: true,
 		}
 	},
 
@@ -63,11 +67,16 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		querySaveDialogOpen(): void {
-			this.isDialogOpen = true
+		openSaveModal(): void {
+			this.isSaveModalOpen = true
 		},
-		querySaveDiaglogClose(): void {
-			this.isDialogOpen = false
+
+		closeSaveModal(): void {
+			this.isSaveModalOpen = false
+		},
+
+		enableStartQueryButton(hasData: boolean): void {
+			this.hasNoQuery = !hasData
 		},
 	},
 })
@@ -86,13 +95,13 @@ export default Vue.extend({
 	overflow-x: hidden;
 }
 
-.feasibility-query {
+.feasibility-query-wrapper {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 100%;
 }
 
-.feasibility-query__top {
+.feasibility-query__output {
 	display: flex;
 	flex-direction: row;
 	place-content: center space-between;
@@ -120,64 +129,13 @@ export default Vue.extend({
 	font-size: medium;
 }
 
-.query-button {
+.feasibility-query__button-group {
 	display: flex;
 	flex-direction: row;
 	column-gap: 15px;
 }
 
-.feasibility-query__consent {
-	margin: 10px 0 15px 5px;
-}
-
-.consent-title {
-	font-size: 16px;
-	font-weight: 500;
-	color: #5270a7;
-}
-
-.consent-text {
-	display: flex;
-	flex-direction: row;
-	column-gap: 10px;
-	align-items: center;
-}
-
-.consent-link {
-	color:#5270a7;
-	text-decoration: underline;
-}
-
-.consent-tooltip {
-	position: relative;
-	display: inline-block;
-}
-
-.consent-tooltip span {
-	display: flex;
-	visibility: hidden;
-	width: 300px;
-	height: auto;
-	background-color: white;
-	padding: 10px;
-	position: absolute;
-	z-index: 100;
-	left: 150%;
-	top: -160%;
-	border-radius: 5px;
-	box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
-}
-
-.consent-tooltip:hover span {
-	visibility: visible;
-}
-
 button {
 	border-radius: 8px;
-}
-
-svg {
-	width: 15px;
-	height: 15px;
 }
 </style>

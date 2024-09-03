@@ -4,87 +4,72 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="attribute-list-container">
-		<div class="attribute-list">
+		<div class="attribute-list-wrapper">
 			<div class="attribute-list__header">
 				Attributliste
 			</div>
 			<div class="attribute-list__content">
-				<NcTextField :value.sync="txtSearch"
+				<NcTextField :value.sync="attributeTextSearch"
 					label="Attribut suchen"
 					trailing-button-icon="close"
 					placeholder=" "
-					:show-trailing-button="txtSearch !== ''"
-					@trailing-button-click="txtSearch = ''">
+					:show-trailing-button="attributeTextSearch !== ''"
+					@trailing-button-click="attributeTextSearch = ''">
 					<Magnify :size="20" />
 				</NcTextField>
-				<div class="attribute-display">
-					<div v-for="(modul, index) in modulName" :key="index">
-						<a class="modul-name" @click="toggleExpansion(index)">
-							<img class="expandImg"
+				<div class="attribute-list__display">
+					<div v-for="(module, index) in moduleName" :key="index">
+						<a class="module-name" @click="toggleExpansion(index)">
+							<img class="module-expand-img"
 								:src="isExpanded(index)
 									? imgExpand
 									: imgCollapse
 								">
-							{{ modul }}
+							{{ module }}
 						</a>
-						<div v-show="isExpanded(index)" style="margin-top: 10px">
-							<!-- eslint-disable -->
-							<div
-								class="attribute-items"
-								v-for="(item, key) in filteredAttribute"
-								:key="key"
-								v-if="
-									item[
-										'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-									] === modul
-								"
-							>
-								<!-- eslint-enable -->
-								<input :id="String(key)"
-									v-model="checkedAttribute"
-									type="checkbox"
-									:value="item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name']"
-									@change="selectAttribute">
-								<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
-								<p :for="key"
-									@mouseover="getTooltipPosition">
-									{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'] }}
-								</p>
-								<span class="attribute-tooltip">{{ item['Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_description'] }}</span>
-							</div>
+						<div v-show="isExpanded(index)">
+							<template v-for="(item, item_index) in filteredAttribute">
+								<div v-if="item[metadata.kds_modul] === module"
+									:key="item_index"
+									class="attribute-name">
+									<input :id="String(item_index)"
+										v-model="selectedAttribute"
+										type="checkbox"
+										:value="item"
+										@change="selectAttribute">
+									<!-- The for attribute is used in HTML to associate a <label> element with a form element -->
+									<p :for="item_index"
+										@mouseover="getTooltipPosition">
+										{{ item[metadata.kds_name] }}
+									</p>
+									<span class="attribute-tooltip-text">{{ item[metadata.kds_description] }}</span>
+								</div>
+							</template>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="attribute-list">
+		<div class="attribute-list-wrapper">
 			<div class="attribute-list__header">
 				ausgewählte Attributliste
 			</div>
 			<div class="attribute-list__content">
-				<div class="attribute-display">
-					<div v-for="(modul, index) in selectedModulName" :key="index">
-						<div class="modul-name">
-							{{ modul }}
+				<div class="attribute-list__display">
+					<div v-for="(module, index) in selectedModulName" :key="index">
+						<div class="module-name module-name--selected-attribute">
+							{{ module }}
 						</div>
-						<!-- eslint-disable -->
-						<div
-							class="attribute-items"
-							v-for="item in selectedAttribute"
-							v-if="
-								item[
-									'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-								] === modul
-							"
-						>
-							<!-- eslint-enable -->
-							<label style="cursor: auto">{{
-								item[
-									"Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name"
-								]
-							}}</label>
-						</div>
+						<template v-for="(item, item_index) in selectedAttribute">
+							<div v-if="item[metadata.kds_modul] === module"
+								:key="item_index"
+								class="attribute-name">
+								<label style="cursor: auto">
+									{{ item[metadata.kds_name] }}
+								</label>
+							</div>
+						</template>
 					</div>
 				</div>
 			</div>
@@ -100,17 +85,21 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 interface AttributeListData {
-    attributeList: Array<object>,
-    attributeName: Array<string>,
-    modulName: Array<string>,
-    expandedGroup: Array<number>,
-    txtSearch: string,
-    checkedAttribute: Array<string>,
-    selectedAttribute: Array<object>,
-    selectedModulName: Array<string>,
-    tooltipPosition: number,
-    imgExpand: string,
-    imgCollapse:string,
+    attributeList: Array<object>;
+    attributeName: Array<string>;
+    moduleName: Array<string>;
+    expandedGroup: Array<number>;
+	attributeTextSearch: string;
+    selectedAttribute: Array<object>;
+    selectedModulName: Array<string>;
+    tooltipPosition: number;
+    imgExpand: string;
+    imgCollapse:string;
+	metadata: {
+		kds_modul: string;
+		kds_name: string;
+		kds_description: string;
+	},
 }
 
 export default Vue.extend({
@@ -123,26 +112,26 @@ export default Vue.extend({
 		return {
 			attributeList: [],
 			attributeName: [],
-			modulName: [],
+			moduleName: [],
 			expandedGroup: [],
-			txtSearch: '',
-			checkedAttribute: [],
+			attributeTextSearch: '',
 			selectedAttribute: [],
 			selectedModulName: [],
 			tooltipPosition: 0,
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
+			metadata: {
+				kds_modul: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_KDS_MODUL',
+				kds_name: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_ATTRIBUT_NAME',
+				kds_description: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_ATTRIBUT_DESCRIPTION',
+			},
 		}
 	},
 
 	computed: {
 		filteredAttribute(): Array<object> {
 			return this.attributeList.filter((item) =>
-				item[
-					'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-				]
-					.toLowerCase()
-					.includes(this.txtSearch.toLowerCase()),
+				item[this.metadata.kds_name].toLowerCase().includes(this.attributeTextSearch.toLowerCase()),
 			)
 		},
 	},
@@ -163,34 +152,47 @@ export default Vue.extend({
 
 	methods: {
 		async getCsv(): Promise<void> {
-			const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
-			this.attributeList = response.data
-			this.modulName = this.getModuleName(this.attributeList)
-			// initialize keys from modulName.length (default: expand all attributelists)
-			this.expandedGroup = [...Array(this.modulName.length).keys()]
-			this.attributeName = this.getAttributeName(this.attributeList)
+			try {
+				const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/metadata'))
+				this.attributeList = response.data
+				this.attributeList = this.sortData(this.attributeList)
+				this.moduleName = this.getModuleName(this.attributeList)
+				// initialize keys from moduleName.length (default: expand all attributelists)
+				this.expandedGroup = [...Array(this.moduleName.length).keys()]
+				this.attributeName = this.getAttributeName(this.attributeList)
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+			}
+		},
+
+		sortData(data: object[]): object[] {
+			data.sort((a, b) => {
+				const moduleNameComparison = a[this.metadata.kds_modul].localeCompare(b[this.metadata.kds_modul])
+				if (moduleNameComparison !== 0) return moduleNameComparison
+
+				const attributeNameComparison = a[this.metadata.kds_name].localeCompare(b[this.metadata.kds_name])
+				if (attributeNameComparison !== 0) return attributeNameComparison
+
+				return 0
+			})
+			return data
 		},
 
 		getModuleName(attributeList: Array<object>): Array<string> {
-			const modulName: Array<string> = attributeList
+			const moduleName: Array<string> = attributeList
 				.map(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_kds_modul'
-						],
+					(item) => item[this.metadata.kds_modul],
 				).filter(
 					(item, index, array) => array.indexOf(item) === index && item !== undefined && item !== '',
 				)
-			return modulName
+			return moduleName
 		},
 
 		getAttributeName(attributeList: Array<object>): Array<string> {
 			const attributeName = attributeList
 				.map(
-					(item) =>
-						item[
-							'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-						],
+					(item) => item[this.metadata.kds_name],
 				).filter((attr) => attr !== '' && attr !== undefined)
 
 			return attributeName
@@ -208,13 +210,6 @@ export default Vue.extend({
 		},
 
 		selectAttribute(): void {
-			this.selectedAttribute = this.attributeList.filter((filteredItem) =>
-				this.checkedAttribute.includes(
-					filteredItem[
-						'Main.Daten.Metadaten.Metadata Repository.Code.Metadata RepositoryClass_attribut_name'
-					],
-				),
-			)
 			this.selectedModulName = this.getModuleName(this.selectedAttribute)
 		},
 
@@ -222,7 +217,7 @@ export default Vue.extend({
 			const targetElement = event.target as HTMLElement
 			const labelPosition = targetElement.getBoundingClientRect()
 			this.tooltipPosition = labelPosition.top - 136
-			const tooltips = document.getElementsByClassName('attribute-tooltip') as HTMLCollectionOf<HTMLElement>
+			const tooltips = document.getElementsByClassName('attribute-tooltip-text') as HTMLCollectionOf<HTMLElement>
 			for (let i = 0; i < tooltips.length; i++) {
 				tooltips[i].style.top = this.tooltipPosition + 'px'
 			}
@@ -242,7 +237,7 @@ export default Vue.extend({
 	padding: 20px 0px 0px 20px;
 }
 
-.attribute-list {
+.attribute-list-wrapper {
 	position: relative;
 	min-height: 45%;
 	width: 100%;
@@ -269,54 +264,61 @@ export default Vue.extend({
 	padding: 20px;
 }
 
+.attribute-list__content input:focus {
+	border: 2px solid #5a78ae;
+}
+
 .input-field {
 	margin-block-start: 0px;
 	margin-bottom: 15px;
 }
 
-.attribute-display {
+.attribute-list__display {
+	display: flex;
+	flex-direction: column;
+	row-gap: 10px;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
 
-.modul-name {
+.module-name {
+	display: inline-block;
 	font-weight: bold;
-	margin-bottom: 2px;
+	margin-bottom: 10px;
 }
 
-.modul-name img {
-	margin-right: 5px;
+.module-name--selected-attribute {
+	margin-bottom: 5px;
 }
 
-.attribute-items {
+.attribute-name {
 	display: flex;
 	flex-direction: row;
-	column-gap: 8px;
+	column-gap: 10px;
 	min-height: 30px;
-	padding-left: 15px;
+	padding-left: 20px;
 }
 
-.attribute-items input {
-	margin: 0px;
+.attribute-name input {
 	position: relative;
+	margin: 0px;
 	top: -6px;
+	width: 14px;
+	height: 14px;
 }
 
-.attribute-items p {
+.attribute-name p {
 	position: relative;
 	display: inline-block;
 }
 
-.attribute-list__content input:focus {
-	border: 2px solid #5a78ae;
+.module-expand-img {
+	width: 14px;
+	height: 14px;
+	margin-right: 5px;
 }
 
-.expandImg {
-	width: 10px;
-	height: 10px
-}
-
-.attribute-tooltip {
+.attribute-tooltip-text {
 	display: flex;
 	visibility: hidden;
 	width: 350px;
@@ -329,7 +331,7 @@ export default Vue.extend({
 	left: 105%;
 }
 
-.attribute-tooltip::after {
+.attribute-tooltip-text::after {
 	content: '';
 	position: absolute;
 	top: 35%;
@@ -339,7 +341,11 @@ export default Vue.extend({
 	border-color: transparent #5270a7 transparent transparent;
 }
 
-.attribute-items p:hover + .attribute-tooltip {
+.attribute-name p:hover + .attribute-tooltip-text {
 	visibility: visible;
+}
+
+p {
+	font-size: 15px;
 }
 </style>

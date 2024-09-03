@@ -9,203 +9,222 @@
 			<p>Ausgewählte Merkmale</p>
 		</div>
 		<div class="display-content">
-			<div id="Einschlusskriterien" class="display-textfield">
-				<div v-if="selectedCharacteristicsEin.length > 0">
-					<div v-for="(characteristic, index) in selectedCharacteristicsEin" :key="index">
-						<div class="selected-criteria-container">
-							<div class="selected-criteria-left" />
-							<div class="selected-criteria-middle">
-								<div class="selected-criteria-display" @click="editLimitation(characteristic, index)">
-									{{ characteristic.display }}
+			<div id="einschlusskriterien" class="display-textfield">
+				<div v-if="selectedInclusionCharacteristics.length > 0">
+					<draggable v-model="draggableInclusionCharacteristics" @end="$emit('update-display-sequence', 'einschlusskriterien', draggableInclusionCharacteristics)">
+						<div v-for="(characteristic, index) in selectedInclusionCharacteristics"
+							:key="index"
+							style="position: relative">
+							<!-- can be changed sequence -->
+							<div class="selected-criteria-container">
+								<div class="selected-criteria-left" />
+								<div class="selected-criteria-middle">
+									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
+										{{ characteristic.display }}
+									</div>
+									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
+										<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
+											{{ value }}
+										</span>
+									</div>
+									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
+										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
+											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+										</p>
+										<p v-else>
+											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+										</p>
+									</div>
+									<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
+										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
+											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+										</p>
+										<p v-else>
+											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+										</p>
+									</div>
 								</div>
-								<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-									<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-										{{ type }}
-									</span>
-								</div>
-								<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-									<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-										{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
-									</p>
-									<p v-else>
-										{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
-									</p>
-								</div>
-								<div v-if="characteristic.timeRange" class="selected-criteria-condition">
-									<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-										{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
-									</p>
-									<p v-else>
-										{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
-									</p>
+								<div class="selected-criteria-right">
+									<button class="delete-btn" @click="deleteBtn(index, 'einschlusskriterien')">
+										<svg role="img"
+											width="20px"
+											height="20px"
+											aria-hidden="true"
+											focusable="false"
+											data-prefix="fas"
+											data-icon="times"
+											class="svg-inline--fa fa-times fa-w-11 fa-lg"
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 352 512"><path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" /></svg>
+									</button>
 								</div>
 							</div>
-							<div class="selected-criteria-right">
-								<button class="delete-btn" @click="deleteBtn(index, 'Einschlusskriterien')">
-									<svg role="img"
-										width="20px"
-										height="20px"
-										aria-hidden="true"
-										focusable="false"
-										data-prefix="fas"
-										data-icon="times"
-										class="svg-inline--fa fa-times fa-w-11 fa-lg"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 352 512"><path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" /></svg>
-								</button>
-							</div>
+							<button v-if="index !== (selectedInclusionCharacteristics.length - 1) && (characteristicsLogic.inclusionCriteria[index] === 'and')"
+								class="combining-operator"
+								@click="switchLogic('einschlussCriteria', index, 'and')">
+								UND
+								<svg role="img"
+									width="12px"
+									height="12px"
+									aria-hidden="true"
+									focusable="false"
+									data-prefix="fas"
+									data-icon="circle"
+									class="svg-inline--fa fa-circle fa-w-16"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 512 512">
+									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
+								</svg>
+							</button>
+							<button v-if="characteristicsLogic.inclusionCriteria[index] === 'or'"
+								class="combining-operator or-operator"
+								@click="switchLogic('einschlussCriteria', index, 'or')">
+								<svg role="img"
+									width="12px"
+									height="12px"
+									aria-hidden="true"
+									focusable="false"
+									data-prefix="fas"
+									data-icon="circle"
+									class="svg-inline--fa fa-circle fa-w-16"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 512 512">
+									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
+								</svg>
+								ODER
+							</button>
 						</div>
-						<button v-if="index !== (selectedCharacteristicsEin.length - 1) && (criteriaLogic.einschlussCriteria[index] === 'and')"
-							class="combining-operator"
-							@click="switchLogic('einschlussCriteria', index, 'and')">
-							UND
-							<svg role="img"
-								width="12px"
-								height="12px"
-								aria-hidden="true"
-								focusable="false"
-								data-prefix="fas"
-								data-icon="circle"
-								class="svg-inline--fa fa-circle fa-w-16"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 512 512">
-								<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
-							</svg>
-						</button>
-						<button v-if="criteriaLogic.einschlussCriteria[index] === 'or'"
-							class="combining-operator or-operator"
-							@click="switchLogic('einschlussCriteria', index, 'or')">
-							<svg role="img"
-								width="12px"
-								height="12px"
-								aria-hidden="true"
-								focusable="false"
-								data-prefix="fas"
-								data-icon="circle"
-								class="svg-inline--fa fa-circle fa-w-16"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 512 512">
-								<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
-							</svg>
-							ODER
-						</button>
-					</div>
+					</draggable>
 				</div>
 			</div>
 			<div class="pipe" />
-			<div id="Ausschlusskriterien" class="display-textfield">
-				<div v-if="selectedCharacteristicsAus.length > 0">
-					<div v-for="(characteristic, index) in selectedCharacteristicsAus" :key="index">
-						<div class="selected-criteria-container">
-							<div class="selected-criteria-left" />
-							<div class="selected-criteria-middle">
-								<div class="selected-criteria-display">
-									{{ characteristic.display }}
+			<div id="ausschlusskriterien" class="display-textfield">
+				<div v-if="selectedExclusionCharacteristics.length > 0">
+					<draggable v-model="draggableExclusionCharacteristics" @end="$emit('update-display-sequence', 'ausschlusskriterien', draggableExclusionCharacteristics)">
+						<div v-for="(characteristic, index) in selectedExclusionCharacteristics" :key="index" style="position: relative">
+							<div class="selected-criteria-container">
+								<div class="selected-criteria-left" />
+								<div class="selected-criteria-middle">
+									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'ausschlusskriterien')">
+										{{ characteristic.display }}
+									</div>
+									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
+										<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
+											{{ value }}
+										</span>
+									</div>
+									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
+										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
+											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+										</p>
+										<p v-else>
+											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+										</p>
+									</div>
+									<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
+										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
+											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+										</p>
+										<p v-else>
+											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+										</p>
+									</div>
 								</div>
-								<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-									<span v-for="(type, type_index) in characteristic.conceptType.value" :key="type_index">
-										{{ type }}
-									</span>
-								</div>
-								<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-									<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-										{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
-									</p>
-									<p v-else>
-										{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
-									</p>
-								</div>
-								<div v-if="characteristic.timeRange" class="selected-criteria-condition">
-									<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-										{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
-									</p>
-									<p v-else>
-										{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
-									</p>
+								<div class="selected-criteria-right">
+									<button class="delete-btn" @click="deleteBtn(index, 'ausschlusskriterien')">
+										<svg role="img"
+											width="18px"
+											height="18px"
+											aria-hidden="true"
+											focusable="false"
+											data-prefix="fas"
+											data-icon="times"
+											class="svg-inline--fa fa-times fa-w-11 fa-lg"
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 352 512">
+											<path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" />
+										</svg>
+									</button>
 								</div>
 							</div>
-							<div class="selected-criteria-right">
-								<button class="delete-btn" @click="deleteBtn(index, 'Ausschlusskriterien')">
-									<svg role="img"
-										width="18px"
-										height="18px"
-										aria-hidden="true"
-										focusable="false"
-										data-prefix="fas"
-										data-icon="times"
-										class="svg-inline--fa fa-times fa-w-11 fa-lg"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 352 512">
-										<path fill="black" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" />
-									</svg>
-								</button>
-							</div>
+							<button v-if="index !== (selectedExclusionCharacteristics.length - 1) && (characteristicsLogic.exclusionCriteria[index] === 'and')"
+								class="combining-operator"
+								@click="switchLogic('ausschlussCriteria', index, 'and')">
+								UND
+								<svg role="img"
+									width="12px"
+									height="12px"
+									aria-hidden="true"
+									focusable="false"
+									data-prefix="fas"
+									data-icon="circle"
+									class="svg-inline--fa fa-circle fa-w-16"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 512 512">
+									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
+								</svg>
+							</button>
+							<button v-if="characteristicsLogic.exclusionCriteria[index] === 'or'"
+								class="combining-operator or-operator"
+								@click="switchLogic('ausschlussCriteria', index, 'or')">
+								<svg role="img"
+									width="12px"
+									height="12px"
+									aria-hidden="true"
+									focusable="false"
+									data-prefix="fas"
+									data-icon="circle"
+									class="svg-inline--fa fa-circle fa-w-16"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 512 512">
+									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
+								</svg>
+								ODER
+							</button>
 						</div>
-						<button v-if="index !== (selectedCharacteristicsAus.length - 1) && (criteriaLogic.ausschlussCriteria[index] === 'and')"
-							class="combining-operator"
-							@click="switchLogic('ausschlussCriteria', index, 'and')">
-							UND
-							<svg role="img"
-								width="12px"
-								height="12px"
-								aria-hidden="true"
-								focusable="false"
-								data-prefix="fas"
-								data-icon="circle"
-								class="svg-inline--fa fa-circle fa-w-16"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 512 512">
-								<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
-							</svg>
-						</button>
-						<button v-if="criteriaLogic.ausschlussCriteria[index] === 'or'"
-							class="combining-operator or-operator"
-							@click="switchLogic('ausschlussCriteria', index, 'or')">
-							<svg role="img"
-								width="12px"
-								height="12px"
-								aria-hidden="true"
-								focusable="false"
-								data-prefix="fas"
-								data-icon="circle"
-								class="svg-inline--fa fa-circle fa-w-16"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 512 512">
-								<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
-							</svg>
-							ODER
-						</button>
-					</div>
+					</draggable>
 				</div>
 			</div>
 		</div>
+		<!-- <span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
+			{{ ein.display }} / {{ characteristicsLogic.einschlussCriteria[ein_index] }} /
+		</span>
+		<br>
+		<span v-for="(aus, aus_index) in selectedExclusionCharacteristics" :key="aus_index">
+			{{ aus.display }} / {{ characteristicsLogic.ausschlussCriteria[aus_index] }} /
+		</span> -->
 	</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import type { FilterInfo } from '../types/FeasibilityQueryBuilderData'
+import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData'
+import draggable from 'vuedraggable'
 
 interface FeasibilityQueryDisplayData {
-    criteriaLogic: {
-        einschlussCriteria: Array<string>;
-        ausschlussCriteria: Array<string>;
+    characteristicsLogic: {
+        inclusionCriteria: Array<string>;
+        exclusionCriteria: Array<string>;
     }
-    einschlussCriteriaOld: Array<string>;
-    ausschlussCriteriaOld: Array<string>;
+    inclusionCriteriaOld: Array<string>;
+	exclusionCriteriaOld: Array<string>;
+	draggableInclusionCharacteristics: Array<FilterInfo>;
+	draggableExclusionCharacteristics: Array<FilterInfo>;
 }
 
 export default Vue.extend({
 	name: 'FeasibilityQueryDisplay',
-	components: {},
+	components: {
+		draggable,
+	},
 
 	props: {
-		selectedCharacteristicsEin: {
+		selectedInclusionCharacteristics: {
 			type: Array<FilterInfo>,
 			required: true,
 		},
 
-		selectedCharacteristicsAus: {
+		selectedExclusionCharacteristics: {
 			type: Array<FilterInfo>,
 			required: true,
 		},
@@ -223,46 +242,52 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryDisplayData {
 		return {
-			criteriaLogic: {
-				einschlussCriteria: [],
-				ausschlussCriteria: [],
+			draggableInclusionCharacteristics: [...this.selectedInclusionCharacteristics],
+			draggableExclusionCharacteristics: [...this.selectedExclusionCharacteristics],
+			characteristicsLogic: {
+				inclusionCriteria: [],
+				exclusionCriteria: [],
 			},
-			einschlussCriteriaOld: [],
-			ausschlussCriteriaOld: [],
+			inclusionCriteriaOld: [],
+			exclusionCriteriaOld: [],
 		}
 	},
 
 	watch: {
-		selectedCharacteristicsEin(newVal) {
+		selectedInclusionCharacteristics(newVal) {
+			this.draggableInclusionCharacteristics = [...newVal]
+
 			// first input
-			if (this.einschlussCriteriaOld.length === 0) {
-				const length = newVal.length - this.einschlussCriteriaOld.length
+			if (this.inclusionCriteriaOld.length === 0) {
+				const length = newVal.length - this.inclusionCriteriaOld.length
 				for (let i = 1; i < length; i++) {
-					this.criteriaLogic.einschlussCriteria.push('and')
+					this.characteristicsLogic.inclusionCriteria.push('and')
 				}
-			} else if (this.selectedCharacteristicsEin.length > 0) {
-				const length = newVal.length - this.einschlussCriteriaOld.length
+			} else if (newVal.length > 0) {
+				const length = newVal.length - this.inclusionCriteriaOld.length
 				for (let i = 1; i <= length; i++) {
-					this.criteriaLogic.einschlussCriteria.push('and')
+					this.characteristicsLogic.inclusionCriteria.push('and')
 				}
 			}
-			this.einschlussCriteriaOld = [...newVal]
+			this.inclusionCriteriaOld = [...newVal]
 		},
 
-		selectedCharacteristicsAus(newVal) {
+		selectedExclusionCharacteristics(newVal) {
+			this.draggableExclusionCharacteristics = [...newVal]
+
 			// first input
-			if (this.ausschlussCriteriaOld.length === 0) {
-				const length = newVal.length - this.ausschlussCriteriaOld.length
+			if (this.exclusionCriteriaOld.length === 0) {
+				const length = newVal.length - this.exclusionCriteriaOld.length
 				for (let i = 1; i < length; i++) {
-					this.criteriaLogic.ausschlussCriteria.push('and')
+					this.characteristicsLogic.exclusionCriteria.push('and')
 				}
-			} else if (this.selectedCharacteristicsAus.length > 0) {
-				const length = newVal.length - this.ausschlussCriteriaOld.length
+			} else if (this.selectedExclusionCharacteristics.length > 0) {
+				const length = newVal.length - this.exclusionCriteriaOld.length
 				for (let i = 1; i <= length; i++) {
-					this.criteriaLogic.ausschlussCriteria.push('and')
+					this.characteristicsLogic.exclusionCriteria.push('and')
 				}
 			}
-			this.ausschlussCriteriaOld = [...newVal]
+			this.exclusionCriteriaOld = [...newVal]
 		},
 	},
 
@@ -284,41 +309,44 @@ export default Vue.extend({
 		switchLogic(criteria: string, index: number, logic: string): void {
 			if (criteria === 'einschlussCriteria') {
 				if (logic === 'and') {
-					this.criteriaLogic.einschlussCriteria.splice(index, 1, 'or')
+					this.characteristicsLogic.inclusionCriteria.splice(index, 1, 'or')
 				} else if (logic === 'or') {
-					this.criteriaLogic.einschlussCriteria.splice(index, 1, 'and')
+					this.characteristicsLogic.inclusionCriteria.splice(index, 1, 'and')
 				}
 			} else if (criteria === 'ausschlussCriteria') {
 				if (logic === 'and') {
-					this.criteriaLogic.ausschlussCriteria.splice(index, 1, 'or')
+					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'or')
 				} else if (logic === 'or') {
-					this.criteriaLogic.ausschlussCriteria.splice(index, 1, 'and')
+					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'and')
 				}
 			}
 		},
 
-		editLimitation(characteristic: FilterInfo, index: number) {
-			this.$emit('edit-criteria-limitation', characteristic, index)
+		editLimitation(characteristic: FilterInfo, index: number, criteriaType: string) {
+			this.$emit('edit-criteria-limitation', characteristic, index, criteriaType)
 		},
 
 		deleteBtn(index: number, criteriaType: string) {
 			this.$emit('delete-characteristic', index, criteriaType)
-			if (criteriaType === 'Einschlusskriterien') {
-				if (this.criteriaLogic.einschlussCriteria[index - 1] === 'or') {
-					this.criteriaLogic.einschlussCriteria.splice(index - 1, 1)
-				} else this.criteriaLogic.einschlussCriteria.splice(index, 1)
-			} else if (criteriaType === 'Ausschlusskriterien') {
-				if (this.criteriaLogic.ausschlussCriteria[index - 1] === 'or') {
-					this.criteriaLogic.ausschlussCriteria.splice(index - 1, 1)
-				} else this.criteriaLogic.ausschlussCriteria.splice(index, 1)
+			if (criteriaType === 'einschlusskriterien') {
+				if (this.characteristicsLogic.inclusionCriteria[index - 1] === 'or') {
+					this.characteristicsLogic.inclusionCriteria.splice(index - 1, 1)
+				} else this.characteristicsLogic.inclusionCriteria.splice(index, 1)
+			} else if (criteriaType === 'ausschlusskriterien') {
+				if (this.characteristicsLogic.exclusionCriteria[index - 1] === 'or') {
+					this.characteristicsLogic.exclusionCriteria.splice(index - 1, 1)
+				} else this.characteristicsLogic.exclusionCriteria.splice(index, 1)
 			}
 		},
 	},
 })
 </script>
+
 <style scoped>
-.pipe--criteria {
-	border-radius: 4px;
+.pipe {
+	flex: 1 1 100%;
+	max-width: 1%;
+	background-color: #5270a7;
 }
 
 .feasibility-query__display {
@@ -326,6 +354,7 @@ export default Vue.extend({
 	border-top-right-radius: 5px;
 	border-top-left-radius: 5px;
 	box-shadow: none!important;
+	margin-top: 20px;
 	width: 100%;
 }
 
@@ -337,11 +366,10 @@ export default Vue.extend({
 	color: #ffffff;
 	border-top-right-radius: 4px;
 	border-top-left-radius: 4px;
-	min-height: 3.5em;
+	min-height: 55px;
 }
 
 .display-header p {
-	font-size: 16px;
 	font-weight: 500;
 }
 
@@ -361,21 +389,17 @@ export default Vue.extend({
 .selected-criteria-container {
 	display: flex;
 	border: 1px solid #5270a7;
-	/* margin-bottom: 15px; */
+	justify-content: flex-end;
 }
 
 .selected-criteria-container:last-child {
 	margin-bottom: 0px;
 }
 
-/* .selected-criteria-container:hover {
-    opacity: 0.2;
-    cursor: pointer;
-} */
-
 .selected-criteria-left {
 	width: 15%;
 	padding: 10px 0px;
+	cursor: all-scroll;
 	background-color: #5270a7;
 }
 
@@ -438,6 +462,7 @@ export default Vue.extend({
 .or-operator {
 	position: absolute;
 	margin-top: -15px;
+	z-index: 1;
 }
 
 .delete-btn {
