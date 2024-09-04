@@ -7,15 +7,22 @@ declare(strict_types=1);
 namespace OCA\Machbarkeit\Service;
 
 use OCA\Machbarkeit\Db\ModuleMapper;
+use OCA\Machbarkeit\Db\OntologyConcept;
+use OCA\Machbarkeit\Db\OntologyConceptMapper;
 
-class MachbarkeitService {
-	private $mapper;
+class MachbarkeitService
+{
+	private $moduleMapper;
+	private $conceptMapper;
 
-	public function __construct(ModuleMapper $mapper) {
-		$this->mapper = $mapper;
+	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $conceptMapper)
+	{
+		$this->moduleMapper = $moduleMapper;
+		$this->conceptMapper = $conceptMapper;
 	}
 
-	public function readCsv() {
+	public function readCsv()
+	{
 		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
 		$data = [];
 		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
@@ -36,7 +43,8 @@ class MachbarkeitService {
 		return array_values($jsonArray);
 	}
 
-	public function readOntology() {
+	public function readOntology()
+	{
 		$json_files = [
 			'Person.json',
 			// 'test.json',
@@ -59,13 +67,20 @@ class MachbarkeitService {
 		return $merged_file;
 	}
 
-	public function readUiProfile() {
+	public function readUiProfile()
+	{
 		$ui_profile = file_get_contents(__DIR__ . '/../../ontology/ui_profile.json');
 		$json_ui_profile = json_decode($ui_profile, true);
 		return $json_ui_profile;
 	}
 
-	public function getModules() {
-		return $this->mapper->findModules();
+	public function getModules()
+	{
+		return $this->moduleMapper->findModules();
+	}
+
+	public function getConcepts($moduleId)
+	{
+		return $this->conceptMapper->find($moduleId);
 	}
 }
