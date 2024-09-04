@@ -12,8 +12,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
-class MachbarkeitController extends Controller
-{
+class MachbarkeitController extends Controller {
 	private MachbarkeitService $service;
 	private ?string $userId;
 	public function __construct(
@@ -31,18 +30,15 @@ class MachbarkeitController extends Controller
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
-	public function getMetadata(): JSONResponse
-	{
+	public function getMetadata(): JSONResponse {
 		return new JSONResponse($this->service->readCsv());
 	}
 
-	public function getOntology(): JSONResponse
-	{
+	public function getOntology(): JSONResponse {
 		return new JSONResponse($this->service->readOntology());
 	}
 
-	public function getUiProfile(): JSONResponse
-	{
+	public function getUiProfile(): JSONResponse {
 		// TODO remove test call
 		$modules = $this->getModules();
 		$concepts = $this->service->getConcepts(2);
@@ -50,8 +46,7 @@ class MachbarkeitController extends Controller
 		return new JSONResponse($this->service->readUiProfile());
 	}
 
-	public function getModules()
-	{
+	public function getModules() {
 		return $this->service->getModules();
 	}
 }

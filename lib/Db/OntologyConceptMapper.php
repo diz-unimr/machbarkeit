@@ -6,7 +6,6 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Db;
 
-use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -14,16 +13,13 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper
-{
-	public function __construct(IDBConnection $db)
-	{
+class OntologyConceptMapper extends QBMapper {
+	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $moduleId): array
-	{
+	public function find(int $moduleId): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
