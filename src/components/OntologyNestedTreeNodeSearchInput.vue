@@ -74,11 +74,11 @@ export default Vue.extend({
 	computed: {
 		isChecked: {
 			// Determines if the current item is checked
-			get() {
+			get(): string {
 				return ''
 			},
 			// Updates checked items when checkbox state changes
-			set(checked) {
+			set(checked): void {
 				if (checked) {
 					this.$emit('input', { action: 'check', node: this.criterion })
 				} else {

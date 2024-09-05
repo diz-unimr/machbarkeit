@@ -10,19 +10,23 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
-class OntologyConcept extends Entity implements JsonSerializable {
+class OntologyConcept extends Entity implements JsonSerializable
+{
 	public string $display = '';
 	public ?int $moduleId = null;
 	public ?int $parentId = null;
 	public bool $selectable = false;
+	public bool $leaf = false;
 
-	public function jsonSerialize(): array {
+	public function jsonSerialize(): array
+	{
 		return [
 			'id' => $this->id,
 			'display' => $this->display,
 			'moduleId' => $this->moduleId,
 			'parentId' => $this->parentId,
-			'selectable' => $this->selectable
+			'selectable' => $this->selectable,
+			'leaf' => $this->leaf
 		];
 	}
 }

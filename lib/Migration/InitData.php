@@ -12,7 +12,8 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 use Psr\Log\LoggerInterface;
 
-class InitData implements IRepairStep {
+class InitData implements IRepairStep
+{
 
 	/** @var LoggerInterface */
 	protected $logger;
@@ -21,7 +22,8 @@ class InitData implements IRepairStep {
 	/** @var IDBConnection */
 	protected $db;
 
-	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db) {
+	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db)
+	{
 		$this->logger = $logger;
 		$this->db = $db;
 		$this->config = $config;
@@ -30,21 +32,24 @@ class InitData implements IRepairStep {
 	/**
 	 * Returns the step's name
 	 */
-	public function getName() {
+	public function getName()
+	{
 		return 'Init data step!';
 	}
 
 	/**
 	 * @param IOutput $output
 	 */
-	public function run(IOutput $output) {
+	public function run(IOutput $output)
+	{
 		$previousVersion = $this->config->getAppValue('machbarkeit', 'installed_version', false);
 		if (!$previousVersion) {
 			$this->storeInitialData();
 		}
 	}
 
-	protected function storeInitialData() {
+	protected function storeInitialData()
+	{
 		$this->logger->info('Loading ontology data', ['app' => 'Machbarkeit']);
 
 		$query = $this->db->getQueryBuilder();
@@ -76,6 +81,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(1),
 				'display' => $this->db->quote('Gegenwärtiges chronologisches Alter'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(1),
 			]
 		)->executeStatement();
@@ -85,6 +91,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(2),
 				'display' => $this->db->quote('Bildgebende Diagnostik'),
 				'selectable' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 			]
 		)->executeStatement();
@@ -94,6 +101,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(3),
 				'display' => $this->db->quote('Andere bildgebende Verfahren'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 				'parent_id' => $this->db->quote(2),
 			]
@@ -104,6 +112,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(4),
 				'display' => $this->db->quote('Elektrische Impedanztomographie'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 				'parent_id' => $this->db->quote(3),
 			]
@@ -114,6 +123,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(5),
 				'display' => $this->db->quote('Elektroimpedanzspektroskopie der Haut'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 				'parent_id' => $this->db->quote(3),
 			]
@@ -124,6 +134,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(6),
 				'display' => $this->db->quote('Knochendichtemessung (alle Verfahren)'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 				'parent_id' => $this->db->quote(3),
 			]
@@ -135,6 +146,7 @@ class InitData implements IRepairStep {
 				'id' => $this->db->quote(7),
 				'display' => $this->db->quote('Radiofrequenzspektroskopie von Brustgewebe'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 				'parent_id' => $this->db->quote(3),
 			],

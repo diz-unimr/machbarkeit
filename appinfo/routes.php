@@ -21,8 +21,10 @@ return [
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 		[
-			'name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
-			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']
+			'name' => 'note_api#preflighted_cors',
+			'url' => '/api/0.1/{path}',
+			'verb' => 'OPTIONS',
+			'requirements' => ['path' => '.+']
 		],
 		['name' => 'machbarkeit#getMetadata', 'url' => '/machbarkeit/metadata', 'verb' => 'GET'],
 		['name' => 'machbarkeit#getOntology', 'url' => '/machbarkeit/ontology', 'verb' => 'GET'],
@@ -31,6 +33,8 @@ return [
 		// TODO
 		// get module names
 		['name' => 'machbarkeit#getModules', 'url' => '/machbarkeit/modules', 'verb' => 'GET'],
+		// get concept
+		['name' => 'machbarkeit#getConcepts', 'url' => '/machbarkeit/concepts', 'verb' => 'GET'],
 		// ontology tree for module
 		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{module_id}', 'verb' => 'GET'],
 		// get filters (for concepts)

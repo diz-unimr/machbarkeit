@@ -13,13 +13,16 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
+class OntologyConceptMapper extends QBMapper
+{
+	public function __construct(IDBConnection $db)
+	{
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $moduleId): array {
+	public function find(int $moduleId): array
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
