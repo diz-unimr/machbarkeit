@@ -43,7 +43,9 @@ class OntologyConceptMapper extends QBMapper {
 			'SELECT * from ontology';
 
 		// TODO build tree (with children)
-		return $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
+		$result = $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
+
+		return $result;
 	}
 
 	protected function findEntitiesWithRawQuery(string $query, array $params, array $types) {
