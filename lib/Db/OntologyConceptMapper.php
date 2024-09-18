@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Db;
 
+use OC\DB\Exceptions\DbalException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -13,21 +14,54 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper
-{
-	public function __construct(IDBConnection $db)
-	{
+class OntologyConceptMapper extends QBMapper {
+	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $moduleId): array
-	{
+	public function find(int $moduleId): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from('machbarkeit_concepts')
 			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)));
 		return $this->findEntities($qb);
+	}
+
+	public function findAll(int $moduleId): array {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from('machbarkeit_concepts')
+			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)))
+			->andWhere($qb->expr()->isNull('parent_id'));
+		// or 'where id = [id]' for sub tree
+
+		$ontology = 'WITH RECURSIVE ontology AS ( ' . $qb->getSQL() .
+			'UNION ALL SELECT c.* FROM oc_machbarkeit_concepts c ' .
+			'JOIN ontology on c.parent_id = ontology.id ) ' .
+			'SELECT * from ontology';
+
+		// TODO build tree (with children)
+		return $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
+	}
+
+	protected function findEntitiesWithRawQuery(string $query, array $params, array $types) {
+		try {
+
+			$cursor = $this->db->executeQuery($query, $params, $types);
+
+			$entities = [];
+
+			while ($row = $cursor->fetch()) {
+				$entities[] = $this->mapRowToEntity($row);
+			}
+
+			$cursor->closeCursor();
+		} catch (DbalException $e) {
+			echo 'Caught exception: ',  $e->getMessage(), "\n";
+		}
+
+		return $entities;
 	}
 }

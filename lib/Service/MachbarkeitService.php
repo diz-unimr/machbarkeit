@@ -75,4 +75,8 @@ class MachbarkeitService {
 	public function getConcepts($moduleId) {
 		return $this->conceptMapper->find($moduleId);
 	}
+
+	public function getOntology($moduleId) {
+		return $this->conceptMapper->findAll($moduleId);
+	}
 }

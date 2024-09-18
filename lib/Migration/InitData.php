@@ -12,8 +12,7 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 use Psr\Log\LoggerInterface;
 
-class InitData implements IRepairStep
-{
+class InitData implements IRepairStep {
 
 	/** @var LoggerInterface */
 	protected $logger;
@@ -22,8 +21,7 @@ class InitData implements IRepairStep
 	/** @var IDBConnection */
 	protected $db;
 
-	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db)
-	{
+	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db) {
 		$this->logger = $logger;
 		$this->db = $db;
 		$this->config = $config;
@@ -32,24 +30,21 @@ class InitData implements IRepairStep
 	/**
 	 * Returns the step's name
 	 */
-	public function getName()
-	{
+	public function getName() {
 		return 'Init data step!';
 	}
 
 	/**
 	 * @param IOutput $output
 	 */
-	public function run(IOutput $output)
-	{
+	public function run(IOutput $output) {
 		$previousVersion = $this->config->getAppValue('machbarkeit', 'installed_version', false);
 		if (!$previousVersion) {
 			$this->storeInitialData();
 		}
 	}
 
-	protected function storeInitialData()
-	{
+	protected function storeInitialData() {
 		$this->logger->info('Loading ontology data', ['app' => 'Machbarkeit']);
 
 		$query = $this->db->getQueryBuilder();
