@@ -33,10 +33,11 @@ return [
 		// TODO
 		// get module names
 		['name' => 'machbarkeit#getModules', 'url' => '/machbarkeit/modules', 'verb' => 'GET'],
-		// get concept
-		['name' => 'machbarkeit#getConcepts', 'url' => '/machbarkeit/concepts', 'verb' => 'GET'],
 		// ontology tree for module
 		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{module_id}', 'verb' => 'GET'],
+		// ['name' => 'machbarkeit#getFirstChildOntologyTree', 'url' => '/machbarkeit/firstchildontology/{module_id}', 'verb' => 'GET'],
+		// searchInput ontology
+		['name' => 'machbarkeit#getSearchOntology', 'url' => '/machbarkeit/search_ontology/{textSearch}/{module_id}', 'verb' => 'GET'],
 		// get filters (for concepts)
 		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters/{concept_ids}', 'verb' => 'GET']
 	]

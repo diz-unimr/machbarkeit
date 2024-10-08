@@ -12,9 +12,11 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version000001Date20240715123000 extends SimpleMigrationStep {
+class Version000001Date20240715123000 extends SimpleMigrationStep
+{
 
-	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options)
+	{
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
@@ -64,6 +66,56 @@ class Version000001Date20240715123000 extends SimpleMigrationStep {
 			$table->setPrimaryKey(['id']);
 			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_modules'), ['module_id'], ['id'], [], 'fk_modules_id_concepts');
 			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_concepts'), ['parent_id'], ['id'], [], 'fk_concepts_id_concepts');
+		}
+
+		// ontology_filters
+		if (!$schema->hasTable('machbarkeit_filters')) {
+			$table = $schema->createTable('machbarkeit_filters');
+			$table->addColumn('id', Types::INTEGER, [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('code', Types::STRING, [
+				'notnull' => false,
+			]);
+			$table->addColumn('display', Types::STRING, [
+				'notnull' => false,
+			]);
+			$table->addColumn('system', Types::STRING, [
+				'notnull' => false,
+			]);
+			$table->addColumn('version', Types::STRING, [
+				'notnull' => false,
+			]);
+			$table->addColumn('allowedUnits', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('selectableConcepts', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('timeRestrictionAllowed', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('optional', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('type', Types::STRING, [
+				'notnull' => false,
+			]);
+			$table->addColumn('module_id', Types::INTEGER, [
+				'notnull' => true
+			]);
+			$table->addColumn('concept_id', Types::INTEGER, [
+				'notnull' => false,
+			]);
+
+			$table->setPrimaryKey(['id']);
+			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_modules'), ['module_id'], ['id'], [], 'fk_modules_id_concepts');
+			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_concepts'), ['concept_id'], ['id'], [], 'fk_concepts_id_concepts');
 		}
 
 		return $schema;

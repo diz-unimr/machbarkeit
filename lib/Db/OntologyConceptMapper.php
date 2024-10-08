@@ -14,13 +14,16 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
+class OntologyConceptMapper extends QBMapper
+{
+	public function __construct(IDBConnection $db)
+	{
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $moduleId): array {
+	public function find(int $moduleId): array
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -29,24 +32,36 @@ class OntologyConceptMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
-	public function findAll(int $moduleId): array {
+	public function findAll(int $moduleId): array
+	{
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from('machbarkeit_concepts')
 			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)))
 			->andWhere($qb->expr()->isNull('parent_id'));
 		// or 'where id = [id]' for sub tree
-
 		$ontology = 'WITH RECURSIVE ontology AS ( ' . $qb->getSQL() .
 			'UNION ALL SELECT c.* FROM oc_machbarkeit_concepts c ' .
 			'JOIN ontology on c.parent_id = ontology.id ) ' .
 			'SELECT * from ontology';
-
 		// TODO build tree (with children)
-		return $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
+		$result = $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
+
+		return $result;
 	}
 
-	protected function findEntitiesWithRawQuery(string $query, array $params, array $types) {
+	public function searchOntology(string $searchText, int $moduleId)
+	{
+		$qb = $this->db->getQueryBuilder();
+		$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
+			'WHERE c.module_id = :moduleId AND lower(c.display) LIKE :searchText AND c.selectable = true';
+		$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%'];
+		$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
+		return $result;
+	}
+
+	protected function findEntitiesWithRawQuery(string $query, array $params, array $types)
+	{
 		try {
 
 			$cursor = $this->db->executeQuery($query, $params, $types);
