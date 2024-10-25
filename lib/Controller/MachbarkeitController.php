@@ -73,10 +73,10 @@ class MachbarkeitController extends Controller
 		return $ontology;
 	}
 
-	/* public function getFirstChildOntologyTree(int $module_id)
+	public function getFilters()
 	{
-		return $this->service->getFirstChildOntology($module_id);
-	} */
+		return $this->service->getFilters();
+	}
 
 	public function getConcepts()
 	{

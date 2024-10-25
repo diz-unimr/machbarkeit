@@ -54,7 +54,10 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') > (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
+		<div v-if="['am', 'vor', 'nach'].includes(timeRangeRestriction.type) && !timeRangeRestriction.fromDate">
+			<label class="text-alert">Der Wert muss angegeben werden</label>
+		</div>
+		<div v-if="timeRangeRestriction.type === 'zwischen' && ((timeRangeRestriction.fromDate ? timeRangeRestriction.fromDate : '') >= (timeRangeRestriction.toDate ? timeRangeRestriction.toDate : ''))">
 			<label class="text-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
@@ -63,16 +66,11 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import type { TimeRangeOptionsData } from '../../types/TimeRangeOptionsData'
-import type { Profile } from '../../types/FeasibilityQueryBuilderData'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'TimeRangeOptions',
 	props: {
-		profile: {
-			type: Object as PropType<Profile>,
-			required: true,
-		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
@@ -109,35 +107,31 @@ export default Vue.extend({
 		timeRangeRestriction: {
 			handler() {
 				if (this.timeRangeRestriction.type === 'kein Filter') {
-					this.$emit('get-selected-filter-option', 'update', {
+					this.$emit('get-selected-filter-option', {
 						type: 'timeRange',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
+						isFilterOptional: true,
 						isFilterComplete: true,
 						value: {},
 					})
+				} else if (['am', 'vor', 'nach'].includes(this.timeRangeRestriction.type)) {
+					const validDate = this.timeRangeRestriction.fromDate !== null
+					this.$emit('get-selected-filter-option', {
+						type: 'timeRange',
+						display: this.selectedCriterion.display,
+						isFilterOptional: validDate,
+						isFilterComplete: validDate,
+						value: this.timeRangeRestriction,
+					})
 				} else if (this.timeRangeRestriction.type === 'zwischen') {
-					if (!!this.timeRangeRestriction.fromDate && !!this.timeRangeRestriction.toDate) {
-						const validDate = !(this.timeRangeRestriction.fromDate > this.timeRangeRestriction.toDate)
-						this.$emit('get-selected-filter-option', 'update', {
-							type: 'timeRange',
-							display: this.selectedCriterion.display,
-							isFilterOptional: validDate,
-							isFilterComplete: validDate,
-							value: this.timeRangeRestriction,
-						})
-					}
-				} else {
-					if (this.timeRangeRestriction.fromDate) {
-						this.$emit('get-selected-filter-option', 'update', {
-							type: 'timeRange',
-							display: this.selectedCriterion.display,
-							isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
-							// isFilterComplete: this.timeRangeRestriction.type.length > 0 && this.timeRangeRestriction.fromDate?.length > 0,
-							isFilterComplete: true,
-							value: this.timeRangeRestriction,
-						})
-					}
+					const validDate = this.timeRangeRestriction.fromDate! < this.timeRangeRestriction.toDate!
+					this.$emit('get-selected-filter-option', {
+						type: 'timeRange',
+						display: this.selectedCriterion.display,
+						isFilterOptional: validDate,
+						isFilterComplete: validDate,
+						value: this.timeRangeRestriction,
+					})
 				}
 			},
 			deep: true,
@@ -167,10 +161,10 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-filter-option', 'initial', {
+		this.$emit('get-selected-filter-option', {
 			type: 'timeRange',
 			display: this.selectedCriterion.display,
-			isFilterOptional: this.profile.valueDefinition?.optional === undefined ? true : this.profile.valueDefinition?.optional,
+			isFilterOptional: true,
 			isFilterComplete: true,
 			value: this.selectedCriterion.timeRange?.value.fromDate
 				? this.timeRangeRestriction

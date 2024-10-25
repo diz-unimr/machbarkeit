@@ -3,7 +3,6 @@
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
 import type { OntologyTreeElement } from './OntologySearchTreeModalData.ts'
-import type { FilterInfo } from './LimitationsSelectedCriteriaCardData.ts'
 
 interface ValueDefinition {
     allowedUnits: [
@@ -37,27 +36,19 @@ export interface Profile {
     valueDefinition: ValueDefinition | null;
 }
 
-export interface UiProfile {
-    Diagnose: Profile;
-    Prozedur: Profile;
-    'Gegenwärtiges chronologisches Alter': Profile;
-    Geschlecht: Profile;
-}
-
 export interface FeasibilityQueryBuilderData {
-    uiProfile: UiProfile | null;
-    inclusionSearchInputTemp: string;
-    exclusionSearchInputTemp: string;
+    searchInputText: string;
+    inclusionSearchInputText: string;
+    exclusionSearchInputText: string;
     inclusionSearchInput: string;
     exclusionSearchInput: string;
     isLimitationsCriteriaOpen: boolean;
     isOntologySearchTreeOpen: boolean;
     criteriaOverlayType: string;
     selectedCriteria: OntologyTreeElement[] | null;
-    selectedEditedCriteria: FilterInfo[] | null;
-    selectedEditedCriteriaIndex: number | null
-    selectedInclusionCharacteristics: Array<FilterInfo>;
-    selectedExclusionCharacteristics: Array<FilterInfo>;
+    selectedEditedCriteriaIndex: number | null;
+    selectedInclusionCharacteristics: OntologyTreeElement[];
+    selectedExclusionCharacteristics: Array<OntologyTreeElement>;
     isStateEditFilter: boolean;
     debouncedHandler: _.DebouncedFunc<() => void> | null;
     imgDelete: string;

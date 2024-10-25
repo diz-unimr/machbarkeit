@@ -157,6 +157,7 @@ export default Vue.extend({
 				this.attributeList = response.data
 				this.attributeList = this.sortData(this.attributeList)
 				this.moduleName = this.getModuleName(this.attributeList)
+
 				// initialize keys from moduleName.length (default: expand all attributelists)
 				this.expandedGroup = [...Array(this.moduleName.length).keys()]
 				this.attributeName = this.getAttributeName(this.attributeList)
@@ -255,7 +256,18 @@ export default Vue.extend({
 	padding: 15px 0px;
 }
 
-.attribute-list__content {
+/* For Firefox */
+.gecko .attribute-list__content {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	width: 100%;
+	height: 90%;
+	padding: 20px;
+}
+
+/* For Chrome */
+.chrome .attribute-list__content {
 	display: flex;
 	flex-direction: column;
 	position: absolute;

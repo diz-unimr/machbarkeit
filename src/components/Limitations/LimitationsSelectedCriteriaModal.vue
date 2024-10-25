@@ -9,13 +9,15 @@
 				<h2 class="limitations-dialog__title">
 					Einschränkungen der ausgewählten Merkmale
 				</h2>
-				<div class="limitations-dialog__panel">
+				<div v-if="filterOptions" class="limitations-dialog__panel">
 					<LimitationsSelectedCriteriaCard v-for="(selectedCriterion, index) in selectedCriteria"
 						:id="index"
 						:key="selectedCriterion.id"
-						:ui-profile="uiProfile"
+						:filter-option="selectedCriterion.filterOptionsId ? filterOptions?.filter(option =>
+							option.id === selectedCriterion.filterOptionsId
+						)[0] : null"
 						:selected-criterion="selectedCriterion"
-						:is-edit-filter-state="isStateEditFilter"
+						:is-state-edit-filter="isStateEditFilter"
 						@get-selected-criteria-filter="getSelectedCriteriaFilter(index, $event)"
 						@delete-dialog-card="deleteDialogCard" />
 				</div>
@@ -38,12 +40,14 @@
 </template>
 
 <script lang="ts">
-import Vue, { type PropType } from 'vue'
+import Vue from 'vue'
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
-import type { SelectedCriteriaFilter, LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
+import type { LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
-import type { UiProfile } from '../../types/FeasibilityQueryBuilderData'
-import type { FilterInfo } from '../../types/LimitationsSelectedCriteriaCardData'
+import type { ConceptType } from '../../types/ConceptOptionsData'
+import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
 
 export default Vue.extend({
@@ -56,10 +60,6 @@ export default Vue.extend({
 			type: Array<OntologyTreeElement>,
 			required: true,
 		},
-		uiProfile: {
-			type: Object as PropType<UiProfile>,
-			required: true,
-		},
 		isStateEditFilter: {
 			type: Boolean,
 			default: false,
@@ -68,7 +68,7 @@ export default Vue.extend({
 
 	data(): LimitationsSelectedCriteriaModalData {
 		return {
-			filterInfo: [],
+			filterOptions: null,
 			selectedCriteriaFiltersInfo: [],
 			isFilterComplete: false,
 		}
@@ -78,17 +78,53 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
-	beforeMount() {},
-	mounted() {
-		this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
+	created() {
+		this.getFilterOptions()
 	},
+	beforeMount() {},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
+		async getFilterOptions(): Promise<void> {
+			/* if (JSON.parse(localStorage.getItem('filterOptions')!)) {
+				this.filterOptions = JSON.parse(localStorage.getItem('filterOptions')!)
+			} else {
+				try {
+					const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/filters'))
+					this.filterOptions = response.data
+					for (let i = 0; i < this.filterOptions!.length; i++) {
+						this.filterOptions![i].filterOptions = JSON.parse(response.data[i].filterOptions)
+					}
+					localStorage.setItem('filterOptions', JSON.stringify(this.filterOptions))
+				} catch (error) {
+					// eslint-disable-next-line no-console
+					console.log((error as Error).message)
+				}
+			} */
+
+			this.filterOptions = JSON.parse(localStorage.getItem('filterOptions')!) ?? (
+				async () => {
+					try {
+						const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/filters'))
+						this.filterOptions = response.data
+						for (let i = 0; i < this.filterOptions!.length; i++) {
+							this.filterOptions![i].filterOptions = JSON.parse(response.data[i].filterOptions)
+						}
+						localStorage.setItem('filterOptions', JSON.stringify(this.filterOptions))
+						return this.filterOptions
+					} catch (error) {
+						// eslint-disable-next-line no-console
+						console.log((error as Error).message)
+						return null
+					}
+				}
+			)()
+		},
+
 		deleteDialogCard(index: number): void {
 			if (this.selectedCriteria !== null) {
 				this.$emit('delete-selected-criteria', index)
@@ -99,32 +135,21 @@ export default Vue.extend({
 			}
 		},
 
-		checkCompleteFilter(filtersInfo: FilterInfo[]): void {
+		checkCompleteFilter(filtersInfo: Array<ConceptType | QuantityType | TimeRange>): void {
 			const notCompleteFilter = filtersInfo.filter(item => {
 				let notComplete = false
-
-				item.timeRange && item.timeRange?.isFilterComplete === false && (notComplete = true)
-				item.quantityType?.isFilterComplete === false && (notComplete = true)
-				item.conceptType?.isFilterComplete === false && (notComplete = true)
-
+				item.isFilterOptional ? (notComplete = false) : item.isFilterComplete ? (notComplete = false) : (notComplete = true)
 				return notComplete
 			})
-
 			notCompleteFilter.length > 0 ? (this.isFilterComplete = false) : (this.isFilterComplete = true)
 		},
 
-		getSelectedCriteriaFilter(index: string | number, data: SelectedCriteriaFilter): void {
-			if (this.selectedCriteria[index].display === data.item.display) {
-				this.selectedCriteriaFiltersInfo[index] = data.item
+		getSelectedCriteriaFilter(index: string | number, filterInfo: ConceptType | QuantityType | TimeRange): void {
+			// store each Criterion Type Information into Array in the correct position (selectedCriteria)
+			if (this.selectedCriteria[index].display === filterInfo.display) {
+				this.selectedCriteriaFiltersInfo[index] = filterInfo
 			}
-
-			data.status === 'update' && this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
-		},
-
-		checkCompleteFilterInput(items: FilterInfo[]) {
-			for (const item of items) {
-				item.timeRange?.value.type && !item.timeRange?.value.fromDate && (item.timeRange.value = {} as TimeRange['value'])
-			}
+			this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
 		},
 
 		submit(): void {

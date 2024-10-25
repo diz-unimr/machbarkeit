@@ -37,6 +37,29 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->setPrimaryKey(['id']);
 		}
 
+		// ontology_filter_options
+		if (!$schema->hasTable('machbarkeit_filter_options')) {
+			$table = $schema->createTable('machbarkeit_filter_options');
+			$table->addColumn('id', Types::INTEGER, [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('filter_name', Types::STRING, [
+				'notnull' => true,
+			]);
+			$table->addColumn('type', Types::STRING, [
+				'notnull' => true,
+			]);
+			$table->addColumn('filter_options', Types::JSON, [
+				'notnull' => true,
+			]);
+			$table->addColumn('optional', Types::BOOLEAN, [
+				'notnull' => true,
+			]);
+
+			$table->setPrimaryKey(['id']);
+		}
+
 		// ontology_concepts
 		if (!$schema->hasTable('machbarkeit_concepts')) {
 			$table = $schema->createTable('machbarkeit_concepts');
@@ -47,6 +70,9 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->addColumn('display', Types::STRING, [
 				'notnull' => true,
 			]);
+			$table->addColumn('term_codes', Types::JSON, [
+				'notnull' => false,
+			]);
 			$table->addColumn('selectable', Types::BOOLEAN, [
 				'notnull' => false,
 				'default' => false
@@ -55,6 +81,18 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 				'notnull' => false,
 				'default' => false
 			]);
+			$table->addColumn('time_restriction_allowed', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('type_quantity', Types::BOOLEAN, [
+				'notnull' => false,
+				'default' => false
+			]);
+			$table->addColumn('filter_options_id', Types::INTEGER, [
+				'notnull' => false,
+			]);
+
 			$table->addColumn('parent_id', Types::INTEGER, [
 				'notnull' => false,
 			]);
@@ -66,56 +104,7 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->setPrimaryKey(['id']);
 			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_modules'), ['module_id'], ['id'], [], 'fk_modules_id_concepts');
 			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_concepts'), ['parent_id'], ['id'], [], 'fk_concepts_id_concepts');
-		}
-
-		// ontology_filters
-		if (!$schema->hasTable('machbarkeit_filters')) {
-			$table = $schema->createTable('machbarkeit_filters');
-			$table->addColumn('id', Types::INTEGER, [
-				'autoincrement' => true,
-				'notnull' => true,
-			]);
-			$table->addColumn('code', Types::STRING, [
-				'notnull' => false,
-			]);
-			$table->addColumn('display', Types::STRING, [
-				'notnull' => false,
-			]);
-			$table->addColumn('system', Types::STRING, [
-				'notnull' => false,
-			]);
-			$table->addColumn('version', Types::STRING, [
-				'notnull' => false,
-			]);
-			$table->addColumn('allowedUnits', Types::BOOLEAN, [
-				'notnull' => false,
-				'default' => false
-			]);
-			$table->addColumn('selectableConcepts', Types::BOOLEAN, [
-				'notnull' => false,
-				'default' => false
-			]);
-			$table->addColumn('timeRestrictionAllowed', Types::BOOLEAN, [
-				'notnull' => false,
-				'default' => false
-			]);
-			$table->addColumn('optional', Types::BOOLEAN, [
-				'notnull' => false,
-				'default' => false
-			]);
-			$table->addColumn('type', Types::STRING, [
-				'notnull' => false,
-			]);
-			$table->addColumn('module_id', Types::INTEGER, [
-				'notnull' => true
-			]);
-			$table->addColumn('concept_id', Types::INTEGER, [
-				'notnull' => false,
-			]);
-
-			$table->setPrimaryKey(['id']);
-			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_modules'), ['module_id'], ['id'], [], 'fk_modules_id_concepts');
-			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_concepts'), ['concept_id'], ['id'], [], 'fk_concepts_id_concepts');
+			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_filter_options'), ['filter_options_id'], ['id'], [], 'fk_filter_options_id_concepts');
 		}
 
 		return $schema;

@@ -23,11 +23,11 @@
 								d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
 						</svg>
 					</button>
-					<NcTextField :value.sync="inclusionSearchInputTemp"
+					<NcTextField :value.sync="inclusionSearchInputText"
 						label="Code oder Suchbegriff eingeben"
 						trailing-button-icon="close"
 						placeholder=" "
-						:show-trailing-button="inclusionSearchInputTemp !== ''"
+						:show-trailing-button="inclusionSearchInputText !== ''"
 						@trailing-button-click="closeOntologySearchTreeModal"
 						@focus="focusSearchInput('einschlusskriterien')">
 						<Magnify :size="20" />
@@ -53,11 +53,11 @@
 								d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
 						</svg>
 					</button>
-					<NcTextField :value.sync="exclusionSearchInputTemp"
+					<NcTextField :value.sync="exclusionSearchInputText"
 						label="Code oder Suchbegriff eingeben"
 						trailing-button-icon="close"
 						placeholder=" "
-						:show-trailing-button="exclusionSearchInputTemp !== ''"
+						:show-trailing-button="exclusionSearchInputText !== ''"
 						@trailing-button-click="closeOntologySearchTreeModal"
 						@focus="focusSearchInput('ausschlusskriterien')">
 						<Magnify :size="20" />
@@ -68,6 +68,7 @@
 
 		<OntologySearchTreeModal v-if="isOntologySearchTreeOpen"
 			:criteria-type="criteriaOverlayType"
+			:search-input-text="searchInputText"
 			:inclusion-search-input="inclusionSearchInput"
 			:exclusion-search-input="exclusionSearchInput"
 			@get-selected-criteria="getSelectedCriteria"
@@ -75,7 +76,6 @@
 
 		<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
 			:selected-criteria="selectedCriteria"
-			:ui-profile="uiProfile"
 			:is-state-edit-filter="isStateEditFilter"
 			@get-selected-filter-info="getSelectedFilterInfo"
 			@dialog-close="isLimitationsCriteriaOpen = false"
@@ -91,16 +91,16 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { generateUrl } from '@nextcloud/router'
-import axios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
-import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData.ts'
 import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import type { ConceptType } from '../types/ConceptOptionsData.ts'
+import type { QuantityType } from '../types/QuantityOptionsData'
+import type { TimeRange } from '../types/TimeRangeOptionsData'
 import debounce from 'lodash.debounce'
 
 export default Vue.extend({
@@ -126,16 +126,15 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryBuilderData {
 		return {
-			uiProfile: null,
-			inclusionSearchInputTemp: '',
-			exclusionSearchInputTemp: '',
+			inclusionSearchInputText: '',
+			exclusionSearchInputText: '',
+			searchInputText: '',
 			inclusionSearchInput: '',
 			exclusionSearchInput: '',
 			isLimitationsCriteriaOpen: false,
 			isOntologySearchTreeOpen: false,
 			criteriaOverlayType: '',
 			selectedCriteria: null,
-			selectedEditedCriteria: null,
 			selectedEditedCriteriaIndex: null,
 			selectedInclusionCharacteristics: [],
 			selectedExclusionCharacteristics: [],
@@ -162,40 +161,44 @@ export default Vue.extend({
 			} else this.$emit('enable-start-query-button', false)
 		},
 
-		inclusionSearchInputTemp(newVal) {
+		inclusionSearchInputText(newVal) {
 			if (newVal.length <= 0) {
-				this.inclusionSearchInput = this.inclusionSearchInputTemp
+				this.inclusionSearchInput = this.inclusionSearchInputText
+				this.searchInputText = this.inclusionSearchInputText
 				this.isOntologySearchTreeOpen = false
 				/* if (this.debouncedHandler?.cancel) {
 					this.debouncedHandler.cancel()
 				} */
 			} else {
 				this.debouncedHandler = debounce(() => {
-					this.inclusionSearchInput = this.inclusionSearchInputTemp
+					this.inclusionSearchInput = this.inclusionSearchInputText
+					this.searchInputText = this.inclusionSearchInputText
 					this.criteriaOverlayType = 'einschlusskriterien'
-					if (this.inclusionSearchInputTemp.length > 0) {
+					if (this.inclusionSearchInputText.length > 0) {
 						this.isOntologySearchTreeOpen = true
 					}
-				}, 500)
+				}, 1000)
 				this.debouncedHandler()
 			}
 		},
 
-		exclusionSearchInputTemp(newVal) {
+		exclusionSearchInputText(newVal) {
 			if (newVal.length <= 0) {
-				this.exclusionSearchInput = this.exclusionSearchInputTemp
+				this.exclusionSearchInput = this.exclusionSearchInputText
+				this.searchInputText = this.exclusionSearchInputText
 				this.isOntologySearchTreeOpen = false
 				/* if (this.debouncedHandler?.cancel) {
 					this.debouncedHandler.cancel()
 				} */
 			} else {
 				this.debouncedHandler = debounce(() => {
-					this.exclusionSearchInput = this.exclusionSearchInputTemp
+					this.exclusionSearchInput = this.exclusionSearchInputText
+					this.searchInputText = this.exclusionSearchInputText
 					this.criteriaOverlayType = 'ausschlusskriterien'
-					if (this.exclusionSearchInputTemp.length > 0) {
+					if (this.exclusionSearchInputText.length > 0) {
 						this.isOntologySearchTreeOpen = true
 					}
-				}, 500)
+				}, 1000)
 				this.debouncedHandler()
 			}
 		},
@@ -205,9 +208,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.getUiProfile()
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -216,59 +217,70 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		async getUiProfile(): Promise<void> {
-			try {
-				const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ui_profile'))
-				this.uiProfile = response.data
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log((error as Error).message)
-			}
-		},
-
 		toggleOntologySearchTreeModal(type: string): void {
 			this.criteriaOverlayType = type
 			this.isOntologySearchTreeOpen = !this.isOntologySearchTreeOpen
-			this.inclusionSearchInputTemp = ''
-			this.exclusionSearchInputTemp = ''
-		},
-
-		focusSearchInput(criteriaType: string): void {
-			if (criteriaType === 'einschlusskriterien') {
-				this.exclusionSearchInput = ''
-				this.exclusionSearchInputTemp = ''
-			} else if (criteriaType === 'ausschlusskriterien') {
-				this.inclusionSearchInput = ''
-				this.inclusionSearchInputTemp = ''
-			}
+			this.inclusionSearchInputText = ''
+			this.exclusionSearchInputText = ''
+			this.searchInputText = ''
 		},
 
 		closeOntologySearchTreeModal() {
 			this.isOntologySearchTreeOpen = false
-			this.inclusionSearchInputTemp = ''
-			this.exclusionSearchInputTemp = ''
+			this.inclusionSearchInputText = ''
+			this.exclusionSearchInputText = ''
+			this.searchInputText = ''
+		},
+
+		focusSearchInput(criteriaType: string): void {
+			this.isOntologySearchTreeOpen = false
+			if (criteriaType === 'einschlusskriterien') {
+				this.exclusionSearchInput = ''
+				this.exclusionSearchInputText = ''
+				this.searchInputText = ''
+			} else if (criteriaType === 'ausschlusskriterien') {
+				this.inclusionSearchInput = ''
+				this.inclusionSearchInputText = ''
+				this.searchInputText = ''
+			}
 		},
 
 		getSelectedCriteria(criteriaType: string, items: OntologyTreeElement[]): void {
-			this.inclusionSearchInputTemp = ''
-			this.exclusionSearchInputTemp = ''
+			this.inclusionSearchInputText = ''
+			this.exclusionSearchInputText = ''
+			this.searchInputText = ''
 			this.selectedCriteria = items
 			this.toggleOntologySearchTreeModal(criteriaType)
 			this.isLimitationsCriteriaOpen = true
 		},
 
-		getSelectedFilterInfo(filterInfo: FilterInfo[]) {
+		getSelectedFilterInfo(filterInfo: Array<ConceptType | QuantityType | TimeRange>) {
+			this.selectedCriteria = this.selectedCriteria!.map((item, index) => {
+				switch (filterInfo[index].type) {
+				case 'conceptType':
+					item.conceptType = filterInfo[index] as ConceptType
+					break
+				case 'quantityType':
+					item.quantityType = filterInfo[index] as QuantityType
+					break
+				case 'timeRange':
+					item.timeRange = filterInfo[index] as TimeRange
+					break
+				}
+				return item
+			})
+
 			// put filterInfo into this.selectedInclusionCharacteristics with for loop, condition with id and display
 			if (this.criteriaOverlayType === 'einschlusskriterien') {
 				if (this.selectedEditedCriteriaIndex !== null) { // when criterion is edited
-					this.selectedInclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
+					this.selectedInclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
 					this.selectedEditedCriteriaIndex = null
-				} else this.selectedInclusionCharacteristics.push(...filterInfo)
+				} else this.selectedInclusionCharacteristics.push(...this.selectedCriteria)
 			} else if (this.criteriaOverlayType === 'ausschlusskriterien') {
 				if (this.selectedEditedCriteriaIndex !== null) {
-					this.selectedExclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...filterInfo)
+					this.selectedExclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
 					this.selectedEditedCriteriaIndex = null
-				} else this.selectedExclusionCharacteristics.push(...filterInfo)
+				} else this.selectedExclusionCharacteristics.push(...this.selectedCriteria)
 			}
 		},
 
@@ -284,21 +296,21 @@ export default Vue.extend({
 			}
 		},
 
-		editCriteriaLimitation(characteristic: FilterInfo, index: number, criteriaType: string): void {
+		editCriteriaLimitation(characteristic: OntologyTreeElement, index: number, criteriaType: string): void {
 			this.criteriaOverlayType = criteriaType
 			if (criteriaType === 'einschlusskriterien') {
-				this.selectedEditedCriteria = this.selectedInclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
-				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
+				const selectedEditedCriteria = this.selectedInclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
+				this.selectedCriteria = selectedEditedCriteria as OntologyTreeElement[]
 			} else if (criteriaType === 'ausschlusskriterien') {
-				this.selectedEditedCriteria = this.selectedExclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
-				this.selectedCriteria = this.selectedEditedCriteria as OntologyTreeElement[]
+				const selectedEditedCriteria = this.selectedExclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
+				this.selectedCriteria = selectedEditedCriteria as OntologyTreeElement[]
 			}
 			this.selectedEditedCriteriaIndex = index
 			this.isLimitationsCriteriaOpen = true
 			this.isStateEditFilter = true
 		},
 
-		updateDisplaySequence(type: string, newOrder: Array<FilterInfo>) {
+		updateDisplaySequence(type: string, newOrder: OntologyTreeElement[]) {
 			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = newOrder) : (this.selectedExclusionCharacteristics = newOrder)
 		},
 	},

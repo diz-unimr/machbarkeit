@@ -11,6 +11,8 @@ use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
+header('Content-Type: application/json'); // Set JSON header
+header('Access-Control-Allow-Origin: *');
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
@@ -46,7 +48,8 @@ class OntologyConceptMapper extends QBMapper
 			'SELECT * from ontology';
 		// TODO build tree (with children)
 		$result = $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
-
+		// $term_code = json_encode($result[0]->termCode);
+		// $result[0]->termCode = $term_code;
 		return $result;
 	}
 
@@ -63,7 +66,6 @@ class OntologyConceptMapper extends QBMapper
 	protected function findEntitiesWithRawQuery(string $query, array $params, array $types)
 	{
 		try {
-
 			$cursor = $this->db->executeQuery($query, $params, $types);
 
 			$entities = [];

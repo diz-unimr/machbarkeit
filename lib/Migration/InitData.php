@@ -76,13 +76,99 @@ class InitData implements IRepairStep
 				]
 			)->executeStatement();
 
+		// ontology filter_options
+		$query->insert('machbarkeit_filter_options')->values(
+			[
+				'id' => $this->db->quote(1),
+				'filter_name' => $this->db->quote('Wertbereich'),
+				'type' => $this->db->quote('quantity'),
+				'filter_options' => $query->createNamedParameter(json_encode(json_decode('[
+					{
+						"code": "a",
+						"display": "a",
+						"system": "http://unitsofmeasure.org",
+						"version": null
+					},
+					{
+						"code": "mo",
+						"display": "mo",
+						"system": "http://unitsofmeasure.org",
+						"version": null
+					},
+					{
+						"code": "wk",
+						"display": "wk",
+						"system": "http://unitsofmeasure.org",
+						"version": null
+					},
+					{
+						"code": "d",
+						"display": "d",
+						"system": "http://unitsofmeasure.org",
+						"version": null
+					}
+	
+				]', true)), IQueryBuilder::PARAM_STR),
+				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+			]
+		)->executeStatement();
+
+		$query->insert('machbarkeit_filter_options')->values(
+			[
+				'id' => $this->db->quote(2),
+				'filter_name' => $this->db->quote('Wertbereich'),
+				'type' => $this->db->quote('concept'),
+				'filter_options' => $query->createNamedParameter(json_encode(json_decode('[
+					{
+						"code": "female",
+						"display": "Female",
+						"system": "http://hl7.org/fhir/administrative-gender",
+						"version": "4.0.1"
+					},
+					{
+						"code": "male",
+						"display": "Male",
+						"system": "http://hl7.org/fhir/administrative-gender",
+						"version": "4.0.1"
+					},
+					{
+						"code": "other",
+						"display": "Other",
+						"system": "http://hl7.org/fhir/administrative-gender",
+						"version": "4.0.1"
+					},
+					{
+						"code": "unknown",
+						"display": "Unknown",
+						"system": "http://hl7.org/fhir/administrative-gender",
+						"version": "4.0.1"
+					}
+				]', true)), IQueryBuilder::PARAM_STR),
+				'optional' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+			]
+		)->executeStatement();
+
 		// ontology concepts
 		$query->insert('machbarkeit_concepts')->values(
 			[
 				'id' => $this->db->quote(1),
 				'display' => $this->db->quote('Gegenwärtiges chronologisches Alter'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "424144002",
+							"display": "Gegenw\u00e4rtiges chronologisches Alter",
+							"system": "http://snomed.info/sct"
+						}'))),
+				/* 'term_code' => $query->createNamedParameter(json_encode([
+					"code" => $this->db->quote('424144002'),
+					"display" => $this->db->quote('Gegenw\u00e4rtiges chronologisches Alter'),
+					"system" => $this->db->quote('http://snomed.info/sct'),
+				]), IQueryBuilder::PARAM_STR), */
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'time_restriction_allowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+				'type_quantity' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+				'filter_options_id' => $this->db->quote(1),
 				'module_id' => $this->db->quote(1),
 			]
 		)->executeStatement();
@@ -91,8 +177,17 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(2),
 				'display' => $this->db->quote('Geschlecht'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "263495000",
+							"display": "Geschlecht",
+							"system": "http://snomed.info/sct"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'time_restriction_allowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+				'type_quantity' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+				'filter_options_id' => $this->db->quote(2),
 				'module_id' => $this->db->quote(1),
 			]
 		)->executeStatement();
@@ -101,8 +196,16 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(3),
 				'display' => $this->db->quote('Bildgebende Diagnostik'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "263495000",
+							"display": "Geschlecht",
+							"system": "http://snomed.info/sct"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+				'time_restriction_allowed' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
+				'type_quantity' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
 			]
 		)->executeStatement();
@@ -111,10 +214,17 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(4),
 				'display' => $this->db->quote('Andere bildgebende Verfahren'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "3-90",
+							"display": "Andere bildgebende Verfahren",
+							"system": "http://fhir.de/CodeSystem/bfarm/ops",
+							"version": "2023"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(2),
+				'parent_id' => $this->db->quote(3),
 			]
 		)->executeStatement();
 
@@ -122,10 +232,17 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(5),
 				'display' => $this->db->quote('Elektrische Impedanztomographie'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "3-903",
+							"display": "Elektrische Impedanztomographie",
+							"system": "http://fhir.de/CodeSystem/bfarm/ops",
+							"version": "2023"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(3),
+				'parent_id' => $this->db->quote(4),
 			]
 		)->executeStatement();
 
@@ -133,10 +250,17 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(6),
 				'display' => $this->db->quote('Elektroimpedanzspektroskopie der Haut'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "3-901",
+							"display": "Elektroimpedanzspektroskopie der Haut",
+							"system": "http://fhir.de/CodeSystem/bfarm/ops",
+							"version": "2023"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(3),
+				'parent_id' => $this->db->quote(4),
 			]
 		)->executeStatement();
 
@@ -144,10 +268,17 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(7),
 				'display' => $this->db->quote('Knochendichtemessung (alle Verfahren)'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "3-900",
+							"display": "Knochendichtemessung (alle Verfahren)",
+							"system": "http://fhir.de/CodeSystem/bfarm/ops",
+							"version": "2023"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(3),
+				'parent_id' => $this->db->quote(4),
 			]
 		)->executeStatement();
 
@@ -156,253 +287,18 @@ class InitData implements IRepairStep
 			[
 				'id' => $this->db->quote(8),
 				'display' => $this->db->quote('Radiofrequenzspektroskopie von Brustgewebe'),
+				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+						{
+							"code": "3-902",
+							"display": "Radiofrequenzspektroskopie von Brustgewebe",
+							"system": "http://fhir.de/CodeSystem/bfarm/ops",
+							"version": "2023"
+						}'))),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(3),
+				'parent_id' => $this->db->quote(4),
 			],
-		)->executeStatement();
-
-		// ontology filters
-		/* $query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(1),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'attributeDefinitions' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'valueDefinition' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				
-			]
-		)->executeStatement(); */
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(1),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-			],
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(2),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('a'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(3),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('a'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(4),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('c'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'optional' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(5),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('a'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(6),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('a'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(7),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('a'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(2),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('a'),
-				'display' => $this->db->quote('a'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(2),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('mo'),
-				'display' => $this->db->quote('mo'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(3),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('wk'),
-				'display' => $this->db->quote('wk'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(4),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(1),
-				'code' => $this->db->quote('d'),
-				'display' => $this->db->quote('d'),
-				'system' => $this->db->quote('http://unitsofmeasure.org'),
-				'allowedUnits' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('quantity'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(5),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(2),
-				'code' => $this->db->quote('female'),
-				'display' => $this->db->quote('Female'),
-				'system' => $this->db->quote('http://hl7.org/fhir/administrative-gender'),
-				'version' => $this->db->quote('4.0.1'),
-				'allowedUnits' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('concept'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(6),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(2),
-				'code' => $this->db->quote('male'),
-				'display' => $this->db->quote('Male'),
-				'system' => $this->db->quote('http://hl7.org/fhir/administrative-gender'),
-				'version' => $this->db->quote('4.0.1'),
-				'allowedUnits' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('concept'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(7),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(2),
-				'code' => $this->db->quote('other'),
-				'display' => $this->db->quote('Other'),
-				'system' => $this->db->quote('http://hl7.org/fhir/administrative-gender'),
-				'version' => $this->db->quote('4.0.1'),
-				'allowedUnits' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('concept'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(8),
-				'module_id' => $this->db->quote(1),
-				'concept_id' => $this->db->quote(2),
-				'code' => $this->db->quote('unknown'),
-				'display' => $this->db->quote('Unknown'),
-				'system' => $this->db->quote('http://hl7.org/fhir/administrative-gender'),
-				'version' => $this->db->quote('4.0.1'),
-				'allowedUnits' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type' => $this->db->quote('concept'),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_filters')->values(
-			[
-				'id' => $this->db->quote(9),
-				'module_id' => $this->db->quote(2),
-				/* 'concept_id' => $this->db->quote(2), */
-				'allowedUnits' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'selectableConcepts' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'timeRestrictionAllowed' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				/* 'optional' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL), */
-				'type' => $this->db->quote('concept'),
-			]
 		)->executeStatement();
 	}
 }

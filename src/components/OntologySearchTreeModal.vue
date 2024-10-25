@@ -8,40 +8,38 @@
 			<div class="criteria-type">
 				{{ criteriaType }}
 			</div>
-			<div v-if="ontologyResponse && ontologyResponse.length > 0">
+			<div v-if="modules && modules.length > 0">
 				<div class="ontology-search-tree__tabs">
 					<div class="ontology-search-tree__tabs-container">
-						<button v-for="(modulName, modulName_index) in ontologyResponse.map((item) => item.display)"
-							:key="modulName_index"
-							:class="['ontology-tab', { 'active': activeTab === modulName_index }]"
-							@click="activateTab(modulName_index)">
-							{{ modulName }}
+						<button v-for="(module) in modules"
+							:key="module.id"
+							:class="['ontology-tab', { 'active': activeTab === module.id }]"
+							@click="activeTab = module.id">
+							{{ module.display }}
 						</button>
 					</div>
 				</div>
-				<div class="ontology-search-tree__display">
-					<div v-for="(criterion, criterionIndex) in ontologyResponse"
-						v-show="activeTab === criterionIndex"
-						:key="criterionIndex">
-						<div class="ontology-search-tree__body">
-							<div v-if="isSearchResultNoData[criterionIndex] && (inclusionSearchInput.length > 0 || exclusionSearchInput.length > 0)" class="no-result-data">
-								Keine Daten
-							</div>
-
-							<OntologyNestedTreeNode v-if="criterion.children && inclusionSearchInput.length <= 0 && exclusionSearchInput.length <= 0"
-								:is-root-node="true"
+				<div v-if="ontologyTree && ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab" class="ontology-search-tree__display">
+					<div class="ontology-search-tree__body">
+						<div class="module_name">
+							{{ modules.filter(module => module.id === activeTab)[0].display }}
+						</div>
+						<template v-if="searchInputText.length <= 0">
+							<!-- :module-info="activeModule" -->
+							<OntologyNestedTreeNode v-for="criterion in ontologyTree"
+								:key="criterion.id"
 								:criterion="criterion"
 								@input="getCheckboxItems" />
+						</template>
 
-							<OntologyNestedTreeNodeSearchInput v-if="criterion.children && (inclusionSearchInput.length > 0 || exclusionSearchInput.length > 0)"
+						<template v-else>
+							<OntologyNestedTreeNodeSearchInput v-for="criterion in ontologyTree"
+								:key="criterion.id"
 								class="ontology-tree-node"
 								:criterion="criterion"
-								:index="criterionIndex"
-								:inclusion-search-input="inclusionSearchInput"
-								:exclusion-search-input="exclusionSearchInput"
-								@input="getCheckboxItems"
-								@check-existing-data="checkExistingData" />
-						</div>
+								:search-input-text="searchInputText"
+								@input="getCheckboxItems" />
+						</template>
 					</div>
 					<div class="ontology-search-tree__button-group">
 						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', criteriaType, selectedItems)">
@@ -52,9 +50,12 @@
 						</button>
 					</div>
 				</div>
-			</div>
-			<div v-else class="loading-text">
-				Loading...
+				<div v-else-if="ontologyTree?.length === 0" class="no-result-data">
+					Keine Daten
+				</div>
+				<div v-else class="loading-text">
+					Loading...
+				</div>
 			</div>
 		</div>
 	</div>
@@ -63,10 +64,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
-import axios from '@nextcloud/axios'
+import nextcloudAxios from '@nextcloud/axios'
+// import { setupCache, buildWebStorage } from 'axios-cache-interceptor'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
-import type { OntologySearchTreeModalData } from '../types/OntologySearchTreeModalData.ts'
+import type { OntologySearchTreeModalData, Modules, OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
 import type { CheckedItem } from './OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
@@ -80,11 +82,7 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
-		inclusionSearchInput: {
-			type: String,
-			default: null,
-		},
-		exclusionSearchInput: {
+		searchInputText: {
 			type: String,
 			default: null,
 		},
@@ -96,20 +94,34 @@ export default Vue.extend({
 
 	data(): OntologySearchTreeModalData {
 		return {
-			activeTab: 0,
+			activeTab: 1,
+			// activeModule: null,
+			wasTabClicked: [],
 			ontologyResponse: null,
 			selectedItems: [],
 			isSearchResultNoData: [],
+			modules: null,
+			ontologyTree: null,
+			ontologyTreeSearch: [],
+			hashId: [],
 		}
 	},
 
 	watch: {
-		inclusionSearchInput() {
-			this.inclusionSearchInput.length > 0 && (this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true))
+		searchInputText: {
+			async handler() {
+				if (this.searchInputText.length > 0) {
+					localStorage.setItem('ontologySearch', JSON.stringify(null))
+					this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
+				}
+			},
+			immediate: true,
 		},
 
-		exclusionSearchInput() {
-			this.exclusionSearchInput.length > 0 && (this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true))
+		activeTab: {
+			handler() {
+				this.getOntology(this.activeTab!, this.searchInputText)
+			},
 		},
 	},
 
@@ -117,8 +129,16 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.getOntology()
+	async created() {
+		// shorthand, if moduleName is in localStorage then this.modules = moduleName, else call functions getModules() and activateTab()
+		// this.modules = (JSON.parse(localStorage.getItem('moduleName')!) ?? await this.getModules())
+		if (JSON.parse(localStorage.getItem('moduleName')!)) {
+			this.modules = JSON.parse(localStorage.getItem('moduleName')!)
+		} else await this.getModules()
+
+		if (this.searchInputText.length <= 0) {
+			this.getOntology(1)
+		}
 	},
 	beforeMount() {},
 	mounted() {},
@@ -128,36 +148,80 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		async getOntology(): Promise<void> {
+		async getModules(): Promise<void> {
 			try {
-				const jsonData = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology'))
-				this.ontologyResponse = jsonData.data
-
-				if (this.inclusionSearchInput.length > 0 || this.exclusionSearchInput.length > 0) {
-					this.isSearchResultNoData = Array(this.ontologyResponse?.length).fill(true)
-				}
+				const responseModules: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
+				this.modules = responseModules
+				localStorage.setItem('moduleName', JSON.stringify(this.modules))
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log((error as Error).message)
 			}
 		},
 
-		activateTab(index: string | number): void {
-			this.activeTab = index
+		async getOntology(moduleId: number, searchText: string | null = null): Promise<OntologyTreeElement[] | null> {
+			// Code oder Suchbegriff eingegeben wurde
+			if (searchText) {
+				const ontologySearch = JSON.parse(localStorage.getItem('ontologySearch')!)
+				if (ontologySearch && ontologySearch[moduleId]) {
+					this.ontologyTree = ontologySearch[moduleId]
+				} else {
+					const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/search_ontology/' + searchText + '/' + moduleId))
+					this.ontologyTree = response ? response.data : []
+					this.ontologyTreeSearch[moduleId] = response ? response.data : []
+					localStorage.setItem('ontologySearch', JSON.stringify(this.ontologyTreeSearch))
+				}
+				return this.ontologyTree
+			} else {
+				// alle Ontology Tree
+				/* if (JSON.parse(localStorage.getItem('ontology:' + moduleId)!)) {
+					this.ontologyTree = JSON.parse(localStorage.getItem('ontology:' + moduleId)!)
+				} else {
+					try {
+						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + moduleId))
+						this.ontologyTree = response.data
+						for (let i = 0; i < response.data.length; i++) {
+							this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
+						}
+						localStorage.setItem('ontology:' + moduleId, JSON.stringify(response.data))
+
+						return this.ontologyTree
+					} catch (error) {
+					// eslint-disable-next-line no-console
+						console.log((error as Error).message)
+						return []
+					}
+				} */
+				this.ontologyTree = JSON.parse(localStorage.getItem('ontology:' + moduleId)!) ?? (
+					async () => {
+						try {
+							const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + moduleId))
+							this.ontologyTree = response.data
+							for (let i = 0; i < response.data.length; i++) {
+								this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
+							}
+							localStorage.setItem('ontology:' + moduleId, JSON.stringify(response.data))
+
+							return this.ontologyTree
+						} catch (error) {
+						// eslint-disable-next-line no-console
+							console.log((error as Error).message)
+							return []
+						}
+					}
+				)()
+			}
+			return this.ontologyTree
 		},
 
 		getCheckboxItems(checkedItem: CheckedItem): void {
 			if (checkedItem.action === 'check') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'uncheck') {
-				this.selectedItems = this.selectedItems.filter(function(name) {
+				this.selectedItems = this.selectedItems.filter(name => {
 					return name !== checkedItem.node
 				})
 			}
-		},
-
-		checkExistingData(index: number): void {
-			this.isSearchResultNoData.splice(index, 1, false)
 		},
 	},
 })
@@ -177,7 +241,7 @@ export default Vue.extend({
 	scrollbar-width: auto;
 	height: 100%;
 	padding: 0px 10px;
-	margin-top: 20px;
+	/* margin-top: 20px; */
 }
 
 .ontology-search-tree-wrapper {
@@ -255,15 +319,21 @@ export default Vue.extend({
 }
 
 .ontology-search-tree__display {
-	height: 650px;
+	min-height: 450px;
+	max-height: 650px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 }
 
 .ontology-search-tree__body {
-	height: 570px;
-	padding: 20px 25px 20px 25px;
+	overflow-y: auto;
+	margin: 30px 25px 20px 30px;
+}
+
+.module_name {
+	font-weight: bold;
+	margin-bottom: 20px;
 }
 
 .ontology-search-tree__button-group {
@@ -288,8 +358,7 @@ export default Vue.extend({
 
 .no-result-data {
 	text-align: center;
-	font-weight: bold;
 	font-size: large;
-	margin-top: 20px;
+	margin: 100px;
 }
 </style>

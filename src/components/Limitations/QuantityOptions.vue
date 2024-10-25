@@ -56,7 +56,7 @@
 					<div v-if="comparisonRestriction.type !== 'kein Filter'"
 						class="text-floating-wrapper">
 						<select v-model="comparisonRestriction.unit">
-							<option v-for="(unit_display, index) in profile.valueDefinition?.allowedUnits"
+							<option v-for="(unit_display, index) in filterOption.filterOptions"
 								:key="index"
 								:value="unit_display.display">
 								{{ unit_display.display }}
@@ -76,15 +76,15 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import type { QuantityOptionsData } from '../../types/QuantityOptionsData.ts'
-import type { Profile } from '../../types/FeasibilityQueryBuilderData'
+import type { FilterOptions } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'QuantityOptions',
 	components: {},
 	props: {
-		profile: {
-			type: Object as PropType<Profile>,
+		filterOption: {
+			type: Object as PropType<FilterOptions>,
 			required: true,
 		},
 		isResetDisabled: {
@@ -114,7 +114,7 @@ export default Vue.extend({
 					: 'kein Filter',
 				unit: this.selectedCriterion.quantityType?.value.unit
 					? this.selectedCriterion.quantityType.value.unit
-					: this.profile.valueDefinition?.allowedUnits[0].display,
+					: this.filterOption.filterOptions[0].display,
 				value: this.selectedCriterion.quantityType?.value.value
 					? this.selectedCriterion.quantityType.value.value
 					: '0',
@@ -142,26 +142,26 @@ export default Vue.extend({
 		comparisonRestriction: {
 			handler() {
 				if (this.comparisonRestriction.type === 'kein Filter') {
-					this.$emit('get-selected-filter-option', 'update', {
+					this.$emit('get-selected-filter-option', {
 						type: 'quantityType',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.profile.valueDefinition?.optional,
-						isFilterComplete: this.profile.valueDefinition?.optional,
+						isFilterOptional: this.filterOption.optional,
+						isFilterComplete: this.filterOption.optional,
 						value: {},
 					})
 				} else if (this.comparisonRestriction.type === 'zwischen') {
-					this.$emit('get-selected-filter-option', 'update', {
+					this.$emit('get-selected-filter-option', {
 						type: 'quantityType',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.profile.valueDefinition?.optional,
+						isFilterOptional: this.filterOption.optional,
 						isFilterComplete: this.comparisonRestriction.type && (this.comparisonRestriction.min < this.comparisonRestriction.max),
 						value: this.comparisonRestriction,
 					})
 				} else {
-					this.$emit('get-selected-filter-option', 'update', {
+					this.$emit('get-selected-filter-option', {
 						type: 'quantityType',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.profile.valueDefinition?.optional,
+						isFilterOptional: this.filterOption.optional,
 						isFilterComplete: this.comparisonRestriction.type.length > 0 && this.comparisonRestriction.value.length > 0,
 						value: this.comparisonRestriction,
 					 })
@@ -174,7 +174,7 @@ export default Vue.extend({
 			if (this.isResetDisabled && this.comparisonRestriction.type !== 'kein Filter') {
 				this.comparisonRestriction.type = 'kein Filter'
 				this.comparisonRestriction.typeSymbol = 'kein Filter'
-				this.comparisonRestriction.unit = this.profile.valueDefinition?.allowedUnits[0].display
+				this.comparisonRestriction.unit = this.filterOption.filterOptions[0].display
 				this.comparisonRestriction.value = '0'
 				this.comparisonRestriction.min = '0'
 				this.comparisonRestriction.max = '0'
@@ -188,13 +188,13 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-filter-option', 'initial', {
+		this.$emit('get-selected-filter-option', {
 			type: 'quantityType',
 			display: this.selectedCriterion.display,
-			isFilterOptional: this.profile.valueDefinition?.optional,
+			isFilterOptional: this.filterOption.optional,
 			isFilterComplete: this.selectedCriterion.quantityType?.isFilterComplete
 				? this.selectedCriterion.quantityType?.isFilterComplete
-				: this.profile.valueDefinition?.optional,
+				: this.filterOption.optional,
 			value: this.selectedCriterion.quantityType?.value
 				? this.comparisonRestriction
 				: {},

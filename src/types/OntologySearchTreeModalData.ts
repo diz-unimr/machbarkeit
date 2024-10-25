@@ -8,38 +8,49 @@ import type { TimeRange } from '../types/TimeRangeOptionsData.ts'
 
 export interface OntologyTreeElement {
     children: Array<OntologyTreeElement> | undefined;
-    id: string;
+    id: number;
+    moduleId: number;
+    parentId: number | null;
+    filterOptionsId: number | undefined;
     display: string;
-    context: {
+    termCodes: {
         code: string,
         display: string,
         system: string,
-        version: string,
     };
-    leaf: boolean | undefined;
-    selectable: boolean | undefined;
-    termCodes: [
-        {
-            code: string,
-            display: string,
-            system: string,
-        }
-    ] | undefined;
+    filterOption: object | undefined;
+    timeRestrictionAllowed: boolean | undefined;
+    typeQuantity: boolean | undefined;
+    selectable: boolean;
+    leaf: boolean;
     conceptType: ConceptType | undefined;
 	timeRange: TimeRange | undefined;
 	quantityType: QuantityType | undefined;
 }
 
-/* interface CriteriaData extends OntologyTreeElement {
-    conceptType: ConceptType | undefined;
-	timeRange: TimeRange | undefined;
-	quantityType: QuantityType | undefined;
-} */
+export interface Modules {
+    id: number;
+    display: string;
+    version: string;
+}
+
+export interface OntologyTree {
+    display: string;
+    id: number;
+    leaf: boolean;
+    moduleId: number;
+    parentId: number | null;
+    selectable: boolean;
+}
 
 export interface OntologySearchTreeModalData {
-	activeTab: number | string;
+	activeTab: number | undefined;
+    wasTabClicked: Array<boolean>;
 	ontologyResponse: OntologyTreeElement[] | null;
-    /* criteriaData: CriteriaData[] | null; */
 	selectedItems: OntologyTreeElement[];
     isSearchResultNoData: Array<boolean>;
+    modules: Modules[] | null;
+    ontologyTree: OntologyTreeElement[] | null;
+    ontologyTreeSearch: Array<OntologyTreeElement | null>;
+    hashId: Array<string>;
 }

@@ -8,21 +8,24 @@ namespace OCA\Machbarkeit\Service;
 
 use OCA\Machbarkeit\Db\ModuleMapper;
 use OCA\Machbarkeit\Db\OntologyConceptMapper;
+use OCA\Machbarkeit\Db\FilterMapper;
 
 class MachbarkeitService
 {
 	private $moduleMapper;
 	private $conceptMapper;
 	private $ontologyConceptMapper;
+	private $filterMapper;
 
 	/* public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $conceptMapper) {
 		$this->moduleMapper = $moduleMapper;
 		$this->conceptMapper = $conceptMapper;
 	} */
-	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper)
+	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper, FilterMapper $filterMapper)
 	{
 		$this->moduleMapper = $moduleMapper;
 		$this->ontologyConceptMapper = $ontologyConceptMapper;
+		$this->filterMapper = $filterMapper;
 	}
 
 	public function readCsv()
@@ -113,5 +116,10 @@ class MachbarkeitService
 	public function getSearchOntology(string $textSeach, int $module_id)
 	{
 		return $this->ontologyConceptMapper->searchOntology($textSeach, $module_id);
+	}
+
+	public function getFilters()
+	{
+		return $this->filterMapper->filters();
 	}
 }

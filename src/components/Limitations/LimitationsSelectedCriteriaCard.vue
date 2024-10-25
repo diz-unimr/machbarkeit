@@ -8,44 +8,33 @@
 			<p class="limitations-card__title">
 				{{ selectedCriterion.display }}
 			</p>
-			<button v-if="!isEditFilterState" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
+			<button v-if="!isStateEditFilter" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
 		</div>
-		<template v-if="uiProfile != null || uiProfile != undefined">
-			<template v-for="(attribute, index) in ['timeRestrictionAllowed', 'valueDefinition']">
-				<template v-if="attribute === 'timeRestrictionAllowed' && profile?.timeRestrictionAllowed">
-					<FilterCard :key="attribute + index"
-						:profile="profile"
-						display="Zeitraum"
-						attribute="timeRestrictionAllowed"
-						:selected-criterion="selectedCriterion"
-						@get-selected-filters="getSelectedFilters" />
-				</template>
-				<template v-if="attribute === 'valueDefinition' && profile?.valueDefinition?.type">
-					<FilterCard :key="attribute + index"
-						:profile="profile"
-						display="Wertebereich"
-						attribute="valueDefinition"
-						:selected-criterion="selectedCriterion"
-						:is-filter-optional="profile.valueDefinition.optional"
-						@get-selected-filters="getSelectedFilters" />
-				</template>
-			</template>
-		</template>
+		<FilterCard :profile="profile"
+			:filter-option="filterOption"
+			:selected-criterion="selectedCriterion"
+			@get-selected-filters="getSelectedFilters" />
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import FilterCard from './FilterCard.vue'
-import type { UiProfile } from '../../types/FeasibilityQueryBuilderData.ts'
+import type { FilterOptions } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
-import type { LimitationsSelectedCriteriaCardData } from '../../types/LimitationsSelectedCriteriaCardData.ts'
+import type { Profile } from '../../types/FeasibilityQueryBuilderData.ts'
 import type { ConceptType } from '../../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
+
+interface LimitationsSelectedCriteriaCardData {
+    profile: Profile | null,
+    filterInfo: OntologyTreeElement | null,
+    imgDelete: string,
+}
 
 export default Vue.extend({
 	name: 'LimitationsSelectedCriteriaCard',
@@ -53,15 +42,15 @@ export default Vue.extend({
 		FilterCard,
 	},
 	props: {
-		uiProfile: {
-			type: Object as PropType<UiProfile>,
-			required: true,
+		filterOption: {
+			type: Object as PropType<FilterOptions>,
+			default: null,
 		},
 		selectedCriterion: {
 			type: Object as PropType<OntologyTreeElement>,
 			default: undefined,
 		},
-		isEditFilterState: {
+		isStateEditFilter: {
 			type: Boolean,
 			default: false,
 		},
@@ -86,13 +75,10 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.getProfile()
-		this.createFilterInfo()
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {
-		this.$emit('get-selected-criteria-filter', { status: 'initial', item: this.filterInfo })
+		// this.$emit('get-selected-criteria-filter', { status: 'initial', item: this.filterInfo })
 	},
 	beforeUpdate() {},
 	updated() {},
@@ -100,43 +86,9 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		getProfile(): void {
-			if (this.selectedCriterion.context.display === 'Diagnose' || this.selectedCriterion.context.display === 'Prozedur') {
-				this.profile = this.uiProfile[this.selectedCriterion.context.display]
-			} else {
-				this.profile = this.uiProfile[this.selectedCriterion.display]
-			}
-		},
-
-		createFilterInfo() {
-			this.filterInfo = {
-				id: this.selectedCriterion.id,
-				display: this.selectedCriterion.display,
-				context: this.selectedCriterion.context,
-				conceptType: null,
-				quantityType: null,
-				timeRange: null,
-			}
-		},
-
 		// This function is called every time when user click/update a filter
-		getSelectedFilters(status: string, selectedFiltersInfo: ConceptType | QuantityType | TimeRange): void {
-			if (this.filterInfo?.display === selectedFiltersInfo.display) {
-				switch (selectedFiltersInfo.type) {
-				case 'conceptType':
-					this.filterInfo.conceptType = selectedFiltersInfo as ConceptType
-					status === 'update' && this.$emit('get-selected-criteria-filter', { status, item: this.filterInfo })
-					break
-				case 'quantityType':
-					this.filterInfo.quantityType = selectedFiltersInfo as QuantityType
-					status === 'update' && this.$emit('get-selected-criteria-filter', { status, item: this.filterInfo })
-					break
-				case 'timeRange':
-					this.filterInfo.timeRange = selectedFiltersInfo as TimeRange
-					status === 'update' && this.$emit('get-selected-criteria-filter', { status, item: this.filterInfo })
-					break
-				}
-			}
+		getSelectedFilters(selectedFiltersInfo: ConceptType | QuantityType | TimeRange): void {
+			this.$emit('get-selected-criteria-filter', selectedFiltersInfo)
 		},
 
 		deleteCard(key: number): void {
@@ -159,7 +111,7 @@ export default Vue.extend({
 
 .limitations-card__header {
 	display: flex;
-	column-gap: 10%;
+	column-gap: 10px;
 	align-items: center;
 	justify-content:space-between;
 	margin: 0px 10px 20px 10px;
@@ -167,6 +119,7 @@ export default Vue.extend({
 
 .limitations-card__title {
 	font-weight: 500;
+	max-width: 80%;
 }
 
 .limitations-card__delete-button {
@@ -178,6 +131,7 @@ export default Vue.extend({
 	padding: 0px;
 	background-color: white;
 	align-items: center;
+	max-width: 20%;
 }
 
 button {

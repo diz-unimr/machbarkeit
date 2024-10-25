@@ -4,40 +4,44 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="ontology-nested-tree-node">
-		<li>
-			<div class="ontology-head-node">
-				<button @click="() => (state = !state)">
-					<img v-if="criterion.children"
-						:src="state
-							? imgExpand
-							: imgCollapse
-						">
-					<div v-if="!criterion.children"
-						class="img-display-none" />
-				</button>
-				<div v-if="criterion.selectable === true" class="search-tree-term-entry">
-					<input :id="criterion.id"
-						v-model="isChecked"
-						type="checkbox"
-						:value="criterion.display">
-					<p @click="() => (state = !state)">
-						{{ criterion.display }}
-					</p>
+		<keep-alive>
+			<li>
+				<div class="ontology-head-node">
+					<button @click="expandTreeNode()">
+						<img v-if="!criterion?.leaf"
+							:src="state
+								? imgExpand
+								: imgCollapse
+							">
+						<div v-else
+							class="img-display-none" />
+					</button>
+					<div v-if="criterion?.selectable" class="search-tree-term-entry">
+						<input :id="String(criterion?.id)"
+							v-model="isChecked"
+							type="checkbox"
+							:value="criterion?.display">
+						<p @click="() => (state = !state)">
+							{{ criterion?.display }}
+						</p>
+					</div>
+					<div v-else-if="!criterion?.selectable"
+						class="search-tree-term-entry">
+						<p @click="() => (state = !state)">
+							{{ criterion?.display }}
+						</p>
+					</div>
 				</div>
-				<div v-else
-					class="search-tree-term-entry">
-					<p @click="() => (state = !state)">
-						{{ criterion.display }}
-					</p>
-				</div>
-			</div>
-			<ul v-show="state">
-				<OntologyNestedTreeNode v-for="child in criterion.children"
-					:key="child.id"
-					:criterion="child"
-					@input="checkboxTrigger" />
-			</ul>
-		</li>
+				<ul v-show="state">
+					<template v-if="criterion.children">
+						<OntologyNestedTreeNode v-for="child in criterion.children"
+							:key="child.id"
+							:criterion="child"
+							@input="checkboxTrigger" />
+					</template>
+				</ul>
+			</li>
+		</keep-alive>
 	</div>
 </template>
 
@@ -49,6 +53,16 @@ interface OntologyNestedTreeNodeData {
 	state: boolean;
 	imgCollapse: string;
 	imgExpand: string;
+	concepts: [
+		{
+			display: string;
+			id: number;
+			leaf: boolean;
+			moduleId: number;
+			parentId: number | null;
+			selectable: boolean;
+		}
+	] | null;
 }
 
 export interface CheckedItem {
@@ -60,13 +74,9 @@ export default Vue.extend({
 	name: 'OntologyNestedTreeNode',
 	components: {},
 	props: {
-		isRootNode: {
-			type: Boolean,
-			default: false,
-		},
 		criterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			required: true,
+			default: null,
 		},
 	},
 
@@ -75,6 +85,7 @@ export default Vue.extend({
 			state: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			concepts: null,
 		}
 	},
 
@@ -99,11 +110,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		if (this.isRootNode === true) {
-			this.state = true
-		}
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -115,6 +122,23 @@ export default Vue.extend({
 		checkboxTrigger(checkedItem: CheckedItem): void {
 			this.$emit('input', checkedItem)
 		},
+
+		/* async getConcepts(num: number): Promise<void> {
+			try {
+				if (this.state === true) {
+					const responseConcepts = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + num))
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+			}
+		}, */
+
+		expandTreeNode(): void {
+			this.state = !this.state
+			// this.getConcepts(moduleId)
+
+		},
 	},
 })
 </script>
@@ -125,6 +149,7 @@ export default Vue.extend({
 	scrollbar-width: auto;
 	height: 100%;
 	padding-right: 10px;
+	margin-left: 20px;
 }
 
 .ontology-nested-tree-node li {
@@ -184,6 +209,6 @@ img {
 }
 
 ul {
-	margin-left: 40px;
+	margin-left: 30px;
 }
 </style>

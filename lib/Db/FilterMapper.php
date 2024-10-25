@@ -12,22 +12,21 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<OntologyFilters>
+ * @template-extends QBMapper<Filter>
  */
-class OntologyFiltersMapper extends QBMapper
+class FilterMapper extends QBMapper
 {
     public function __construct(IDBConnection $db)
     {
-        parent::__construct($db, 'machbarkeit_filters', OntologyFilters::class);
+        parent::__construct($db, 'machbarkeit_filter_options', Filter::class);
     }
 
-    public function filter($moduleId, $conceptId): array
+    public function filters(): array
     {
         $qb = $this->db->getQueryBuilder();
         $qb->select('*')
-            ->from('machbarkeit_filters')
-            ->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)))
-            ->andWhere($qb->expr()->eq('concept_id', $qb->createNamedParameter($conceptId, IQueryBuilder::PARAM_INT)));
+            ->from('machbarkeit_filter_options');
+        // ->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)));
         return $this->findEntities($qb);
     }
 }

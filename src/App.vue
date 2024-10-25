@@ -34,7 +34,10 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		const root = document.getElementsByTagName('html')[0]
+		root.setAttribute('class', 'webkit chrome win js')
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

@@ -186,19 +186,20 @@
 				</div>
 			</div>
 		</div>
-		<!-- <span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
-			{{ ein.display }} / {{ characteristicsLogic.einschlussCriteria[ein_index] }} /
+		<!-- key Problem!! -->
+		<span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
+			{{ ein.display }} / {{ characteristicsLogic.inclusionCriteria[ein_index] }} /
 		</span>
 		<br>
 		<span v-for="(aus, aus_index) in selectedExclusionCharacteristics" :key="aus_index">
-			{{ aus.display }} / {{ characteristicsLogic.ausschlussCriteria[aus_index] }} /
-		</span> -->
+			{{ aus.display }} / {{ characteristicsLogic.exclusionCriteria[aus_index] }} /
+		</span>
 	</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData'
+import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
 import draggable from 'vuedraggable'
 
 interface FeasibilityQueryDisplayData {
@@ -208,8 +209,8 @@ interface FeasibilityQueryDisplayData {
     }
     inclusionCriteriaOld: Array<string>;
 	exclusionCriteriaOld: Array<string>;
-	draggableInclusionCharacteristics: Array<FilterInfo>;
-	draggableExclusionCharacteristics: Array<FilterInfo>;
+	draggableInclusionCharacteristics: Array<OntologyTreeElement>;
+	draggableExclusionCharacteristics: Array<OntologyTreeElement>;
 }
 
 export default Vue.extend({
@@ -220,12 +221,12 @@ export default Vue.extend({
 
 	props: {
 		selectedInclusionCharacteristics: {
-			type: Array<FilterInfo>,
+			type: Array<OntologyTreeElement>,
 			required: true,
 		},
 
 		selectedExclusionCharacteristics: {
-			type: Array<FilterInfo>,
+			type: Array<OntologyTreeElement>,
 			required: true,
 		},
 
@@ -256,11 +257,9 @@ export default Vue.extend({
 	watch: {
 		selectedInclusionCharacteristics(newVal) {
 			this.draggableInclusionCharacteristics = [...newVal]
-
 			// first input
 			if (this.inclusionCriteriaOld.length === 0) {
-				const length = newVal.length - this.inclusionCriteriaOld.length
-				for (let i = 1; i < length; i++) {
+				for (let i = 1; i < newVal.length; i++) {
 					this.characteristicsLogic.inclusionCriteria.push('and')
 				}
 			} else if (newVal.length > 0) {
@@ -295,9 +294,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -322,7 +319,7 @@ export default Vue.extend({
 			}
 		},
 
-		editLimitation(characteristic: FilterInfo, index: number, criteriaType: string) {
+		editLimitation(characteristic: OntologyTreeElement, index: number, criteriaType: string) {
 			this.$emit('edit-criteria-limitation', characteristic, index, criteriaType)
 		},
 

@@ -4,29 +4,21 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div>
-		<div v-if="filteredCriterion !== null && filteredCriterion.selectable === true" class="ontology-nested-tree-node-wrapper">
+		<!-- v-if="filteredCriterion !== null && filteredCriterion.selectable === true" -->
+		<div class="ontology-nested-tree-node-wrapper">
 			<p class="criterion-code">
-				{{ filteredCriterion.termCodes?.[0].code }}
+				code
 			</p>
 			<div class="search-tree-term-entry">
-				<input :id="criterion.id"
+				<input :id="String(criterion.id)"
 					v-model="isChecked"
 					type="checkbox"
 					:value="criterion.display">
 				<p>
-					{{ filteredCriterion.display }}
+					{{ criterion?.display }}
 				</p>
 			</div>
 		</div>
-
-		<OntologyNestedTreeNodeSearchInput v-for="child in criterion.children"
-			:key="child.id"
-			:criterion="child"
-			:index="index"
-			:inclusion-search-input="inclusionSearchInput"
-			:exclusion-search-input="exclusionSearchInput"
-			@check-existing-data="checkExistingData"
-			@input="checkboxTrigger" />
 	</div>
 </template>
 
@@ -49,19 +41,15 @@ export default Vue.extend({
 	props: {
 		criterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			required: true,
+			default: Object,
 		},
 		index: {
 			type: Number,
 			default: Number,
 		},
-		inclusionSearchInput: {
+		searchInputText: {
 			type: String,
-			default: '',
-		},
-		exclusionSearchInput: {
-			type: String,
-			default: '',
+			default: null,
 		},
 	},
 
@@ -88,37 +76,13 @@ export default Vue.extend({
 		},
 	},
 
-	watch: {
-		inclusionSearchInput() {
-			if (this.inclusionSearchInput.length > 0 && this.criterion.selectable === true) {
-				const filteredCriterionResult = this.filterCriteria(this.inclusionSearchInput, this.criterion)
-				filteredCriterionResult && this.$emit('check-existing-data')
-			}
-		},
-
-		exclusionSearchInput() {
-			if (this.exclusionSearchInput.length > 0 && this.criterion.selectable === true) {
-				const filteredCriterionResult = this.filterCriteria(this.exclusionSearchInput, this.criterion)
-				filteredCriterionResult && this.$emit('check-existing-data')
-			}
-		},
-	},
+	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		if (this.inclusionSearchInput.length > 0 && this.criterion.selectable === true) {
-			const filteredCriterionResult = this.filterCriteria(this.inclusionSearchInput, this.criterion)
-			filteredCriterionResult && this.$emit('check-existing-data')
-		}
-
-		if (this.exclusionSearchInput.length > 0 && this.criterion.selectable === true) {
-			const filteredCriterionResult = this.filterCriteria(this.exclusionSearchInput, this.criterion)
-			filteredCriterionResult && this.$emit('check-existing-data')
-		}
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -127,22 +91,18 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		checkboxTrigger(checkedItem: CheckedItem): void {
-			this.$emit('input', checkedItem)
-		},
-
-		filterCriteria(textSearch: string, criterion: OntologyTreeElement): OntologyTreeElement | null {
-			const filteredItem = criterion.termCodes?.[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes?.[0].display.toLowerCase().includes(textSearch.toLowerCase())
-
+		/* filterCriteria(textSearch: string, criterion: OntologyTreeElement): OntologyTreeElement | null {
+			// const filteredItem = criterion.termCodes?.[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes?.[0].display.toLowerCase().includes(textSearch.toLowerCase())
+			const filteredItem = true
 			if (filteredItem) {
 				this.filteredCriterion = criterion
 			} else this.filteredCriterion = null
 			return this.filteredCriterion
-		},
+		}, */
 
-		checkExistingData() {
+		/* checkExistingData() {
 			this.$emit('check-existing-data', this.index)
-		},
+		}, */
 	},
 })
 </script>
