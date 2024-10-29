@@ -12,9 +12,11 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version000001Date20240715123000 extends SimpleMigrationStep {
+class Version000001Date20240715123000 extends SimpleMigrationStep
+{
 
-	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options)
+	{
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
@@ -52,7 +54,8 @@ class Version000001Date20240715123000 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 			$table->addColumn('optional', Types::BOOLEAN, [
-				'notnull' => true,
+				'notnull' => false,
+				'default' => true
 			]);
 
 			$table->setPrimaryKey(['id']);
