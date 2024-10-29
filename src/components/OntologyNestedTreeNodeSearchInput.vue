@@ -10,10 +10,10 @@
 				code
 			</p>
 			<div class="search-tree-term-entry">
-				<input :id="String(criterion.id)"
+				<input :id="String(criterion?.id)"
 					v-model="isChecked"
 					type="checkbox"
-					:value="criterion.display">
+					:value="criterion?.display">
 				<p>
 					{{ criterion?.display }}
 				</p>
@@ -41,7 +41,7 @@ export default Vue.extend({
 	props: {
 		criterion: {
 			type: Object as PropType<OntologyTreeElement>,
-			default: Object,
+			default: null,
 		},
 		index: {
 			type: Number,
@@ -61,17 +61,18 @@ export default Vue.extend({
 
 	computed: {
 		isChecked: {
-			// Determines if the current item is checked
-			get(): string {
-				return ''
+			get(): boolean {
+				return this.$store.getters.checkedItems(this.criterion.id)
 			},
-			// Updates checked items when checkbox state changes
-			set(checked): void {
+			set(checked: boolean): void {
 				if (checked) {
 					this.$emit('input', { action: 'check', node: this.criterion })
+					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, display: this.criterion.display })
 				} else {
 					this.$emit('input', { action: 'uncheck', node: this.criterion })
+					this.$store.dispatch('removeCheckedItem', { id: this.criterion.id, display: this.criterion.display })
 				}
+
 			},
 		},
 	},

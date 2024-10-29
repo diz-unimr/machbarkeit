@@ -19,6 +19,7 @@
 						</button>
 					</div>
 				</div>
+
 				<div v-if="ontologyTree && ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab" class="ontology-search-tree__display">
 					<div class="ontology-search-tree__body">
 						<div class="module_name">
@@ -42,10 +43,10 @@
 						</template>
 					</div>
 					<div class="ontology-search-tree__button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="$emit('get-selected-criteria', criteriaType, selectedItems)">
+						<button :disabled="selectedItems.length > 0 ? false : true" @click="submit(criteriaType, selectedItems)">
 							AUSWÄHLEN
 						</button>
-						<button @click="$emit('toggle-ontology-search-tree-modal', criteriaType)">
+						<button @click="cancel(criteriaType)">
 							ABBRECHEN
 						</button>
 					</div>
@@ -95,7 +96,6 @@ export default Vue.extend({
 	data(): OntologySearchTreeModalData {
 		return {
 			activeTab: 1,
-			// activeModule: null,
 			wasTabClicked: [],
 			ontologyResponse: null,
 			selectedItems: [],
@@ -119,8 +119,8 @@ export default Vue.extend({
 		},
 
 		activeTab: {
-			handler() {
-				this.getOntology(this.activeTab!, this.searchInputText)
+			async handler() {
+				await this.getOntology(this.activeTab!, this.searchInputText)
 			},
 		},
 	},
@@ -130,14 +130,13 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	async created() {
-		// shorthand, if moduleName is in localStorage then this.modules = moduleName, else call functions getModules() and activateTab()
-		// this.modules = (JSON.parse(localStorage.getItem('moduleName')!) ?? await this.getModules())
+
 		if (JSON.parse(localStorage.getItem('moduleName')!)) {
 			this.modules = JSON.parse(localStorage.getItem('moduleName')!)
 		} else await this.getModules()
 
 		if (this.searchInputText.length <= 0) {
-			this.getOntology(1)
+			await this.getOntology(1)
 		}
 	},
 	beforeMount() {},
@@ -173,25 +172,6 @@ export default Vue.extend({
 				}
 				return this.ontologyTree
 			} else {
-				// alle Ontology Tree
-				/* if (JSON.parse(localStorage.getItem('ontology:' + moduleId)!)) {
-					this.ontologyTree = JSON.parse(localStorage.getItem('ontology:' + moduleId)!)
-				} else {
-					try {
-						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + moduleId))
-						this.ontologyTree = response.data
-						for (let i = 0; i < response.data.length; i++) {
-							this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
-						}
-						localStorage.setItem('ontology:' + moduleId, JSON.stringify(response.data))
-
-						return this.ontologyTree
-					} catch (error) {
-					// eslint-disable-next-line no-console
-						console.log((error as Error).message)
-						return []
-					}
-				} */
 				this.ontologyTree = JSON.parse(localStorage.getItem('ontology:' + moduleId)!) ?? (
 					async () => {
 						try {
@@ -201,7 +181,6 @@ export default Vue.extend({
 								this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
 							}
 							localStorage.setItem('ontology:' + moduleId, JSON.stringify(response.data))
-
 							return this.ontologyTree
 						} catch (error) {
 						// eslint-disable-next-line no-console
@@ -222,6 +201,16 @@ export default Vue.extend({
 					return name !== checkedItem.node
 				})
 			}
+		},
+
+		submit(criteriaType: string, selectedItems: OntologyTreeElement[]): void {
+			this.$emit('get-selected-criteria', criteriaType, selectedItems)
+			this.$store.dispatch('clearCheckedItem')
+		},
+
+		cancel(criteriaType: string): void {
+			this.$emit('toggle-ontology-search-tree-modal', criteriaType)
+			this.$store.dispatch('clearCheckedItem')
 		},
 	},
 })

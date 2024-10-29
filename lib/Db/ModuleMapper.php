@@ -14,10 +14,8 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<Module>
  */
-class ModuleMapper extends QBMapper
-{
-	public function __construct(IDBConnection $db)
-	{
+class ModuleMapper extends QBMapper {
+	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'machbarkeit_modules', Module::class);
 	}
 
@@ -25,8 +23,7 @@ class ModuleMapper extends QBMapper
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function find(int $id): Module
-	{
+	public function find(int $id): Module {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -38,8 +35,7 @@ class ModuleMapper extends QBMapper
 	/**
 	 * @return array
 	 */
-	public function findModules(): array
-	{
+	public function findModules(): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')

@@ -44,7 +44,7 @@ export interface OntologyTree {
 }
 
 export interface OntologySearchTreeModalData {
-	activeTab: number | undefined;
+	activeTab: number;
     wasTabClicked: Array<boolean>;
 	ontologyResponse: OntologyTreeElement[] | null;
 	selectedItems: OntologyTreeElement[];

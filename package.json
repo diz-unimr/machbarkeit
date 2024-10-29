@@ -26,10 +26,13 @@
     "@nextcloud/router": "^2.0.0",
     "@nextcloud/typings": "^1.8.0",
     "@nextcloud/vue": "^8.7.1",
+    "axios": "^1.7.7",
+    "axios-cache-interceptor": "^1.6.0",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "vue": "^2.7.0",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^2.24.3",
+    "vuex": "^3.6.2"
   },
   "browserslist": [
     "extends @nextcloud/browserslist-config"

@@ -92,6 +92,22 @@ export default Vue.extend({
 	computed: {
 		isChecked: {
 			// Determines if the current item is checked
+			get(): boolean {
+				return this.$store.getters.checkedItems(this.criterion.id)
+			},
+			// Updates checked items when checkbox state changes
+			set(checked: boolean): void {
+				if (checked) {
+					this.$emit('input', { action: 'check', node: this.criterion })
+					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, display: this.criterion.display })
+				} else {
+					this.$emit('input', { action: 'uncheck', node: this.criterion })
+					this.$store.dispatch('removeCheckedItem', { id: this.criterion.id, display: this.criterion.display })
+				}
+			},
+		},
+		/* isChecked: {
+			// Determines if the current item is checked
 			get(): string {
 				return ''
 			},
@@ -103,7 +119,7 @@ export default Vue.extend({
 					this.$emit('input', { action: 'uncheck', node: this.criterion })
 				}
 			},
-		},
+		}, */
 	},
 
 	// life cycle of vue js

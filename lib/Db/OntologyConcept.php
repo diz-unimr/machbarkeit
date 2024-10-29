@@ -9,10 +9,8 @@ namespace OCA\Machbarkeit\Db;
 use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
-use PHPUnit\Util\Json;
 
-class OntologyConcept extends Entity implements JsonSerializable
-{
+class OntologyConcept extends Entity implements JsonSerializable {
 	public string $display = '';
 	public ?string $termCodes = null;
 	public bool $timeRestrictionAllowed = false;
@@ -24,8 +22,7 @@ class OntologyConcept extends Entity implements JsonSerializable
 	public ?int $filterOptionsId = null;
 
 
-	public function jsonSerialize(): array
-	{
+	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,
 			'display' => $this->display,

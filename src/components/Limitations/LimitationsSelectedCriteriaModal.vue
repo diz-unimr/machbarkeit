@@ -9,6 +9,7 @@
 				<h2 class="limitations-dialog__title">
 					Einschränkungen der ausgewählten Merkmale
 				</h2>
+
 				<div v-if="filterOptions" class="limitations-dialog__panel">
 					<LimitationsSelectedCriteriaCard v-for="(selectedCriterion, index) in selectedCriteria"
 						:id="index"

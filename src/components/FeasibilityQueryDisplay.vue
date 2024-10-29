@@ -186,14 +186,18 @@
 				</div>
 			</div>
 		</div>
-		<!-- key Problem!! -->
-		<span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
-			{{ ein.display }} / {{ characteristicsLogic.inclusionCriteria[ein_index] }} /
-		</span>
+
+		<div>
+			<span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
+				{{ ein.display }} / {{ characteristicsLogic.inclusionCriteria[ein_index] }} /
+			</span>
+		</div>
 		<br>
-		<span v-for="(aus, aus_index) in selectedExclusionCharacteristics" :key="aus_index">
-			{{ aus.display }} / {{ characteristicsLogic.exclusionCriteria[aus_index] }} /
-		</span>
+		<div>
+			<span v-for="(aus, aus_index) in selectedExclusionCharacteristics" :key="aus_index">
+				{{ aus.display }} / {{ characteristicsLogic.exclusionCriteria[aus_index] }} /
+			</span>
+		</div>
 	</div>
 </template>
 

@@ -32,21 +32,7 @@ import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 
-interface FilterOptions {
-    id: number;
-    filterName: string;
-    type: string;
-    optional: boolean;
-    filterOptions: {
-        code: string;
-        display: string;
-        system: string;
-        version: string;
-    }[];
-}
-
 interface FeasibilityQueryContainerData {
-	filterOptions: FilterOptions[] | null;
 	numberOfPatients: number;
 	isSaveModalOpen: boolean;
 	hasNoQuery: boolean;
@@ -62,7 +48,6 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryContainerData {
 		return {
-			filterOptions: null,
 			numberOfPatients: 0,
 			isSaveModalOpen: false,
 			hasNoQuery: true,

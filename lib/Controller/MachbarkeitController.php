@@ -9,13 +9,11 @@ namespace OCA\Machbarkeit\Controller;
 use OCA\Machbarkeit\AppInfo\Application;
 use OCA\Machbarkeit\Service\MachbarkeitService;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\Response;
-use OCP\IRequest;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
 
-class MachbarkeitController extends Controller
-{
+class MachbarkeitController extends Controller {
 	#[NoCSRFRequired]
 	private MachbarkeitService $service;
 	private ?string $userId;
@@ -35,18 +33,15 @@ class MachbarkeitController extends Controller
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
-	public function getMetadata(): JSONResponse
-	{
+	public function getMetadata(): JSONResponse {
 		return new JSONResponse($this->service->readCsv());
 	}
 
-	public function getOntology(): JSONResponse
-	{
+	public function getOntology(): JSONResponse {
 		return new JSONResponse($this->service->readOntology());
 	}
 
-	public function getUiProfile(): JSONResponse
-	{
+	public function getUiProfile(): JSONResponse {
 		// TODO remove test call
 		$modules = $this->getModules();
 		// $concepts = $this->service->getConcepts(2);
@@ -55,31 +50,26 @@ class MachbarkeitController extends Controller
 		return new JSONResponse($this->service->readUiProfile());
 	}
 
-	public function getModules()
-	{
+	public function getModules() {
 		return $this->service->getModules();
 	}
 
-	public function getOntologyTree(int $module_id)
-	{
+	public function getOntologyTree(int $module_id) {
 		$ontology = $this->service->getOntology($module_id);
 		$ontologyTree = $this->service->buildTree($ontology, null);
 		return $ontologyTree;
 	}
 
-	public function getSearchOntology(string $textSearch, int $module_id)
-	{
+	public function getSearchOntology(string $textSearch, int $module_id) {
 		$ontology = $this->service->getSearchOntology($textSearch, $module_id);
 		return $ontology;
 	}
 
-	public function getFilters()
-	{
+	public function getFilters() {
 		return $this->service->getFilters();
 	}
 
-	public function getConcepts()
-	{
+	public function getConcepts() {
 		return $this->service->getConcepts(1);
 	}
 }
