@@ -15,7 +15,7 @@
 							:key="module.id"
 							:class="['ontology-tab', { 'active': activeTab === module.id }]"
 							@click="activeTab = module.id">
-							{{ module.display }}
+							{{ module.moduleName }}
 						</button>
 					</div>
 				</div>
@@ -66,7 +66,6 @@
 import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import nextcloudAxios from '@nextcloud/axios'
-// import { setupCache, buildWebStorage } from 'axios-cache-interceptor'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
 import type { OntologySearchTreeModalData, Modules, OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
@@ -130,7 +129,9 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	async created() {
-
+		/* const param = [1, 3]
+		const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/filters/[' + param + ']'))
+		console.log(response) */
 		if (JSON.parse(localStorage.getItem('moduleName')!)) {
 			this.modules = JSON.parse(localStorage.getItem('moduleName')!)
 		} else await this.getModules()
@@ -149,8 +150,8 @@ export default Vue.extend({
 	methods: {
 		async getModules(): Promise<void> {
 			try {
-				const responseModules: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
-				this.modules = responseModules
+				const response: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
+				this.modules = response
 				localStorage.setItem('moduleName', JSON.stringify(this.modules))
 			} catch (error) {
 				// eslint-disable-next-line no-console

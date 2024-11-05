@@ -12,7 +12,8 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 use Psr\Log\LoggerInterface;
 
-class InitData implements IRepairStep {
+class InitData implements IRepairStep
+{
 
 	/** @var LoggerInterface */
 	protected $logger;
@@ -21,7 +22,8 @@ class InitData implements IRepairStep {
 	/** @var IDBConnection */
 	protected $db;
 
-	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db) {
+	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db)
+	{
 		$this->logger = $logger;
 		$this->db = $db;
 		$this->config = $config;
@@ -30,14 +32,16 @@ class InitData implements IRepairStep {
 	/**
 	 * Returns the step's name
 	 */
-	public function getName() {
+	public function getName()
+	{
 		return 'Init data step!';
 	}
 
 	/**
 	 * @param IOutput $output
 	 */
-	public function run(IOutput $output) {
+	public function run(IOutput $output)
+	{
 		$this->storeInitialData();
 		/* $previousVersion = $this->config->getAppValue('machbarkeit', 'installed_version', false);
 		if (!$previousVersion) {
@@ -45,7 +49,8 @@ class InitData implements IRepairStep {
 		} */
 	}
 
-	protected function storeInitialData() {
+	protected function storeInitialData()
+	{
 		$this->logger->info('Loading ontology data', ['app' => 'Machbarkeit']);
 
 		$query = $this->db->getQueryBuilder();
@@ -56,7 +61,7 @@ class InitData implements IRepairStep {
 			->values(
 				[
 					'id' => $this->db->quote(1),
-					'display' => $this->db->quote('Person'),
+					'module_name' => $this->db->quote('Person'),
 					'version' => $this->db->quote('1.0.0')
 				]
 			)->executeStatement();
@@ -66,7 +71,7 @@ class InitData implements IRepairStep {
 			->values(
 				[
 					'id' => $this->db->quote(2),
-					'display' => $this->db->quote('Prozedur'),
+					'module_name' => $this->db->quote('Prozedur'),
 					'version' => $this->db->quote('1.0.0'),
 				]
 			)->executeStatement();
@@ -148,17 +153,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(1),
 				'display' => $this->db->quote('Gegenwärtiges chronologisches Alter'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "424144002",
-							"display": "Gegenw\u00e4rtiges chronologisches Alter",
-							"system": "http://snomed.info/sct"
-						}'))),
-				/* 'term_code' => $query->createNamedParameter(json_encode([
-					"code" => $this->db->quote('424144002'),
-					"display" => $this->db->quote('Gegenw\u00e4rtiges chronologisches Alter'),
-					"system" => $this->db->quote('http://snomed.info/sct'),
-				]), IQueryBuilder::PARAM_STR), */
+				'code' => $this->db->quote('424144002'),
+				'code_system' => $this->db->quote('http://snomed.info/sct'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'time_restriction_allowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
@@ -172,12 +168,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(2),
 				'display' => $this->db->quote('Geschlecht'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "263495000",
-							"display": "Geschlecht",
-							"system": "http://snomed.info/sct"
-						}'))),
+				'code' => $this->db->quote('263495000'),
+				'code_system' => $this->db->quote('http://snomed.info/sct'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'time_restriction_allowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
@@ -191,12 +183,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(3),
 				'display' => $this->db->quote('Bildgebende Diagnostik'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "263495000",
-							"display": "Geschlecht",
-							"system": "http://snomed.info/sct"
-						}'))),
+				'code' => $this->db->quote('3'),
+				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
 				'time_restriction_allowed' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
@@ -209,13 +197,15 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(4),
 				'display' => $this->db->quote('Andere bildgebende Verfahren'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
+				'code' => $this->db->quote('3-90'),
+				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
+				/* 'term_codes' => $query->createNamedParameter(json_encode(json_decode('
 						{
 							"code": "3-90",
 							"display": "Andere bildgebende Verfahren",
 							"system": "http://fhir.de/CodeSystem/bfarm/ops",
 							"version": "2023"
-						}'))),
+						}'))), */
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
@@ -227,13 +217,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(5),
 				'display' => $this->db->quote('Elektrische Impedanztomographie'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "3-903",
-							"display": "Elektrische Impedanztomographie",
-							"system": "http://fhir.de/CodeSystem/bfarm/ops",
-							"version": "2023"
-						}'))),
+				'code' => $this->db->quote('3-903'),
+				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
@@ -245,13 +230,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(6),
 				'display' => $this->db->quote('Elektroimpedanzspektroskopie der Haut'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "3-901",
-							"display": "Elektroimpedanzspektroskopie der Haut",
-							"system": "http://fhir.de/CodeSystem/bfarm/ops",
-							"version": "2023"
-						}'))),
+				'code' => $this->db->quote('3-901'),
+				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
@@ -263,13 +243,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(7),
 				'display' => $this->db->quote('Knochendichtemessung (alle Verfahren)'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "3-900",
-							"display": "Knochendichtemessung (alle Verfahren)",
-							"system": "http://fhir.de/CodeSystem/bfarm/ops",
-							"version": "2023"
-						}'))),
+				'code' => $this->db->quote('3-900'),
+				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),
@@ -282,13 +257,8 @@ class InitData implements IRepairStep {
 			[
 				'id' => $this->db->quote(8),
 				'display' => $this->db->quote('Radiofrequenzspektroskopie von Brustgewebe'),
-				'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "3-902",
-							"display": "Radiofrequenzspektroskopie von Brustgewebe",
-							"system": "http://fhir.de/CodeSystem/bfarm/ops",
-							"version": "2023"
-						}'))),
+				'code' => $this->db->quote('3-902'),
+				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
 				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 				'module_id' => $this->db->quote(2),

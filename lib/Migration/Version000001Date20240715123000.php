@@ -27,7 +27,7 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 				'autoincrement' => true,
 				'notnull' => true,
 			]);
-			$table->addColumn('display', Types::STRING, [
+			$table->addColumn('module_name', Types::STRING, [
 				'notnull' => true,
 			]);
 			$table->addColumn('version', Types::STRING, [
@@ -71,9 +71,15 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->addColumn('display', Types::STRING, [
 				'notnull' => true,
 			]);
-			$table->addColumn('term_codes', Types::JSON, [
-				'notnull' => false,
+			$table->addColumn('code', Types::STRING, [
+				'notnull' => true,
 			]);
+			$table->addColumn('code_system', Types::STRING, [
+				'notnull' => true,
+			]);
+			/* $table->addColumn('term_codes', Types::JSON, [
+				'notnull' => false,
+			]); */
 			$table->addColumn('selectable', Types::BOOLEAN, [
 				'notnull' => false,
 				'default' => false

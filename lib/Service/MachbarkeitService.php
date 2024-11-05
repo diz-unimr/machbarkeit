@@ -10,7 +10,8 @@ use OCA\Machbarkeit\Db\FilterMapper;
 use OCA\Machbarkeit\Db\ModuleMapper;
 use OCA\Machbarkeit\Db\OntologyConceptMapper;
 
-class MachbarkeitService {
+class MachbarkeitService
+{
 	private $moduleMapper;
 	private $conceptMapper;
 	private $ontologyConceptMapper;
@@ -20,13 +21,15 @@ class MachbarkeitService {
 		$this->moduleMapper = $moduleMapper;
 		$this->conceptMapper = $conceptMapper;
 	} */
-	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper, FilterMapper $filterMapper) {
+	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper, FilterMapper $filterMapper)
+	{
 		$this->moduleMapper = $moduleMapper;
 		$this->ontologyConceptMapper = $ontologyConceptMapper;
 		$this->filterMapper = $filterMapper;
 	}
 
-	public function readCsv() {
+	public function readCsv()
+	{
 		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
 		$data = [];
 		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
@@ -47,7 +50,8 @@ class MachbarkeitService {
 		return array_values($jsonArray);
 	}
 
-	public function readOntology() {
+	public function readOntology()
+	{
 		$json_files = [
 			'Person.json',
 			// 'test.json',
@@ -70,25 +74,30 @@ class MachbarkeitService {
 		return $merged_file;
 	}
 
-	public function readUiProfile() {
+	public function readUiProfile()
+	{
 		$ui_profile = file_get_contents(__DIR__ . '/../../ontology/ui_profile.json');
 		$json_ui_profile = json_decode($ui_profile, true);
 		return $json_ui_profile;
 	}
 
-	public function getModules() {
+	public function getModules()
+	{
 		return $this->moduleMapper->findModules();
 	}
 
-	public function getConcepts($moduleId) {
+	public function getConcepts($moduleId)
+	{
 		return $this->ontologyConceptMapper->find($moduleId);
 	}
 
-	public function getOntology($moduleId) {
+	public function getOntology($moduleId)
+	{
 		return $this->ontologyConceptMapper->findAll($moduleId);
 	}
 
-	public function buildTree(array $elements, $id) {
+	public function buildTree(array $elements, $id)
+	{
 		$branch = [];
 		foreach ($elements as $element) {
 			if ($element->parentId == $id) {
@@ -104,11 +113,13 @@ class MachbarkeitService {
 		return $branch;
 	}
 
-	public function getSearchOntology(string $textSeach, int $module_id) {
+	public function getSearchOntology(string $textSeach, int $module_id)
+	{
 		return $this->ontologyConceptMapper->searchOntology($textSeach, $module_id);
 	}
 
-	public function getFilters() {
-		return $this->filterMapper->filters();
+	public function getFilters($filter_options_ids) // string $filter_options_ids = null
+	{
+		return $this->filterMapper->filters($filter_options_ids);
 	}
 }
