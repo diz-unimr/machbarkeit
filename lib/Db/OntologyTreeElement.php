@@ -8,8 +8,7 @@ namespace OCA\Machbarkeit\Db;
 
 use JsonSerializable;
 
-class OntologyTreeElement implements JsonSerializable
-{
+class OntologyTreeElement implements JsonSerializable {
 	public int $id;
 	public string $display = '';
 	public ?int $moduleId = null;
@@ -17,8 +16,7 @@ class OntologyTreeElement implements JsonSerializable
 	public bool $selectable = false;
 	public bool $leaf = false;
 
-	public function jsonSerialize(): array
-	{
+	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,
 			'display' => $this->display,

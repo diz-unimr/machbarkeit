@@ -15,15 +15,12 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<Filter>
  */
-class FilterMapper extends QBMapper
-{
-	public function __construct(IDBConnection $db)
-	{
+class FilterMapper extends QBMapper {
+	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'machbarkeit_filter_options', Filter::class);
 	}
 
-	public function filters($filter_options_ids)
-	{
+	public function filters($filter_options_ids) {
 		// $filter_options_ids = null;
 
 		$qb = $this->db->getQueryBuilder();

@@ -19,13 +19,11 @@ use OCP\AppFramework\Db\Entity;
  * @method getUiProfile(): string
  * @method setUiProfile(string $uiProfile): void
  */
-class Module extends Entity implements JsonSerializable
-{
+class Module extends Entity implements JsonSerializable {
 	public string $moduleName = '';
 	public string $version = '';
 
-	public function jsonSerialize(): array
-	{
+	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,
 			'moduleName' => $this->moduleName,
