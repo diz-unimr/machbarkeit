@@ -6,23 +6,25 @@ import type { ConceptType } from './ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData.ts'
 import type { TimeRange } from '../types/TimeRangeOptionsData.ts'
 
-export interface OntologyTreeElement {
-    children: Array<OntologyTreeElement> | undefined;
+export interface Criterion {
+    children: Array<Criterion> | undefined;
     id: number;
     moduleId: number;
     parentId: number | null;
-    filterOptionsId: number | undefined;
     display: string;
-    termCodes: {
-        code: string,
-        display: string,
-        system: string,
-    };
-    filterOption: object | undefined;
-    timeRestrictionAllowed: boolean | undefined;
-    typeQuantity: boolean | undefined;
+    code: string;
+    codeSystem: string;
     selectable: boolean;
     leaf: boolean;
+    timeRestrictionAllowed: boolean | undefined;
+    filterName: string;
+    filterType: string;
+    filterOptions: {
+        code: string;
+        display: string;
+        system: string;
+        version: string;
+    }[];
     conceptType: ConceptType | undefined;
 	timeRange: TimeRange | undefined;
 	quantityType: QuantityType | undefined;
@@ -30,7 +32,7 @@ export interface OntologyTreeElement {
 
 export interface Modules {
     id: number;
-    display: string;
+    moduleName: string;
     version: string;
 }
 
@@ -46,11 +48,11 @@ export interface OntologyTree {
 export interface OntologySearchTreeModalData {
 	activeTab: number;
     wasTabClicked: Array<boolean>;
-	ontologyResponse: OntologyTreeElement[] | null;
-	selectedItems: OntologyTreeElement[];
+	ontologyResponse: Criterion[] | null;
+	selectedItems: Criterion[];
     isSearchResultNoData: Array<boolean>;
     modules: Modules[] | null;
-    ontologyTree: OntologyTreeElement[] | null;
-    ontologyTreeSearch: Array<OntologyTreeElement | null>;
+    ontologyTree: Criterion[] | null;
+    ontologyTreeSearch: Array<Criterion | null>;
     hashId: Array<string>;
 }

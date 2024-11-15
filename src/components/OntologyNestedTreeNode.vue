@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
+import type { Criterion } from '../types/OntologySearchTreeModalData'
 
 interface OntologyNestedTreeNodeData {
 	state: boolean;
@@ -67,7 +67,7 @@ interface OntologyNestedTreeNodeData {
 
 export interface CheckedItem {
 	action: string;
-	node: OntologyTreeElement;
+	node: Criterion;
 }
 
 export default Vue.extend({
@@ -75,7 +75,7 @@ export default Vue.extend({
 	components: {},
 	props: {
 		criterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			default: null,
 		},
 	},
@@ -106,20 +106,6 @@ export default Vue.extend({
 				}
 			},
 		},
-		/* isChecked: {
-			// Determines if the current item is checked
-			get(): string {
-				return ''
-			},
-			// Updates checked items when checkbox state changes
-			set(checked): void {
-				if (checked) {
-					this.$emit('input', { action: 'check', node: this.criterion })
-				} else {
-					this.$emit('input', { action: 'uncheck', node: this.criterion })
-				}
-			},
-		}, */
 	},
 
 	// life cycle of vue js
@@ -139,21 +125,8 @@ export default Vue.extend({
 			this.$emit('input', checkedItem)
 		},
 
-		/* async getConcepts(num: number): Promise<void> {
-			try {
-				if (this.state === true) {
-					const responseConcepts = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + num))
-				}
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log((error as Error).message)
-			}
-		}, */
-
 		expandTreeNode(): void {
 			this.state = !this.state
-			// this.getConcepts(moduleId)
-
 		},
 	},
 })

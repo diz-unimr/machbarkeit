@@ -11,3 +11,4 @@ node_modules/
 /js/
 ontology/
 dev/data/server
+lib/Service/.env

@@ -10,10 +10,7 @@
 					<img :src="imgExpand"
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
 				</button>
-				<p>{{ filterOption ? filterOption.filterName : 'Zeitraum' }} </p>
-				<p v-if="filterOption?.optional || selectedCriterion.timeRestrictionAllowed">
-					(optional)
-				</p>
+				<p>{{ selectedCriterion.filterName }} </p>
 			</div>
 			<div class="filter-card__button--reset">
 				<button :disabled="isResetDisabled" @click="reset">
@@ -27,15 +24,13 @@
 			@toggle-reset-button="toggleResetButton"
 			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<QuantityOptions v-if="selectedCriterion.typeQuantity && filterOption"
-			:filter-option="filterOption"
+		<QuantityOptions v-if="selectedCriterion.filterType === 'quantity'"
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
 			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<ConceptOptions v-if="!selectedCriterion.typeQuantity && filterOption"
-			:filter-option="filterOption"
+		<ConceptOptions v-if="selectedCriterion.filterType === 'concept'"
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
@@ -48,8 +43,7 @@ import Vue, { type PropType } from 'vue'
 import TimeRangeOptions from './TimeRangeOptions.vue'
 import ConceptOptions from './ConceptOptions.vue'
 import QuantityOptions from './QuantityOptions.vue'
-import type { FilterOptions } from '../../types/LimitationsSelectedCriteriaModalData'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { Criterion } from '../../types/OntologySearchTreeModalData'
 import type { ConceptType } from '../../types/ConceptOptionsData'
 import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
@@ -68,30 +62,14 @@ export default Vue.extend({
 		QuantityOptions,
 	},
 	props: {
-		filterOption: {
-			type: Object as PropType<FilterOptions>,
-			default: null,
-		},
-		attribute: {
-			type: String,
-			default: '',
-		},
-		isFilterOptional: {
-			type: Boolean,
-			default: true,
-		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			required: true,
-		},
-		display: {
-			type: String,
-			default: '',
 		},
 	},
 	data(): FilterCardData {
 		return {
-			state: this.filterOption ? !this.filterOption.optional : false,
+			state: true,
 			isResetDisabled: this.selectedCriterion.conceptType
 				? this.selectedCriterion.conceptType.value.length <= 0
 				: this.selectedCriterion.quantityType

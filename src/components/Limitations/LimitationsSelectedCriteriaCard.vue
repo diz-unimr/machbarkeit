@@ -13,9 +13,7 @@
 				<img :src="imgDelete">
 			</button>
 		</div>
-		<FilterCard :profile="profile"
-			:filter-option="filterOption"
-			:selected-criterion="selectedCriterion"
+		<FilterCard :selected-criterion="selectedCriterion"
 			@get-selected-filters="getSelectedFilters" />
 	</div>
 </template>
@@ -23,16 +21,13 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import FilterCard from './FilterCard.vue'
-import type { FilterOptions } from '../../types/LimitationsSelectedCriteriaModalData.ts'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
-import type { Profile } from '../../types/FeasibilityQueryBuilderData.ts'
+import type { Criterion } from '../../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
 
 interface LimitationsSelectedCriteriaCardData {
-    profile: Profile | null,
-    filterInfo: OntologyTreeElement | null,
+    filterInfo: Criterion | null,
     imgDelete: string,
 }
 
@@ -42,12 +37,8 @@ export default Vue.extend({
 		FilterCard,
 	},
 	props: {
-		filterOption: {
-			type: Object as PropType<FilterOptions>,
-			default: null,
-		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			default: undefined,
 		},
 		isStateEditFilter: {
@@ -65,7 +56,6 @@ export default Vue.extend({
 	},
 	data(): LimitationsSelectedCriteriaCardData {
 		return {
-			profile: null,
 			filterInfo: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
 		}
@@ -77,9 +67,7 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	created() {},
 	beforeMount() {},
-	mounted() {
-		// this.$emit('get-selected-criteria-filter', { status: 'initial', item: this.filterInfo })
-	},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},

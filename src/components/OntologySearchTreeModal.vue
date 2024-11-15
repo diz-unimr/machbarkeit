@@ -23,10 +23,9 @@
 				<div v-if="ontologyTree && ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab" class="ontology-search-tree__display">
 					<div class="ontology-search-tree__body">
 						<div class="module_name">
-							{{ modules.filter(module => module.id === activeTab)[0].display }}
+							{{ modules.filter(module => module.id === activeTab)[0].moduleName }}
 						</div>
 						<template v-if="searchInputText.length <= 0">
-							<!-- :module-info="activeModule" -->
 							<OntologyNestedTreeNode v-for="criterion in ontologyTree"
 								:key="criterion.id"
 								:criterion="criterion"
@@ -68,7 +67,7 @@ import { generateUrl } from '@nextcloud/router'
 import nextcloudAxios from '@nextcloud/axios'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
-import type { OntologySearchTreeModalData, Modules, OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import type { OntologySearchTreeModalData, Modules, Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { CheckedItem } from './OntologyNestedTreeNode.vue'
 
 export default Vue.extend({
@@ -129,9 +128,6 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	async created() {
-		/* const param = [1, 3]
-		const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/filters/[' + param + ']'))
-		console.log(response) */
 		if (JSON.parse(localStorage.getItem('moduleName')!)) {
 			this.modules = JSON.parse(localStorage.getItem('moduleName')!)
 		} else await this.getModules()
@@ -159,7 +155,7 @@ export default Vue.extend({
 			}
 		},
 
-		async getOntology(moduleId: number, searchText: string | null = null): Promise<OntologyTreeElement[] | null> {
+		async getOntology(moduleId: number, searchText: string | null = null): Promise<Criterion[] | null> {
 			// Code oder Suchbegriff eingegeben wurde
 			if (searchText) {
 				const ontologySearch = JSON.parse(localStorage.getItem('ontologySearch')!)
@@ -178,10 +174,10 @@ export default Vue.extend({
 						try {
 							const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + moduleId))
 							this.ontologyTree = response.data
-							for (let i = 0; i < response.data.length; i++) {
-								this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
+							for (let i = 0; i < this.ontologyTree!.length; i++) {
+								this.ontologyTree![i].filterOptions = JSON.parse(response.data[i].filterOptions)
 							}
-							localStorage.setItem('ontology:' + moduleId, JSON.stringify(response.data))
+							localStorage.setItem('ontology:' + moduleId, JSON.stringify(this.ontologyTree))
 							return this.ontologyTree
 						} catch (error) {
 						// eslint-disable-next-line no-console
@@ -204,7 +200,7 @@ export default Vue.extend({
 			}
 		},
 
-		submit(criteriaType: string, selectedItems: OntologyTreeElement[]): void {
+		submit(criteriaType: string, selectedItems: Criterion[]): void {
 			this.$emit('get-selected-criteria', criteriaType, selectedItems)
 			this.$store.dispatch('clearCheckedItem')
 		},

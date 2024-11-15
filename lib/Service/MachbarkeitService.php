@@ -9,18 +9,14 @@ namespace OCA\Machbarkeit\Service;
 use OCA\Machbarkeit\Db\FilterMapper;
 use OCA\Machbarkeit\Db\ModuleMapper;
 use OCA\Machbarkeit\Db\OntologyConceptMapper;
+use Dotenv\Dotenv;
 
 class MachbarkeitService
 {
 	private $moduleMapper;
-	private $conceptMapper;
 	private $ontologyConceptMapper;
 	private $filterMapper;
 
-	/* public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $conceptMapper) {
-		$this->moduleMapper = $moduleMapper;
-		$this->conceptMapper = $conceptMapper;
-	} */
 	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper, FilterMapper $filterMapper)
 	{
 		$this->moduleMapper = $moduleMapper;
@@ -118,8 +114,72 @@ class MachbarkeitService
 		return $this->ontologyConceptMapper->searchOntology($textSeach, $module_id);
 	}
 
-	public function getFilters($filter_options_ids) // string $filter_options_ids = null
+	public function getFilters($filter_options_ids)
 	{
 		return $this->filterMapper->filters($filter_options_ids);
+	}
+
+	public function getFhirRequest($criteria)
+	{
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv =  Dotenv::createImmutable(__DIR__);
+		$dotenv->load();
+		//$username = $_ENV['FHIR_USERNAME'];
+		//$password = $_ENV['FHIR_PASSWORD'];
+
+		$data = json_decode('{
+			"version": "http://to_be_decided.com/draft-1/schema#",
+			"display": "",
+			"inclusionCriteria": [
+				[
+					{
+						"termCodes": [
+							{
+								"code": "263495000",
+								"system": "http://snomed.info/sct",
+								"display": "Geschlecht"
+							}
+						],
+						"context": {
+							"code": "Patient",
+							"system": "fdpg.mii.cds",
+							"version": "1.0.0",
+							"display": "Patient"
+						},
+						"valueFilter": {
+							"selectedConcepts": [
+								{
+									"code": "female",
+									"display": "Female",
+									"system": "http://hl7.org/fhir/administrative-gender"
+								}
+							],
+							"type": "concept"
+						}
+					}
+				]
+			]
+		}', true);
+
+		// Initialize cURL session
+		$url = 'http://feasibility.diz.uni-marburg.de:8084/query/execute';
+		$ch = curl_init($url);
+
+		// Set options for cURL
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+		//curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC); // Use Basic Authentication
+		//curl_setopt($ch, CURLOPT_USERPWD, "$username:$password"); // Set the username and password
+		curl_setopt($ch, CURLOPT_POST, true); // Set request method to POST
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data)); // Attach the data as JSON in the body
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			'Content-Type: application/json', // Set content type to JSON
+		]);
+
+		// Execute the request
+		$response = curl_exec($ch);
+		// Close the cURL session
+		curl_close($ch);
+		return $response;
 	}
 }

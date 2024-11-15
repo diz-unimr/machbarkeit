@@ -38,7 +38,10 @@ return [
 		// ['name' => 'machbarkeit#getFirstChildOntologyTree', 'url' => '/machbarkeit/firstchildontology/{module_id}', 'verb' => 'GET'],
 		// searchInput ontology
 		['name' => 'machbarkeit#getSearchOntology', 'url' => '/machbarkeit/search_ontology/{textSearch}/{module_id}', 'verb' => 'GET'],
+		// get all filters
+		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters/{filter_options_ids}', 'verb' => 'GET'],
 		// get filters (for concepts)
-		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters', 'verb' => 'GET']
+		//['name' => 'machbarkeit#getConceptFilters', 'url' => '/machbarkeit/filters/{filter_options_ids}', 'verb' => 'GET']
+		['name' => 'machbarkeit#getRequest', 'url' => '/machbarkeit/get_request', 'verb' => 'POST']
 	]
 ];

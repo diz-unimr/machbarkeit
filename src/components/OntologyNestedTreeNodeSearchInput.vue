@@ -4,7 +4,6 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div>
-		<!-- v-if="filteredCriterion !== null && filteredCriterion.selectable === true" -->
 		<div class="ontology-nested-tree-node-wrapper">
 			<p class="criterion-code">
 				code
@@ -24,15 +23,15 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData'
+import type { Criterion } from '../types/OntologySearchTreeModalData'
 
 interface OntologyNestedTreeNodeSearchInputData {
-	filteredCriterion: OntologyTreeElement | null;
+	filteredCriterion: Criterion | null;
 }
 
 export interface CheckedItem {
 	action: string;
-	node: OntologyTreeElement;
+	node: Criterion;
 }
 
 export default Vue.extend({
@@ -40,7 +39,7 @@ export default Vue.extend({
 	components: {},
 	props: {
 		criterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			default: null,
 		},
 		index: {
@@ -91,20 +90,7 @@ export default Vue.extend({
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		/* filterCriteria(textSearch: string, criterion: OntologyTreeElement): OntologyTreeElement | null {
-			// const filteredItem = criterion.termCodes?.[0].code.toLowerCase().includes(textSearch.toLowerCase()) || criterion.termCodes?.[0].display.toLowerCase().includes(textSearch.toLowerCase())
-			const filteredItem = true
-			if (filteredItem) {
-				this.filteredCriterion = criterion
-			} else this.filteredCriterion = null
-			return this.filteredCriterion
-		}, */
-
-		/* checkExistingData() {
-			this.$emit('check-existing-data', this.index)
-		}, */
-	},
+	methods: {},
 })
 </script>
 

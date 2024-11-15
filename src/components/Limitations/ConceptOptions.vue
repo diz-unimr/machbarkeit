@@ -5,11 +5,11 @@
 	-->
 	<div class="content-option-container dialog-border">
 		<div class="content-option__text">
-			<span>*</span> Geben Sie einen oder mehrere zulässige Werte an:
+			Geben Sie einen oder mehrere zulässige Werte an:
 		</div>
 		<div class="content-option__body">
 			<div class="content-option__checkbox">
-				<div v-for="(option, index) in filterOption.filterOptions"
+				<div v-for="(option, index) in selectedCriterion.filterOptions"
 					:key="index"
 					class="checkbox-option">
 					<!-- https://kyoshee.medium.com/building-custom-checkbox-using-only-html-and-css-no-js-1-babd79d5e2e9 -->
@@ -20,31 +20,23 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="!filterOption.optional && selectedConcepts?.length <= 0" class="content-option-alert">
-			Wählen Sie mindestens einen Wert
-		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import type { ConceptOptionsData } from '../../types/ConceptOptionsData'
-import type { FilterOptions } from '../../types/LimitationsSelectedCriteriaModalData'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { Criterion } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'ConceptOptions',
 	props: {
-		filterOption: {
-			type: Object as PropType<FilterOptions>,
-			required: true,
-		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
 		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			required: true,
 		},
 	},
@@ -60,8 +52,8 @@ export default Vue.extend({
 			this.$emit('get-selected-filter-option', {
 				type: 'conceptType',
 				display: this.selectedCriterion.display,
-				isFilterOptional: this.filterOption.optional,
-				isFilterComplete: this.filterOption.optional ? true : this.selectedConcepts.length > 0,
+				isFilterOptional: true,
+				isFilterComplete: true,
 				value: this.selectedConcepts,
 			})
 
@@ -87,10 +79,10 @@ export default Vue.extend({
 		this.$emit('get-selected-filter-option', {
 			type: 'conceptType',
 			display: this.selectedCriterion.display,
-			isFilterOptional: this.filterOption.optional,
+			isFilterOptional: true,
 			isFilterComplete: this.selectedCriterion.conceptType?.isFilterComplete
 				? this.selectedCriterion.conceptType?.isFilterComplete
-				: this.filterOption.optional,
+				: true,
 			value: this.selectedConcepts,
 		})
 	},

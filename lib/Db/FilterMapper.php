@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace OCA\Machbarkeit\Db;
 
+header('Content-Type: application/json');
+
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -13,16 +15,29 @@ use OCP\IDBConnection;
 /**
  * @template-extends QBMapper<Filter>
  */
-class FilterMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
+class FilterMapper extends QBMapper
+{
+	public function __construct(IDBConnection $db)
+	{
 		parent::__construct($db, 'machbarkeit_filter_options', Filter::class);
 	}
 
-	public function filters(): array {
+	public function filters($filter_options_ids)
+	{
+		// $filter_options_ids = null;
+
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from('machbarkeit_filter_options');
-		// ->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)));
+
+		if ($filter_options_ids) {
+			$ids = json_decode($filter_options_ids, true);
+			$qb->select('*')
+				->from('machbarkeit_filter_options')
+				->where($qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)));
+		} else {
+			$qb->select('*')
+				->from('machbarkeit_filter_options');
+		}
+
 		return $this->findEntities($qb);
 	}
 }

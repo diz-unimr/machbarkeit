@@ -66,7 +66,7 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import type { TimeRangeOptionsData } from '../../types/TimeRangeOptionsData'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { Criterion } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'TimeRangeOptions',
@@ -76,7 +76,7 @@ export default Vue.extend({
 			default: true,
 		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			required: true,
 		},
 	},

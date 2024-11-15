@@ -6,21 +6,7 @@ import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRange } from '../types/TimeRangeOptionsData'
 
-export interface FilterOptions {
-    id: number;
-    filterName: string;
-    type: string;
-    optional: boolean;
-    filterOptions: {
-        code: string;
-        display: string;
-        system: string;
-        version: string;
-    }[];
-}
-
 export interface LimitationsSelectedCriteriaModalData {
-	filterOptions: FilterOptions[] | null;
     selectedCriteriaFiltersInfo: Array<ConceptType | QuantityType | TimeRange>;
     isFilterComplete: boolean;
 }

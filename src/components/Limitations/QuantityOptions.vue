@@ -56,7 +56,7 @@
 					<div v-if="comparisonRestriction.type !== 'kein Filter'"
 						class="text-floating-wrapper">
 						<select v-model="comparisonRestriction.unit">
-							<option v-for="(unit_display, index) in filterOption.filterOptions"
+							<option v-for="(unit_display, index) in selectedCriterion.filterOptions"
 								:key="index"
 								:value="unit_display.display">
 								{{ unit_display.display }}
@@ -76,23 +76,18 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import type { QuantityOptionsData } from '../../types/QuantityOptionsData.ts'
-import type { FilterOptions } from '../../types/LimitationsSelectedCriteriaModalData.ts'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { Criterion } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'QuantityOptions',
 	components: {},
 	props: {
-		filterOption: {
-			type: Object as PropType<FilterOptions>,
-			required: true,
-		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
 		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			required: true,
 		},
 	},
@@ -114,7 +109,7 @@ export default Vue.extend({
 					: 'kein Filter',
 				unit: this.selectedCriterion.quantityType?.value.unit
 					? this.selectedCriterion.quantityType.value.unit
-					: this.filterOption.filterOptions[0].display,
+					: this.selectedCriterion.filterOptions[0].display,
 				value: this.selectedCriterion.quantityType?.value.value
 					? this.selectedCriterion.quantityType.value.value
 					: '0',
@@ -145,15 +140,15 @@ export default Vue.extend({
 					this.$emit('get-selected-filter-option', {
 						type: 'quantityType',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.filterOption.optional,
-						isFilterComplete: this.filterOption.optional,
+						isFilterOptional: true,
+						isFilterComplete: true,
 						value: {},
 					})
 				} else if (this.comparisonRestriction.type === 'zwischen') {
 					this.$emit('get-selected-filter-option', {
 						type: 'quantityType',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.filterOption.optional,
+						isFilterOptional: true,
 						isFilterComplete: this.comparisonRestriction.type && (this.comparisonRestriction.min < this.comparisonRestriction.max),
 						value: this.comparisonRestriction,
 					})
@@ -161,7 +156,7 @@ export default Vue.extend({
 					this.$emit('get-selected-filter-option', {
 						type: 'quantityType',
 						display: this.selectedCriterion.display,
-						isFilterOptional: this.filterOption.optional,
+						isFilterOptional: true,
 						isFilterComplete: this.comparisonRestriction.type.length > 0 && this.comparisonRestriction.value.length > 0,
 						value: this.comparisonRestriction,
 					 })
@@ -174,7 +169,7 @@ export default Vue.extend({
 			if (this.isResetDisabled && this.comparisonRestriction.type !== 'kein Filter') {
 				this.comparisonRestriction.type = 'kein Filter'
 				this.comparisonRestriction.typeSymbol = 'kein Filter'
-				this.comparisonRestriction.unit = this.filterOption.filterOptions[0].display
+				this.comparisonRestriction.unit = this.selectedCriterion.filterOptions[0].display
 				this.comparisonRestriction.value = '0'
 				this.comparisonRestriction.min = '0'
 				this.comparisonRestriction.max = '0'
@@ -191,10 +186,10 @@ export default Vue.extend({
 		this.$emit('get-selected-filter-option', {
 			type: 'quantityType',
 			display: this.selectedCriterion.display,
-			isFilterOptional: this.filterOption.optional,
+			isFilterOptional: true,
 			isFilterComplete: this.selectedCriterion.quantityType?.isFilterComplete
 				? this.selectedCriterion.quantityType?.isFilterComplete
-				: this.filterOption.optional,
+				: true,
 			value: this.selectedCriterion.quantityType?.value
 				? this.comparisonRestriction
 				: {},

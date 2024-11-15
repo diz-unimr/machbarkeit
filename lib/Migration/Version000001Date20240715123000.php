@@ -33,12 +33,11 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->addColumn('version', Types::STRING, [
 				'notnull' => true,
 			]);
-
 			$table->setPrimaryKey(['id']);
 		}
 
 		// ontology_filter_options
-		if (!$schema->hasTable('machbarkeit_filter_options')) {
+		/* if (!$schema->hasTable('machbarkeit_filter_options')) {
 			$table = $schema->createTable('machbarkeit_filter_options');
 			$table->addColumn('id', Types::INTEGER, [
 				'autoincrement' => true,
@@ -53,13 +52,9 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->addColumn('filter_options', Types::JSON, [
 				'notnull' => true,
 			]);
-			$table->addColumn('optional', Types::BOOLEAN, [
-				'notnull' => false,
-				'default' => true
-			]);
 
 			$table->setPrimaryKey(['id']);
-		}
+		} */
 
 		// ontology_concepts
 		if (!$schema->hasTable('machbarkeit_concepts')) {
@@ -77,9 +72,6 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 			$table->addColumn('code_system', Types::STRING, [
 				'notnull' => true,
 			]);
-			/* $table->addColumn('term_codes', Types::JSON, [
-				'notnull' => false,
-			]); */
 			$table->addColumn('selectable', Types::BOOLEAN, [
 				'notnull' => false,
 				'default' => false
@@ -92,26 +84,24 @@ class Version000001Date20240715123000 extends SimpleMigrationStep
 				'notnull' => false,
 				'default' => false
 			]);
-			$table->addColumn('type_quantity', Types::BOOLEAN, [
-				'notnull' => false,
-				'default' => false
-			]);
-			$table->addColumn('filter_options_id', Types::INTEGER, [
+			$table->addColumn('filter_name', Types::STRING, [
 				'notnull' => false,
 			]);
-
+			$table->addColumn('filter_type', Types::STRING, [
+				'notnull' => false,
+			]);
+			$table->addColumn('filter_options', Types::JSON, [
+				'notnull' => true,
+			]);
 			$table->addColumn('parent_id', Types::INTEGER, [
 				'notnull' => false,
 			]);
 			$table->addColumn('module_id', Types::INTEGER, [
 				'notnull' => true
 			]);
-
-
 			$table->setPrimaryKey(['id']);
 			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_modules'), ['module_id'], ['id'], [], 'fk_modules_id_concepts');
 			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_concepts'), ['parent_id'], ['id'], [], 'fk_concepts_id_concepts');
-			$table->addForeignKeyConstraint($schema->getTable('machbarkeit_filter_options'), ['filter_options_id'], ['id'], [], 'fk_filter_options_id_concepts');
 		}
 
 		return $schema;

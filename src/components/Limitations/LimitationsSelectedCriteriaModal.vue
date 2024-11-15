@@ -9,14 +9,11 @@
 				<h2 class="limitations-dialog__title">
 					Einschränkungen der ausgewählten Merkmale
 				</h2>
-
-				<div v-if="filterOptions" class="limitations-dialog__panel">
+				<div class="limitations-dialog__panel">
 					<LimitationsSelectedCriteriaCard v-for="(selectedCriterion, index) in selectedCriteria"
 						:id="index"
 						:key="selectedCriterion.id"
-						:filter-option="selectedCriterion.filterOptionsId ? filterOptions?.filter(option =>
-							option.id === selectedCriterion.filterOptionsId
-						)[0] : null"
+						:filter-option="selectedCriterion.filterOptions ? selectedCriterion.filterOptions : null"
 						:selected-criterion="selectedCriterion"
 						:is-state-edit-filter="isStateEditFilter"
 						@get-selected-criteria-filter="getSelectedCriteriaFilter(index, $event)"
@@ -42,11 +39,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { generateUrl } from '@nextcloud/router'
-import axios from '@nextcloud/axios'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
 import type { LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData.ts'
+import type { Criterion } from '../../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../../types/ConceptOptionsData'
 import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRange } from '../../types/TimeRangeOptionsData'
@@ -58,7 +53,7 @@ export default Vue.extend({
 	},
 	props: {
 		selectedCriteria: {
-			type: Array<OntologyTreeElement>,
+			type: Array<Criterion>,
 			required: true,
 		},
 		isStateEditFilter: {
@@ -69,7 +64,6 @@ export default Vue.extend({
 
 	data(): LimitationsSelectedCriteriaModalData {
 		return {
-			filterOptions: null,
 			selectedCriteriaFiltersInfo: [],
 			isFilterComplete: false,
 		}
@@ -79,9 +73,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.getFilterOptions()
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -90,42 +82,6 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		async getFilterOptions(): Promise<void> {
-			/* if (JSON.parse(localStorage.getItem('filterOptions')!)) {
-				this.filterOptions = JSON.parse(localStorage.getItem('filterOptions')!)
-			} else {
-				try {
-					const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/filters'))
-					this.filterOptions = response.data
-					for (let i = 0; i < this.filterOptions!.length; i++) {
-						this.filterOptions![i].filterOptions = JSON.parse(response.data[i].filterOptions)
-					}
-					localStorage.setItem('filterOptions', JSON.stringify(this.filterOptions))
-				} catch (error) {
-					// eslint-disable-next-line no-console
-					console.log((error as Error).message)
-				}
-			} */
-
-			this.filterOptions = JSON.parse(localStorage.getItem('filterOptions')!) ?? (
-				async () => {
-					try {
-						const response = await axios.get(generateUrl('/apps/machbarkeit/machbarkeit/filters'))
-						this.filterOptions = response.data
-						for (let i = 0; i < this.filterOptions!.length; i++) {
-							this.filterOptions![i].filterOptions = JSON.parse(response.data[i].filterOptions)
-						}
-						localStorage.setItem('filterOptions', JSON.stringify(this.filterOptions))
-						return this.filterOptions
-					} catch (error) {
-						// eslint-disable-next-line no-console
-						console.log((error as Error).message)
-						return null
-					}
-				}
-			)()
-		},
-
 		deleteDialogCard(index: number): void {
 			if (this.selectedCriteria !== null) {
 				this.$emit('delete-selected-criteria', index)

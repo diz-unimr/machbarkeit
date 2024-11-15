@@ -49,35 +49,72 @@ class InitData implements IRepairStep
 		} */
 	}
 
+	public function get_metadata($file_name)
+	{
+		$data = [];
+		$file = fopen(__DIR__ . '/../../csvfile/' . $file_name, 'r');
+		while (($row = fgetcsv($file)) !== false) {
+			$data[] = $row;
+		}
+
+		$headers = $data[0];
+		$jsonArray = [];
+		$rowCount = count($data);
+		for ($i = 1; $i < $rowCount; $i++) {
+			foreach ($data[$i] as $key => $column) {
+				$jsonArray[$i][$headers[$key]] = $column;
+				$jsonArray[$i]['filter_options'] = str_replace('""', '"', $jsonArray[$i]['filter_options']);
+			}
+		}
+		fclose($file);
+		return $jsonArray;
+	}
+
 	protected function storeInitialData()
 	{
 		$this->logger->info('Loading ontology data', ['app' => 'Machbarkeit']);
-
 		$query = $this->db->getQueryBuilder();
 
-		// add modules first
-		$query
-			->insert('machbarkeit_modules')
-			->values(
-				[
-					'id' => $this->db->quote(1),
-					'module_name' => $this->db->quote('Person'),
-					'version' => $this->db->quote('1.0.0')
-				]
-			)->executeStatement();
+		// add modules
+		$module_data = $this->get_metadata('module_name.csv');
 
-		$query
-			->insert('machbarkeit_modules')
-			->values(
-				[
-					'id' => $this->db->quote(2),
-					'module_name' => $this->db->quote('Prozedur'),
-					'version' => $this->db->quote('1.0.0'),
-				]
-			)->executeStatement();
+		for ($i = 1; $i <= count($module_data); $i++) {
+			$query
+				->insert('machbarkeit_modules')
+				->values(
+					[
+						'id' => $this->db->quote($module_data[$i]['id']),
+						'module_name' => $this->db->quote($module_data[$i]['module_name']),
+						'version' => $this->db->quote($module_data[$i]['version']),
+					]
+				)->executeStatement();
+		}
+
+		// add concept
+		$concept_data = $this->get_metadata('concept.csv');
+
+		for ($i = 1; $i <= count($concept_data); $i++) {
+			$query
+				->insert('machbarkeit_concepts')
+				->values(
+					[
+						'id' => $this->db->quote($concept_data[$i]['id']),
+						'display' => $this->db->quote($concept_data[$i]['display']),
+						'code' => $this->db->quote($concept_data[$i]['code']),
+						'code_system' => $this->db->quote($concept_data[$i]['code_system']),
+						'selectable' => $this->db->quote($concept_data[$i]['selectable']),
+						'leaf' => $this->db->quote($concept_data[$i]['leaf']),
+						'time_restriction_allowed' => $this->db->quote($concept_data[$i]['time_restriction_allowed']),
+						'filter_name' => $this->db->quote($concept_data[$i]['filter_name']),
+						'filter_type' => $this->db->quote($concept_data[$i]['filter_type']),
+						'filter_options' => $query->createNamedParameter(json_encode(json_decode(strval($concept_data[$i]['filter_options'])))),
+						'module_id' => $this->db->quote($concept_data[$i]['module_id']),
+					]
+				)->executeStatement();
+		}
 
 		// ontology filter_options
-		$query->insert('machbarkeit_filter_options')->values(
+		/* $query->insert('machbarkeit_filter_options')->values(
 			[
 				'id' => $this->db->quote(1),
 				'filter_name' => $this->db->quote('Wertbereich'),
@@ -109,7 +146,6 @@ class InitData implements IRepairStep
 					}
 	
 				]', true)), IQueryBuilder::PARAM_STR),
-				'optional' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
 			]
 		)->executeStatement();
 
@@ -144,126 +180,7 @@ class InitData implements IRepairStep
 						"version": "4.0.1"
 					}
 				]', true)), IQueryBuilder::PARAM_STR),
-				'optional' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
 			]
-		)->executeStatement();
-
-		// ontology concepts
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(1),
-				'display' => $this->db->quote('Gegenwärtiges chronologisches Alter'),
-				'code' => $this->db->quote('424144002'),
-				'code_system' => $this->db->quote('http://snomed.info/sct'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'time_restriction_allowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type_quantity' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'filter_options_id' => $this->db->quote(1),
-				'module_id' => $this->db->quote(1),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(2),
-				'display' => $this->db->quote('Geschlecht'),
-				'code' => $this->db->quote('263495000'),
-				'code_system' => $this->db->quote('http://snomed.info/sct'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'time_restriction_allowed' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'type_quantity' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'filter_options_id' => $this->db->quote(2),
-				'module_id' => $this->db->quote(1),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(3),
-				'display' => $this->db->quote('Bildgebende Diagnostik'),
-				'code' => $this->db->quote('3'),
-				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'time_restriction_allowed' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'type_quantity' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'module_id' => $this->db->quote(2),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(4),
-				'display' => $this->db->quote('Andere bildgebende Verfahren'),
-				'code' => $this->db->quote('3-90'),
-				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
-				/* 'term_codes' => $query->createNamedParameter(json_encode(json_decode('
-						{
-							"code": "3-90",
-							"display": "Andere bildgebende Verfahren",
-							"system": "http://fhir.de/CodeSystem/bfarm/ops",
-							"version": "2023"
-						}'))), */
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
-				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(3),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(5),
-				'display' => $this->db->quote('Elektrische Impedanztomographie'),
-				'code' => $this->db->quote('3-903'),
-				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(4),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(6),
-				'display' => $this->db->quote('Elektroimpedanzspektroskopie der Haut'),
-				'code' => $this->db->quote('3-901'),
-				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(4),
-			]
-		)->executeStatement();
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(7),
-				'display' => $this->db->quote('Knochendichtemessung (alle Verfahren)'),
-				'code' => $this->db->quote('3-900'),
-				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(4),
-			]
-		)->executeStatement();
-
-
-		$query->insert('machbarkeit_concepts')->values(
-			[
-				'id' => $this->db->quote(8),
-				'display' => $this->db->quote('Radiofrequenzspektroskopie von Brustgewebe'),
-				'code' => $this->db->quote('3-902'),
-				'code_system' => $this->db->quote('http://fhir.de/CodeSystem/bfarm/ops'),
-				'selectable' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'leaf' => $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL),
-				'module_id' => $this->db->quote(2),
-				'parent_id' => $this->db->quote(4),
-			],
-		)->executeStatement();
+		)->executeStatement(); */
 	}
 }

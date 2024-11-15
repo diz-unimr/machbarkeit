@@ -133,8 +133,8 @@
 								<div class="selected-criteria-right">
 									<button class="delete-btn" @click="deleteBtn(index, 'ausschlusskriterien')">
 										<svg role="img"
-											width="18px"
-											height="18px"
+											width="20px"
+											height="20px"
 											aria-hidden="true"
 											focusable="false"
 											data-prefix="fas"
@@ -203,7 +203,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import draggable from 'vuedraggable'
 
 interface FeasibilityQueryDisplayData {
@@ -213,8 +213,8 @@ interface FeasibilityQueryDisplayData {
     }
     inclusionCriteriaOld: Array<string>;
 	exclusionCriteriaOld: Array<string>;
-	draggableInclusionCharacteristics: Array<OntologyTreeElement>;
-	draggableExclusionCharacteristics: Array<OntologyTreeElement>;
+	draggableInclusionCharacteristics: Array<Criterion>;
+	draggableExclusionCharacteristics: Array<Criterion>;
 }
 
 export default Vue.extend({
@@ -225,12 +225,12 @@ export default Vue.extend({
 
 	props: {
 		selectedInclusionCharacteristics: {
-			type: Array<OntologyTreeElement>,
+			type: Array<Criterion>,
 			required: true,
 		},
 
 		selectedExclusionCharacteristics: {
-			type: Array<OntologyTreeElement>,
+			type: Array<Criterion>,
 			required: true,
 		},
 
@@ -323,7 +323,7 @@ export default Vue.extend({
 			}
 		},
 
-		editLimitation(characteristic: OntologyTreeElement, index: number, criteriaType: string) {
+		editLimitation(characteristic: Criterion, index: number, criteriaType: string) {
 			this.$emit('edit-criteria-limitation', characteristic, index, criteriaType)
 		},
 
@@ -408,7 +408,7 @@ export default Vue.extend({
 	display: flex;
 	flex-direction: column;
 	width: 80%;
-	padding: 10px;
+	padding: 8px;
 }
 
 .selected-criteria-right {
@@ -421,7 +421,7 @@ export default Vue.extend({
 
 .selected-criteria-display {
 	font-weight: 700;
-	margin-bottom: 10px;
+	margin-bottom: 8px;
 }
 
 .selected-criteria-display:hover {
@@ -470,7 +470,7 @@ export default Vue.extend({
 	display: flex;
 	border: none;
 	outline: none;
-	height: 0px;
+	min-height: 20px;
 	margin: 0px;
 	padding: 0px;
 	background-color: unset;

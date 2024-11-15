@@ -97,7 +97,7 @@ import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
-import type { OntologyTreeElement } from '../types/OntologySearchTreeModalData.ts'
+import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRange } from '../types/TimeRangeOptionsData'
@@ -166,9 +166,6 @@ export default Vue.extend({
 				this.inclusionSearchInput = this.inclusionSearchInputText
 				this.searchInputText = this.inclusionSearchInputText
 				this.isOntologySearchTreeOpen = false
-				/* if (this.debouncedHandler?.cancel) {
-					this.debouncedHandler.cancel()
-				} */
 			} else {
 				this.debouncedHandler = debounce(() => {
 					this.inclusionSearchInput = this.inclusionSearchInputText
@@ -187,9 +184,6 @@ export default Vue.extend({
 				this.exclusionSearchInput = this.exclusionSearchInputText
 				this.searchInputText = this.exclusionSearchInputText
 				this.isOntologySearchTreeOpen = false
-				/* if (this.debouncedHandler?.cancel) {
-					this.debouncedHandler.cancel()
-				} */
 			} else {
 				this.debouncedHandler = debounce(() => {
 					this.exclusionSearchInput = this.exclusionSearchInputText
@@ -211,7 +205,9 @@ export default Vue.extend({
 	created() {},
 	beforeMount() {},
 	mounted() {},
-	beforeUpdate() {},
+	beforeUpdate() {
+		this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
+	},
 	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
@@ -245,7 +241,7 @@ export default Vue.extend({
 			}
 		},
 
-		getSelectedCriteria(criteriaType: string, items: OntologyTreeElement[]): void {
+		getSelectedCriteria(criteriaType: string, items: Criterion[]): void {
 			this.inclusionSearchInputText = ''
 			this.exclusionSearchInputText = ''
 			this.searchInputText = ''
@@ -296,21 +292,21 @@ export default Vue.extend({
 			}
 		},
 
-		editCriteriaLimitation(characteristic: OntologyTreeElement, index: number, criteriaType: string): void {
+		editCriteriaLimitation(characteristic: Criterion, index: number, criteriaType: string): void {
 			this.criteriaOverlayType = criteriaType
 			if (criteriaType === 'einschlusskriterien') {
 				const selectedEditedCriteria = this.selectedInclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
-				this.selectedCriteria = selectedEditedCriteria as OntologyTreeElement[]
+				this.selectedCriteria = selectedEditedCriteria as Criterion[]
 			} else if (criteriaType === 'ausschlusskriterien') {
 				const selectedEditedCriteria = this.selectedExclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
-				this.selectedCriteria = selectedEditedCriteria as OntologyTreeElement[]
+				this.selectedCriteria = selectedEditedCriteria as Criterion[]
 			}
 			this.selectedEditedCriteriaIndex = index
 			this.isLimitationsCriteriaOpen = true
 			this.isStateEditFilter = true
 		},
 
-		updateDisplaySequence(type: string, newOrder: OntologyTreeElement[]) {
+		updateDisplaySequence(type: string, newOrder: Criterion[]) {
 			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = newOrder) : (this.selectedExclusionCharacteristics = newOrder)
 		},
 	},

@@ -81,4 +81,9 @@ class MachbarkeitController extends Controller
 	{
 		return $this->service->getConcepts(1);
 	}
+
+	public function getRequest($criteria)
+	{
+		return $this->service->getFhirRequest($criteria);
+	}
 }

@@ -10,28 +10,36 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
-class OntologyConcept extends Entity implements JsonSerializable {
+class OntologyConcept extends Entity implements JsonSerializable
+{
 	public string $display = '';
-	public ?string $termCodes = null;
-	public bool $timeRestrictionAllowed = false;
-	public bool $typeQuantity = false;
+	public string $code = '';
+	public string $codeSystem = '';
 	public bool $selectable = false;
 	public bool $leaf = false;
+	public bool $timeRestrictionAllowed = false;
+	public ?string $filterName = null;
+	public ?string $filterType = null;
+	public ?string $filterOptions = '';
 	public ?int $moduleId = null;
 	public ?int $parentId = null;
-	public ?int $filterOptionsId = null;
+	//public ?int $filterOptionsId = null;
 
 
-	public function jsonSerialize(): array {
+	public function jsonSerialize(): array
+	{
 		return [
 			'id' => $this->id,
 			'display' => $this->display,
-			'termCodes' => $this->termCodes,
-			'timeRestrictionAllowed' => $this->timeRestrictionAllowed,
-			'typeQuantity' => $this->typeQuantity,
+			'code' => $this->code,
+			'codeSystem' => $this->codeSystem,
 			'selectable' => $this->selectable,
 			'leaf' => $this->leaf,
-			'filterOptionsId' => $this->filterOptionsId,
+			'timeRestrictionAllowed' => $this->timeRestrictionAllowed,
+			'filterName' => $this->filterName,
+			'filterType' => $this->filterType,
+			'filterOptions' => $this->filterOptions,
+			// 'filterOptionsId' => $this->filterOptionsId,
 			'moduleId' => $this->moduleId,
 			'parentId' => $this->parentId,
 		];
