@@ -13,9 +13,9 @@
 					:key="index"
 					class="checkbox-option">
 					<!-- https://kyoshee.medium.com/building-custom-checkbox-using-only-html-and-css-no-js-1-babd79d5e2e9 -->
-					<input v-model="selectedConcepts"
+					<input v-model="selectedValue"
 						type="checkbox"
-						:value="option.display">
+						:value="option">
 					<label>{{ option.display }}</label>
 				</div>
 			</div>
@@ -42,22 +42,43 @@ export default Vue.extend({
 	},
 	data(): ConceptOptionsData {
 		return {
-			selectedConcepts: this.selectedCriterion.conceptType?.value
+			/* selectedConcepts2: this.selectedCriterion.conceptType?.value
 				? this.selectedCriterion.conceptType.value
+				: [], */
+			selectedValue: this.selectedCriterion.conceptType?.valueFilter
+				? this.selectedCriterion.conceptType.valueFilter.selectedConcepts
 				: [],
+			conceptType: {
+				termCodes: [this.selectedCriterion.termCodes],
+				context: this.selectedCriterion.context,
+			},
 		}
 	},
 	watch: {
-		selectedConcepts() {
-			this.$emit('get-selected-filter-option', {
+		selectedValue() {
+			/* this.$emit('get-selected-filter-option', {
 				type: 'conceptType',
 				display: this.selectedCriterion.display,
 				isFilterOptional: true,
 				isFilterComplete: true,
 				value: this.selectedConcepts,
-			})
+			}) */
+			this.conceptType = {
+				termCodes: [this.selectedCriterion.termCodes],
+				context: this.selectedCriterion.context,
+				...(this.selectedValue.length > 0
+					? {
+						valueFilter: {
+							selectedConcepts: this.selectedValue,
+							type: 'concept',
+						},
+					}
+					: {}
+				),
+			}
+			this.$emit('get-selected-filter-option', this.conceptType)
 
-			if (this.selectedConcepts.length > 0) {
+			if (this.conceptType.valueFilter) {
 				this.$emit('toggle-reset-button', true)
 			} else {
 				this.$emit('toggle-reset-button', false)
@@ -66,7 +87,7 @@ export default Vue.extend({
 
 		isResetDisabled(): void {
 			if (this.isResetDisabled) {
-				this.selectedConcepts = []
+				this.selectedValue = []
 			}
 		},
 	},
@@ -76,7 +97,7 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-filter-option', {
+		/* this.$emit('get-selected-filter-option', {
 			type: 'conceptType',
 			display: this.selectedCriterion.display,
 			isFilterOptional: true,
@@ -84,7 +105,8 @@ export default Vue.extend({
 				? this.selectedCriterion.conceptType?.isFilterComplete
 				: true,
 			value: this.selectedConcepts,
-		})
+		}) */
+		this.$emit('get-selected-filter-option', this.conceptType)
 	},
 
 	beforeMount() {},

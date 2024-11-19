@@ -2,14 +2,18 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
+import type { Criterion } from './OntologySearchTreeModalData'
+
 export interface ConceptType {
-	type: string;
-    display: string;
-    isFilterOptional: boolean;
-    isFilterComplete: boolean;
-    value: Array<string>;
+    termCodes: Array<Criterion['termCodes']>;
+    context: Criterion['context'];
+    valueFilter?: {
+        selectedConcepts: Criterion['filterOptions'];
+        type: string;
+    };
 }
 
 export interface ConceptOptionsData {
-	selectedConcepts: ConceptType['value'];
+    selectedValue: Criterion['filterOptions'] | [];
+    conceptType: ConceptType;
 }
