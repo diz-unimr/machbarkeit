@@ -4,7 +4,7 @@
 */
 import type { ConceptType } from './ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData.ts'
-import type { TimeRange } from '../types/TimeRangeOptionsData.ts'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 
 export interface Criterion {
     children: Array<Criterion> | undefined;
@@ -12,6 +12,18 @@ export interface Criterion {
     moduleId: number;
     parentId: number | null;
     display: string;
+    termCodes: {
+        code: string;
+        system: string;
+        display: string;
+        version: string;
+    },
+    context: {
+        code: string;
+        system: string;
+        version: string;
+        display: string;
+    };
     code: string;
     codeSystem: string;
     selectable: boolean;
@@ -22,12 +34,13 @@ export interface Criterion {
     filterOptions: {
         code: string;
         display: string;
-        system: string;
-        version: string;
+        system: string | undefined;
+        version: string | undefined;
     }[];
-    conceptType: ConceptType | undefined;
-	timeRange: TimeRange | undefined;
-	quantityType: QuantityType | undefined;
+    /* conceptType: ConceptType | undefined;
+	timeRange: TimeRangeType | undefined;
+	quantityType: QuantityType | undefined; */
+    selectedCriterion?: ConceptType | QuantityType | TimeRangeType;
 }
 
 export interface Modules {

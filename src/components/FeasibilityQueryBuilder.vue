@@ -85,7 +85,8 @@
 			:selected-exclusion-characteristics="selectedExclusionCharacteristics"
 			@update-display-sequence="updateDisplaySequence"
 			@edit-criteria-limitation="editCriteriaLimitation"
-			@delete-characteristic="deleteCharacteristic" />
+			@delete-characteristic="deleteCharacteristic"
+			@get-update-query-data="getUpdateQueryData"/>
 	</div>
 </template>
 
@@ -100,7 +101,8 @@ import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuild
 import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
-import type { TimeRange } from '../types/TimeRangeOptionsData'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData'
+import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 import debounce from 'lodash.debounce'
 
 export default Vue.extend({
@@ -206,9 +208,11 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {
+		// this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
+	},
+	updated() {
 		this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
 	},
-	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -250,9 +254,10 @@ export default Vue.extend({
 			this.isLimitationsCriteriaOpen = true
 		},
 
-		getSelectedFilterInfo(filterInfo: Array<ConceptType | QuantityType | TimeRange>) {
+		getSelectedFilterInfo(filterInfo: Array<ConceptType | QuantityType | TimeRangeType>) {
 			this.selectedCriteria = this.selectedCriteria!.map((item, index) => {
-				switch (filterInfo[index].type) {
+				item.selectedCriterion = filterInfo[index] as ConceptType | QuantityType | TimeRangeType
+				/* switch (filterInfo[index].type) {
 				case 'conceptType':
 					item.conceptType = filterInfo[index] as ConceptType
 					break
@@ -260,9 +265,9 @@ export default Vue.extend({
 					item.quantityType = filterInfo[index] as QuantityType
 					break
 				case 'timeRange':
-					item.timeRange = filterInfo[index] as TimeRange
+					item.timeRange = filterInfo[index] as TimeRangeType
 					break
-				}
+				} */
 				return item
 			})
 
@@ -308,7 +313,13 @@ export default Vue.extend({
 
 		updateDisplaySequence(type: string, newOrder: Criterion[]) {
 			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = newOrder) : (this.selectedExclusionCharacteristics = newOrder)
+			// this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
 		},
+
+		getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
+			console.log(queryData)
+			this.$emit('get-query-data', { inclusionCriteria: queryData, exclusionCriteria: this.selectedExclusionCharacteristics })
+		}
 	},
 })
 </script>

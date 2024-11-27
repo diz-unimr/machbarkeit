@@ -20,7 +20,7 @@
 						@delete-dialog-card="deleteDialogCard" />
 				</div>
 				<div class="limitations-dialog__button-group">
-					<button :disabled="!isFilterComplete" @click="submit">
+					<button :disabled="!isAllFilterComplete" @click="submit">
 						<template v-if="isStateEditFilter">
 							SPEICHERN
 						</template>
@@ -40,11 +40,21 @@
 <script lang="ts">
 import Vue from 'vue'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
-import type { LimitationsSelectedCriteriaModalData } from '../../types/LimitationsSelectedCriteriaModalData.ts'
 import type { Criterion } from '../../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../../types/ConceptOptionsData'
 import type { QuantityType } from '../../types/QuantityOptionsData'
-import type { TimeRange } from '../../types/TimeRangeOptionsData'
+import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
+
+interface LimitationsSelectedCriteriaModalData {
+    selectedCriteriaFiltersInfo: Array<ConceptType | QuantityType | TimeRangeType>;
+    isAllFilterComplete: boolean;
+	filterCompleteStatus: Array<boolean>;
+}
+
+interface FilterInfo {
+	selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType;
+	isFilterComplete: boolean
+}
 
 export default Vue.extend({
 	name: 'LimitationsSelectedCriteriaModal',
@@ -65,7 +75,8 @@ export default Vue.extend({
 	data(): LimitationsSelectedCriteriaModalData {
 		return {
 			selectedCriteriaFiltersInfo: [],
-			isFilterComplete: false,
+			isAllFilterComplete: false,
+			filterCompleteStatus: [],
 		}
 	},
 
@@ -86,27 +97,35 @@ export default Vue.extend({
 			if (this.selectedCriteria !== null) {
 				this.$emit('delete-selected-criteria', index)
 				this.selectedCriteriaFiltersInfo.splice(index, 1)
+				this.filterCompleteStatus.splice(index, 1)
 				if (this.selectedCriteria.length === 0) {
 					this.$emit('dialog-close')
-				} else this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
+				} else {
+					// const inCompleteItems = this.selectedCriteriaFiltersInfo.filter(item => item.isFilterComplete === false)
+					// this.isAllFilterComplete = inCompleteItems.length <= 0
+					this.isAllFilterComplete = !this.filterCompleteStatus.includes(false)
+				} // this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
 			}
 		},
 
-		checkCompleteFilter(filtersInfo: Array<ConceptType | QuantityType | TimeRange>): void {
+		/* checkCompleteFilter(filtersInfo: Array<ConceptType | QuantityType | TimeRangeType>): void {
 			const notCompleteFilter = filtersInfo.filter(item => {
 				let notComplete = false
 				item.isFilterOptional ? (notComplete = false) : item.isFilterComplete ? (notComplete = false) : (notComplete = true)
 				return notComplete
 			})
 			notCompleteFilter.length > 0 ? (this.isFilterComplete = false) : (this.isFilterComplete = true)
-		},
+		}, */
 
-		getSelectedCriteriaFilter(index: string | number, filterInfo: ConceptType | QuantityType | TimeRange): void {
+		getSelectedCriteriaFilter(index: string | number, filterInfo: FilterInfo): void {
 			// store each Criterion Type Information into Array in the correct position (selectedCriteria)
-			if (this.selectedCriteria[index].display === filterInfo.display) {
-				this.selectedCriteriaFiltersInfo[index] = filterInfo
+			if (this.selectedCriteria[index].termCodes[0].display === filterInfo.selectedFiltersInfo.termCodes[0][0].display) {
+				this.selectedCriteriaFiltersInfo[index] = filterInfo.selectedFiltersInfo
+				this.filterCompleteStatus[index] = filterInfo.isFilterComplete
 			}
-			this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
+			// const inCompleteItems = this.selectedCriteriaFiltersInfo.filter(item => item.isFilterComplete === false)
+			// this.isAllFilterComplete = inCompleteItems.length <= 0
+			this.isAllFilterComplete = !this.filterCompleteStatus.includes(false)
 		},
 
 		submit(): void {

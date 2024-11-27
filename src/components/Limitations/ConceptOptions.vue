@@ -25,7 +25,7 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { ConceptOptionsData } from '../../types/ConceptOptionsData'
+import type { ConceptOptionsData, ConceptType } from '../../types/ConceptOptionsData'
 import type { Criterion } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
@@ -42,12 +42,8 @@ export default Vue.extend({
 	},
 	data(): ConceptOptionsData {
 		return {
-			/* selectedConcepts2: this.selectedCriterion.conceptType?.value
-				? this.selectedCriterion.conceptType.value
-				: [], */
-			selectedValue: this.selectedCriterion.conceptType?.valueFilter
-				? this.selectedCriterion.conceptType.valueFilter.selectedConcepts
-				: [],
+			selectedValue: (this.selectedCriterion.selectedCriterion as ConceptType)?.valueFilter?.selectedConcepts
+				?? [],
 			conceptType: {
 				termCodes: [this.selectedCriterion.termCodes],
 				context: this.selectedCriterion.context,
@@ -56,13 +52,6 @@ export default Vue.extend({
 	},
 	watch: {
 		selectedValue() {
-			/* this.$emit('get-selected-filter-option', {
-				type: 'conceptType',
-				display: this.selectedCriterion.display,
-				isFilterOptional: true,
-				isFilterComplete: true,
-				value: this.selectedConcepts,
-			}) */
 			this.conceptType = {
 				termCodes: [this.selectedCriterion.termCodes],
 				context: this.selectedCriterion.context,
@@ -97,15 +86,6 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		/* this.$emit('get-selected-filter-option', {
-			type: 'conceptType',
-			display: this.selectedCriterion.display,
-			isFilterOptional: true,
-			isFilterComplete: this.selectedCriterion.conceptType?.isFilterComplete
-				? this.selectedCriterion.conceptType?.isFilterComplete
-				: true,
-			value: this.selectedConcepts,
-		}) */
 		this.$emit('get-selected-filter-option', this.conceptType)
 	},
 

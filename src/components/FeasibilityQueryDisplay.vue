@@ -22,25 +22,32 @@
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
 										{{ characteristic.display }}
 									</div>
-									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-										<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
-											{{ value }}
+									{{ (characteristic.selectedCriterion instanceof ConceptType) }}
+									<div v-if="characteristic.selectedCriterion?.valueFilter?.selectedConcepts" class="selected-criteria-condition">
+										<span v-for="(value, value_index) in characteristic.selectedCriterion.valueFilter.selectedConcepts" :key="value_index">
+											{{ value.display }}
 										</span>
 									</div>
-									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+									<div v-if="characteristic.selectedCriterion?.valueFilter?.type" class="selected-criteria-condition">
+										<p v-if="characteristic.selectedCriterion.valueFilter?.type === 'quantity-range'">
+											zwischen {{ characteristic.selectedCriterion.valueFilter?.minValue }} und {{ characteristic.selectedCriterion.valueFilter?.maxValue }} {{ characteristic.selectedCriterion.valueFilter?.unit.display }}
 										</p>
-										<p v-else>
-											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+										<p v-if="characteristic.selectedCriterion.valueFilter?.type === 'quantity-comparator'">
+											{{ characteristic.selectedCriterion.valueFilter?.comparator === 'lt' ? '<' : characteristic.selectedCriterion.valueFilter?.comparator === 'gt' ? '>' : '=' }} {{ characteristic.selectedCriterion.valueFilter?.value }} {{ characteristic.selectedCriterion.valueFilter?.unit.display }}
 										</p>
 									</div>
-									<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
-										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+									<div v-if="characteristic.selectedCriterion?.timeRestriction" class="selected-criteria-condition">
+										<p v-if="new Date(characteristic.selectedCriterion?.timeRestriction.afterDate) < new Date(characteristic.selectedCriterion?.timeRestriction.beforeDate)">
+											zwischen {{ characteristic.selectedCriterion?.timeRestriction.afterDate }} und {{ characteristic.selectedCriterion?.timeRestriction.beforeDate }}
 										</p>
-										<p v-else>
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+										<p v-else-if="characteristic.selectedCriterion?.timeRestriction.afterDate === characteristic.selectedCriterion?.timeRestriction.beforeDate">
+											am {{ characteristic.selectedCriterion?.timeRestriction.afterDate }}
+										</p>
+										<p v-else-if="!characteristic.selectedCriterion?.timeRestriction.afterDate && characteristic.selectedCriterion?.timeRestriction.beforeDate">
+											vor {{ characteristic.selectedCriterion?.timeRestriction.beforeDate }}
+										</p>
+										<p v-else-if="characteristic.selectedCriterion?.timeRestriction.afterDate && !characteristic.selectedCriterion?.timeRestriction.beforeDate">
+											nach {{ characteristic.selectedCriterion?.timeRestriction.afterDate }}
 										</p>
 									</div>
 								</div>
@@ -205,6 +212,10 @@
 import Vue from 'vue'
 import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import draggable from 'vuedraggable'
+import type { ConceptType } from '../types/ConceptOptionsData.ts'
+import type { QuantityType } from '../types/QuantityOptionsData.ts'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
+import ConceptOptions from './Limitations/ConceptOptions.vue'
 
 interface FeasibilityQueryDisplayData {
     characteristicsLogic: {
@@ -215,6 +226,34 @@ interface FeasibilityQueryDisplayData {
 	exclusionCriteriaOld: Array<string>;
 	draggableInclusionCharacteristics: Array<Criterion>;
 	draggableExclusionCharacteristics: Array<Criterion>;
+	queryData: {
+		version: string;
+		display: string;
+		inclusionCriteria: Array<ConceptType | QuantityType | TimeRangeType | null>[];
+	};
+	// typeSymbole: string;
+	/* queryData: {
+		version: string;
+		display: string;
+		inclusionCriteria: {
+			termCodes: Array<Criterion['termCodes']>;
+			context: Criterion['context'];
+			timeRestriction: {
+				beforDate: string | undefined;
+				afterDate: string | undefined;
+			} | undefined;
+			valueFilter: {
+				selectedConcepts: Array<Criterion['filterOptions']> | undefined;
+				type: string | undefined;
+				unit: Criterion['filterOptions'] | undefined;
+				comparator: string | undefined;
+				value: number | undefined;
+				minValue: number | undefined;
+				maxValue: number | undefined;
+			} | undefined;
+		}[] | undefined;
+		exclusionCriteria: Array<Criterion['termCodes']>;
+	} */
 }
 
 export default Vue.extend({
@@ -255,6 +294,11 @@ export default Vue.extend({
 			},
 			inclusionCriteriaOld: [],
 			exclusionCriteriaOld: [],
+			queryData: {
+				version: '123',
+				display: 'Test Query',
+				inclusionCriteria: [[]],
+			},
 		}
 	},
 
@@ -273,6 +317,7 @@ export default Vue.extend({
 				}
 			}
 			this.inclusionCriteriaOld = [...newVal]
+			this.updateQueryData()
 		},
 
 		selectedExclusionCharacteristics(newVal) {
@@ -302,7 +347,9 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
+	updated() {
+		//this.updateQueryData()
+	},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -321,6 +368,7 @@ export default Vue.extend({
 					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'and')
 				}
 			}
+			this.updateQueryData()
 		},
 
 		editLimitation(characteristic: Criterion, index: number, criteriaType: string) {
@@ -338,6 +386,63 @@ export default Vue.extend({
 					this.characteristicsLogic.exclusionCriteria.splice(index - 1, 1)
 				} else this.characteristicsLogic.exclusionCriteria.splice(index, 1)
 			}
+		},
+
+		updateQueryData() {
+			console.log('logic: ', this.characteristicsLogic)
+			console.log(this.selectedInclusionCharacteristics)
+			console.log(this.queryData)
+			console.log(this.queryData.inclusionCriteria)
+			console.log(this.queryData.inclusionCriteria[0])
+			console.log(this.queryData.inclusionCriteria[3])
+			this.queryData.inclusionCriteria = []
+			// this.queryData.exclusionCriteria = []
+			if (this.selectedInclusionCharacteristics) {
+				let tempIndex = 0
+				for (let i = 0; i < this.selectedInclusionCharacteristics.length; i++) {
+					const selectedCharacteristic = this.selectedInclusionCharacteristics[i].selectedCriterion as ConceptType | QuantityType |TimeRangeType
+					selectedCharacteristic.termCodes = selectedCharacteristic.termCodes.flat()
+					console.log('selectedCharacteristic: ', selectedCharacteristic)
+					// i === 0 && this.queryData.inclusionCriteria.splice(0, 0, [selectedCharacteristic])
+					console.log(tempIndex)
+					if (!this.queryData.inclusionCriteria[tempIndex]) {
+						this.queryData.inclusionCriteria[tempIndex] = []
+					}
+					this.queryData.inclusionCriteria[tempIndex].push(...[selectedCharacteristic])
+					if (this.characteristicsLogic.inclusionCriteria[i] === 'or') {
+						console.log(this.selectedInclusionCharacteristics[i])
+						this.queryData.inclusionCriteria[tempIndex].push(selectedCharacteristic)
+					} else if (this.characteristicsLogic.inclusionCriteria[i] === 'and') {
+						console.log(this.selectedInclusionCharacteristics[i])
+						// this.queryData.inclusionCriteria.length > 0 && tempIndex++
+						console.log(this.queryData.inclusionCriteria)
+						this.queryData.inclusionCriteria.push([selectedCharacteristic])
+						tempIndex++
+						// this.queryData.inclusionCriteria[0].splice(tempIndex, 0, selectedCharacteristic)
+					}
+					i++
+				}
+
+				console.log(JSON.stringify(this.queryData))
+				/* this.selectedInclusionCharacteristics.forEach(item => {
+					const selectedCharacteristic = item.selectedCriterion as ConceptType | QuantityType |TimeRangeType
+					selectedCharacteristic.termCodes = selectedCharacteristic.termCodes.flat()
+
+					this.characteristicsLogic.inclusionCriteria.forEach(logic => {
+						if (logic === 'or') {
+							this.queryData.inclusionCriteria[index].push(selectedCharacteristic)
+						}
+					})
+				}) */
+			}
+			/* if (this.selectedExclusionCharacteristics) {
+				this.selectedExclusionCharacteristics.forEach(item => {
+					const selectedCharacteristic = item.selectedCriterion as ConceptType | QuantityType |TimeRangeType
+					selectedCharacteristic.termCodes = selectedCharacteristic.termCodes.flat()
+					this.queryData.exclusionCriteria[0].push(selectedCharacteristic)
+				})
+			} */
+			// this.$emit('get-update-query-data', this.queryData)
 		},
 	},
 })

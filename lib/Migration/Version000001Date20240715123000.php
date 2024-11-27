@@ -12,9 +12,11 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version000001Date20240715123000 extends SimpleMigrationStep {
+class Version000001Date20240715123000 extends SimpleMigrationStep
+{
 
-	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options)
+	{
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
@@ -62,6 +64,12 @@ class Version000001Date20240715123000 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 			$table->addColumn('display', Types::STRING, [
+				'notnull' => true,
+			]);
+			$table->addColumn('term_codes', Types::JSON, [
+				'notnull' => true,
+			]);
+			$table->addColumn('context', Types::JSON, [
 				'notnull' => true,
 			]);
 			$table->addColumn('code', Types::STRING, [

@@ -46,7 +46,7 @@ import QuantityOptions from './QuantityOptions.vue'
 import type { Criterion } from '../../types/OntologySearchTreeModalData'
 import type { ConceptType } from '../../types/ConceptOptionsData'
 import type { QuantityType } from '../../types/QuantityOptionsData'
-import type { TimeRange } from '../../types/TimeRangeOptionsData'
+import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
 
 interface FilterCardData {
 	state: boolean;
@@ -71,11 +71,11 @@ export default Vue.extend({
 		return {
 			state: true,
 			isResetDisabled: this.selectedCriterion.conceptType
-				? this.selectedCriterion.conceptType.value.length <= 0
+				? !this.selectedCriterion.conceptType.valueFilter
 				: this.selectedCriterion.quantityType
-					? this.selectedCriterion.quantityType?.value.type === 'kein Filter'
-					: this.selectedCriterion.timeRange && Object.entries(this.selectedCriterion.timeRange.value).length > 0
-						? (this.selectedCriterion.timeRange?.value.type === 'kein Filter')
+					? !this.selectedCriterion.quantityType.valueFilter
+					: this.selectedCriterion.timeRange
+						? !this.selectedCriterion.timeRange.timeRestriction
 						: true,
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
@@ -94,8 +94,8 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		getSelectedFilterOption(selectedFilterInfo: ConceptType | QuantityType | TimeRange) {
-			this.$emit('get-selected-filters', selectedFilterInfo)
+		getSelectedFilterOption(selectedFilterInfo: ConceptType | QuantityType | TimeRangeType, isFilterComplete: boolean = true) {
+			this.$emit('get-selected-filters', selectedFilterInfo, isFilterComplete)
 		},
 
 		toggleResetButton(isReset: boolean): void {

@@ -5,7 +5,7 @@
 	-->
 	<div class="limitations-card">
 		<div class="limitations-card__header">
-			<p class="limitations-card__title">
+			<p v-if="selectedCriterion" class="limitations-card__title">
 				{{ selectedCriterion.display }}
 			</p>
 			<button v-if="!isStateEditFilter" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
@@ -24,7 +24,7 @@ import FilterCard from './FilterCard.vue'
 import type { Criterion } from '../../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../../types/QuantityOptionsData'
-import type { TimeRange } from '../../types/TimeRangeOptionsData'
+import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
 
 interface LimitationsSelectedCriteriaCardData {
     filterInfo: Criterion | null,
@@ -75,8 +75,8 @@ export default Vue.extend({
 
 	methods: {
 		// This function is called every time when user click/update a filter
-		getSelectedFilters(selectedFiltersInfo: ConceptType | QuantityType | TimeRange): void {
-			this.$emit('get-selected-criteria-filter', selectedFiltersInfo)
+		getSelectedFilters(selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType, isFilterComplete: boolean): void {
+			this.$emit('get-selected-criteria-filter', { selectedFiltersInfo, isFilterComplete })
 		},
 
 		deleteCard(key: number): void {

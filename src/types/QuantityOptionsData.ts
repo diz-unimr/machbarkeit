@@ -2,7 +2,9 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-export interface QuantityType {
+import type { Criterion } from './OntologySearchTreeModalData'
+
+export interface QuantityType2 {
     type: string;
     display: string;
     isFilterOptional: boolean;
@@ -17,13 +19,49 @@ export interface QuantityType {
     },
 }
 
+export interface QuantityType {
+    termCodes: Array<Criterion['termCodes']>;
+    context: Criterion['context'];
+    valueFilter?: {
+        /* access only object inside array */
+        unit: Criterion['filterOptions'][number];
+        comparator?: string;
+        value?: number;
+        minValue?: number;
+        maxValue?: number;
+        type: string;
+    };
+}
+
+
+export interface X {
+    termCodes: Array<Criterion['termCodes']>;
+    context: Criterion['context'];
+    valueFilter?: {
+        /* access only object inside array */
+        selectedConcepts: Criterion['filterOptions'];
+        unit: Criterion['filterOptions'][number];
+        comparator?: string;
+        value?: number;
+        minValue?: number;
+        maxValue?: number;
+        type: string;
+    };
+    timeRestriction?: {
+        beforeDate?: string;
+        afterDate?: string;
+    };
+}
+
 export interface QuantityOptionsData {
-    typeSymbol: {
-        'kein Filter': string,
-        gleich: string,
-        kleiner: string,
-        größer: string,
-        zwischen: string,
-    },
-    comparisonRestriction: QuantityType['value']
+    isFilterComplete: boolean;
+    selectedValue: {
+        unit: Criterion['filterOptions'][number];
+        comparator: string;
+        value: number;
+        minValue: number;
+        maxValue: number;
+        type: string;
+    }
+    quantityType: QuantityType;
 }

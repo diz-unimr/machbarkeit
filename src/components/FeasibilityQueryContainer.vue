@@ -7,20 +7,21 @@
 		<div class="feasibility-query-wrapper">
 			<div class="feasibility-query__output">
 				<div class="number-patients">
-					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
+					<p>Anzahl der Patienten: {{ numberOfPatients ?? '-' }}</p>
 				</div>
 				<div class="feasibility-query__button-group">
 					<button :disabled="true">
 						ZURÜCKSETZEN
 					</button>
-					<button :disabled="hasNoQuery">
+					<button :disabled="hasNoQuery" @click="startQuery(queryData)">
 						ABFRAGE STARTEN
 					</button>
 				</div>
 			</div>
 			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
 			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen"
-				@enable-start-query-button="enableStartQueryButton" />
+				@enable-start-query-button="enableStartQueryButton"
+				@get-query-data="getQueryData" />
 		</div>
 		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
 	</div>
@@ -28,12 +29,29 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { generateUrl } from '@nextcloud/router'
+import nextcloudAxios from '@nextcloud/axios'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
+import type { Criterion } from '../types/OntologySearchTreeModalData'
+import type { ConceptType } from '../types/ConceptOptionsData'
+import type { QuantityType } from '../types/QuantityOptionsData'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData'
 
 interface FeasibilityQueryContainerData {
-	numberOfPatients: number;
+	queryData: {
+		inclusionCriteria: Criterion[] | undefined,
+		exclusionCriteria: Criterion[] | undefined,
+	} | null;
+	queryData2: {
+		version: string;
+		display: string;
+		inclusionCriteria: [
+			Array<ConceptType | QuantityType | TimeRangeType>
+		];
+	};
+	numberOfPatients: number | null;
 	isSaveModalOpen: boolean;
 	hasNoQuery: boolean;
 }
@@ -48,7 +66,13 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryContainerData {
 		return {
-			numberOfPatients: 0,
+			queryData: null,
+			queryData2: {
+				version: '123',
+				display: 'Test Query',
+				inclusionCriteria: [[]],
+			},
+			numberOfPatients: null,
 			isSaveModalOpen: false,
 			hasNoQuery: true,
 		}
@@ -77,6 +101,54 @@ export default Vue.extend({
 
 		enableStartQueryButton(hasData: boolean): void {
 			this.hasNoQuery = !hasData
+		},
+
+		getQueryData(data): void {
+			console.log('data', data)
+			this.queryData2 = data.inclusionCriteria
+			/* console.log('data', data)
+
+			data?.inclusionCriteria?.forEach(item => {
+				const selectedCriterion = item.selectedCriterion as ConceptType | QuantityType |TimeRangeType
+				selectedCriterion.termCodes = selectedCriterion.termCodes.flat()
+				this.queryData2.inclusionCriteria[0].push(selectedCriterion)
+			})
+			console.log(this.queryData2)
+			console.log(this.queryData2.inclusionCriteria[0][1]) */
+			/* data?.inclusionCriteria?.map((item, index) => {
+				const x = item.selectedCriterion as ConceptType | QuantityType | TimeRangeType
+				return this.queryData2.inclusionCriteria[index] = x
+			}) */
+			/* const inclusion = data?.inclusionCriteria
+				? {
+					inclusionCriteria: [
+						5,
+					],
+				}
+				: {}
+
+			console.log(data)
+			const jsonData = {
+				version: 'http://to_be_decided.com/draft-1/schema#',
+				display: '',
+			} */
+		},
+
+		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
+			this.numberOfPatients = null
+			console.log('Start')
+			console.log(this.queryData2)
+			const response = await nextcloudAxios.post(generateUrl('/apps/machbarkeit/machbarkeit/get_request'),
+				{ criteria: JSON.stringify(this.queryData2) },
+				{
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				})
+			// const x = JSON.parse(response.data)
+			console.log(response)
+			console.log('finished')
+			this.numberOfPatients = response.data as number
 		},
 	},
 })

@@ -12,7 +12,8 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 use Psr\Log\LoggerInterface;
 
-class InitData implements IRepairStep {
+class InitData implements IRepairStep
+{
 
 	/** @var LoggerInterface */
 	protected $logger;
@@ -21,7 +22,8 @@ class InitData implements IRepairStep {
 	/** @var IDBConnection */
 	protected $db;
 
-	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db) {
+	public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $db)
+	{
 		$this->logger = $logger;
 		$this->db = $db;
 		$this->config = $config;
@@ -30,14 +32,16 @@ class InitData implements IRepairStep {
 	/**
 	 * Returns the step's name
 	 */
-	public function getName() {
+	public function getName()
+	{
 		return 'Init data step!';
 	}
 
 	/**
 	 * @param IOutput $output
 	 */
-	public function run(IOutput $output) {
+	public function run(IOutput $output)
+	{
 		$this->storeInitialData();
 		/* $previousVersion = $this->config->getAppValue('machbarkeit', 'installed_version', false);
 		if (!$previousVersion) {
@@ -45,7 +49,8 @@ class InitData implements IRepairStep {
 		} */
 	}
 
-	public function get_metadata($file_name) {
+	public function get_metadata($file_name)
+	{
 		$data = [];
 		$file = fopen(__DIR__ . '/../../csvfile/' . $file_name, 'r');
 		while (($row = fgetcsv($file)) !== false) {
@@ -65,7 +70,8 @@ class InitData implements IRepairStep {
 		return $jsonArray;
 	}
 
-	protected function storeInitialData() {
+	protected function storeInitialData()
+	{
 		$this->logger->info('Loading ontology data', ['app' => 'Machbarkeit']);
 		$query = $this->db->getQueryBuilder();
 
@@ -94,6 +100,21 @@ class InitData implements IRepairStep {
 					[
 						'id' => $this->db->quote($concept_data[$i]['id']),
 						'display' => $this->db->quote($concept_data[$i]['display']),
+						'term_codes' => $query->createNamedParameter(json_encode(json_decode('[
+							{
+								"code": "263495000",
+                        		"system": "http://snomed.info/sct",
+                        		"display": "Geschlecht"
+							},
+						]', true)), IQueryBuilder::PARAM_STR),
+						'context' => $query->createNamedParameter(json_encode(json_decode('[
+							{
+								"code": "Patient",
+								"system": "fdpg.mii.cds",
+								"version": "1.0.0",
+								"display": "Patient"
+							},
+						]', true)), IQueryBuilder::PARAM_STR),
 						'code' => $this->db->quote($concept_data[$i]['code']),
 						'code_system' => $this->db->quote($concept_data[$i]['code_system']),
 						'selectable' => $this->db->quote($concept_data[$i]['selectable']),

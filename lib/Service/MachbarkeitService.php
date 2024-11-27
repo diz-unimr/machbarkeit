@@ -11,18 +11,21 @@ use OCA\Machbarkeit\Db\FilterMapper;
 use OCA\Machbarkeit\Db\ModuleMapper;
 use OCA\Machbarkeit\Db\OntologyConceptMapper;
 
-class MachbarkeitService {
+class MachbarkeitService
+{
 	private $moduleMapper;
 	private $ontologyConceptMapper;
 	private $filterMapper;
 
-	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper, FilterMapper $filterMapper) {
+	public function __construct(ModuleMapper $moduleMapper, OntologyConceptMapper $ontologyConceptMapper, FilterMapper $filterMapper)
+	{
 		$this->moduleMapper = $moduleMapper;
 		$this->ontologyConceptMapper = $ontologyConceptMapper;
 		$this->filterMapper = $filterMapper;
 	}
 
-	public function readCsv() {
+	public function readCsv()
+	{
 		$file = fopen(__DIR__ . '/../../csvfile/diz_metadaten.csv', 'r');
 		$data = [];
 		/* fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read. */
@@ -43,7 +46,8 @@ class MachbarkeitService {
 		return array_values($jsonArray);
 	}
 
-	public function readOntology() {
+	public function readOntology()
+	{
 		$json_files = [
 			'Person.json',
 			// 'test.json',
@@ -66,25 +70,30 @@ class MachbarkeitService {
 		return $merged_file;
 	}
 
-	public function readUiProfile() {
+	public function readUiProfile()
+	{
 		$ui_profile = file_get_contents(__DIR__ . '/../../ontology/ui_profile.json');
 		$json_ui_profile = json_decode($ui_profile, true);
 		return $json_ui_profile;
 	}
 
-	public function getModules() {
+	public function getModules()
+	{
 		return $this->moduleMapper->findModules();
 	}
 
-	public function getConcepts($moduleId) {
+	public function getConcepts($moduleId)
+	{
 		return $this->ontologyConceptMapper->find($moduleId);
 	}
 
-	public function getOntology($moduleId) {
+	public function getOntology($moduleId)
+	{
 		return $this->ontologyConceptMapper->findAll($moduleId);
 	}
 
-	public function buildTree(array $elements, $id) {
+	public function buildTree(array $elements, $id)
+	{
 		$branch = [];
 		foreach ($elements as $element) {
 			if ($element->parentId == $id) {
@@ -100,21 +109,24 @@ class MachbarkeitService {
 		return $branch;
 	}
 
-	public function getSearchOntology(string $textSeach, int $module_id) {
+	public function getSearchOntology(string $textSeach, int $module_id)
+	{
 		return $this->ontologyConceptMapper->searchOntology($textSeach, $module_id);
 	}
 
-	public function getFilters($filter_options_ids) {
+	public function getFilters($filter_options_ids)
+	{
 		return $this->filterMapper->filters($filter_options_ids);
 	}
 
-	public function getFhirRequest($criteria) {
+	public function getFhirRequest($criteria)
+	{
 		require_once __DIR__ . '/../../vendor/autoload.php';
 		$dotenv = Dotenv::createImmutable(__DIR__);
 		$dotenv->load();
 		//$username = $_ENV['FHIR_USERNAME'];
 		//$password = $_ENV['FHIR_PASSWORD'];
-
+		// return $criteria;
 		$data = json_decode('{
 			"version": "http://to_be_decided.com/draft-1/schema#",
 			"display": "",
@@ -159,7 +171,7 @@ class MachbarkeitService {
 		//curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC); // Use Basic Authentication
 		//curl_setopt($ch, CURLOPT_USERPWD, "$username:$password"); // Set the username and password
 		curl_setopt($ch, CURLOPT_POST, true); // Set request method to POST
-		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data)); // Attach the data as JSON in the body
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(json_decode($criteria, true))); // Attach the data as JSON in the body
 		curl_setopt($ch, CURLOPT_HTTPHEADER, [
 			'Content-Type: application/json', // Set content type to JSON
 		]);

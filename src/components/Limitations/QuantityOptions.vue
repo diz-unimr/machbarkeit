@@ -9,57 +9,57 @@
 		</div>
 		<div class="content-option__body">
 			<div class="content-option-wrapper">
-				<select v-model="comparisonRestriction.type">
-					<option value="kein Filter">
+				<select v-model="selectedValue.comparator">
+					<option value="no filter">
 						kein Filter
 					</option>
-					<option value="gleich">
+					<option value="eq">
 						gleich
 					</option>
-					<option value="kleiner">
+					<option value="lt">
 						kleiner
 					</option>
-					<option value="größer">
+					<option value="gt">
 						größer
 					</option>
-					<option value="zwischen">
+					<option value="between">
 						zwischen
 					</option>
 				</select>
 				<div class="input-wrapper">
-					<div v-if="comparisonRestriction.type === 'gleich' || comparisonRestriction.type === 'kleiner' || comparisonRestriction.type === 'größer'"
+					<div v-if="selectedValue.comparator === 'eq' || selectedValue.comparator === 'lt' || selectedValue.comparator === 'gt'"
 						class="text-floating-wrapper">
-						<input v-model="comparisonRestriction.value"
+						<input v-model="selectedValue.value"
 							type="number"
 							@change="checkEmptyValue($event, 'value')">
 						<label class="text-floating">Wert</label>
 					</div>
-					<div v-if="comparisonRestriction.type === 'zwischen'"
+					<div v-if="selectedValue.comparator === 'between'"
 						class="input-wrapper input-wrapper--between">
 						<div class="text-floating-wrapper">
-							<input v-model="comparisonRestriction.min"
+							<input v-model="selectedValue.minValue"
 								style="width: 100px !important;"
 								type="number"
-								@change="checkEmptyValue($event, 'min')">
+								@change="checkEmptyValue($event, 'minValue')">
 							<label class="text-floating">Min</label>
 						</div>
 						<span class="font-bold">und</span>
 						<div class="text-floating-wrapper">
-							<input v-model="comparisonRestriction.max"
+							<input v-model="selectedValue.maxValue"
 								style="width: 100px !important;"
 								type="number"
-								@change="checkEmptyValue($event, 'max')">
+								@change="checkEmptyValue($event, 'maxValue')">
 							<label class="text-floating">Max</label>
 						</div>
 					</div>
 					<!-- Unit will be shown if type != 'kein Filter' -->
-					<div v-if="comparisonRestriction.type !== 'kein Filter'"
+					<div v-if="selectedValue.comparator !== 'no filter'"
 						class="text-floating-wrapper">
-						<select v-model="comparisonRestriction.unit">
-							<option v-for="(unit_display, index) in selectedCriterion.filterOptions"
+						<select v-model="selectedValue.unit">
+							<option v-for="(unit, index) in selectedCriterion.filterOptions"
 								:key="index"
-								:value="unit_display.display">
-								{{ unit_display.display }}
+								:value="unit">
+								{{ unit.display }}
 							</option>
 						</select>
 						<label class="text-floating">Einheit</label>
@@ -67,7 +67,7 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="comparisonRestriction.type === 'zwischen' && (comparisonRestriction.min >= comparisonRestriction.max)">
+		<div v-if="checkCompleteValue()">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { QuantityOptionsData } from '../../types/QuantityOptionsData.ts'
+import type { QuantityOptionsData, QuantityType } from '../../types/QuantityOptionsData.ts'
 import type { Criterion } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
@@ -93,21 +93,34 @@ export default Vue.extend({
 	},
 	data(): QuantityOptionsData {
 		return {
-			typeSymbol: {
+			/* typeSymbol: {
 				'kein Filter': 'kein Filter',
 				gleich: '=',
 				kleiner: '<',
 				größer: '>',
 				zwischen: 'zwischen',
+			}, */
+			isFilterComplete: true,
+			selectedValue: {
+				comparator: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.comparator
+					?? ((this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.type === 'quantity-range'
+						? 'between'
+						: 'no filter'),
+				unit: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.unit
+					?? this.selectedCriterion.filterOptions[0],
+				value: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.value
+					?? 0,
+				minValue: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.minValue
+					?? 0,
+				maxValue: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.maxValue
+					?? 0,
+				type: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.type
+					?? '',
 			},
-			comparisonRestriction: {
-				type: this.selectedCriterion.quantityType?.value.type
-					? this.selectedCriterion.quantityType.value.type
-					: 'kein Filter',
-				typeSymbol: this.selectedCriterion.quantityType?.value.typeSymbol
-					? this.selectedCriterion.quantityType.value.typeSymbol
-					: 'kein Filter',
-				unit: this.selectedCriterion.quantityType?.value.unit
+			quantityType: {
+				termCodes: [this.selectedCriterion.termCodes],
+				context: this.selectedCriterion.context,
+				/* unit: this.selectedCriterion.quantityType?.value.unit
 					? this.selectedCriterion.quantityType.value.unit
 					: this.selectedCriterion.filterOptions[0].display,
 				value: this.selectedCriterion.quantityType?.value.value
@@ -119,60 +132,80 @@ export default Vue.extend({
 				max: this.selectedCriterion.quantityType?.value.max
 					? this.selectedCriterion.quantityType.value.max
 					: '0',
+				type: this.selectedCriterion.quantityType?.value.type
+					? this.selectedCriterion.quantityType.value.type
+					: 'kein Filter', */
 			},
 		}
 	},
 
 	watch: {
-		'comparisonRestriction.type'(): void {
-			this.comparisonRestriction.typeSymbol = this.typeSymbol[this.comparisonRestriction.type]
-
-			if (this.comparisonRestriction.type !== 'kein Filter') {
-				this.$emit('toggle-reset-button', true)
-			} else {
-				this.$emit('toggle-reset-button', false)
-			}
-		},
-
-		comparisonRestriction: {
-			handler() {
-				if (this.comparisonRestriction.type === 'kein Filter') {
-					this.$emit('get-selected-filter-option', {
-						type: 'quantityType',
-						display: this.selectedCriterion.display,
-						isFilterOptional: true,
-						isFilterComplete: true,
-						value: {},
-					})
-				} else if (this.comparisonRestriction.type === 'zwischen') {
-					this.$emit('get-selected-filter-option', {
-						type: 'quantityType',
-						display: this.selectedCriterion.display,
-						isFilterOptional: true,
-						isFilterComplete: this.comparisonRestriction.type && (this.comparisonRestriction.min < this.comparisonRestriction.max),
-						value: this.comparisonRestriction,
-					})
-				} else {
-					this.$emit('get-selected-filter-option', {
-						type: 'quantityType',
-						display: this.selectedCriterion.display,
-						isFilterOptional: true,
-						isFilterComplete: this.comparisonRestriction.type.length > 0 && this.comparisonRestriction.value.length > 0,
-						value: this.comparisonRestriction,
-					 })
+		/* 'comparison.type'(): void {
+			if (this.comparison.type === 'no filter') {
+				this.quantityType = {
+					termCodes: [this.selectedCriterion.termCodes],
+					context: this.selectedCriterion.context,
 				}
+				this.$emit('toggle-reset-button', true)
+			} else this.$emit('toggle-reset-button', false)
+
+			if (this.comparison.type === 'eq' || this.comparison.type === 'lt' || this.comparison.type === 'gt') {
+				this.quantityType.valueFilter = {
+					unit: this.comparison.unit,
+					comparator: this.comparison.type,
+					value: this.comparison.value,
+					type: 'quantity-comparator',
+				}
+			} else if (this.comparison.type === 'between') {
+				this.quantityType.valueFilter = {
+					unit: this.comparison.unit,
+					minValue: this.comparison.minValue,
+					maxValue: this.comparison.maxValue,
+					type: 'quantity-range',
+				}
+			}
+			this.$emit('get-selected-filter-option', this.quantityType)
+		}, */
+
+		selectedValue: {
+			handler() {
+				if (this.selectedValue?.comparator === 'no filter') {
+					this.$emit('toggle-reset-button', false)
+					this.quantityType = {
+						termCodes: [this.selectedCriterion.termCodes],
+						context: this.selectedCriterion.context,
+					}
+				} else {
+					this.$emit('toggle-reset-button', true)
+					if (this.selectedValue.comparator === 'between') {
+						this.checkCompleteValue()
+						this.quantityType.valueFilter = {
+							unit: this.selectedValue.unit,
+							minValue: this.selectedValue.minValue,
+							maxValue: this.selectedValue.maxValue,
+							type: 'quantity-range',
+						}
+					} else if (this.selectedValue.comparator === 'eq' || this.selectedValue.comparator === 'lt' || this.selectedValue.comparator === 'gt') {
+						this.quantityType.valueFilter = {
+							unit: this.selectedValue.unit,
+							comparator: this.selectedValue.comparator,
+							value: this.selectedValue.value,
+							type: 'quantity-comparator',
+						}
+					}
+				}
+				this.$emit('get-selected-filter-option', this.quantityType, this.isFilterComplete)
 			},
 			deep: true,
 		},
 
 		isResetDisabled() {
-			if (this.isResetDisabled && this.comparisonRestriction.type !== 'kein Filter') {
-				this.comparisonRestriction.type = 'kein Filter'
-				this.comparisonRestriction.typeSymbol = 'kein Filter'
-				this.comparisonRestriction.unit = this.selectedCriterion.filterOptions[0].display
-				this.comparisonRestriction.value = '0'
-				this.comparisonRestriction.min = '0'
-				this.comparisonRestriction.max = '0'
+			if (this.isResetDisabled && this.selectedValue.comparator !== 'no filter') {
+				this.selectedValue.comparator = 'no filter'
+				this.selectedValue.unit = this.selectedCriterion.filterOptions[0]
+				this.selectedValue.value = 0
+				this.selectedValue.minValue = 0
+				this.selectedValue.maxValue = 0
 			}
 		},
 
@@ -183,17 +216,7 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-filter-option', {
-			type: 'quantityType',
-			display: this.selectedCriterion.display,
-			isFilterOptional: true,
-			isFilterComplete: this.selectedCriterion.quantityType?.isFilterComplete
-				? this.selectedCriterion.quantityType?.isFilterComplete
-				: true,
-			value: this.selectedCriterion.quantityType?.value
-				? this.comparisonRestriction
-				: {},
-		})
+		this.$emit('get-selected-filter-option', this.quantityType, this.isFilterComplete)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -201,10 +224,25 @@ export default Vue.extend({
 	updated() {},
 
 	methods: {
+		getQuantityOption() {
+			this.selectedValue.unit = (this.selectedCriterion.selectedCriterion as QuantityType).valueFilter?.unit ?? this.selectedCriterion.filterOptions[0]
+			this.selectedValue.comparator = (this.selectedCriterion.selectedCriterion as QuantityType).valueFilter?.comparator ?? 'no filter'
+		},
+
 		checkEmptyValue(event: Event, tag: string): void {
 			const eventTarget = event.target as HTMLInputElement
 			if (eventTarget.value.length === 0) {
-				this.comparisonRestriction[tag] = '0'
+				this.selectedValue[tag] = 0
+			}
+		},
+
+		checkCompleteValue() {
+			if (this.selectedValue.comparator === 'between' && (this.selectedValue.minValue >= this.selectedValue.maxValue)) {
+				this.isFilterComplete = false
+				return true
+			} else {
+				this.isFilterComplete = true
+				return false
 			}
 		},
 	},

@@ -4,9 +4,14 @@
 */
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
-import type { TimeRange } from '../types/TimeRangeOptionsData'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData'
 
 export interface LimitationsSelectedCriteriaModalData {
-    selectedCriteriaFiltersInfo: Array<ConceptType | QuantityType | TimeRange>;
-    isFilterComplete: boolean;
+    // selectedCriteriaFiltersInfo: Array<ConceptType | QuantityType | TimeRangeType>;
+    selectedCriteriaFiltersInfo: {
+        selectedCriterion: ConceptType | QuantityType | TimeRangeType;
+        isFilterComplete: boolean
+    }[],
+    isAllFilterComplete: boolean;
+    filterCompleteStatus: Array<boolean>;
 }
