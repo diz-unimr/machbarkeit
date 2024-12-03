@@ -70,13 +70,7 @@ export default Vue.extend({
 	data(): FilterCardData {
 		return {
 			state: true,
-			isResetDisabled: this.selectedCriterion.conceptType
-				? !this.selectedCriterion.conceptType.valueFilter
-				: this.selectedCriterion.quantityType
-					? !this.selectedCriterion.quantityType.valueFilter
-					: this.selectedCriterion.timeRange
-						? !this.selectedCriterion.timeRange.timeRestriction
-						: true,
+			isResetDisabled: !(this.selectedCriterion.selectedFilter !== undefined && (!('valueFilter' in this.selectedCriterion.selectedFilter) || !('timeRestriction' in this.selectedCriterion.selectedFilter))),
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
@@ -94,7 +88,7 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		getSelectedFilterOption(selectedFilterInfo: ConceptType | QuantityType | TimeRangeType, isFilterComplete: boolean = true) {
+		getSelectedFilterOption(selectedFilterInfo: ConceptType | QuantityType | TimeRangeType | undefined, isFilterComplete: boolean | undefined) {
 			this.$emit('get-selected-filters', selectedFilterInfo, isFilterComplete)
 		},
 

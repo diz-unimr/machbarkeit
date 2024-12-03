@@ -52,7 +52,7 @@ interface LimitationsSelectedCriteriaModalData {
 }
 
 interface FilterInfo {
-	selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType;
+	selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType | undefined;
 	isFilterComplete: boolean
 }
 
@@ -75,7 +75,7 @@ export default Vue.extend({
 	data(): LimitationsSelectedCriteriaModalData {
 		return {
 			selectedCriteriaFiltersInfo: [],
-			isAllFilterComplete: false,
+			isAllFilterComplete: true,
 			filterCompleteStatus: [],
 		}
 	},
@@ -101,30 +101,18 @@ export default Vue.extend({
 				if (this.selectedCriteria.length === 0) {
 					this.$emit('dialog-close')
 				} else {
-					// const inCompleteItems = this.selectedCriteriaFiltersInfo.filter(item => item.isFilterComplete === false)
-					// this.isAllFilterComplete = inCompleteItems.length <= 0
 					this.isAllFilterComplete = !this.filterCompleteStatus.includes(false)
-				} // this.checkCompleteFilter(this.selectedCriteriaFiltersInfo)
+				}
 			}
 		},
 
-		/* checkCompleteFilter(filtersInfo: Array<ConceptType | QuantityType | TimeRangeType>): void {
-			const notCompleteFilter = filtersInfo.filter(item => {
-				let notComplete = false
-				item.isFilterOptional ? (notComplete = false) : item.isFilterComplete ? (notComplete = false) : (notComplete = true)
-				return notComplete
-			})
-			notCompleteFilter.length > 0 ? (this.isFilterComplete = false) : (this.isFilterComplete = true)
-		}, */
-
 		getSelectedCriteriaFilter(index: string | number, filterInfo: FilterInfo): void {
-			// store each Criterion Type Information into Array in the correct position (selectedCriteria)
-			if (this.selectedCriteria[index].termCodes[0].display === filterInfo.selectedFiltersInfo.termCodes[0][0].display) {
+			if (filterInfo) {
 				this.selectedCriteriaFiltersInfo[index] = filterInfo.selectedFiltersInfo
 				this.filterCompleteStatus[index] = filterInfo.isFilterComplete
+			} else {
+
 			}
-			// const inCompleteItems = this.selectedCriteriaFiltersInfo.filter(item => item.isFilterComplete === false)
-			// this.isAllFilterComplete = inCompleteItems.length <= 0
 			this.isAllFilterComplete = !this.filterCompleteStatus.includes(false)
 		},
 

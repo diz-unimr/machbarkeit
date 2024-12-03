@@ -7,23 +7,37 @@
 		<div class="feasibility-query-wrapper">
 			<div class="feasibility-query__output">
 				<div class="number-patients">
-					<p>Anzahl der Patienten: {{ numberOfPatients ?? '-' }}</p>
+					<p>Anzahl der Patienten: 
+						<span v-if="queryProcessStatus === 0">
+							<img src="../../img/loading_spinner.svg" />
+						</span>
+						<span class="error-message" v-else-if="errorMessage.length > 0">{{ errorMessage }}</span>
+						<span class="error-message" v-else-if="numberOfPatients && numberOfPatients <= 3">Das Ergebnis ist zu klein</span>
+						<span v-else>{{ numberOfPatients && numberOfPatients > 3 ? numberOfPatients : '-' }}</span>
+					</p>
 				</div>
 				<div class="feasibility-query__button-group">
-					<button :disabled="true">
+					<button :disabled="!queryData" @click="resetSelectedCriteria()">
 						ZURÜCKSETZEN
 					</button>
-					<button :disabled="hasNoQuery" @click="startQuery(queryData)">
+					<button :disabled="!queryData" @click="startQuery(queryData)">
 						ABFRAGE STARTEN
 					</button>
 				</div>
 			</div>
-			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
-			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen"
+			<SaveQueryModal v-if="isSaveModalOpen"
+				:query-data="queryData"
+				@close-save-modal="closeSaveModal" />
+			<FeasibilityQueryBuilder :is-criteria-reset="isCriteriaReset"
+				:is-save-modal-open="isSaveModalOpen"
 				@enable-start-query-button="enableStartQueryButton"
 				@get-query-data="getQueryData" />
 		</div>
-		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
+		<MachbarkeitFooter
+			:is-query-data-valid="isQueryDataValid"
+			@open-save-modal="openSaveModal"
+			@close-save-modal="closeSaveModal"
+			@get-query-data="getQueryData" />
 	</div>
 </template>
 
@@ -34,26 +48,17 @@ import nextcloudAxios from '@nextcloud/axios'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
-import type { Criterion } from '../types/OntologySearchTreeModalData'
-import type { ConceptType } from '../types/ConceptOptionsData'
-import type { QuantityType } from '../types/QuantityOptionsData'
-import type { TimeRangeType } from '../types/TimeRangeOptionsData'
+import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 
 interface FeasibilityQueryContainerData {
-	queryData: {
-		inclusionCriteria: Criterion[] | undefined,
-		exclusionCriteria: Criterion[] | undefined,
-	} | null;
-	queryData2: {
-		version: string;
-		display: string;
-		inclusionCriteria: [
-			Array<ConceptType | QuantityType | TimeRangeType>
-		];
-	};
+	queryData: FeasibilityQueryDisplayData['queryData'] | null;
 	numberOfPatients: number | null;
 	isSaveModalOpen: boolean;
 	hasNoQuery: boolean;
+	isQueryDataValid: boolean;
+	errorMessage: string;
+	queryProcessStatus: number | null;
+	isCriteriaReset: boolean;
 }
 
 export default Vue.extend({
@@ -67,14 +72,13 @@ export default Vue.extend({
 	data(): FeasibilityQueryContainerData {
 		return {
 			queryData: null,
-			queryData2: {
-				version: '123',
-				display: 'Test Query',
-				inclusionCriteria: [[]],
-			},
 			numberOfPatients: null,
 			isSaveModalOpen: false,
 			hasNoQuery: true,
+			isQueryDataValid: false,
+			errorMessage: '',
+			queryProcessStatus: null,
+			isCriteriaReset: false,
 		}
 	},
 
@@ -86,7 +90,9 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
+	updated() {
+		this.queryData && this.checkExistingData(this.queryData)
+	},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -99,56 +105,44 @@ export default Vue.extend({
 			this.isSaveModalOpen = false
 		},
 
+		checkExistingData(data: FeasibilityQueryDisplayData['queryData']) {
+			this.isQueryDataValid = (data.inclusionCriteria && data.inclusionCriteria?.length > 0) || (data.exclusionCriteria && data.exclusionCriteria?.length > 0)!
+			if (!this.isQueryDataValid) this.numberOfPatients = null
+		},
+
 		enableStartQueryButton(hasData: boolean): void {
 			this.hasNoQuery = !hasData
 		},
 
-		getQueryData(data): void {
-			console.log('data', data)
-			this.queryData2 = data.inclusionCriteria
-			/* console.log('data', data)
+		resetSelectedCriteria() {
+			this.queryData = null
+			this.isCriteriaReset = true
+			this.numberOfPatients = null
+		},
 
-			data?.inclusionCriteria?.forEach(item => {
-				const selectedCriterion = item.selectedCriterion as ConceptType | QuantityType |TimeRangeType
-				selectedCriterion.termCodes = selectedCriterion.termCodes.flat()
-				this.queryData2.inclusionCriteria[0].push(selectedCriterion)
-			})
-			console.log(this.queryData2)
-			console.log(this.queryData2.inclusionCriteria[0][1]) */
-			/* data?.inclusionCriteria?.map((item, index) => {
-				const x = item.selectedCriterion as ConceptType | QuantityType | TimeRangeType
-				return this.queryData2.inclusionCriteria[index] = x
-			}) */
-			/* const inclusion = data?.inclusionCriteria
-				? {
-					inclusionCriteria: [
-						5,
-					],
-				}
-				: {}
-
-			console.log(data)
-			const jsonData = {
-				version: 'http://to_be_decided.com/draft-1/schema#',
-				display: '',
-			} */
+		getQueryData(data: FeasibilityQueryDisplayData['queryData']): void {
+			if (data.inclusionCriteria!.length > 0 || data.exclusionCriteria!.length > 0) {
+				this.queryData = data
+				this.hasNoQuery = !data
+			} else this.queryData = null
+			this.checkExistingData(data)
 		},
 
 		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
+			this.queryProcessStatus = 0
 			this.numberOfPatients = null
-			console.log('Start')
-			console.log(this.queryData2)
 			const response = await nextcloudAxios.post(generateUrl('/apps/machbarkeit/machbarkeit/get_request'),
-				{ criteria: JSON.stringify(this.queryData2) },
+				{ criteria: JSON.stringify(data) },
 				{
 					headers: {
 						'Content-Type': 'application/json',
 					},
 				})
-			// const x = JSON.parse(response.data)
-			console.log(response)
-			console.log('finished')
-			this.numberOfPatients = response.data as number
+			
+			const status = JSON.parse(response.data)
+			this.errorMessage = status.error ?? ''
+			this.numberOfPatients = response.data
+			this.queryProcessStatus = 1
 		},
 	},
 })
@@ -197,8 +191,19 @@ export default Vue.extend({
 }
 
 .number-patients p {
+	display: flex;
+	align-items: center;
 	margin-left: 30px;
 	font-size: medium;
+}
+
+.number-patients span {
+	display: flex;
+	padding-left: 5px;
+}
+
+.error-message {
+	color: red;
 }
 
 .feasibility-query__button-group {

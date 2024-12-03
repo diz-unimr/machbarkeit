@@ -5,7 +5,7 @@
 	-->
 	<div class="limitations-card">
 		<div class="limitations-card__header">
-			<p v-if="selectedCriterion" class="limitations-card__title">
+			<p class="limitations-card__title">
 				{{ selectedCriterion.display }}
 			</p>
 			<button v-if="!isStateEditFilter" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
@@ -75,7 +75,7 @@ export default Vue.extend({
 
 	methods: {
 		// This function is called every time when user click/update a filter
-		getSelectedFilters(selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType, isFilterComplete: boolean): void {
+		getSelectedFilters(selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType | undefined, isFilterComplete: boolean = true): void {
 			this.$emit('get-selected-criteria-filter', { selectedFiltersInfo, isFilterComplete })
 		},
 

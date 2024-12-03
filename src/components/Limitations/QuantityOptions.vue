@@ -93,104 +93,51 @@ export default Vue.extend({
 	},
 	data(): QuantityOptionsData {
 		return {
-			/* typeSymbol: {
-				'kein Filter': 'kein Filter',
-				gleich: '=',
-				kleiner: '<',
-				größer: '>',
-				zwischen: 'zwischen',
-			}, */
 			isFilterComplete: true,
 			selectedValue: {
-				comparator: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.comparator
-					?? ((this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.type === 'quantity-range'
+				comparator: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.comparator
+					?? ((this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.type === 'quantity-range'
 						? 'between'
 						: 'no filter'),
-				unit: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.unit
+				unit: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.unit
 					?? this.selectedCriterion.filterOptions[0],
-				value: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.value
+				value: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.value
 					?? 0,
-				minValue: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.minValue
+				minValue: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.minValue
 					?? 0,
-				maxValue: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.maxValue
+				maxValue: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.maxValue
 					?? 0,
-				type: (this.selectedCriterion.selectedCriterion as QuantityType)?.valueFilter?.type
+				type: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.type
 					?? '',
-			},
-			quantityType: {
-				termCodes: [this.selectedCriterion.termCodes],
-				context: this.selectedCriterion.context,
-				/* unit: this.selectedCriterion.quantityType?.value.unit
-					? this.selectedCriterion.quantityType.value.unit
-					: this.selectedCriterion.filterOptions[0].display,
-				value: this.selectedCriterion.quantityType?.value.value
-					? this.selectedCriterion.quantityType.value.value
-					: '0',
-				min: this.selectedCriterion.quantityType?.value.min
-					? this.selectedCriterion.quantityType.value.min
-					: '0',
-				max: this.selectedCriterion.quantityType?.value.max
-					? this.selectedCriterion.quantityType.value.max
-					: '0',
-				type: this.selectedCriterion.quantityType?.value.type
-					? this.selectedCriterion.quantityType.value.type
-					: 'kein Filter', */
 			},
 		}
 	},
 
 	watch: {
-		/* 'comparison.type'(): void {
-			if (this.comparison.type === 'no filter') {
-				this.quantityType = {
-					termCodes: [this.selectedCriterion.termCodes],
-					context: this.selectedCriterion.context,
-				}
-				this.$emit('toggle-reset-button', true)
-			} else this.$emit('toggle-reset-button', false)
-
-			if (this.comparison.type === 'eq' || this.comparison.type === 'lt' || this.comparison.type === 'gt') {
-				this.quantityType.valueFilter = {
-					unit: this.comparison.unit,
-					comparator: this.comparison.type,
-					value: this.comparison.value,
-					type: 'quantity-comparator',
-				}
-			} else if (this.comparison.type === 'between') {
-				this.quantityType.valueFilter = {
-					unit: this.comparison.unit,
-					minValue: this.comparison.minValue,
-					maxValue: this.comparison.maxValue,
-					type: 'quantity-range',
-				}
-			}
-			this.$emit('get-selected-filter-option', this.quantityType)
-		}, */
-
 		selectedValue: {
 			handler() {
 				if (this.selectedValue?.comparator === 'no filter') {
 					this.$emit('toggle-reset-button', false)
-					this.quantityType = {
-						termCodes: [this.selectedCriterion.termCodes],
-						context: this.selectedCriterion.context,
-					}
 				} else {
 					this.$emit('toggle-reset-button', true)
 					if (this.selectedValue.comparator === 'between') {
 						this.checkCompleteValue()
-						this.quantityType.valueFilter = {
-							unit: this.selectedValue.unit,
-							minValue: this.selectedValue.minValue,
-							maxValue: this.selectedValue.maxValue,
-							type: 'quantity-range',
+						this.quantityType = {
+							valueFilter: {
+								unit: this.selectedValue.unit,
+								minValue: this.selectedValue.minValue,
+								maxValue: this.selectedValue.maxValue,
+								type: 'quantity-range',
+							},
 						}
 					} else if (this.selectedValue.comparator === 'eq' || this.selectedValue.comparator === 'lt' || this.selectedValue.comparator === 'gt') {
-						this.quantityType.valueFilter = {
-							unit: this.selectedValue.unit,
-							comparator: this.selectedValue.comparator,
-							value: this.selectedValue.value,
-							type: 'quantity-comparator',
+						this.quantityType = {
+							valueFilter: {
+								unit: this.selectedValue.unit,
+								comparator: this.selectedValue.comparator,
+								value: this.selectedValue.value,
+								type: 'quantity-comparator',
+							},
 						}
 					}
 				}
@@ -215,9 +162,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.$emit('get-selected-filter-option', this.quantityType, this.isFilterComplete)
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -225,8 +170,8 @@ export default Vue.extend({
 
 	methods: {
 		getQuantityOption() {
-			this.selectedValue.unit = (this.selectedCriterion.selectedCriterion as QuantityType).valueFilter?.unit ?? this.selectedCriterion.filterOptions[0]
-			this.selectedValue.comparator = (this.selectedCriterion.selectedCriterion as QuantityType).valueFilter?.comparator ?? 'no filter'
+			this.selectedValue.unit = (this.selectedCriterion.selectedFilter as QuantityType).valueFilter?.unit ?? this.selectedCriterion.filterOptions[0]
+			this.selectedValue.comparator = (this.selectedCriterion.selectedFilter as QuantityType).valueFilter?.comparator ?? 'no filter'
 		},
 
 		checkEmptyValue(event: Event, tag: string): void {

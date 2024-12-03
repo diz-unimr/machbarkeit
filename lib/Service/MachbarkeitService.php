@@ -126,7 +126,7 @@ class MachbarkeitService
 		$dotenv->load();
 		//$username = $_ENV['FHIR_USERNAME'];
 		//$password = $_ENV['FHIR_PASSWORD'];
-		// return $criteria;
+
 		$data = json_decode('{
 			"version": "http://to_be_decided.com/draft-1/schema#",
 			"display": "",

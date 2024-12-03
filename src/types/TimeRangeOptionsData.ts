@@ -2,8 +2,6 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { Criterion } from './OntologySearchTreeModalData'
-
 export interface TimeRange2 {
     type: string;
     display: string;
@@ -19,9 +17,7 @@ export interface TimeRange2 {
 }
 
 export interface TimeRangeType {
-    termCodes: Array<Criterion['termCodes']>;
-    context: Criterion['context'];
-    timeRestriction?: {
+    timeRestriction: {
         beforeDate?: string;
         afterDate?: string;
     };
@@ -36,5 +32,5 @@ export interface TimeRangeOptionsData {
         afterDate: string;
         atDate: string;
     }
-    timeRangeType: TimeRangeType;
+    timeRangeType?: TimeRangeType;
 }

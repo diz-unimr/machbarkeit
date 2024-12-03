@@ -48,7 +48,6 @@ class MachbarkeitController extends Controller
 	{
 		// TODO remove test call
 		$modules = $this->getModules();
-		// $concepts = $this->service->getConcepts(2);
 		$ontology = $this->service->getOntology(2);
 
 		return new JSONResponse($this->service->readUiProfile());

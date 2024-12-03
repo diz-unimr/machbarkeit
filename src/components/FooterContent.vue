@@ -5,11 +5,11 @@
 	-->
 	<div class="footer-container">
 		<div class="footer__button-group">
-			<input id="upload" type="file" hidden>
-			<label for="upload" class="upload-query-button" @click="$emit('close-save-modal')">
+			<input id="upload" ref="fileInput" type="file" accept="application/json" hidden @change="handleFileUpload">
+			<label for="upload" class="upload-query-button">
 				ABFRAGE LADEN
 			</label>
-			<button @click="$emit('open-save-modal')">
+			<button :disabled="!isQueryDataValid" @click="$emit('open-save-modal')">
 				ABFRAGE SPEICHERN
 			</button>
 		</div>
@@ -18,9 +18,36 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue';
 
 export default Vue.extend({
 	name: 'FooterContent',
+	props: {
+		isQueryDataValid: {
+			type: Boolean,
+			default: false
+		}
+	},
+
+	methods: {
+		handleFileUpload(event: Event) {
+			const target = event.target as HTMLInputElement
+			if (target.files && target.files.length > 0) {
+				const file = target.files[0]
+				const reader = new FileReader();
+				reader.onload = (e) => {
+				try {
+					const jsonData: FeasibilityQueryDisplayData['queryData'] = e.target?.result && JSON.parse(e.target?.result as string);
+					const isJsonDataValid = (jsonData.inclusionCriteria && jsonData.inclusionCriteria?.length > 0) || (jsonData.exclusionCriteria && jsonData.exclusionCriteria?.length > 0)
+					isJsonDataValid ? this.$emit('get-query-data', jsonData) : null
+				} catch (error) {
+					alert("Invalid JSON file.");
+				}
+				};
+				reader.readAsText(file);
+			}
+		}
+	}
 })
 </script>
 

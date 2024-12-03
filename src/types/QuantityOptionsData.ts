@@ -20,9 +20,7 @@ export interface QuantityType2 {
 }
 
 export interface QuantityType {
-    termCodes: Array<Criterion['termCodes']>;
-    context: Criterion['context'];
-    valueFilter?: {
+    valueFilter: {
         /* access only object inside array */
         unit: Criterion['filterOptions'][number];
         comparator?: string;
@@ -30,26 +28,6 @@ export interface QuantityType {
         minValue?: number;
         maxValue?: number;
         type: string;
-    };
-}
-
-
-export interface X {
-    termCodes: Array<Criterion['termCodes']>;
-    context: Criterion['context'];
-    valueFilter?: {
-        /* access only object inside array */
-        selectedConcepts: Criterion['filterOptions'];
-        unit: Criterion['filterOptions'][number];
-        comparator?: string;
-        value?: number;
-        minValue?: number;
-        maxValue?: number;
-        type: string;
-    };
-    timeRestriction?: {
-        beforeDate?: string;
-        afterDate?: string;
     };
 }
 
@@ -63,5 +41,5 @@ export interface QuantityOptionsData {
         maxValue: number;
         type: string;
     }
-    quantityType: QuantityType;
+    quantityType?: QuantityType;
 }

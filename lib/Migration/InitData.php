@@ -100,21 +100,8 @@ class InitData implements IRepairStep
 					[
 						'id' => $this->db->quote($concept_data[$i]['id']),
 						'display' => $this->db->quote($concept_data[$i]['display']),
-						'term_codes' => $query->createNamedParameter(json_encode(json_decode('[
-							{
-								"code": "263495000",
-                        		"system": "http://snomed.info/sct",
-                        		"display": "Geschlecht"
-							},
-						]', true)), IQueryBuilder::PARAM_STR),
-						'context' => $query->createNamedParameter(json_encode(json_decode('[
-							{
-								"code": "Patient",
-								"system": "fdpg.mii.cds",
-								"version": "1.0.0",
-								"display": "Patient"
-							},
-						]', true)), IQueryBuilder::PARAM_STR),
+						'term_codes' => $query->createNamedParameter(json_encode(json_decode(strval($concept_data[$i]['term_codes'])))),
+						'context' => $query->createNamedParameter(json_encode(json_decode(strval($concept_data[$i]['context'])))),
 						'code' => $this->db->quote($concept_data[$i]['code']),
 						'code_system' => $this->db->quote($concept_data[$i]['code_system']),
 						'selectable' => $this->db->quote($concept_data[$i]['selectable']),

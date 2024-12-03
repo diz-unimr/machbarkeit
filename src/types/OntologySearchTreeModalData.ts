@@ -17,7 +17,7 @@ export interface Criterion {
         system: string;
         display: string;
         version: string;
-    },
+    }[],
     context: {
         code: string;
         system: string;
@@ -37,10 +37,10 @@ export interface Criterion {
         system: string | undefined;
         version: string | undefined;
     }[];
-    /* conceptType: ConceptType | undefined;
-	timeRange: TimeRangeType | undefined;
-	quantityType: QuantityType | undefined; */
-    selectedCriterion?: ConceptType | QuantityType | TimeRangeType;
+    /* conceptType?: ConceptType;
+	timeRange?: TimeRangeType;
+	quantityType?: QuantityType; */
+    selectedFilter?: ConceptType | QuantityType | TimeRangeType;
 }
 
 export interface Modules {

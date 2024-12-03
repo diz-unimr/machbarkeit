@@ -205,7 +205,6 @@ export default Vue.extend({
 
 		toggleExpansion(key: number): void {
 			if (this.isExpanded(key)) {
-				// .splice(start, deleteCount, item1, ..., itemN)
 				this.expandedGroup.splice(this.expandedGroup.indexOf(key), 1)
 			} else this.expandedGroup.push(key)
 		},

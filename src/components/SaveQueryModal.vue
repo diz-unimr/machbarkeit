@@ -17,7 +17,7 @@
 					@trailing-button-click="fileName = ''" />
 			</div>
 			<div class="save-query-modal__button-group">
-				<button @click="saveQuery">
+				<button :disabled="fileName.length === 0" @click="saveQuery(queryData, fileName)">
 					SPEICHERN
 				</button>
 				<button @click="$emit('close-save-modal')">
@@ -29,8 +29,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { type PropType } from 'vue'
+import download from 'downloadjs'
 import { NcTextField } from '@nextcloud/vue'
+import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 
 interface SaveQueryModalData {
 	fileName:string;
@@ -42,6 +44,14 @@ export default Vue.extend({
 	components: {
 		NcTextField,
 	},
+
+	props: {
+		queryData: {
+			type: Object as PropType<FeasibilityQueryDisplayData['queryData']>,
+			default: null
+		}
+	},
+
 	data(): SaveQueryModalData {
 		return {
 			fileName: '',
@@ -62,7 +72,10 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		saveQuery() {
+		saveQuery(data: FeasibilityQueryDisplayData['queryData'], fileName: string) {
+			const saveData = JSON.stringify(data, null, 2)
+			download(JSON.stringify(data, null, 2), fileName + '.json', 'application/json')
+			this.$emit('close-save-modal')
 		},
 	},
 })

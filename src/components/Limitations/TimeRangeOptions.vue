@@ -74,9 +74,6 @@
 				</div>
 			</div>
 		</div>
-		<!-- <div v-if="['am', 'vor', 'nach'].includes(selectedValue.type) && (!selectedValue.afterDate && !selectedValue.beforeDate && !selectedValue.atDate)">
-			<label class="text-alert">Der Wert muss angegeben werden</label>
-		</div> -->
 		<div v-if="selectedValue.type === 'zwischen' && ((selectedValue.afterDate ?? '') >= (selectedValue.beforeDate ?? ''))">
 			<label class="text-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
@@ -105,42 +102,21 @@ export default Vue.extend({
 		return {
 			isFilterComplete: true,
 			selectedValue: {
-				type: (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction
-					// eslint-disable-next-line no-constant-condition
-					? (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate && (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate && new Date((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate as string).getTime() === new Date((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate as string).getTime()
+				type: (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction
+					? (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate && (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate && new Date((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate as string).getTime() === new Date((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate as string).getTime()
 						? 'am'
-						: new Date((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate as string) < new Date((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate as string)
+						: new Date((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate as string) < new Date((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate as string)
 							? 'zwischen'
-							: (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate && !(this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate
+							: (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate && !(this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate
 								? 'nach'
 								: 'vor'
 					: 'kein filter',
-				beforeDate: (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate
-					?? ((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate ?? ''),
-				afterDate: (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate
-					?? ((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate ?? ''),
-				atDate: (this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.afterDate as string
-					?? ((this.selectedCriterion.selectedCriterion as TimeRangeType)?.timeRestriction?.beforeDate as string ?? ''),
-			},
-			/* selectedValue: {
-				type: !this.selectedCriterion.timeRange
-					? 'kein filter'
-					: this.selectedCriterion.timeRange?.timeRestriction?.afterDate === this.selectedCriterion.timeRange?.timeRestriction?.beforeDate
-						? 'am'
-						: this.selectedCriterion.timeRange?.timeRestriction?.afterDate && this.selectedCriterion.timeRange?.timeRestriction?.beforeDate && new Date(this.selectedCriterion.timeRange?.timeRestriction?.afterDate) < new Date(this.selectedCriterion.timeRange?.timeRestriction?.beforeDate)
-							? 'zwischen'
-							: this.selectedCriterion.timeRange?.timeRestriction?.afterDate && !(this.selectedCriterion.timeRange?.timeRestriction?.beforeDate)
-								? 'nach'
-								: this.selectedCriterion.timeRange?.timeRestriction?.beforeDate && !(this.selectedCriterion.timeRange?.timeRestriction?.afterDate)
-									? 'vor'
-									: 'kein filter',
-				beforeDate: this.selectedCriterion.timeRange?.timeRestriction?.beforeDate ?? '',
-				afterDate: this.selectedCriterion.timeRange?.timeRestriction?.afterDate ?? '',
-				atDate: this.selectedCriterion.timeRange?.timeRestriction?.afterDate && this.selectedCriterion.timeRange?.timeRestriction?.beforeDate && this.selectedCriterion.timeRange?.timeRestriction?.afterDate === this.selectedCriterion.timeRange?.timeRestriction?.beforeDate ? this.selectedCriterion.timeRange?.timeRestriction?.afterDate : '',
-			}, */
-			timeRangeType: {
-				termCodes: [this.selectedCriterion.termCodes],
-				context: this.selectedCriterion.context,
+				beforeDate: (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate
+					?? ((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate ?? ''),
+				afterDate: (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate
+					?? ((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate ?? ''),
+				atDate: (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.afterDate as string
+					?? ((this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction?.beforeDate as string ?? ''),
 			},
 		}
 	},
@@ -151,16 +127,10 @@ export default Vue.extend({
 				this.isFilterComplete = true
 				if (this.selectedValue.type === 'kein filter') {
 					this.$emit('toggle-reset-button', false)
-					this.timeRangeType = {
-						termCodes: [this.selectedCriterion.termCodes],
-						context: this.selectedCriterion.context,
-					}
 				} else {
 					this.$emit('toggle-reset-button', true)
 					if (this.selectedValue.type === 'am' && this.selectedValue.atDate) {
 						this.timeRangeType = {
-							termCodes: [this.selectedCriterion.termCodes],
-							context: this.selectedCriterion.context,
 							timeRestriction: {
 								afterDate: this.selectedValue.atDate,
 								beforeDate: this.selectedValue.atDate,
@@ -168,16 +138,12 @@ export default Vue.extend({
 						}
 					} else if (this.selectedValue.type === 'vor' && this.selectedValue.atDate) {
 						this.timeRangeType = {
-							termCodes: [this.selectedCriterion.termCodes],
-							context: this.selectedCriterion.context,
 							timeRestriction: {
 								beforeDate: this.selectedValue.atDate,
 							},
 						}
 					} else if (this.selectedValue.type === 'nach' && this.selectedValue.atDate) {
 						this.timeRangeType = {
-							termCodes: [this.selectedCriterion.termCodes],
-							context: this.selectedCriterion.context,
 							timeRestriction: {
 								afterDate: this.selectedValue.atDate,
 							},
@@ -185,8 +151,6 @@ export default Vue.extend({
 					} else if (this.selectedValue.type === 'zwischen') {
 						if (new Date(this.selectedValue.afterDate) < new Date(this.selectedValue.beforeDate)) {
 							this.timeRangeType = {
-								termCodes: [this.selectedCriterion.termCodes],
-								context: this.selectedCriterion.context,
 								timeRestriction: {
 									afterDate: this.selectedValue.afterDate,
 									beforeDate: this.selectedValue.beforeDate,
@@ -214,9 +178,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.$emit('get-selected-filter-option', this.timeRangeType, this.isFilterComplete)
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

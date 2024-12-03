@@ -83,10 +83,10 @@
 
 		<FeasibilityQueryDisplay :selected-inclusion-characteristics="selectedInclusionCharacteristics"
 			:selected-exclusion-characteristics="selectedExclusionCharacteristics"
-			@update-display-sequence="updateDisplaySequence"
+			@update-characteristics="updateCharacteristics"
 			@edit-criteria-limitation="editCriteriaLimitation"
 			@delete-characteristic="deleteCharacteristic"
-			@get-update-query-data="getUpdateQueryData"/>
+			@get-update-query-data="getUpdateQueryData" />
 	</div>
 </template>
 
@@ -115,6 +115,11 @@ export default Vue.extend({
 		FeasibilityQueryDisplay,
 	},
 	props: {
+		isCriteriaReset: {
+			type: Boolean,
+			default: false,
+		},
+
 		isSaveModalOpen: {
 			type: Boolean,
 			required: true,
@@ -148,13 +153,22 @@ export default Vue.extend({
 
 	computed: {
 		hasCharacteristics(): boolean {
+			const hasData = this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
 			return this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
 		},
 	},
 
 	watch: {
+		isCriteriaReset(value) {
+			if (value) {
+				this.selectedCriteria = null
+				this.selectedInclusionCharacteristics = []
+				this.selectedExclusionCharacteristics = []
+			}
+		},
+
 		isSaveModalOpen(value) {
-			if (value === true) this.isOntologySearchTreeOpen = false
+			if (value) this.isOntologySearchTreeOpen = false
 		},
 
 		hasCharacteristics(hasValue) {
@@ -207,11 +221,11 @@ export default Vue.extend({
 	created() {},
 	beforeMount() {},
 	mounted() {},
-	beforeUpdate() {
-		// this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
-	},
+	beforeUpdate() {},
 	updated() {
-		this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
+		if (this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0) {
+			this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
+		}
 	},
 	beforeDestroy() {},
 	destroyed() {},
@@ -256,18 +270,11 @@ export default Vue.extend({
 
 		getSelectedFilterInfo(filterInfo: Array<ConceptType | QuantityType | TimeRangeType>) {
 			this.selectedCriteria = this.selectedCriteria!.map((item, index) => {
-				item.selectedCriterion = filterInfo[index] as ConceptType | QuantityType | TimeRangeType
-				/* switch (filterInfo[index].type) {
-				case 'conceptType':
-					item.conceptType = filterInfo[index] as ConceptType
-					break
-				case 'quantityType':
-					item.quantityType = filterInfo[index] as QuantityType
-					break
-				case 'timeRange':
-					item.timeRange = filterInfo[index] as TimeRangeType
-					break
-				} */
+				if (filterInfo[index]) {
+					item.selectedFilter = filterInfo[index] as ConceptType | QuantityType | TimeRangeType
+				} else {
+					item.selectedFilter = undefined
+				}
 				return item
 			})
 
@@ -311,14 +318,18 @@ export default Vue.extend({
 			this.isStateEditFilter = true
 		},
 
-		updateDisplaySequence(type: string, newOrder: Criterion[]) {
+		updateCharacteristics(type: string, newOrder: Criterion[]) {
 			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = newOrder) : (this.selectedExclusionCharacteristics = newOrder)
-			// this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
 		},
 
 		getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
-			console.log(queryData)
-			this.$emit('get-query-data', { inclusionCriteria: queryData, exclusionCriteria: this.selectedExclusionCharacteristics })
+			this.$emit('get-query-data', queryData)
+		},
+
+		resetSelectedCriteria() {
+			this.selectedCriteria = null
+			this.selectedInclusionCharacteristics = []
+			this.selectedExclusionCharacteristics = []
 		}
 	},
 })

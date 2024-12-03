@@ -42,32 +42,24 @@ export default Vue.extend({
 	},
 	data(): ConceptOptionsData {
 		return {
-			selectedValue: (this.selectedCriterion.selectedCriterion as ConceptType)?.valueFilter?.selectedConcepts
+			selectedValue: (this.selectedCriterion.selectedFilter as ConceptType)?.valueFilter?.selectedConcepts
 				?? [],
-			conceptType: {
-				termCodes: [this.selectedCriterion.termCodes],
-				context: this.selectedCriterion.context,
-			},
 		}
 	},
 	watch: {
 		selectedValue() {
-			this.conceptType = {
-				termCodes: [this.selectedCriterion.termCodes],
-				context: this.selectedCriterion.context,
-				...(this.selectedValue.length > 0
-					? {
-						valueFilter: {
-							selectedConcepts: this.selectedValue,
-							type: 'concept',
-						},
-					}
-					: {}
-				),
-			}
+			this.conceptType = this.selectedValue.length > 0
+				? {
+					valueFilter: {
+						selectedConcepts: this.selectedValue,
+						type: 'concept',
+					},
+				}
+				: undefined
+
 			this.$emit('get-selected-filter-option', this.conceptType)
 
-			if (this.conceptType.valueFilter) {
+			if (this.conceptType && this.conceptType.valueFilter) {
 				this.$emit('toggle-reset-button', true)
 			} else {
 				this.$emit('toggle-reset-button', false)
@@ -85,9 +77,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		this.$emit('get-selected-filter-option', this.conceptType)
-	},
+	created() {},
 
 	beforeMount() {},
 	mounted() {},
