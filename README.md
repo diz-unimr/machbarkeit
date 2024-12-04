@@ -4,6 +4,14 @@
 -->
 
 # Machbarkeit App
+[![ESLint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml)
+[![Lint app info](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml)
+[![PHP Coding Standards Fixer](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-php-cs.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-php-cs.yml)
+[![Stylelint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-stylelint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-stylelint.yml)
+[![PHPUnit](https://github.com/diz-unimr/machbarkeit/actions/workflows/phpunit-pgsql.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/phpunit-pgsql.yml)
+[![Package build](https://github.com/diz-unimr/machbarkeit/actions/workflows/appbuild.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/appbuild.yml)
+[![REUSE Compliance Check](https://github.com/diz-unimr/machbarkeit/actions/workflows/reuse.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/reuse.yml)
+
 An app for Nextcloud that allows researchers to perform local feasibility queries against a FHRI server. <br />
 A feasibility request can be found out, how many data sets for your search criteria are available. <br />
 The availability of health data for medical research purposes can be estimated using inclusion and exclusion criteria.
@@ -22,19 +30,6 @@ To create a 'Machbarkeit' database, concept.csv and module_name.csv are required
 <br />
 [See an example](https://github.com/diz-unimr/machbarkeit/tree/data-query-format/csvfile)
   
-# Nextcloud app development example
-[![ESLint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-eslint.yml)
-[![Lint app info](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-info-xml.yml)
-[![PHP Coding Standards Fixer](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-php-cs.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-php-cs.yml)
-[![Stylelint](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-stylelint.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/lint-stylelint.yml)
-[![PHPUnit](https://github.com/diz-unimr/machbarkeit/actions/workflows/phpunit-pgsql.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/phpunit-pgsql.yml)
-[![Package build](https://github.com/diz-unimr/machbarkeit/actions/workflows/appbuild.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/appbuild.yml)
-[![REUSE Compliance Check](https://github.com/diz-unimr/machbarkeit/actions/workflows/reuse.yml/badge.svg)](https://github.com/diz-unimr/machbarkeit/actions/workflows/reuse.yml)
-
-This is an example nextcloud app development setup.
-
-This repository features a [Docker Compose setup](dev/compose.yaml) to develop against a specific Nextcloud version and supports
-hot module replacement of the app's frontend (Vue.js) components.
 
 ## Building the app
 
