@@ -48,8 +48,8 @@ export default Vue.extend({
 	props: {
 		queryData: {
 			type: Object as PropType<FeasibilityQueryDisplayData['queryData']>,
-			default: null
-		}
+			default: null,
+		},
 	},
 
 	data(): SaveQueryModalData {
@@ -73,8 +73,7 @@ export default Vue.extend({
 
 	methods: {
 		saveQuery(data: FeasibilityQueryDisplayData['queryData'], fileName: string) {
-			const saveData = JSON.stringify(data, null, 2)
-			download(JSON.stringify(data, null, 2), fileName + '.json', 'application/json')
+			data && download(JSON.stringify(data, null, 2), fileName + '.json', 'application/json')
 			this.$emit('close-save-modal')
 		},
 	},

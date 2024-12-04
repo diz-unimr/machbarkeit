@@ -110,8 +110,6 @@ export default Vue.extend({
 			if (filterInfo) {
 				this.selectedCriteriaFiltersInfo[index] = filterInfo.selectedFiltersInfo
 				this.filterCompleteStatus[index] = filterInfo.isFilterComplete
-			} else {
-
 			}
 			this.isAllFilterComplete = !this.filterCompleteStatus.includes(false)
 		},

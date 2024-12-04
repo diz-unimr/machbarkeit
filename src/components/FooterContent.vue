@@ -5,11 +5,16 @@
 	-->
 	<div class="footer-container">
 		<div class="footer__button-group">
-			<input id="upload" ref="fileInput" type="file" accept="application/json" hidden @change="handleFileUpload">
+			<input id="upload"
+				ref="fileInput"
+				type="file"
+				accept="application/json"
+				hidden
+				@change="handleFileUpload">
 			<label for="upload" class="upload-query-button">
 				ABFRAGE LADEN
 			</label>
-			<button :disabled="!isQueryDataValid" @click="$emit('open-save-modal')">
+			<button :disabled="!isCriteriaAvailable" @click="$emit('open-save-modal')">
 				ABFRAGE SPEICHERN
 			</button>
 		</div>
@@ -18,15 +23,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue';
+import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 
 export default Vue.extend({
 	name: 'FooterContent',
 	props: {
-		isQueryDataValid: {
+		isCriteriaAvailable: {
 			type: Boolean,
-			default: false
-		}
+			default: false,
+		},
 	},
 
 	methods: {
@@ -34,20 +39,20 @@ export default Vue.extend({
 			const target = event.target as HTMLInputElement
 			if (target.files && target.files.length > 0) {
 				const file = target.files[0]
-				const reader = new FileReader();
+				const reader = new FileReader()
 				reader.onload = (e) => {
-				try {
-					const jsonData: FeasibilityQueryDisplayData['queryData'] = e.target?.result && JSON.parse(e.target?.result as string);
-					const isJsonDataValid = (jsonData.inclusionCriteria && jsonData.inclusionCriteria?.length > 0) || (jsonData.exclusionCriteria && jsonData.exclusionCriteria?.length > 0)
-					isJsonDataValid ? this.$emit('get-query-data', jsonData) : null
-				} catch (error) {
-					alert("Invalid JSON file.");
+					try {
+						const jsonData: FeasibilityQueryDisplayData['queryData'] = e.target?.result && JSON.parse(e.target?.result as string)
+						const isJsonDataValid = (jsonData.inclusionCriteria && jsonData.inclusionCriteria?.length > 0) || (jsonData.exclusionCriteria && jsonData.exclusionCriteria?.length > 0)
+						isJsonDataValid && this.$emit('get-query-data', jsonData)
+					} catch (error) {
+						alert('Invalid JSON file.')
+					}
 				}
-				};
-				reader.readAsText(file);
+				reader.readAsText(file)
 			}
-		}
-	}
+		},
+	},
 })
 </script>
 

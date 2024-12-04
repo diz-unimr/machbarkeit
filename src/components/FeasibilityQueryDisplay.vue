@@ -11,7 +11,7 @@
 		<div class="display-content">
 			<div id="einschlusskriterien" class="display-textfield">
 				<div v-if="selectedInclusionCharacteristics.length > 0">
-					<draggable v-model="draggableInclusionCharacteristics" @end="$emit('update-characteristics', 'einschlusskriterien', draggableInclusionCharacteristics, queryData)">
+					<draggable v-model="draggableInclusionCharacteristics" @end="$emit('update-characteristics', 'einschlusskriterien', draggableInclusionCharacteristics)">
 						<div v-for="(characteristic, index) in selectedInclusionCharacteristics"
 							:key="index"
 							style="position: relative">
@@ -226,7 +226,7 @@ type QueryCriterionData = {
 		} & (ConceptType | QuantityType | TimeRangeType | undefined)
 
 export interface FeasibilityQueryDisplayData {
-    characteristicsLogic: {
+	characteristicsLogic: {
         inclusionCriteria: Array<string>;
         exclusionCriteria: Array<string>;
     }
@@ -287,7 +287,18 @@ export default Vue.extend({
 		}
 	},
 
+	computed: {
+		hasCharacteristics(): boolean {
+			// const hasData = this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
+			return this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
+		},
+	},
+
 	watch: {
+		/* hasCharacteristics(hasValue) {
+			this.enableStart()
+		}, */
+
 		selectedInclusionCharacteristics(newVal) {
 			this.draggableInclusionCharacteristics = [...newVal]
 			// first input
@@ -303,6 +314,7 @@ export default Vue.extend({
 			}
 			this.inclusionCriteriaOld = [...newVal]
 			this.updateQueryData()
+			// this.$emit('update-query-data', this.characteristicsLogic)
 		},
 
 		selectedExclusionCharacteristics(newVal) {
@@ -322,6 +334,7 @@ export default Vue.extend({
 			}
 			this.exclusionCriteriaOld = [...newVal]
 			this.updateQueryData()
+			// this.$emit('update-query-data', this.characteristicsLogic)
 		},
 	},
 
@@ -365,6 +378,7 @@ export default Vue.extend({
 				}
 			}
 			this.updateQueryData()
+			// this.$emit('update-query-data', this.characteristicsLogic)
 		},
 
 		editLimitation(characteristic: Criterion, index: number, criteriaType: string) {
@@ -393,23 +407,23 @@ export default Vue.extend({
 					const selectedCharacteristic = {
 						termCodes: this.selectedInclusionCharacteristics[i].termCodes,
 						context: this.selectedInclusionCharacteristics[i].context,
-						...(this.selectedInclusionCharacteristics[i].selectedFilter || {})
-					} as QueryCriterionData ;
+						...(this.selectedInclusionCharacteristics[i].selectedFilter || {}),
+					} as QueryCriterionData
 
 					if (i === 0) {
 						this.queryData.inclusionCriteria.push([selectedCharacteristic])
 					} else {
-						if (this.characteristicsLogic.inclusionCriteria[i-1] === 'or') {
+						if (this.characteristicsLogic.inclusionCriteria[i - 1] === 'or') {
 							this.queryData.inclusionCriteria[tempIndex].push(selectedCharacteristic)
-						} else if (this.characteristicsLogic.inclusionCriteria[i-1] === 'and') {
+						} else if (this.characteristicsLogic.inclusionCriteria[i - 1] === 'and') {
 							this.queryData.inclusionCriteria.push([selectedCharacteristic])
 							tempIndex++
 						}
 					}
-					
+
 				}
 			}
-			
+
 			if (this.selectedExclusionCharacteristics.length > 0) {
 				let tempIndex = 0
 
@@ -417,19 +431,19 @@ export default Vue.extend({
 					const selectedCharacteristic = {
 						termCodes: this.selectedExclusionCharacteristics[i].termCodes,
 						context: this.selectedExclusionCharacteristics[i].context,
-						...(this.selectedExclusionCharacteristics[i].selectedFilter || {})
-					} as QueryCriterionData ;
+						...(this.selectedExclusionCharacteristics[i].selectedFilter || {}),
+					} as QueryCriterionData
 					if (i === 0) {
 						this.queryData.exclusionCriteria.push([selectedCharacteristic])
 					} else {
-						if (this.characteristicsLogic.exclusionCriteria[i-1] === 'or') {
+						if (this.characteristicsLogic.exclusionCriteria[i - 1] === 'or') {
 							this.queryData.exclusionCriteria.push([selectedCharacteristic])
 							tempIndex++
-						} else if (this.characteristicsLogic.exclusionCriteria[i-1] === 'and') {
+						} else if (this.characteristicsLogic.exclusionCriteria[i - 1] === 'and') {
 							this.queryData.exclusionCriteria[tempIndex].push(selectedCharacteristic)
 						}
 					}
-					
+
 				}
 			}
 			this.$emit('get-update-query-data', this.queryData)

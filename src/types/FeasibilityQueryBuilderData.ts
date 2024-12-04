@@ -15,7 +15,7 @@ export interface FeasibilityQueryBuilderData {
     criteriaOverlayType: string;
     selectedCriteria: Criterion[] | null;
     selectedEditedCriteriaIndex: number | null;
-    selectedInclusionCharacteristics: Criterion[];
+    selectedInclusionCharacteristics: Array<Criterion>;
     selectedExclusionCharacteristics: Array<Criterion>;
     isStateEditFilter: boolean;
     debouncedHandler: _.DebouncedFunc<() => void> | null;

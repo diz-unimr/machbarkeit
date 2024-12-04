@@ -151,17 +151,9 @@ export default Vue.extend({
 		}
 	},
 
-	computed: {
-		hasCharacteristics(): boolean {
-			const hasData = this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
-			return this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0
-		},
-	},
-
 	watch: {
 		isCriteriaReset(value) {
 			if (value) {
-				this.selectedCriteria = null
 				this.selectedInclusionCharacteristics = []
 				this.selectedExclusionCharacteristics = []
 			}
@@ -169,12 +161,6 @@ export default Vue.extend({
 
 		isSaveModalOpen(value) {
 			if (value) this.isOntologySearchTreeOpen = false
-		},
-
-		hasCharacteristics(hasValue) {
-			if (hasValue) {
-				this.$emit('enable-start-query-button', true)
-			} else this.$emit('enable-start-query-button', false)
 		},
 
 		inclusionSearchInputText(newVal) {
@@ -222,11 +208,7 @@ export default Vue.extend({
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-		if (this.selectedInclusionCharacteristics.length > 0 || this.selectedExclusionCharacteristics.length > 0) {
-			this.$emit('update-query-data', { inclusionCriteria: this.selectedInclusionCharacteristics, exclusionCriteria: this.selectedExclusionCharacteristics })
-		}
-	},
+	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
@@ -323,14 +305,10 @@ export default Vue.extend({
 		},
 
 		getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
-			this.$emit('get-query-data', queryData)
+			(queryData.inclusionCriteria?.length === 0 && queryData.exclusionCriteria?.length === 0)
+				? this.$emit('get-query-data', null)
+				: this.$emit('get-query-data', queryData)
 		},
-
-		resetSelectedCriteria() {
-			this.selectedCriteria = null
-			this.selectedInclusionCharacteristics = []
-			this.selectedExclusionCharacteristics = []
-		}
 	},
 })
 </script>
