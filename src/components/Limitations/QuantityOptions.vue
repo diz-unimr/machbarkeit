@@ -125,8 +125,8 @@ export default Vue.extend({
 						this.quantityType = {
 							valueFilter: {
 								unit: this.selectedValue.unit,
-								minValue: this.selectedValue.minValue,
-								maxValue: this.selectedValue.maxValue,
+								minValue: Number(this.selectedValue.minValue),
+								maxValue: Number(this.selectedValue.maxValue),
 								type: 'quantity-range',
 							},
 						}
@@ -135,7 +135,7 @@ export default Vue.extend({
 							valueFilter: {
 								unit: this.selectedValue.unit,
 								comparator: this.selectedValue.comparator,
-								value: this.selectedValue.value,
+								value: Number(this.selectedValue.value),
 								type: 'quantity-comparator',
 							},
 						}
