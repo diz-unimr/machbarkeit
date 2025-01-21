@@ -2,7 +2,13 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
+import type { QueryCriterionData } from '../components/FeasibilityQueryDisplay.vue'
 import type { Criterion } from './OntologySearchTreeModalData.ts'
+
+export interface SelectedCharacteristics {
+    characteristics: Array<Criterion>;
+    logic: Array<string>;
+}
 
 export interface FeasibilityQueryBuilderData {
     searchInputText: string;
@@ -15,8 +21,14 @@ export interface FeasibilityQueryBuilderData {
     criteriaOverlayType: string;
     selectedCriteria: Criterion[] | null;
     selectedEditedCriteriaIndex: number | null;
-    selectedInclusionCharacteristics: Array<Criterion>;
-    selectedExclusionCharacteristics: Array<Criterion>;
+    selectedInclusionCharacteristics: SelectedCharacteristics;
+    selectedExclusionCharacteristics: SelectedCharacteristics;
+    queryData: {
+        version: string;
+        display: string;
+        inclusionCriteria?: Array<QueryCriterionData>[];
+		exclusionCriteria?: Array<QueryCriterionData>[];
+    };
     isStateEditFilter: boolean;
     debouncedHandler: _.DebouncedFunc<() => void> | null;
     imgDelete: string;

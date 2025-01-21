@@ -7,7 +7,7 @@ import type { QuantityType } from '../types/QuantityOptionsData.ts'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 
 export interface Criterion {
-    children: Array<Criterion> | undefined;
+    children?: Array<Criterion> | undefined;
     id: number;
     moduleId: number;
     parentId: number | null;
@@ -37,9 +37,6 @@ export interface Criterion {
         system: string | undefined;
         version: string | undefined;
     }[];
-    /* conceptType?: ConceptType;
-	timeRange?: TimeRangeType;
-	quantityType?: QuantityType; */
     selectedFilter?: ConceptType | QuantityType | TimeRangeType;
 }
 

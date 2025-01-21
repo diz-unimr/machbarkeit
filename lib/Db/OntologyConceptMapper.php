@@ -31,6 +31,15 @@ class OntologyConceptMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
+	public function findFromCode(string $code): array {
+		/* @var $qb IQueryBuilder */
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from('machbarkeit_concepts')
+			->where($qb->expr()->eq('code', $qb->createNamedParameter($code, IQueryBuilder::PARAM_STR)));
+		return $this->findEntities($qb);
+	}
+
 	public function findAll(int $moduleId): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')

@@ -31,6 +31,7 @@
 				@close-save-modal="closeSaveModal" />
 
 			<FeasibilityQueryBuilder ref="childComponent"
+				:uploaded-criteria-data="queryData"
 				:is-criteria-reset="isCriteriaReset"
 				:is-save-modal-open="isSaveModalOpen"
 				@get-query-data="getQueryData" />
@@ -53,6 +54,7 @@ import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 
 interface FeasibilityQueryContainerData {
 	queryData: FeasibilityQueryDisplayData['queryData'] | null;
+	queryDataFromUpload: FeasibilityQueryDisplayData['queryData'] | null;
 	numberOfPatients: number | null;
 	isSaveModalOpen: boolean;
 	isCriteriaAvailable: boolean;
@@ -72,6 +74,7 @@ export default Vue.extend({
 	data(): FeasibilityQueryContainerData {
 		return {
 			queryData: null,
+			queryDataFromUpload: null,
 			numberOfPatients: null,
 			isSaveModalOpen: false,
 			isCriteriaAvailable: false,
@@ -110,11 +113,6 @@ export default Vue.extend({
 			this.isSaveModalOpen = false
 		},
 
-		checkExistingData(data: FeasibilityQueryDisplayData['queryData']) {
-			this.isCriteriaAvailable = (data.inclusionCriteria && data.inclusionCriteria?.length > 0) || (data.exclusionCriteria && data.exclusionCriteria?.length > 0)!
-			if (!this.isCriteriaAvailable) this.numberOfPatients = null
-		},
-
 		resetSelectedCriteria() {
 			this.isCriteriaReset = true
 			this.numberOfPatients = null
@@ -123,11 +121,10 @@ export default Vue.extend({
 		getQueryData(data: FeasibilityQueryDisplayData['queryData'] | null): void {
 			this.queryData = data
 			this.isCriteriaAvailable = !!data
+			this.numberOfPatients = null
 		},
 
 		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
-			/* const childComponent = this.$refs.childComponent as Vue & { getQueryData: () => FeasibilityQueryBuilderData['queryData'] }
-			const data1 = childComponent.getQueryData() */
 			this.isQeuryCompleted = false
 			this.numberOfPatients = null
 			const response = await nextcloudAxios.post(generateUrl('/apps/machbarkeit/machbarkeit/get_request'),

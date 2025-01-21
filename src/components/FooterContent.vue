@@ -42,15 +42,16 @@ export default Vue.extend({
 				const reader = new FileReader()
 				reader.onload = (e) => {
 					try {
-						const jsonData: FeasibilityQueryDisplayData['queryData'] = e.target?.result && JSON.parse(e.target?.result as string)
-						const isJsonDataValid = (jsonData.inclusionCriteria && jsonData.inclusionCriteria?.length > 0) || (jsonData.exclusionCriteria && jsonData.exclusionCriteria?.length > 0)
-						isJsonDataValid && this.$emit('get-query-data', jsonData)
+						const uploadedCriteria: FeasibilityQueryDisplayData['queryData'] = JSON.parse(e.target?.result as string)
+						const isJsonDataValid = (uploadedCriteria.inclusionCriteria && uploadedCriteria.inclusionCriteria?.length > 0) || (uploadedCriteria.exclusionCriteria && uploadedCriteria.exclusionCriteria?.length > 0)
+						isJsonDataValid ? this.$emit('get-query-data', uploadedCriteria) : alert('Invalid JSON Format')
 					} catch (error) {
-						alert('Invalid JSON file.')
+						alert('Invalid JSON Format')
 					}
 				}
 				reader.readAsText(file)
 			}
+			target.value = ''
 		},
 	},
 })

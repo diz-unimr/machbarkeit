@@ -10,8 +10,7 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
-class OntologyConcept extends Entity implements JsonSerializable
-{
+class OntologyConcept extends Entity implements JsonSerializable {
 	public string $display = '';
 	public string $termCodes = '';
 	public string $context = '';
@@ -26,8 +25,7 @@ class OntologyConcept extends Entity implements JsonSerializable
 	public ?int $moduleId = null;
 	public ?int $parentId = null;
 
-	public function jsonSerialize(): array
-	{
+	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,
 			'display' => $this->display,

@@ -4,15 +4,6 @@
 */
 import type { Criterion } from './OntologySearchTreeModalData'
 
-export type ConceptType1 = {
-    termCodes: Array<Criterion['termCodes']>;
-    context: Criterion['context'];
-    valueFilter?: {
-        selectedConcepts: Criterion['filterOptions'];
-        type: string;
-    };
-}
-
 export interface ConceptType {
     valueFilter: {
         selectedConcepts: Criterion['filterOptions'];

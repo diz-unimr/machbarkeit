@@ -91,18 +91,20 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { type PropType } from 'vue'
+import { generateUrl } from '@nextcloud/router'
+import nextcloudAxios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
-import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
+import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
-import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
+import type { FeasibilityQueryDisplayData, QueryCriterionData } from './FeasibilityQueryDisplay.vue'
 import debounce from 'lodash.debounce'
 
 export default Vue.extend({
@@ -124,10 +126,10 @@ export default Vue.extend({
 			type: Boolean,
 			required: true,
 		},
-
-		enableStartQueryButton: {
-			type: Function,
-			default: () => {},
+		/* criteria-data */
+		uploadedCriteriaData: {
+			type: Object as PropType<FeasibilityQueryDisplayData['queryData']>,
+			default: null,
 		},
 	},
 
@@ -143,8 +145,18 @@ export default Vue.extend({
 			criteriaOverlayType: '',
 			selectedCriteria: null,
 			selectedEditedCriteriaIndex: null,
-			selectedInclusionCharacteristics: [],
-			selectedExclusionCharacteristics: [],
+			selectedInclusionCharacteristics: {
+				characteristics: [],
+				logic: [],
+			},
+			selectedExclusionCharacteristics: {
+				characteristics: [],
+				logic: [],
+			},
+			queryData: {
+				version: '',
+				display: '',
+			},
 			isStateEditFilter: false,
 			debouncedHandler: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
@@ -152,10 +164,21 @@ export default Vue.extend({
 	},
 
 	watch: {
+		uploadedCriteriaData(newData: FeasibilityQueryDisplayData['queryData'] | null) {
+			newData && this.getUploadCriteria(newData)
+		},
+
 		isCriteriaReset(value) {
 			if (value) {
-				this.selectedInclusionCharacteristics = []
-				this.selectedExclusionCharacteristics = []
+				this.selectedInclusionCharacteristics = {
+					characteristics: [],
+					logic: [],
+				}
+				this.selectedExclusionCharacteristics = {
+					characteristics: [],
+					logic: [],
+				}
+				this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
 			}
 		},
 
@@ -263,15 +286,24 @@ export default Vue.extend({
 			// put filterInfo into this.selectedInclusionCharacteristics with for loop, condition with id and display
 			if (this.criteriaOverlayType === 'einschlusskriterien') {
 				if (this.selectedEditedCriteriaIndex !== null) { // when criterion is edited
-					this.selectedInclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
+					this.selectedInclusionCharacteristics.characteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
 					this.selectedEditedCriteriaIndex = null
-				} else this.selectedInclusionCharacteristics.push(...this.selectedCriteria)
+				} else {
+					this.selectedInclusionCharacteristics.characteristics.push(...this.selectedCriteria)
+					const length = this.selectedInclusionCharacteristics.characteristics.length === 0 ? this.selectedCriteria.length - 1 : this.selectedCriteria.length
+					this.selectedInclusionCharacteristics.logic.push(...Array.from({ length }, () => 'and'))
+				}
 			} else if (this.criteriaOverlayType === 'ausschlusskriterien') {
 				if (this.selectedEditedCriteriaIndex !== null) {
-					this.selectedExclusionCharacteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
+					this.selectedExclusionCharacteristics.characteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
 					this.selectedEditedCriteriaIndex = null
-				} else this.selectedExclusionCharacteristics.push(...this.selectedCriteria)
+				} else {
+					this.selectedExclusionCharacteristics.characteristics.push(...this.selectedCriteria)
+					const length = this.selectedInclusionCharacteristics.characteristics.length === 0 ? this.selectedCriteria.length - 1 : this.selectedCriteria.length
+					this.selectedExclusionCharacteristics.logic.push(...Array.from({ length }, () => 'and'))
+				}
 			}
+			this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
 		},
 
 		deleteSelectedCriteria(index: number): void {
@@ -280,19 +312,19 @@ export default Vue.extend({
 
 		deleteCharacteristic(index: number, criteriaType: string): void {
 			if (criteriaType === 'einschlusskriterien') {
-				this.selectedInclusionCharacteristics.splice(index, 1)
+				this.selectedInclusionCharacteristics.characteristics.splice(index, 1)
 			} else if (criteriaType === 'ausschlusskriterien') {
-				this.selectedExclusionCharacteristics.splice(index, 1)
+				this.selectedExclusionCharacteristics.characteristics.splice(index, 1)
 			}
 		},
 
 		editCriteriaLimitation(characteristic: Criterion, index: number, criteriaType: string): void {
 			this.criteriaOverlayType = criteriaType
 			if (criteriaType === 'einschlusskriterien') {
-				const selectedEditedCriteria = this.selectedInclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
+				const selectedEditedCriteria = this.selectedInclusionCharacteristics.characteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
 				this.selectedCriteria = selectedEditedCriteria as Criterion[]
 			} else if (criteriaType === 'ausschlusskriterien') {
-				const selectedEditedCriteria = this.selectedExclusionCharacteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
+				const selectedEditedCriteria = this.selectedExclusionCharacteristics.characteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
 				this.selectedCriteria = selectedEditedCriteria as Criterion[]
 			}
 			this.selectedEditedCriteriaIndex = index
@@ -300,14 +332,171 @@ export default Vue.extend({
 			this.isStateEditFilter = true
 		},
 
-		updateCharacteristics(type: string, newOrder: Criterion[]) {
-			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = newOrder) : (this.selectedExclusionCharacteristics = newOrder)
+		updateCharacteristics(type: string, newOrder: SelectedCharacteristics) {
+			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = { ...newOrder }) : (this.selectedExclusionCharacteristics = { ...newOrder })
+			this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
 		},
 
 		getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
 			(queryData.inclusionCriteria?.length === 0 && queryData.exclusionCriteria?.length === 0)
 				? this.$emit('get-query-data', null)
 				: this.$emit('get-query-data', queryData)
+		},
+
+		updateQueryData(selectedIncludeCriteria: SelectedCharacteristics, selectedExcludeCriteria: SelectedCharacteristics) {
+			this.queryData.inclusionCriteria = []
+			this.queryData.exclusionCriteria = []
+			if (selectedIncludeCriteria.characteristics.length > 0) {
+				let tempIndex = 0
+				for (let i = 0; i < selectedIncludeCriteria.characteristics.length; i++) {
+					const selectedCharacteristic = {
+						termCodes: selectedIncludeCriteria.characteristics[i].termCodes,
+						context: selectedIncludeCriteria.characteristics[i].context,
+						...(selectedIncludeCriteria.characteristics[i].selectedFilter || {}),
+					} as QueryCriterionData
+
+					if (i === 0) {
+						this.queryData.inclusionCriteria.push([selectedCharacteristic])
+					} else {
+						if (selectedIncludeCriteria.logic[i - 1] === 'or') {
+							this.queryData.inclusionCriteria[tempIndex].push(selectedCharacteristic)
+						} else if (selectedIncludeCriteria.logic[i - 1] === 'and') {
+							this.queryData.inclusionCriteria.push([selectedCharacteristic])
+							tempIndex++
+						}
+					}
+
+				}
+			}
+
+			if (selectedExcludeCriteria.characteristics.length > 0) {
+				let tempIndex = 0
+
+				for (let i = 0; i < selectedExcludeCriteria.characteristics.length; i++) {
+					const selectedCharacteristic = {
+						termCodes: selectedExcludeCriteria.characteristics[i].termCodes,
+						context: selectedExcludeCriteria.characteristics[i].context,
+						...(selectedExcludeCriteria.characteristics[i].selectedFilter || {}),
+					} as QueryCriterionData
+					if (i === 0) {
+						this.queryData.exclusionCriteria.push([selectedCharacteristic])
+					} else {
+						if (selectedExcludeCriteria.logic[i - 1] === 'or') {
+							this.queryData.exclusionCriteria.push([selectedCharacteristic])
+							tempIndex++
+						} else if (selectedExcludeCriteria.logic[i - 1] === 'and') {
+							this.queryData.exclusionCriteria[tempIndex].push(selectedCharacteristic)
+						}
+					}
+
+				}
+			}
+			this.getUpdateQueryData(this.queryData)
+		},
+
+		async getUploadCriteria(criteria: FeasibilityQueryDisplayData['queryData']) {
+			const inclusionCharacteristics: SelectedCharacteristics = {
+				characteristics: [],
+				logic: [],
+			}
+			const exclusionCharacteristics: SelectedCharacteristics = {
+				characteristics: [],
+				logic: [],
+			}
+
+			if (criteria.inclusionCriteria) {
+				let tempIndex = 0
+				for (let itemsIndex = 0; itemsIndex < criteria.inclusionCriteria.length; itemsIndex++) {
+					itemsIndex !== 0 && inclusionCharacteristics.logic.push('and')
+					for (let itemIndex = 0; itemIndex < criteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
+						const code = criteria.inclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
+						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntology/' + code))
+						const ontology: Criterion = response.data[0]
+						ontology.context = JSON.parse(response.data[0].context)
+						ontology.termCodes = JSON.parse(response.data[0].termCodes)
+						ontology.filterOptions = JSON.parse(response.data[0].filterOptions)
+
+						inclusionCharacteristics.characteristics.push(ontology)
+
+						if (['valueFilter', 'timeRestriction'].some(key => key in criteria.inclusionCriteria![itemsIndex][itemIndex])) {
+							switch (ontology.filterType) {
+							case 'concept': {
+								const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & ConceptType
+								inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
+									valueFilter: item.valueFilter,
+								}
+								break
+							}
+							case 'quantity': {
+								const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & QuantityType
+								inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
+									valueFilter: item.valueFilter,
+								}
+								break
+							}
+							default: {
+								if (ontology.timeRestrictionAllowed) {
+									const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & TimeRangeType
+									inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
+										timeRestriction: item.timeRestriction,
+									}
+								}
+							}
+							}
+						}
+
+						itemIndex !== 0 && inclusionCharacteristics.logic.push('or')
+						tempIndex++
+					}
+				}
+			}
+			if (criteria.exclusionCriteria) {
+				let tempIndex = 0
+				for (let itemsIndex = 0; itemsIndex < criteria.exclusionCriteria.length; itemsIndex++) {
+					itemsIndex !== 0 && exclusionCharacteristics.logic.push('or')
+					for (let itemIndex = 0; itemIndex < criteria.exclusionCriteria[itemsIndex].length; itemIndex++) {
+						const code = criteria.exclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
+						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntology/' + code))
+						const ontology: Criterion = response.data[0]
+						ontology.context = JSON.parse(response.data[0].context)
+						ontology.termCodes = JSON.parse(response.data[0].termCodes)
+						ontology.filterOptions = JSON.parse(response.data[0].filterOptions)
+
+						exclusionCharacteristics.characteristics.push(ontology)
+
+						if (['valueFilter', 'timeRestriction'].some(key => key in criteria.exclusionCriteria![itemsIndex][itemIndex])) {
+							switch (ontology.filterType) {
+							case 'concept': {
+								const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & ConceptType
+								exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
+									valueFilter: item.valueFilter,
+								}
+								break
+							}
+							case 'quantity': {
+								const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & QuantityType
+								exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
+									valueFilter: item.valueFilter,
+								}
+								break
+							}
+							default: {
+								if (ontology.timeRestrictionAllowed) {
+									const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & TimeRangeType
+									exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
+										timeRestriction: item.timeRestriction,
+									}
+								}
+							}
+							}
+						}
+						itemIndex !== 0 && exclusionCharacteristics.logic.push('and')
+						tempIndex++
+					}
+				}
+			}
+			this.selectedInclusionCharacteristics = inclusionCharacteristics
+			this.selectedExclusionCharacteristics = exclusionCharacteristics
 		},
 	},
 })
