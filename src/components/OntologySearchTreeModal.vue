@@ -321,6 +321,7 @@ export default Vue.extend({
 }
 
 .module_name {
+	font-size: 18px;
 	font-weight: bold;
 	margin-bottom: 20px;
 }

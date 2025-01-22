@@ -31,15 +31,6 @@ class OntologyConceptMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
-	public function findFromCode(string $code): array {
-		/* @var $qb IQueryBuilder */
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from('machbarkeit_concepts')
-			->where($qb->expr()->eq('code', $qb->createNamedParameter($code, IQueryBuilder::PARAM_STR)));
-		return $this->findEntities($qb);
-	}
-
 	public function findAll(int $moduleId): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -61,7 +52,7 @@ class OntologyConceptMapper extends QBMapper {
 	public function searchOntology(string $searchText, int $moduleId) {
 		$qb = $this->db->getQueryBuilder();
 		$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
-			'WHERE c.module_id = :moduleId AND lower(c.display) LIKE :searchText AND c.selectable = true';
+			'WHERE c.module_id = :moduleId AND (lower(c.display) LIKE :searchText OR c.code LIKE :searchText) AND c.selectable = true';
 		$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%'];
 		$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
 		return $result;

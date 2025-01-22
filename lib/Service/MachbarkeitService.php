@@ -84,10 +84,6 @@ class MachbarkeitService {
 		return $this->ontologyConceptMapper->findAll($moduleId);
 	}
 
-	public function getOntologyFromCode($code) {
-		return $this->ontologyConceptMapper->findFromCode($code);
-	}
-
 	public function buildTree(array $elements, $id) {
 		$branch = [];
 		foreach ($elements as $element) {

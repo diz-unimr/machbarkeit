@@ -6,7 +6,7 @@
 	<div>
 		<div class="ontology-nested-tree-node-wrapper">
 			<p class="criterion-code">
-				code
+				{{ criterion?.code }}
 			</p>
 			<div class="search-tree-term-entry">
 				<input :id="String(criterion?.id)"
@@ -122,7 +122,7 @@ export default Vue.extend({
 
 .criterion-code {
 	font-weight: 500;
-	width: 15%;
+	width: 12%;
 	margin-top: 5px;
 }
 </style>
