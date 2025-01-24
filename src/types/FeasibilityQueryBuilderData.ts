@@ -14,8 +14,6 @@ export interface FeasibilityQueryBuilderData {
     searchInputText: string;
     inclusionSearchInputText: string;
     exclusionSearchInputText: string;
-    inclusionSearchInput: string;
-    exclusionSearchInput: string;
     isLimitationsCriteriaOpen: boolean;
     isOntologySearchTreeOpen: boolean;
     criteriaOverlayType: string;

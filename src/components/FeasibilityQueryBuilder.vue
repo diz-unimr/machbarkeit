@@ -69,8 +69,6 @@
 		<OntologySearchTreeModal v-if="isOntologySearchTreeOpen"
 			:criteria-type="criteriaOverlayType"
 			:search-input-text="searchInputText"
-			:inclusion-search-input="inclusionSearchInput"
-			:exclusion-search-input="exclusionSearchInput"
 			@get-selected-criteria="getSelectedCriteria"
 			@toggle-ontology-search-tree-modal="toggleOntologySearchTreeModal" />
 
@@ -86,14 +84,13 @@
 			@update-characteristics="updateCharacteristics"
 			@edit-criteria-limitation="editCriteriaLimitation"
 			@delete-characteristic="deleteCharacteristic"
-			@get-update-query-data="getUpdateQueryData" />
+			@get-update-query-data="getUpdateQueryData"
+			@send-criteria-to-display="getCriteriaFromUpload" />
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import { generateUrl } from '@nextcloud/router'
-import nextcloudAxios from '@nextcloud/axios'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
@@ -126,9 +123,9 @@ export default Vue.extend({
 			type: Boolean,
 			required: true,
 		},
-		/* criteria-data */
-		uploadedCriteriaData: {
-			type: Object as PropType<FeasibilityQueryDisplayData['queryData']>,
+
+		dataFromUpload: {
+			type: Object as PropType<{ inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics }>,
 			default: null,
 		},
 	},
@@ -138,8 +135,6 @@ export default Vue.extend({
 			inclusionSearchInputText: '',
 			exclusionSearchInputText: '',
 			searchInputText: '',
-			inclusionSearchInput: '',
-			exclusionSearchInput: '',
 			isLimitationsCriteriaOpen: false,
 			isOntologySearchTreeOpen: false,
 			criteriaOverlayType: '',
@@ -164,8 +159,11 @@ export default Vue.extend({
 	},
 
 	watch: {
-		uploadedCriteriaData(newData: FeasibilityQueryDisplayData['queryData'] | null) {
-			newData && this.getUploadCriteria(newData)
+		dataFromUpload(data) {
+			if (data) {
+				this.selectedInclusionCharacteristics = data.inclusionCharacteristics
+				this.selectedExclusionCharacteristics = data.exclusionCharacteristics
+			}
 		},
 
 		isCriteriaReset(value) {
@@ -187,36 +185,32 @@ export default Vue.extend({
 		},
 
 		inclusionSearchInputText(newVal) {
+			this.searchInputText = this.inclusionSearchInputText
 			if (newVal.length <= 0) {
-				this.inclusionSearchInput = this.inclusionSearchInputText
-				this.searchInputText = this.inclusionSearchInputText
 				this.isOntologySearchTreeOpen = false
 			} else {
 				this.debouncedHandler = debounce(() => {
-					this.inclusionSearchInput = this.inclusionSearchInputText
-					this.searchInputText = this.inclusionSearchInputText
 					this.criteriaOverlayType = 'einschlusskriterien'
-					if (this.inclusionSearchInputText.length > 0) {
+					this.isOntologySearchTreeOpen = true
+					/* if (this.inclusionSearchInputText.length > 0) {
 						this.isOntologySearchTreeOpen = true
-					}
+					} */
 				}, 1000)
 				this.debouncedHandler()
 			}
 		},
 
 		exclusionSearchInputText(newVal) {
+			this.searchInputText = this.exclusionSearchInputText
 			if (newVal.length <= 0) {
-				this.exclusionSearchInput = this.exclusionSearchInputText
-				this.searchInputText = this.exclusionSearchInputText
 				this.isOntologySearchTreeOpen = false
 			} else {
 				this.debouncedHandler = debounce(() => {
-					this.exclusionSearchInput = this.exclusionSearchInputText
-					this.searchInputText = this.exclusionSearchInputText
 					this.criteriaOverlayType = 'ausschlusskriterien'
-					if (this.exclusionSearchInputText.length > 0) {
+					this.isOntologySearchTreeOpen = true
+					/* if (this.exclusionSearchInputText.length > 0) {
 						this.isOntologySearchTreeOpen = true
-					}
+					} */
 				}, 1000)
 				this.debouncedHandler()
 			}
@@ -254,11 +248,9 @@ export default Vue.extend({
 		focusSearchInput(criteriaType: string): void {
 			this.isOntologySearchTreeOpen = false
 			if (criteriaType === 'einschlusskriterien') {
-				this.exclusionSearchInput = ''
 				this.exclusionSearchInputText = ''
 				this.searchInputText = ''
 			} else if (criteriaType === 'ausschlusskriterien') {
-				this.inclusionSearchInput = ''
 				this.inclusionSearchInputText = ''
 				this.searchInputText = ''
 			}
@@ -394,107 +386,7 @@ export default Vue.extend({
 			this.getUpdateQueryData(this.queryData)
 		},
 
-		async getUploadCriteria(criteria: FeasibilityQueryDisplayData['queryData']) {
-			const inclusionCharacteristics: SelectedCharacteristics = {
-				characteristics: [],
-				logic: [],
-			}
-			const exclusionCharacteristics: SelectedCharacteristics = {
-				characteristics: [],
-				logic: [],
-			}
-
-			if (criteria.inclusionCriteria) {
-				let tempIndex = 0
-				for (let itemsIndex = 0; itemsIndex < criteria.inclusionCriteria.length; itemsIndex++) {
-					itemsIndex !== 0 && inclusionCharacteristics.logic.push('and')
-					for (let itemIndex = 0; itemIndex < criteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
-						const code = criteria.inclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
-						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntology/' + code))
-						const ontology: Criterion = response.data[0]
-						ontology.context = JSON.parse(response.data[0].context)
-						ontology.termCodes = JSON.parse(response.data[0].termCodes)
-						ontology.filterOptions = JSON.parse(response.data[0].filterOptions)
-
-						inclusionCharacteristics.characteristics.push(ontology)
-
-						if (['valueFilter', 'timeRestriction'].some(key => key in criteria.inclusionCriteria![itemsIndex][itemIndex])) {
-							switch (ontology.filterType) {
-							case 'concept': {
-								const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & ConceptType
-								inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
-								break
-							}
-							case 'quantity': {
-								const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & QuantityType
-								inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
-								break
-							}
-							default: {
-								if (ontology.timeRestrictionAllowed) {
-									const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & TimeRangeType
-									inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-										timeRestriction: item.timeRestriction,
-									}
-								}
-							}
-							}
-						}
-
-						itemIndex !== 0 && inclusionCharacteristics.logic.push('or')
-						tempIndex++
-					}
-				}
-			}
-			if (criteria.exclusionCriteria) {
-				let tempIndex = 0
-				for (let itemsIndex = 0; itemsIndex < criteria.exclusionCriteria.length; itemsIndex++) {
-					itemsIndex !== 0 && exclusionCharacteristics.logic.push('or')
-					for (let itemIndex = 0; itemIndex < criteria.exclusionCriteria[itemsIndex].length; itemIndex++) {
-						const code = criteria.exclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
-						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntology/' + code))
-						const ontology: Criterion = response.data[0]
-						ontology.context = JSON.parse(response.data[0].context)
-						ontology.termCodes = JSON.parse(response.data[0].termCodes)
-						ontology.filterOptions = JSON.parse(response.data[0].filterOptions)
-
-						exclusionCharacteristics.characteristics.push(ontology)
-
-						if (['valueFilter', 'timeRestriction'].some(key => key in criteria.exclusionCriteria![itemsIndex][itemIndex])) {
-							switch (ontology.filterType) {
-							case 'concept': {
-								const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & ConceptType
-								exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
-								break
-							}
-							case 'quantity': {
-								const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & QuantityType
-								exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
-								break
-							}
-							default: {
-								if (ontology.timeRestrictionAllowed) {
-									const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & TimeRangeType
-									exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-										timeRestriction: item.timeRestriction,
-									}
-								}
-							}
-							}
-						}
-						itemIndex !== 0 && exclusionCharacteristics.logic.push('and')
-						tempIndex++
-					}
-				}
-			}
+		getCriteriaFromUpload(inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics) {
 			this.selectedInclusionCharacteristics = inclusionCharacteristics
 			this.selectedExclusionCharacteristics = exclusionCharacteristics
 		},

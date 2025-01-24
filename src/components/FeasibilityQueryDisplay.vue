@@ -220,8 +220,6 @@ export interface FeasibilityQueryDisplayData {
         inclusionCriteria: Array<string>;
         exclusionCriteria: Array<string>;
     }
-    inclusionCriteriaOld: Array<string>;
-	exclusionCriteriaOld: Array<string>;
 	draggableInclusionCharacteristics: FeasibilityQueryBuilderData['selectedInclusionCharacteristics'];
 	draggableExclusionCharacteristics: FeasibilityQueryBuilderData['selectedExclusionCharacteristics'];
 	queryData: {
@@ -274,8 +272,6 @@ export default Vue.extend({
 				inclusionCriteria: [],
 				exclusionCriteria: [],
 			},
-			inclusionCriteriaOld: [],
-			exclusionCriteriaOld: [],
 			queryData: {
 				version: '',
 				display: '',
@@ -294,7 +290,6 @@ export default Vue.extend({
 			handler(newVal) {
 				this.draggableInclusionCharacteristics.characteristics = [...newVal.characteristics]
 				this.draggableInclusionCharacteristics.logic = newVal.logic
-				this.inclusionCriteriaOld = [...newVal.characteristics]
 			},
 			deep: true,
 		},
@@ -303,7 +298,6 @@ export default Vue.extend({
 			handler(newVal) {
 				this.draggableExclusionCharacteristics.characteristics = [...newVal.characteristics]
 				this.draggableExclusionCharacteristics.logic = newVal.logic
-				this.exclusionCriteriaOld = [...newVal.characteristics]
 			},
 			deep: true,
 		},

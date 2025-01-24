@@ -30,8 +30,10 @@
 				:query-data="queryData"
 				@close-save-modal="closeSaveModal" />
 
+			<!-- :uploaded-criteria-data="queryData" -->
 			<FeasibilityQueryBuilder ref="childComponent"
-				:uploaded-criteria-data="queryData"
+				:uploaded-query-data="queryDataFromUpload"
+				:data-from-upload="dataFromUpload"
 				:is-criteria-reset="isCriteriaReset"
 				:is-save-modal-open="isSaveModalOpen"
 				@get-query-data="getQueryData" />
@@ -39,6 +41,7 @@
 		<MachbarkeitFooter :is-criteria-available="isCriteriaAvailable"
 			@open-save-modal="openSaveModal"
 			@close-save-modal="closeSaveModal"
+			@send-criteria-to-display="forwardCriteriaToDisplay"
 			@get-query-data="getQueryData" />
 	</div>
 </template>
@@ -51,10 +54,15 @@ import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
+import type { SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 
 interface FeasibilityQueryContainerData {
 	queryData: FeasibilityQueryDisplayData['queryData'] | null;
 	queryDataFromUpload: FeasibilityQueryDisplayData['queryData'] | null;
+	dataFromUpload: {
+		inclusionCharacteristics: SelectedCharacteristics;
+		exclusionCharacteristics: SelectedCharacteristics;
+	} | null;
 	numberOfPatients: number | null;
 	isSaveModalOpen: boolean;
 	isCriteriaAvailable: boolean;
@@ -75,6 +83,7 @@ export default Vue.extend({
 		return {
 			queryData: null,
 			queryDataFromUpload: null,
+			dataFromUpload: null,
 			numberOfPatients: null,
 			isSaveModalOpen: false,
 			isCriteriaAvailable: false,
@@ -122,6 +131,10 @@ export default Vue.extend({
 			this.queryData = data
 			this.isCriteriaAvailable = !!data
 			this.numberOfPatients = null
+		},
+
+		forwardCriteriaToDisplay(data: { inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics }) {
+			this.dataFromUpload = data
 		},
 
 		async startQuery(data: FeasibilityQueryContainerData['queryData']) {

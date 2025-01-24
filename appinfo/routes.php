@@ -34,11 +34,9 @@ return [
 		// get module names
 		['name' => 'machbarkeit#getModules', 'url' => '/machbarkeit/modules', 'verb' => 'GET'],
 		// ontology tree
-		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{module_id}', 'verb' => 'GET'],
+		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{textSearch}/{module_id}', 'verb' => 'GET'],
 		// find ontology from termCodes
 		['name' => 'machbarkeit#findOntology', 'url' => '/machbarkeit/findOntology/{code}', 'verb' => 'GET'],
-		// searchInput ontology
-		['name' => 'machbarkeit#getSearchOntology', 'url' => '/machbarkeit/search_ontology/{textSearch}/{module_id}', 'verb' => 'GET'],
 		// get all filters
 		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters/{filter_options_ids}', 'verb' => 'GET'],
 		// get filters (for concepts)

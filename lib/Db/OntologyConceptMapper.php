@@ -16,13 +16,16 @@ header('Access-Control-Allow-Origin: *');
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
+class OntologyConceptMapper extends QBMapper
+{
+	public function __construct(IDBConnection $db)
+	{
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $moduleId): array {
+	public function find(int $moduleId): array
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -31,7 +34,18 @@ class OntologyConceptMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
-	public function findAll(int $moduleId): array {
+	public function findFromCode(string $code): array
+	{
+		/* @var $qb IQueryBuilder */
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from('machbarkeit_concepts')
+			->where($qb->expr()->eq('code', $qb->createNamedParameter($code, IQueryBuilder::PARAM_STR)));
+		return $this->findEntities($qb);
+	}
+
+	public function findAll(int $moduleId): array
+	{
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from('machbarkeit_concepts')
@@ -49,16 +63,31 @@ class OntologyConceptMapper extends QBMapper {
 		return $result;
 	}
 
-	public function searchOntology(string $searchText, int $moduleId) {
+	public function getOntologyTree(string $searchText, int $moduleId): array
+	{
 		$qb = $this->db->getQueryBuilder();
-		$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
-			'WHERE c.module_id = :moduleId AND (lower(c.display) LIKE :searchText OR c.code LIKE :searchText) AND c.selectable = true';
-		$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%'];
-		$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
-		return $result;
+		if ($searchText === '_null_') {
+			$qb->select('*')
+				->from('machbarkeit_concepts')
+				->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)))
+				->andWhere($qb->expr()->isNull('parent_id'));
+			$ontology = 'WITH RECURSIVE ontology AS ( ' . $qb->getSQL() .
+				'UNION ALL SELECT c.* FROM oc_machbarkeit_concepts c ' .
+				'JOIN ontology on c.parent_id = ontology.id ) ' .
+				'SELECT * from ontology';
+			$result = $this->findEntitiesWithRawQuery($ontology, $qb->getParameters(), $qb->getParameterTypes());
+			return $result;
+		} else {
+			$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
+				'WHERE c.module_id = :moduleId AND (lower(c.display) LIKE :searchText OR c.code LIKE :searchText) AND c.selectable = true';
+			$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%'];
+			$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
+			return $result;
+		}
 	}
 
-	protected function findEntitiesWithRawQuery(string $query, array $params, array $types) {
+	protected function findEntitiesWithRawQuery(string $query, array $params, array $types)
+	{
 		try {
 			$cursor = $this->db->executeQuery($query, $params, $types);
 

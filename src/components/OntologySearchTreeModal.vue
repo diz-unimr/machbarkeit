@@ -21,41 +21,45 @@
 					</div>
 				</div>
 
-				<div v-if="ontologyTree && ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab" class="ontology-search-tree__display">
-					<div class="ontology-search-tree__body">
-						<div class="module_name">
-							{{ modules.filter(module => module.id === activeTab)[0].moduleName }}
-						</div>
-						<template v-if="searchInputText.length <= 0">
-							<OntologyNestedTreeNode v-for="criterion in ontologyTree"
-								:key="criterion.id"
-								:criterion="criterion"
-								@input="getCheckboxItems" />
-						</template>
+				<div v-if="ontologyTree" class="ontology-search-tree__display">
+					<div v-if="ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab">
+						<div class="ontology-search-tree__body">
+							<div class="module_name">
+								{{ modules.filter(module => module.id === activeTab)[0].moduleName }}
+							</div>
+							<template v-if="searchInputText.length <= 0">
+								<OntologyNestedTreeNode v-for="criterion in ontologyTree"
+									:key="criterion.id"
+									:criterion="criterion"
+									@input="getCheckboxItems" />
+							</template>
 
-						<template v-else>
-							<OntologyNestedTreeNodeSearchInput v-for="criterion in ontologyTree"
-								:key="criterion.id"
-								class="ontology-tree-node"
-								:criterion="criterion"
-								:search-input-text="searchInputText"
-								@input="getCheckboxItems" />
-						</template>
+							<template v-else>
+								<OntologyNestedTreeNodeSearchInput v-for="criterion in ontologyTree"
+									:key="criterion.id"
+									class="ontology-tree-node"
+									:criterion="criterion"
+									:search-input-text="searchInputText"
+									@input="getCheckboxItems" />
+							</template>
+						</div>
 					</div>
-					<div class="ontology-search-tree__button-group">
-						<button :disabled="selectedItems.length > 0 ? false : true" @click="submit(criteriaType, selectedItems)">
-							AUSWÄHLEN
-						</button>
-						<button @click="cancel(criteriaType)">
-							ABBRECHEN
-						</button>
+					<div v-else-if="ontologyTree?.length === 0">
+						<div class="no-result-data">
+							Keine Daten
+						</div>
 					</div>
 				</div>
-				<div v-else-if="ontologyTree?.length === 0" class="no-result-data">
-					Keine Daten
-				</div>
-				<div v-else class="loading-text">
+				<div v-else class="loading-text ontology-search-tree__display">
 					Loading...
+				</div>
+				<div class="ontology-search-tree__button-group">
+					<button :disabled="selectedItems.length > 0 ? false : true" @click="submit(criteriaType, selectedItems)">
+						AUSWÄHLEN
+					</button>
+					<button @click="cancel(criteriaType)">
+						ABBRECHEN
+					</button>
 				</div>
 			</div>
 		</div>
@@ -110,7 +114,6 @@ export default Vue.extend({
 		searchInputText: {
 			async handler() {
 				if (this.searchInputText.length > 0) {
-					localStorage.setItem('ontologySearch', JSON.stringify(null))
 					this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
 				}
 			},
@@ -119,7 +122,7 @@ export default Vue.extend({
 
 		activeTab: {
 			async handler() {
-				await this.getOntology(this.activeTab!, this.searchInputText)
+				this.searchInputText ? await this.getOntology(this.activeTab!, this.searchInputText) : await this.getOntology(this.activeTab!)
 			},
 		},
 	},
@@ -156,39 +159,15 @@ export default Vue.extend({
 			}
 		},
 
-		async getOntology(moduleId: number, searchText: string | null = null): Promise<Criterion[] | null> {
-			// Code oder Suchbegriff eingegeben wurde
-			if (searchText) {
-				const ontologySearch = JSON.parse(localStorage.getItem('ontologySearch')!)
-				if (ontologySearch && ontologySearch[moduleId]) {
-					this.ontologyTree = ontologySearch[moduleId]
-				} else {
-					const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/search_ontology/' + searchText + '/' + moduleId))
-					this.ontologyTree = response ? response.data : []
-					this.ontologyTreeSearch[moduleId] = response ? response.data : []
-					// localStorage.setItem('ontologySearch', JSON.stringify(this.ontologyTreeSearch))
-				}
-				return this.ontologyTree
-			} else {
-				this.ontologyTree = JSON.parse(localStorage.getItem('ontology:' + moduleId)!) ?? (
-					async () => {
-						try {
-							const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + moduleId))
-							this.ontologyTree = response.data
-							for (let i = 0; i < this.ontologyTree!.length; i++) {
-								this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
-								this.ontologyTree![i].context = JSON.parse(response.data[i].context)
-								this.ontologyTree![i].filterOptions = JSON.parse(response.data[i].filterOptions)
-							}
-							// localStorage.setItem('ontology:' + moduleId, JSON.stringify(this.ontologyTree))
-							return this.ontologyTree
-						} catch (error) {
-						// eslint-disable-next-line no-console
-							console.log((error as Error).message)
-							return []
-						}
-					}
-				)()
+		async getOntology(moduleId: number, searchText: string = '_null_'): Promise<Criterion[] | null> {
+			// Code oder Suchbegriff wurde eingegeben
+			const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + searchText + '/' + moduleId))
+			this.ontologyTree = response ? response.data : []
+			this.ontologyTreeSearch[moduleId] = response ? response.data : []
+			for (let i = 0; i < this.ontologyTree!.length; i++) {
+				this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
+				this.ontologyTree![i].context = JSON.parse(response.data[i].context)
+				this.ontologyTree![i].filterOptions = JSON.parse(response.data[i].filterOptions)
 			}
 			return this.ontologyTree
 		},
