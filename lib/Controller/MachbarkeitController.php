@@ -13,8 +13,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
-class MachbarkeitController extends Controller
-{
+class MachbarkeitController extends Controller {
 	#[NoCSRFRequired]
 	private MachbarkeitService $service;
 	private ?string $userId;
@@ -34,18 +33,15 @@ class MachbarkeitController extends Controller
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
-	public function getMetadata(): JSONResponse
-	{
+	public function getMetadata(): JSONResponse {
 		return new JSONResponse($this->service->readCsv());
 	}
 
-	public function getOntology(): JSONResponse
-	{
+	public function getOntology(): JSONResponse {
 		return new JSONResponse($this->service->readOntology());
 	}
 
-	public function getUiProfile(): JSONResponse
-	{
+	public function getUiProfile(): JSONResponse {
 		// TODO remove test call
 		$modules = $this->getModules();
 		$ontology = $this->service->getOntology(2);
@@ -53,8 +49,7 @@ class MachbarkeitController extends Controller
 		return new JSONResponse($this->service->readUiProfile());
 	}
 
-	public function getModules()
-	{
+	public function getModules() {
 		return $this->service->getModules();
 	}
 
@@ -65,30 +60,25 @@ class MachbarkeitController extends Controller
 		return $ontologyTree;
 	} */
 
-	public function findOntology(string $code)
-	{
+	public function findOntology(string $code) {
 		$ontology = $this->service->getOntologyFromCode($code);
 		return $ontology;
 	}
 
-	public function getOntologyTree(string $textSearch, int $module_id)
-	{
+	public function getOntologyTree(string $textSearch, int $module_id) {
 		$ontology = $this->service->getOntologyTree($textSearch, $module_id);
 		return $ontology;
 	}
 
-	public function getFilters($filter_options_ids = null)
-	{
+	public function getFilters($filter_options_ids = null) {
 		return $this->service->getFilters($filter_options_ids);
 	}
 
-	public function getConcepts()
-	{
+	public function getConcepts() {
 		return $this->service->getConcepts(1);
 	}
 
-	public function getRequest($criteria)
-	{
+	public function getRequest($criteria) {
 		return $this->service->getFhirRequest($criteria);
 	}
 }
