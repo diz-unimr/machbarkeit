@@ -30,11 +30,10 @@
 				:query-data="queryData"
 				@close-save-modal="closeSaveModal" />
 
-			<!-- :uploaded-criteria-data="queryData" -->
 			<FeasibilityQueryBuilder ref="childComponent"
 				:uploaded-query-data="queryDataFromUpload"
 				:data-from-upload="dataFromUpload"
-				:is-criteria-reset="isCriteriaReset"
+				:is-criteria-available="isCriteriaAvailable"
 				:is-save-modal-open="isSaveModalOpen"
 				@get-query-data="getQueryData" />
 		</div>
@@ -68,7 +67,6 @@ interface FeasibilityQueryContainerData {
 	isCriteriaAvailable: boolean;
 	errorMessage: string;
 	isQeuryCompleted: boolean | null;
-	isCriteriaReset: boolean | null;
 }
 
 export default Vue.extend({
@@ -89,16 +87,7 @@ export default Vue.extend({
 			isCriteriaAvailable: false,
 			errorMessage: '',
 			isQeuryCompleted: null,
-			isCriteriaReset: null,
 		}
-	},
-
-	watch: {
-		isCriteriaAvailable(value) {
-			if (value) {
-				this.isCriteriaReset = null
-			}
-		},
 	},
 
 	// life cycle of vue js
@@ -123,7 +112,7 @@ export default Vue.extend({
 		},
 
 		resetSelectedCriteria() {
-			this.isCriteriaReset = true
+			this.isCriteriaAvailable = false
 			this.numberOfPatients = null
 		},
 

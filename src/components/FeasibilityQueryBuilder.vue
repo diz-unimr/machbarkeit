@@ -83,9 +83,7 @@
 			:selected-exclusion-characteristics="selectedExclusionCharacteristics"
 			@update-characteristics="updateCharacteristics"
 			@edit-criteria-limitation="editCriteriaLimitation"
-			@delete-characteristic="deleteCharacteristic"
-			@get-update-query-data="getUpdateQueryData"
-			@send-criteria-to-display="getCriteriaFromUpload" />
+			@delete-characteristic="deleteCharacteristic" />
 	</div>
 </template>
 
@@ -101,7 +99,7 @@ import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
-import type { FeasibilityQueryDisplayData, QueryCriterionData } from './FeasibilityQueryDisplay.vue'
+import type { QueryCriterionData } from './FeasibilityQueryDisplay.vue'
 import debounce from 'lodash.debounce'
 
 export default Vue.extend({
@@ -114,7 +112,7 @@ export default Vue.extend({
 		FeasibilityQueryDisplay,
 	},
 	props: {
-		isCriteriaReset: {
+		isCriteriaAvailable: {
 			type: Boolean,
 			default: false,
 		},
@@ -166,8 +164,8 @@ export default Vue.extend({
 			}
 		},
 
-		isCriteriaReset(value) {
-			if (value) {
+		isCriteriaAvailable(value) {
+			if (!value) {
 				this.selectedInclusionCharacteristics = {
 					characteristics: [],
 					logic: [],
@@ -185,7 +183,7 @@ export default Vue.extend({
 		},
 
 		inclusionSearchInputText(newVal) {
-			this.searchInputText = this.inclusionSearchInputText
+			this.searchInputText = newVal // this.inclusionSearchInputText
 			if (newVal.length <= 0) {
 				this.isOntologySearchTreeOpen = false
 			} else {
@@ -329,11 +327,11 @@ export default Vue.extend({
 			this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
 		},
 
-		getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
+		/* getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
 			(queryData.inclusionCriteria?.length === 0 && queryData.exclusionCriteria?.length === 0)
 				? this.$emit('get-query-data', null)
 				: this.$emit('get-query-data', queryData)
-		},
+		}, */
 
 		updateQueryData(selectedIncludeCriteria: SelectedCharacteristics, selectedExcludeCriteria: SelectedCharacteristics) {
 			this.queryData.inclusionCriteria = []
@@ -383,12 +381,11 @@ export default Vue.extend({
 
 				}
 			}
-			this.getUpdateQueryData(this.queryData)
-		},
 
-		getCriteriaFromUpload(inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics) {
-			this.selectedInclusionCharacteristics = inclusionCharacteristics
-			this.selectedExclusionCharacteristics = exclusionCharacteristics
+			this.queryData.inclusionCriteria?.length === 0 && this.queryData.exclusionCriteria?.length === 0
+				? this.$emit('get-query-data', null)
+				: this.$emit('get-query-data', this.queryData)
+			// this.getUpdateQueryData(this.queryData)
 		},
 	},
 })

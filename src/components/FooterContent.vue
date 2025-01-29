@@ -168,9 +168,6 @@ export default Vue.extend({
 					}
 				}
 			}
-			// this.selectedInclusionCharacteristics = inclusionCharacteristics
-			// this.selectedExclusionCharacteristics = exclusionCharacteristics
-			console.log('selectedInclusionCharacteristics123 : ', inclusionCharacteristics)
 			this.$emit('send-criteria-to-display', { inclusionCharacteristics, exclusionCharacteristics })
 		},
 	},
