@@ -139,8 +139,6 @@ export default Vue.extend({
 					},
 				})
 			const status = JSON.parse(response.data)
-			console.log(response)
-			console.log(status)
 			this.errorMessage = status.error ? 'Found some error!' : null
 			this.numberOfPatients = response.data
 			this.isQeuryCompleted = true
