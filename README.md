@@ -39,7 +39,7 @@ hot module replacement of the app's frontend (Vue.js) components.
    docker compose up -d
    ```
 
-This starts the [nextcloud-docker-dev](https://github.com/juliushaertl/nextcloud-docker-dev) container.
+This starts the [nextcloud-docker-dev](https://github.com/juliusknorr/nextcloud-docker-dev) container.
 
 ## Enable apps
 

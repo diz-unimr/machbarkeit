@@ -12,7 +12,7 @@
 						<span v-if="isQeuryCompleted !== null && !isQeuryCompleted">
 							<img src="../../img/loading_spinner.svg">
 						</span>
-						<span v-else-if="errorMessage.length > 0" class="error-message">{{ errorMessage }}</span>
+						<span v-else-if="errorMessage" class="error-message">{{ errorMessage }}</span>
 						<span v-else-if="numberOfPatients && numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>
 						<span v-else>{{ numberOfPatients && numberOfPatients > 3 ? numberOfPatients : '-' }}</span>
 					</p>
@@ -65,7 +65,7 @@ interface FeasibilityQueryContainerData {
 	numberOfPatients: number | null;
 	isSaveModalOpen: boolean;
 	isCriteriaAvailable: boolean;
-	errorMessage: string;
+	errorMessage: string | null;
 	isQeuryCompleted: boolean | null;
 }
 
@@ -85,7 +85,7 @@ export default Vue.extend({
 			numberOfPatients: null,
 			isSaveModalOpen: false,
 			isCriteriaAvailable: false,
-			errorMessage: '',
+			errorMessage: null,
 			isQeuryCompleted: null,
 		}
 	},
@@ -114,12 +114,14 @@ export default Vue.extend({
 		resetSelectedCriteria() {
 			this.isCriteriaAvailable = false
 			this.numberOfPatients = null
+			this.errorMessage = null
 		},
 
 		getQueryData(data: FeasibilityQueryDisplayData['queryData'] | null): void {
 			this.queryData = data
 			this.isCriteriaAvailable = !!data
 			this.numberOfPatients = null
+			this.errorMessage = null
 		},
 
 		forwardCriteriaToDisplay(data: { inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics }) {
@@ -137,7 +139,9 @@ export default Vue.extend({
 					},
 				})
 			const status = JSON.parse(response.data)
-			this.errorMessage = status.error ?? ''
+			console.log(response)
+			console.log(status)
+			this.errorMessage = status.error ? 'Found some error!' : null
 			this.numberOfPatients = response.data
 			this.isQeuryCompleted = true
 		},
