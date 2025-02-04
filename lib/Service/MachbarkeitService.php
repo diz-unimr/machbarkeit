@@ -155,7 +155,7 @@ class MachbarkeitService {
 		}', true);
 
 		// Initialize cURL session
-		$url = 'http://feasibility.diz.uni-marburg.de:8084/query/execute';
+		$url = 'https://feasibility.diz.uni-marburg.de/query/execute';
 		$ch = curl_init($url);
 
 		// Set options for cURL

@@ -73,8 +73,12 @@ class OntologyConceptMapper extends QBMapper {
 			return $result;
 		} else {
 			$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
-				'WHERE c.module_id = :moduleId AND (lower(c.display) LIKE :searchText OR c.code LIKE :searchText) AND c.selectable = true';
-			$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%'];
+				'WHERE c.module_id = :moduleId 
+					AND (lower(c.display) LIKE :searchText 
+						OR jsonb_path_exists(c.term_codes::jsonb, CAST(:jsonPath AS jsonpath))
+					) 
+					AND c.selectable = true';
+			$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%', 'jsonPath' => '$[*] ? (@.code like_regex ".*' . $searchText . '.*")'];
 			$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
 			return $result;
 		}
@@ -86,6 +90,7 @@ class OntologyConceptMapper extends QBMapper {
 
 			$entities = [];
 
+			/* fetchAssociative */
 			while ($row = $cursor->fetch()) {
 				$entities[] = $this->mapRowToEntity($row);
 			}
@@ -97,4 +102,9 @@ class OntologyConceptMapper extends QBMapper {
 
 		return $entities;
 	}
+}
+
+function mapTermCodes($entity) {
+	$entity->termCodesArray = json_decode($entity->termCodes, true);
+	return $entity;
 }
