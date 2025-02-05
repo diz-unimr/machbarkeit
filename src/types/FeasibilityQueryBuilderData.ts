@@ -3,7 +3,7 @@
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
 import type { QueryCriterionData } from '../components/FeasibilityQueryDisplay.vue'
-import type { Criterion } from './OntologySearchTreeModalData.ts'
+import type { Criterion, Modules } from './OntologySearchTreeModalData.ts'
 
 export interface SelectedCharacteristics {
     characteristics: Array<Criterion>;
@@ -11,6 +11,7 @@ export interface SelectedCharacteristics {
 }
 
 export interface FeasibilityQueryBuilderData {
+    modules: Array<Modules> | null;
     searchInputText: string;
     inclusionSearchInputText: string;
     exclusionSearchInputText: string;

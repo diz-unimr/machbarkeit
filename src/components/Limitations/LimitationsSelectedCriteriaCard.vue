@@ -13,6 +13,7 @@
 				<img :src="imgDelete">
 			</button>
 		</div>
+		<!-- Loop, Falls mehrere Filter vorkommen -->
 		<FilterCard :selected-criterion="selectedCriterion"
 			@get-selected-filters="getSelectedFilters" />
 	</div>

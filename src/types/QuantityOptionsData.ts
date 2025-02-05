@@ -32,6 +32,7 @@ export interface QuantityType {
 }
 
 export interface QuantityOptionsData {
+    newSelectedCriterion: Criterion;
     isFilterComplete: boolean;
     selectedValue: {
         unit: Criterion['filterOptions'][number];

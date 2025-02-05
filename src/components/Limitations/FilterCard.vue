@@ -10,7 +10,7 @@
 					<img :src="imgExpand"
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
 				</button>
-				<p>{{ selectedCriterion.filterName }} </p>
+				<p>{{ filterName }} </p>
 			</div>
 			<div class="filter-card__button--reset">
 				<button :disabled="isResetDisabled" @click="reset">
@@ -49,6 +49,7 @@ import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
 
 interface FilterCardData {
+	filterName: string | null;
 	state: boolean;
 	isResetDisabled: boolean;
 	imgExpand: string;
@@ -69,6 +70,7 @@ export default Vue.extend({
 	},
 	data(): FilterCardData {
 		return {
+			filterName: null,
 			state: true,
 			isResetDisabled: !(this.selectedCriterion.selectedFilter !== undefined && (!('valueFilter' in this.selectedCriterion.selectedFilter) || !('timeRestriction' in this.selectedCriterion.selectedFilter))),
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
@@ -79,7 +81,9 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.selectedCriterion.timeRestrictionAllowed ? this.filterName = 'Zeitraum (Option)' : this.filterName = 'Wertbereich'
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

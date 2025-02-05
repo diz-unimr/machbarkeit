@@ -12,6 +12,7 @@ export interface ConceptType {
 }
 
 export interface ConceptOptionsData {
+    newSelectedCriterion: Criterion;
     selectedValue: Criterion['filterOptions'] | [];
     conceptType? : ConceptType;
 }

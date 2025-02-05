@@ -152,7 +152,8 @@ export default Vue.extend({
 			try {
 				const response: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
 				this.modules = response
-				localStorage.setItem('moduleName', JSON.stringify(this.modules))
+				this.$emit('update-modules', this.modules)
+				// localStorage.setItem('moduleName', JSON.stringify(this.modules))
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log((error as Error).message)
@@ -164,11 +165,6 @@ export default Vue.extend({
 			const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + searchText + '/' + moduleId))
 			this.ontologyTree = response ? response.data : []
 			this.ontologyTreeSearch[moduleId] = response ? response.data : []
-			for (let i = 0; i < this.ontologyTree!.length; i++) {
-				this.ontologyTree![i].termCodes = JSON.parse(response.data[i].termCodes)
-				this.ontologyTree![i].context = JSON.parse(response.data[i].context)
-				this.ontologyTree![i].filterOptions = JSON.parse(response.data[i].filterOptions)
-			}
 			return this.ontologyTree
 		},
 

@@ -9,7 +9,7 @@
 		</div>
 		<div class="content-option__body">
 			<div class="content-option__checkbox">
-				<div v-for="(option, index) in selectedCriterion.filterOptions"
+				<div v-for="(option, index) in newSelectedCriterion.filterOptions"
 					:key="index"
 					class="checkbox-option">
 					<!-- https://kyoshee.medium.com/building-custom-checkbox-using-only-html-and-css-no-js-1-babd79d5e2e9 -->
@@ -37,11 +37,13 @@ export default Vue.extend({
 		},
 		selectedCriterion: {
 			type: Object as PropType<Criterion>,
+			default: undefined,
 			required: true,
 		},
 	},
 	data(): ConceptOptionsData {
 		return {
+			newSelectedCriterion: this.selectedCriterion,
 			selectedValue: (this.selectedCriterion.selectedFilter as ConceptType)?.valueFilter?.selectedConcepts
 				?? [],
 		}
@@ -77,7 +79,17 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		if (typeof this.newSelectedCriterion.context === 'string') {
+			this.newSelectedCriterion.context = JSON.parse(this.newSelectedCriterion.context)
+		}
+		if (typeof this.newSelectedCriterion.termCodes === 'string') {
+			this.newSelectedCriterion.termCodes = JSON.parse(this.newSelectedCriterion.termCodes)
+		}
+		if (typeof this.newSelectedCriterion.filterOptions === 'string') {
+			this.newSelectedCriterion.filterOptions = JSON.parse(this.newSelectedCriterion.filterOptions)
+		}
+	},
 
 	beforeMount() {},
 	mounted() {},

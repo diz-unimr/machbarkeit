@@ -56,7 +56,7 @@
 					<div v-if="selectedValue.comparator !== 'no filter'"
 						class="text-floating-wrapper">
 						<select v-model="selectedValue.unit">
-							<option v-for="(unit, index) in selectedCriterion.filterOptions"
+							<option v-for="(unit, index) in newSelectedCriterion.filterOptions"
 								:key="index"
 								:value="unit">
 								{{ unit.display }}
@@ -93,6 +93,7 @@ export default Vue.extend({
 	},
 	data(): QuantityOptionsData {
 		return {
+			newSelectedCriterion: this.selectedCriterion,
 			isFilterComplete: true,
 			selectedValue: {
 				comparator: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.comparator
@@ -162,7 +163,17 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		if (typeof this.newSelectedCriterion.context === 'string') {
+			this.newSelectedCriterion.context = JSON.parse(this.newSelectedCriterion.context)
+		}
+		if (typeof this.newSelectedCriterion.termCodes === 'string') {
+			this.newSelectedCriterion.termCodes = JSON.parse(this.newSelectedCriterion.termCodes)
+		}
+		if (typeof this.newSelectedCriterion.filterOptions === 'string') {
+			this.newSelectedCriterion.filterOptions = JSON.parse(this.newSelectedCriterion.filterOptions)
+		}
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

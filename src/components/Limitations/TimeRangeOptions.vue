@@ -100,6 +100,7 @@ export default Vue.extend({
 
 	data(): TimeRangeOptionsData {
 		return {
+			newSelectedCriterion: this.selectedCriterion,
 			isFilterComplete: true,
 			selectedValue: {
 				type: (this.selectedCriterion.selectedFilter as TimeRangeType)?.timeRestriction
@@ -178,7 +179,17 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		if (typeof this.newSelectedCriterion.context === 'string') {
+			this.newSelectedCriterion.context = JSON.parse(this.newSelectedCriterion.context)
+		}
+		if (typeof this.newSelectedCriterion.termCodes === 'string') {
+			this.newSelectedCriterion.termCodes = JSON.parse(this.newSelectedCriterion.termCodes)
+		}
+		if (typeof this.newSelectedCriterion.filterOptions === 'string') {
+			this.newSelectedCriterion.filterOptions = JSON.parse(this.newSelectedCriterion.filterOptions)
+		}
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

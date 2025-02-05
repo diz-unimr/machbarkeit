@@ -70,6 +70,7 @@
 			:criteria-type="criteriaOverlayType"
 			:search-input-text="searchInputText"
 			@get-selected-criteria="getSelectedCriteria"
+			@update-modules="HandleModules"
 			@toggle-ontology-search-tree-modal="toggleOntologySearchTreeModal" />
 
 		<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
@@ -95,7 +96,7 @@ import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
-import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
+import type { Criterion, Modules } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
@@ -130,6 +131,7 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryBuilderData {
 		return {
+			modules: null,
 			inclusionSearchInputText: '',
 			exclusionSearchInputText: '',
 			searchInputText: '',
@@ -183,16 +185,13 @@ export default Vue.extend({
 		},
 
 		inclusionSearchInputText(newVal) {
-			this.searchInputText = newVal // this.inclusionSearchInputText
+			this.searchInputText = newVal
 			if (newVal.length <= 0) {
 				this.isOntologySearchTreeOpen = false
 			} else {
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'einschlusskriterien'
 					this.isOntologySearchTreeOpen = true
-					/* if (this.inclusionSearchInputText.length > 0) {
-						this.isOntologySearchTreeOpen = true
-					} */
 				}, 1000)
 				this.debouncedHandler()
 			}
@@ -206,9 +205,6 @@ export default Vue.extend({
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'ausschlusskriterien'
 					this.isOntologySearchTreeOpen = true
-					/* if (this.exclusionSearchInputText.length > 0) {
-						this.isOntologySearchTreeOpen = true
-					} */
 				}, 1000)
 				this.debouncedHandler()
 			}
@@ -252,6 +248,10 @@ export default Vue.extend({
 				this.inclusionSearchInputText = ''
 				this.searchInputText = ''
 			}
+		},
+
+		HandleModules(modules: Array<Modules>): void {
+			this.modules = modules
 		},
 
 		getSelectedCriteria(criteriaType: string, items: Criterion[]): void {
@@ -327,13 +327,8 @@ export default Vue.extend({
 			this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
 		},
 
-		/* getUpdateQueryData(queryData: FeasibilityQueryDisplayData['queryData']) {
-			(queryData.inclusionCriteria?.length === 0 && queryData.exclusionCriteria?.length === 0)
-				? this.$emit('get-query-data', null)
-				: this.$emit('get-query-data', queryData)
-		}, */
-
 		updateQueryData(selectedIncludeCriteria: SelectedCharacteristics, selectedExcludeCriteria: SelectedCharacteristics) {
+			// TODO: update Context Here
 			this.queryData.inclusionCriteria = []
 			this.queryData.exclusionCriteria = []
 			if (selectedIncludeCriteria.characteristics.length > 0) {
@@ -385,7 +380,6 @@ export default Vue.extend({
 			this.queryData.inclusionCriteria?.length === 0 && this.queryData.exclusionCriteria?.length === 0
 				? this.$emit('get-query-data', null)
 				: this.$emit('get-query-data', this.queryData)
-			// this.getUpdateQueryData(this.queryData)
 		},
 	},
 })
