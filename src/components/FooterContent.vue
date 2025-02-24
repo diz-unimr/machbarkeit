@@ -25,8 +25,8 @@
 import Vue from 'vue'
 import { generateUrl } from '@nextcloud/router'
 import nextcloudAxios from '@nextcloud/axios'
-import type { FeasibilityQueryDisplayData, QueryCriterionData } from './FeasibilityQueryDisplay.vue'
-import type { SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
+import type { QueryCriterionData } from './FeasibilityQueryDisplay.vue'
+import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
@@ -49,9 +49,8 @@ export default Vue.extend({
 				const reader = new FileReader()
 				reader.onload = async (e) => {
 					try {
-						const uploadedCriteria: FeasibilityQueryDisplayData['queryData'] = JSON.parse(e.target?.result as string)
+						const uploadedCriteria: FeasibilityQueryBuilderData['queryData'] = JSON.parse(e.target?.result as string)
 						const isJsonDataValid = (uploadedCriteria.inclusionCriteria && uploadedCriteria.inclusionCriteria?.length > 0) || (uploadedCriteria.exclusionCriteria && uploadedCriteria.exclusionCriteria?.length > 0)
-
 						if (isJsonDataValid) {
 							await this.getCriteriaInfo(uploadedCriteria)
 							this.$emit('get-query-data', uploadedCriteria)
@@ -67,7 +66,7 @@ export default Vue.extend({
 			target.value = ''
 		},
 
-		async getCriteriaInfo(criteria: FeasibilityQueryDisplayData['queryData']) {
+		async getCriteriaInfo(criteria: FeasibilityQueryBuilderData['queryData']) {
 			const inclusionCharacteristics : SelectedCharacteristics = {
 				characteristics: [],
 				logic: [],
@@ -76,14 +75,13 @@ export default Vue.extend({
 				characteristics: [],
 				logic: [],
 			}
-
 			if (criteria.inclusionCriteria) {
 				let tempIndex = 0
 				for (let itemsIndex = 0; itemsIndex < criteria.inclusionCriteria.length; itemsIndex++) {
 					itemsIndex !== 0 && inclusionCharacteristics.logic.push('and')
 					for (let itemIndex = 0; itemIndex < criteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
 						const code = criteria.inclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
-						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntology/' + code))
+						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntologyFromUploadFile/' + code))
 						const ontology: Criterion = response.data[0]
 						ontology.context = JSON.parse(response.data[0].context)
 						ontology.termCodes = JSON.parse(response.data[0].termCodes)
@@ -117,7 +115,6 @@ export default Vue.extend({
 							}
 							}
 						}
-
 						itemIndex !== 0 && inclusionCharacteristics.logic.push('or')
 						tempIndex++
 					}

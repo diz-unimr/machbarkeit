@@ -52,12 +52,12 @@ import nextcloudAxios from '@nextcloud/axios'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
-import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
-import type { SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
+// import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
+import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 
 interface FeasibilityQueryContainerData {
-	queryData: FeasibilityQueryDisplayData['queryData'] | null;
-	queryDataFromUpload: FeasibilityQueryDisplayData['queryData'] | null;
+	queryData: FeasibilityQueryBuilderData['queryData'] | null;
+	queryDataFromUpload: FeasibilityQueryBuilderData['queryData'] | null;
 	dataFromUpload: {
 		inclusionCharacteristics: SelectedCharacteristics;
 		exclusionCharacteristics: SelectedCharacteristics;
@@ -117,7 +117,7 @@ export default Vue.extend({
 			this.errorMessage = null
 		},
 
-		getQueryData(data: FeasibilityQueryDisplayData['queryData'] | null): void {
+		getQueryData(data: FeasibilityQueryBuilderData['queryData'] | null): void {
 			this.queryData = data
 			this.isCriteriaAvailable = !!data
 			this.numberOfPatients = null

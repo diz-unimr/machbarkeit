@@ -334,9 +334,16 @@ export default Vue.extend({
 			if (selectedIncludeCriteria.characteristics.length > 0) {
 				let tempIndex = 0
 				for (let i = 0; i < selectedIncludeCriteria.characteristics.length; i++) {
+					// const module = this.modules?.find(module => module.id === selectedIncludeCriteria.characteristics[i].moduleId)
 					const selectedCharacteristic = {
 						termCodes: selectedIncludeCriteria.characteristics[i].termCodes,
 						context: selectedIncludeCriteria.characteristics[i].context,
+						/* context: {
+							code: module?.fdpg_kds_cod,
+							display: module?.kds_module_name,
+							system: fdpg_kds_system,
+							version: fdpg_kds_version,
+						}, */
 						...(selectedIncludeCriteria.characteristics[i].selectedFilter || {}),
 					} as QueryCriterionData
 

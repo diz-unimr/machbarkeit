@@ -222,12 +222,12 @@ export interface FeasibilityQueryDisplayData {
     }
 	draggableInclusionCharacteristics: FeasibilityQueryBuilderData['selectedInclusionCharacteristics'];
 	draggableExclusionCharacteristics: FeasibilityQueryBuilderData['selectedExclusionCharacteristics'];
-	queryData: {
+	/* queryData: {
 		version: string;
 		display: string;
 		inclusionCriteria?: Array<QueryCriterionData>[];
 		exclusionCriteria?: Array<QueryCriterionData>[];
-	};
+	}; */
 }
 
 export default Vue.extend({
@@ -272,10 +272,10 @@ export default Vue.extend({
 				inclusionCriteria: [],
 				exclusionCriteria: [],
 			},
-			queryData: {
+			/* queryData: {
 				version: '',
 				display: '',
-			},
+			}, */
 		}
 	},
 

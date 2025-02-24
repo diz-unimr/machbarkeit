@@ -7,7 +7,7 @@
 		<keep-alive>
 			<li>
 				<div class="ontology-head-node">
-					<button @click="expandTreeNode()">
+					<button v-if="!criterion?.leaf" @click="expandTreeNode()">
 						<img v-if="!criterion?.leaf"
 							:src="state
 								? imgExpand
@@ -198,6 +198,6 @@ img {
 }
 
 ul {
-	margin-left: 30px;
+	margin-left: 20px;
 }
 </style>

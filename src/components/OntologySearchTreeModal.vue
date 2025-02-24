@@ -106,7 +106,7 @@ export default Vue.extend({
 			modules: null,
 			ontologyTree: null,
 			ontologyTreeSearch: [],
-			hashId: [],
+			context: null,
 		}
 	},
 

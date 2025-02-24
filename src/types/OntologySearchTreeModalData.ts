@@ -44,6 +44,15 @@ export interface Modules {
     id: number;
     moduleName: string;
     version: string;
+
+    /*
+    id: string;
+    kds_module_name: string;
+    fdpg_kds_code: string;
+    fdpg_kds_system: string;
+    fdpg_kds_version: string:
+    version: string;
+    */
 }
 
 export interface OntologyTree {
@@ -64,5 +73,10 @@ export interface OntologySearchTreeModalData {
     modules: Modules[] | null;
     ontologyTree: Criterion[] | null;
     ontologyTreeSearch: Array<Criterion | null>;
-    hashId: Array<string>;
+    context: {
+        code: string;
+        system: string;
+        version: string;
+        display: string;
+    } | null;
 }
