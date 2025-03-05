@@ -169,6 +169,7 @@ export default Vue.extend({
 		},
 
 		getCheckboxItems(checkedItem: CheckedItem): void {
+			checkedItem.node.swlCode = checkedItem.swlCode
 			if (checkedItem.action === 'check') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'uncheck') {

@@ -21,13 +21,18 @@
 							v-model="isChecked"
 							type="checkbox"
 							:value="criterion?.display">
-						<p @click="() => (state = !state)">
+						<p class="swl-code">
+							{{ findSWLCODE(criterion) }}
+						</p>
+						<p class="swl-description" @click="() => (state = !state)">
 							{{ criterion?.display }}
 						</p>
 					</div>
-					<div v-else-if="!criterion?.selectable"
-						class="search-tree-term-entry">
-						<p @click="() => (state = !state)">
+					<div v-else-if="!criterion?.selectable" class="search-tree-term-entry">
+						<p class="swl-code">
+							HK
+						</p>
+						<p class="swl-desciption" @click="() => (state = !state)">
 							{{ criterion?.display }}
 						</p>
 					</div>
@@ -63,11 +68,13 @@ interface OntologyNestedTreeNodeData {
 			selectable: boolean;
 		}
 	] | null;
+	swlCode: string | undefined;
 }
 
 export interface CheckedItem {
 	action: string;
 	node: Criterion;
+	swlCode?: string;
 }
 
 export default Vue.extend({
@@ -86,6 +93,7 @@ export default Vue.extend({
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			concepts: null,
+			swlCode: undefined,
 		}
 	},
 
@@ -98,7 +106,7 @@ export default Vue.extend({
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
 				if (checked) {
-					this.$emit('input', { action: 'check', node: this.criterion })
+					this.$emit('input', { action: 'check', node: this.criterion, swlCode: this.swlCode })
 					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, display: this.criterion.display })
 				} else {
 					this.$emit('input', { action: 'uncheck', node: this.criterion })
@@ -112,7 +120,9 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -127,6 +137,15 @@ export default Vue.extend({
 
 		expandTreeNode(): void {
 			this.state = !this.state
+		},
+
+		findSWLCODE(criterion: Criterion): string | undefined {
+			// const loinc = criterion.termCodes.find((termCode) => termCode.system === 'http://loinc.org')
+			// const swlcode = criterion.termCodes.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
+			// return [loinc?.code, swlcode?.code]
+			this.swlCode = String(criterion)
+			this.swlCode = 'swl-code'
+			return this.swlCode
 		},
 	},
 })
@@ -150,7 +169,7 @@ export default Vue.extend({
 	place-content: center flex-start;
 	align-items: flex-start;
 	margin-top: 5px;
-	gap: 20px;
+	gap: 15px;
 }
 
 .ontology-head-node button {
@@ -168,7 +187,8 @@ export default Vue.extend({
 .search-tree-term-entry {
 	display: flex;
 	align-items: flex-start;
-	gap: 20px;
+	gap: 15px;
+	width: 100%;
 }
 
 .search-tree-term-entry input[type='checkbox'] {
@@ -177,8 +197,14 @@ export default Vue.extend({
 	margin: 0px;
 }
 
-.search-tree-term-entry p {
-	flex: 1;
+.search-tree-term-entry .swl-code {
+	width: 9%;
+	margin-top: 5px;
+	font-weight: 500;
+}
+
+.search-tree-term-entry .swl-description {
+	max-width: 100%;
 	margin-top: 5px;
 }
 

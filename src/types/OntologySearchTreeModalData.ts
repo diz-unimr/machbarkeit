@@ -26,6 +26,7 @@ export interface Criterion {
     };
     code: string;
     codeSystem: string;
+    swlCode: string | undefined;
     selectable: boolean;
     leaf: boolean;
     timeRestrictionAllowed: boolean | undefined;

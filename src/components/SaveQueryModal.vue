@@ -32,7 +32,7 @@
 import Vue, { type PropType } from 'vue'
 import download from 'downloadjs'
 import { NcTextField } from '@nextcloud/vue'
-import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
+import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
 
 interface SaveQueryModalData {
 	fileName:string;
@@ -47,7 +47,7 @@ export default Vue.extend({
 
 	props: {
 		queryData: {
-			type: Object as PropType<FeasibilityQueryDisplayData['queryData']>,
+			type: Object as PropType<FeasibilityQueryBuilderData['queryData']>,
 			default: null,
 		},
 	},
@@ -72,7 +72,7 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		saveQuery(data: FeasibilityQueryDisplayData['queryData'], fileName: string) {
+		saveQuery(data: FeasibilityQueryBuilderData['queryData'], fileName: string) {
 			data && download(JSON.stringify(data, null, 2), fileName + '.json', 'application/json')
 			this.$emit('close-save-modal')
 		},

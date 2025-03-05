@@ -2,13 +2,20 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { QueryCriterionData } from '../components/FeasibilityQueryDisplay.vue'
+import type { ConceptType } from '../types/ConceptOptionsData.ts'
+import type { QuantityType } from '../types/QuantityOptionsData.ts'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 import type { Criterion, Modules } from './OntologySearchTreeModalData.ts'
 
 export interface SelectedCharacteristics {
     characteristics: Array<Criterion>;
     logic: Array<string>;
 }
+
+export type QueryCriterionData = {
+    termCodes: Criterion['termCodes'];
+    context: Criterion['context'];
+} & (ConceptType | QuantityType | TimeRangeType | undefined)
 
 export interface FeasibilityQueryBuilderData {
     modules: Array<Modules> | null;
@@ -30,5 +37,6 @@ export interface FeasibilityQueryBuilderData {
     };
     isStateEditFilter: boolean;
     debouncedHandler: _.DebouncedFunc<() => void> | null;
+    searchInputWarning: string;
     imgDelete: string;
 }

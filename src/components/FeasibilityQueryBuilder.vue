@@ -9,29 +9,34 @@
 				<div class="search-input__title">
 					Einschlusskriterien
 				</div>
-				<div class="search-input__body">
-					<button id="einschlusskriterien" @click="toggleOntologySearchTreeModal('einschlusskriterien')">
-						<svg role="img"
-							aria-hidden="true"
-							focusable="false"
-							data-prefix="fas"
-							data-icon="folder"
-							class="svg-inline--fa fa-folder fa-w-16 fa-2x"
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 512 512">
-							<path fill="currentColor"
-								d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
-						</svg>
-					</button>
-					<NcTextField :value.sync="inclusionSearchInputText"
-						label="Code oder Suchbegriff eingeben"
-						trailing-button-icon="close"
-						placeholder=" "
-						:show-trailing-button="inclusionSearchInputText !== ''"
-						@trailing-button-click="closeOntologySearchTreeModal"
-						@focus="focusSearchInput('einschlusskriterien')">
-						<Magnify :size="20" />
-					</NcTextField>
+				<div>
+					<div class="search-input__body" :style="{marginBottom: searchInputWarning !== '' ? '0px' : '10px'}">
+						<button id="einschlusskriterien" @click="toggleOntologySearchTreeModal('einschlusskriterien')">
+							<svg role="img"
+								aria-hidden="true"
+								focusable="false"
+								data-prefix="fas"
+								data-icon="folder"
+								class="svg-inline--fa fa-folder fa-w-16 fa-2x"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 512 512">
+								<path fill="currentColor"
+									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
+							</svg>
+						</button>
+						<NcTextField :value.sync="inclusionSearchInputText"
+							label="Code oder Suchbegriff eingeben"
+							trailing-button-icon="close"
+							placeholder=" "
+							:show-trailing-button="inclusionSearchInputText !== ''"
+							@trailing-button-click="closeOntologySearchTreeModal"
+							@focus="focusSearchInput('einschlusskriterien')">
+							<Magnify :size="20" />
+						</NcTextField>
+					</div>
+					<div v-if="inclusionSearchInputText !== '' && searchInputWarning !== ''" class="serach-input-warning">
+						{{ searchInputWarning }}
+					</div>
 				</div>
 			</div>
 			<div class="pipe" />
@@ -39,29 +44,34 @@
 				<div class="search-input__title">
 					Ausschlusskriterien
 				</div>
-				<div class="search-input__body">
-					<button id="ausschlusskriterien" @click="toggleOntologySearchTreeModal('ausschlusskriterien')">
-						<svg role="img"
-							aria-hidden="true"
-							focusable="false"
-							data-prefix="fas"
-							data-icon="folder"
-							class="svg-inline--fa fa-folder fa-w-16 fa-2x"
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 512 512">
-							<path fill="currentColor"
-								d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
-						</svg>
-					</button>
-					<NcTextField :value.sync="exclusionSearchInputText"
-						label="Code oder Suchbegriff eingeben"
-						trailing-button-icon="close"
-						placeholder=" "
-						:show-trailing-button="exclusionSearchInputText !== ''"
-						@trailing-button-click="closeOntologySearchTreeModal"
-						@focus="focusSearchInput('ausschlusskriterien')">
-						<Magnify :size="20" />
-					</NcTextField>
+				<div>
+					<div class="search-input__body" :style="{marginBottom: searchInputWarning !== '' ? '0px' : '10px'}">
+						<button id="ausschlusskriterien" @click="toggleOntologySearchTreeModal('ausschlusskriterien')">
+							<svg role="img"
+								aria-hidden="true"
+								focusable="false"
+								data-prefix="fas"
+								data-icon="folder"
+								class="svg-inline--fa fa-folder fa-w-16 fa-2x"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 512 512">
+								<path fill="currentColor"
+									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
+							</svg>
+						</button>
+						<NcTextField :value.sync="exclusionSearchInputText"
+							label="Code oder Suchbegriff eingeben"
+							trailing-button-icon="close"
+							placeholder=" "
+							:show-trailing-button="exclusionSearchInputText !== ''"
+							@trailing-button-click="closeOntologySearchTreeModal"
+							@focus="focusSearchInput('ausschlusskriterien')">
+							<Magnify :size="20" />
+						</NcTextField>
+					</div>
+					<div v-if="exclusionSearchInputText !== '' && searchInputWarning !== ''" class="serach-input-warning">
+						{{ searchInputWarning }}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -95,12 +105,12 @@ import Magnify from 'vue-material-design-icons/Magnify.vue'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
-import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
+import type { FeasibilityQueryBuilderData, SelectedCharacteristics, QueryCriterionData } from '../types/FeasibilityQueryBuilderData'
 import type { Criterion, Modules } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
-import type { QueryCriterionData } from './FeasibilityQueryDisplay.vue'
+
 import debounce from 'lodash.debounce'
 
 export default Vue.extend({
@@ -154,6 +164,7 @@ export default Vue.extend({
 			},
 			isStateEditFilter: false,
 			debouncedHandler: null,
+			searchInputWarning: '',
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
 	},
@@ -186,9 +197,14 @@ export default Vue.extend({
 
 		inclusionSearchInputText(newVal) {
 			this.searchInputText = newVal
-			if (newVal.length <= 0) {
+			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
+				this.searchInputWarning = ''
+			} else if (newVal.length < 2) {
+				this.isOntologySearchTreeOpen = false
+				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
 			} else {
+				this.searchInputWarning = ''
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'einschlusskriterien'
 					this.isOntologySearchTreeOpen = true
@@ -199,9 +215,14 @@ export default Vue.extend({
 
 		exclusionSearchInputText(newVal) {
 			this.searchInputText = this.exclusionSearchInputText
-			if (newVal.length <= 0) {
+			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
+				this.searchInputWarning = ''
+			} else if (newVal.length < 2) {
+				this.isOntologySearchTreeOpen = false
+				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
 			} else {
+				this.searchInputWarning = ''
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'ausschlusskriterien'
 					this.isOntologySearchTreeOpen = true
@@ -452,6 +473,12 @@ export default Vue.extend({
 .search-input__body .input-field {
 	max-width: 85%;
 	font-size: 15px;
+}
+
+.serach-input-warning {
+	display: flex;
+	padding-left: 15%;
+	color: red;
 }
 
 .pipe {

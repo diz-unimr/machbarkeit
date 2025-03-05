@@ -20,7 +20,7 @@
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
-										{{ characteristic.display }}
+										{{ characteristic.display }} <span v-if="characteristic.swlCode">({{ characteristic.swlCode }})</span>
 									</div>
 									<div v-if="characteristic.selectedFilter && isConceptType(characteristic.selectedFilter)" class="selected-criteria-condition">
 										<span v-for="(value, value_index) in characteristic.selectedFilter.valueFilter?.selectedConcepts" :key="value_index">
@@ -209,11 +209,6 @@ import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData.ts'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData.ts'
-
-export type QueryCriterionData = {
-			termCodes: Criterion['termCodes'];
-			context: Criterion['context'];
-		} & (ConceptType | QuantityType | TimeRangeType | undefined)
 
 export interface FeasibilityQueryDisplayData {
 	characteristicsLogic: {
