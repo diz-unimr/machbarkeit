@@ -23,14 +23,13 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import axios, { AxiosError, type AxiosResponse } from 'axios'
+import axios from 'axios'
 import transformObjectKeys from '../utils/transformObjectKeys'
 import type { QueryCriterionData, FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 import type { Criterion, Modules } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
-import lodash from 'lodash'
 
 export default Vue.extend({
 	name: 'FooterContent',
@@ -86,8 +85,8 @@ export default Vue.extend({
 					for (let itemIndex = 0; itemIndex < criteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
 						const id = criteria.inclusionCriteria[itemsIndex][itemIndex].id
 						const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id))
-						let ontology: Criterion = transformObjectKeys([response.data])[0]
-						
+						const ontology: Criterion = transformObjectKeys([response.data])[0]
+
 						const module = modules.find((module) => module.id === ontology.moduleId)
 						ontology.context = {
 							code: module!.fdpgCdsCode,
@@ -136,8 +135,8 @@ export default Vue.extend({
 					for (let itemIndex = 0; itemIndex < criteria.exclusionCriteria[itemsIndex].length; itemIndex++) {
 						const id = criteria.exclusionCriteria[itemsIndex][itemIndex].id
 						const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id))
-						let ontology: Criterion = transformObjectKeys([response.data])[0]
-						
+						const ontology: Criterion = transformObjectKeys([response.data])[0]
+
 						const module = modules.find((module) => module.id === ontology.moduleId)
 						ontology.context = {
 							code: module!.fdpgCdsCode,

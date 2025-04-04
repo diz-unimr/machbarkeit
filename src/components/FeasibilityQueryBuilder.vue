@@ -201,10 +201,7 @@ export default Vue.extend({
 			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
-			} /* else if (newVal.length < 2) {
-				this.isOntologySearchTreeOpen = false
-				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} */ else {
+			} else {
 				this.searchInputWarning = ''
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'einschlusskriterien'
@@ -219,10 +216,7 @@ export default Vue.extend({
 			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
-			}/* else if (newVal.length < 2) {
-				this.isOntologySearchTreeOpen = false
-				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} */ else {
+			} else {
 				this.searchInputWarning = ''
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'ausschlusskriterien'

@@ -16,16 +16,13 @@ header('Access-Control-Allow-Origin: *');
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper
-{
-	public function __construct(IDBConnection $db)
-	{
+class OntologyConceptMapper extends QBMapper {
+	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $module_id): array
-	{
+	public function find(int $module_id): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -34,8 +31,7 @@ class OntologyConceptMapper extends QBMapper
 		return $this->findEntities($qb);
 	}
 
-	public function findFromCode(string $code): array
-	{
+	public function findFromCode(string $code): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		/* $qb->select('*')
@@ -59,8 +55,7 @@ class OntologyConceptMapper extends QBMapper
 		/* return $this->findEntities($qb); */
 	}
 
-	public function findAll(int $module_id): array
-	{
+	public function findAll(int $module_id): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from('machbarkeit_concepts')
@@ -78,8 +73,7 @@ class OntologyConceptMapper extends QBMapper
 		return $result;
 	}
 
-	public function select_sql()
-	{
+	public function select_sql() {
 		$qb = $this->db->getQueryBuilder();
 		$module_id = 1;
 		$query = 'SELECT * from oc_accounts';
@@ -88,8 +82,7 @@ class OntologyConceptMapper extends QBMapper
 		return $result;
 	}
 
-	public function getOntologyTree(string $searchText, int $module_id): array
-	{
+	public function getOntologyTree(string $searchText, int $module_id): array {
 		$qb = $this->db->getQueryBuilder();
 		if ($searchText === '_null_') {
 			$qb->select('*')
@@ -115,8 +108,7 @@ class OntologyConceptMapper extends QBMapper
 		}
 	}
 
-	protected function findEntitiesWithRawQuery(string $query, array $params, array $types)
-	{
+	protected function findEntitiesWithRawQuery(string $query, array $params, array $types) {
 		try {
 			$cursor = $this->db->executeQuery($query, $params, $types);
 
@@ -136,8 +128,7 @@ class OntologyConceptMapper extends QBMapper
 	}
 }
 
-function mapTermCodes($entity)
-{
+function mapTermCodes($entity) {
 	$entity->termCodesArray = json_decode($entity->termCodes, true);
 	return $entity;
 }

@@ -47,12 +47,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { generateUrl } from '@nextcloud/router'
-import nextcloudAxios from '@nextcloud/axios'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
-// import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 import axios from 'axios'
 
@@ -130,7 +127,6 @@ export default Vue.extend({
 		},
 
 		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
-			console.log('startQuery', data)
 			this.isQeuryCompleted = false
 			this.numberOfPatients = null
 			const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',

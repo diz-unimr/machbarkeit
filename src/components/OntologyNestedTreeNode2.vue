@@ -14,16 +14,17 @@
 					</button>
 					<input v-if="criterion?.selectable"
 						:id="String(criterion?.id)"
-						v-model="isChecked"
+						:checked="isChecked"
 						:disabled="onlySwlCode"
 						type="checkbox"
-						:value="criterion?.display">
+						:value="criterion?.display"
+						@change="toggleCheckedbox">
 					<div class="search-tree-term-entry">
 						<div class="swl-wrapper" :style="{gap: swlCode ? '1.5%' : '0'}">
-							<p class="swl-code" @click="expandTreeNode">
+							<p class="swl-code" @click="state = !state">
 								{{ swlCode }}
 							</p>
-							<p class="swl-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
+							<p class="swl-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="state = !state">
 								{{ criterion?.display }}
 							</p>
 						</div>
@@ -31,16 +32,24 @@
 							(Die Suche nach SWL-Code wird momentan nicht unterstützt)
 						</p>
 					</div>
+
+					<!-- <div v-else-if="!criterion?.selectable" class="search-tree-term-entry">
+						<p class="swl-code">
+							HK
+						</p>
+						<p class="swl-desciption" @click="() => (state = !state)">
+							{{ criterion?.display }}
+						</p>
+					</div> -->
 				</div>
 				<ul v-show="state">
-					<template v-if="criterion.children">
+					<template v-if="criterion.children && criterion.children.length > 0">
 						<OntologyNestedTreeNode v-for="child in criterion.children"
 							:key="child.id"
 							:criterion="child"
-							:parent="criterion"
-							:parent-ids="[...parentIds, criterion.id]"
-							@input="checkboxTrigger"
-							@change="toggleParent(parent, isChecked)" />
+							:parent="criterion.selectable ? criterion : null"
+							:level="level + 1"
+							@change="checkboxTrigger" />
 					</template>
 				</ul>
 			</li>
@@ -51,6 +60,7 @@
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
 import type { Criterion } from '../types/OntologySearchTreeModalData'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 
 interface OntologyNestedTreeNodeData {
 	state: boolean;
@@ -75,11 +85,10 @@ export interface CheckedItem {
 	action: string;
 	node: Criterion;
 	loinc?: string;
-	parentIds?: string[];
 }
 
 export default Vue.extend({
-	name: 'OntologyNestedTreeNode',
+	name: 'OntologyNestedTreeNode2',
 	components: {},
 	props: {
 		criterion: {
@@ -90,9 +99,9 @@ export default Vue.extend({
 			type: Object as PropType<Criterion>,
 			default: null,
 		},
-		parentIds: {
-			type: Array as PropType<string[]>,
-			default: null,
+		level: {
+			type: Number,
+			required: true,
 		},
 	},
 
@@ -109,54 +118,52 @@ export default Vue.extend({
 	},
 
 	computed: {
-		isChecked: {
-			// Determines if the current item is checked
+		/* isChecked: {
 			get(): boolean {
+				console.log(this.$store.getters.getCheckedItems(this.criterion.id))
 				return this.$store.getters.getCheckedItems(this.criterion.id)
 			},
-			// Updates checked items when checkbox state changes
-			set(checked: boolean): void {
-				if (checked) {
-					this.$store.dispatch('addCheckedItem', { node: this.criterion, isChecked: checked })
-					// if parent is checked, check all children
-					if (this.criterion.children && this.criterion.children.length > 0) {
-						this.toggleChildren(this.criterion.children, checked)
-					}
-					// if all children are checked, check the parent
-					if (this.parent) {
-						this.toggleParent(this.parent, checked)
-					}
-					this.$emit('input', { action: 'check', node: this.criterion })
-				} else {
-					this.$store.dispatch('removeCheckedItem', { id: this.criterion.id, isChecked: checked })
-					// if parent is unchecked, uncheck all children
-					if (this.criterion.children && this.criterion.children.length > 0) {
-						this.criterion.children.forEach((child) => {
-							this.$emit('input', { action: 'uncheck', node: child, parentIds: this.parentIds })
-							this.$store.dispatch('removeCheckedItem', { id: child.id, isChecked: checked })
-						})
-					}
-					// if child is unchecked, uncheck the parent
-					if (this.parent) {
-						this.$emit('input', { action: 'uncheck', node: this.parent, parentIds: this.parentIds })
-						this.parentIds.forEach((parentId) => {
-							this.$store.dispatch('removeCheckedItem', { id: parentId, isChecked: checked })
-						})
-					}
-					this.$emit('input', { action: 'uncheck', node: this.criterion, parentIds: this.parentIds })
-				}
+		}, */
+
+		...mapGetters(['getCheckedItems']),
+		isChecked(): boolean {
+			// console.log('computed', this.criterion)
+			const isItemCheked = this.getCheckedItems(this.criterion.id)
+			return isItemCheked
+		},
+		/* isChecked: {
+			get() {
+				return (this as any).getCheckedItems(this.criterion.id)
+			},
+			set(value) {
+				this.toggleCheckedItem({
+				id: this.criterion.id,
+				isChecked: (event.target as HTMLInputElement).checked,
+				ownChildren: this.criterion.children,
+				ownParent: this.parent,
+			})
+			}
+		} */
+	},
+
+	watch: {
+		// watch for changes in the state if element is checked
+		isChecked: {
+			// immediate: true,
+			handler(newValue) {
+				console.log('watch', newValue, this.criterion)
+				this.state = newValue
+				// this.toggleChildren()
 			},
 		},
 	},
-
-	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.findSWL(this.criterion)
+		console.log('created', this.isChecked)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -166,43 +173,79 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
+		...mapMutations({
+			toggleCheckedItem: 'TOGGLE_CHECKED_ITEM',
+			toggleParent: 'TOGGLE_PARENT',
+			toggleChild: 'TOGGLE_CHILD',
+		}),
+		// ...mapActions({ toggleCheckedItem: 'TOGGLE_CHECKED_ITEM' }),
+
 		checkboxTrigger(checkedItem: CheckedItem): void {
-			this.$emit('input', checkedItem)
+			console.log('checkboxTrigger', checkedItem)
+			this.$emit('change', checkedItem)
 		},
 
+		toggleCheckedbox(event: Event): void {
+			console.log('toggleCheckedbox', this.criterion)
+			const isChecked = (event.target as HTMLInputElement).checked
+			console.log(isChecked)
+			// this.emitChange(isChecked, this.criterion, this.loinc)
+
+			this.toggleCheckedItem(this.criterion.id, isChecked)
+			// if criterion is parent and has children
+			if (this.criterion.children && this.criterion.children.length > 0) {
+				this.toggleChildren(this.criterion.children, isChecked)
+			}
+			if (this.parent) {
+				this.toggleParent()
+			}
+
+		},
 		toggleChildren(children: Criterion[], isChecked: boolean): void {
 			children.forEach((child: Criterion) => {
-				this.$store.dispatch('addCheckedItem', { node: child, isChecked })
-				if (child.children && child.children.length > 0) {
-					this.toggleChildren(child.children, isChecked)
-				}
+				this.toggleCheckedItem(this.criterion.id, isChecked)
+				this.toggleChild(child.id)
 			})
 		},
 
-		toggleParent(parent: Criterion, isChecked: boolean): void {
-			if (this.parent && this.parent.selectable) {
-				const children = new Set(parent.children)
-				const checkedItemId = new Set(this.$store.state.checkedItems.map((checkedItem: Criterion) => checkedItem.id))
-				const allChildrenChecked = [...children].every(child => checkedItemId.has(child.id))
+		toggleParent(): void {
+			console.log('toggleParent', this.criterion)
+		},
 
-				if (allChildrenChecked) {
-					this.$store.dispatch('addCheckedItem', { node: this.parent, isChecked })
-					this.$emit('change') // go back to upper parent level
-					this.$emit('input', { action: 'check', node: parent })
-				}
+		handleChildChange(checkedItem: CheckedItem): void {
+			this.emitChange(checkedItem)
+
+			// if criterion is child and has parent
+			if (this.parent) {
+				console.log('parent', this.parent)
+				this.toggleParent()
 			}
+			// if criterion is parent and has children
+			if (this.criterion.children && this.criterion.children.length > 0) {
+				console.log('children', this.criterion.children)
+				this.criterion.children.forEach((child: Criterion) => {
+					// action = (event.target as HTMLInputElement).checked ? 'uncheck' : 'check'
+					// this.emitChange(action, child, this.loinc)
+				})
+				this.toggleChildren()
+
+			}
+
+			/* this.$emit('change', {
+				action: (event.target as HTMLInputElement).checked ? 'check' : 'uncheck',
+				node: this.criterion,
+				loinc: this.loinc,
+			}) */
+			this.toggleCheckedItem(this.criterion.id)
 		},
 
-		expandTreeNode(): void {
-			this.state = !this.state
-		},
-
-		findSWL(criterion: Criterion): void {
-			const onlySwlCode = criterion.termCodes?.every((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
-			// const loinc = criterion.termCodes?.find((termCode) => termCode.system === 'http://loinc.org' || termCode.system === 'http://snomed.info/sct')
-			const swlcode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
-			this.onlySwlCode = onlySwlCode
-			this.swlCode = swlcode?.code ?? undefined
+		emitChange(action: string, child: Criterion, loinc: string): void {
+			console.log('emitChange')
+			this.$emit('change', {
+				action,
+				node: child,
+				loinc,
+			})
 		},
 	},
 })
