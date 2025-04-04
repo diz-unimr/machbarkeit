@@ -101,7 +101,7 @@ export default Vue.extend({
 						? 'between'
 						: 'no filter'),
 				unit: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.unit
-					?? this.selectedCriterion.filterOptions[0],
+					?? this.selectedCriterion.filterOptions![0],
 				value: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.value
 					?? 0,
 				minValue: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.minValue
@@ -150,7 +150,7 @@ export default Vue.extend({
 		isResetDisabled() {
 			if (this.isResetDisabled && this.selectedValue.comparator !== 'no filter') {
 				this.selectedValue.comparator = 'no filter'
-				this.selectedValue.unit = this.selectedCriterion.filterOptions[0]
+				this.selectedValue.unit = this.selectedCriterion.filterOptions![0]
 				this.selectedValue.value = 0
 				this.selectedValue.minValue = 0
 				this.selectedValue.maxValue = 0
@@ -181,7 +181,7 @@ export default Vue.extend({
 
 	methods: {
 		getQuantityOption() {
-			this.selectedValue.unit = (this.selectedCriterion.selectedFilter as QuantityType).valueFilter?.unit ?? this.selectedCriterion.filterOptions[0]
+			this.selectedValue.unit = (this.selectedCriterion.selectedFilter as QuantityType).valueFilter?.unit ?? this.selectedCriterion.filterOptions![0]
 			this.selectedValue.comparator = (this.selectedCriterion.selectedFilter as QuantityType).valueFilter?.comparator ?? 'no filter'
 		},
 

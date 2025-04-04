@@ -36,10 +36,12 @@ return [
 		// ontology tree
 		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{textSearch}/{module_id}', 'verb' => 'GET'],
 		// find ontology from termCodes
-		['name' => 'machbarkeit#findOntology', 'url' => '/machbarkeit/findOntology/{code}', 'verb' => 'GET'],
+		['name' => 'machbarkeit#findOntology', 'url' => '/machbarkeit/findOntologyFromUploadFile/{code}', 'verb' => 'GET'],
 		// get all filters
 		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters/{filter_options_ids}', 'verb' => 'GET'],
 		// get filters (for concepts)
-		['name' => 'machbarkeit#getRequest', 'url' => '/machbarkeit/get_request', 'verb' => 'POST']
+		['name' => 'machbarkeit#getRequest', 'url' => '/machbarkeit/get_request', 'verb' => 'POST'],
+
+		['name' => 'machbarkeit#selectSql', 'url' => '/machbarkeit/select_sql', 'verb' => 'GET'],
 	]
 ];

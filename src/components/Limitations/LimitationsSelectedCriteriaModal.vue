@@ -126,10 +126,10 @@ export default Vue.extend({
 <style scoped>
 @media (max-width: 1300px) {
 	.limitations-dialog-container {
-		top: -55%;
+		top: -45%;
 	}
 	.limitations-dialog {
-		max-height: 480px;
+		max-height: 550px;
 	}
 }
 

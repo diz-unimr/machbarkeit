@@ -7,10 +7,10 @@ import type { QuantityType } from '../types/QuantityOptionsData.ts'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 
 export interface Criterion {
-    children?: Array<Criterion> | undefined;
-    id: number;
-    moduleId: number;
-    parentId: number | null;
+    children: Array<Criterion>;
+    id: string;
+    moduleId: string;
+    parentId: string | null;
     display: string;
     termCodes: {
         code: string;
@@ -18,42 +18,34 @@ export interface Criterion {
         display: string;
         version: string;
     }[],
-    context: {
+    context?: {
         code: string;
         system: string;
         version: string;
         display: string;
     };
-    code: string;
-    codeSystem: string;
-    swlCode: string | undefined;
+    loinc?: string;
     selectable: boolean;
     leaf: boolean;
-    timeRestrictionAllowed: boolean | undefined;
-    filterName: string;
-    filterType: string;
+    timeRestrictionAllowed?: boolean | null;
+    filterName?: string;
+    filterType: string | null;
     filterOptions: {
         code: string;
         display: string;
-        system: string | undefined;
-        version: string | undefined;
-    }[];
+        system?: string;
+        version?: string;
+    }[] | null;
     selectedFilter?: ConceptType | QuantityType | TimeRangeType;
 }
 
 export interface Modules {
-    id: number;
-    moduleName: string;
-    version: string;
-
-    /*
     id: string;
-    kds_module_name: string;
-    fdpg_kds_code: string;
-    fdpg_kds_system: string;
-    fdpg_kds_version: string:
+    name: string;
+    fdpgCdsCode: string;
+    fdpgCdsSystem: string;
+    fdpgCdsVersion: string;
     version: string;
-    */
 }
 
 export interface OntologyTree {
@@ -66,10 +58,12 @@ export interface OntologyTree {
 }
 
 export interface OntologySearchTreeModalData {
-	activeTab: number;
+	activeTab?: string;
     wasTabClicked: Array<boolean>;
 	ontologyResponse: Criterion[] | null;
+    requestStatus?: number;
 	selectedItems: Criterion[];
+    selectedItems2: Set<Criterion>;
     isSearchResultNoData: Array<boolean>;
     modules: Modules[] | null;
     ontologyTree: Criterion[] | null;
@@ -80,4 +74,5 @@ export interface OntologySearchTreeModalData {
         version: string;
         display: string;
     } | null;
+    isCheckboxChecked: boolean;
 }

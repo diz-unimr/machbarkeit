@@ -37,9 +37,12 @@ export default Vue.extend({
 	created() {
 		const root = document.getElementsByTagName('html')[0]
 		root.setAttribute('class', 'webkit chrome win js')
+		document.body.classList.add('light-mode')
 	},
 	beforeMount() {},
-	mounted() {},
+	mounted() {
+		document.documentElement.setAttribute('data-theme', 'light')
+	},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
@@ -50,9 +53,27 @@ export default Vue.extend({
 </script>
 
 <style>
+/* force ui in dark mode as light mode */
+/* :root {
+	--color-main-background: #ffffff !important;
+	--color-main-text: #222222 !important;
+	--color-background-dark: #ededed !important;
+	--color-background-light: #ffffff !important;
+	--color-border-dark: #dbdbdb !important;
+	--icon-triangle-s-dark: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZlcnNpb249IjEuMSIgdmlld2JveD0iMCAwIDE2IDE2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00IDYgNCA0IDQtMy45OTR6IiBmaWxsPSIjMDAwMDAwIi8+PC9zdmc+Cg==) !important;
+} */
+
 html body {
-	font-size: 16px;
+	font-size: 16px !important;
 }
+
+button {
+	font-size: 16px !important;
+}
+
+/* select {
+	background: ;
+} */
 
 .machbarkeit {
 	display: flex;

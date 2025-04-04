@@ -20,7 +20,7 @@
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
-										{{ characteristic.display }} <span v-if="characteristic.swlCode">({{ characteristic.swlCode }})</span>
+										{{ characteristic.display }} <span v-if="characteristic.loinc">({{ characteristic.loinc }})</span>
 									</div>
 									<div v-if="characteristic.selectedFilter && isConceptType(characteristic.selectedFilter)" class="selected-criteria-condition">
 										<span v-for="(value, value_index) in characteristic.selectedFilter.valueFilter?.selectedConcepts" :key="value_index">

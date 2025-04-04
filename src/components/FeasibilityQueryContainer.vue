@@ -54,6 +54,7 @@ import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 // import type { FeasibilityQueryDisplayData } from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
+import axios from 'axios'
 
 interface FeasibilityQueryContainerData {
 	queryData: FeasibilityQueryBuilderData['queryData'] | null;
@@ -129,15 +130,17 @@ export default Vue.extend({
 		},
 
 		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
+			console.log('startQuery', data)
 			this.isQeuryCompleted = false
 			this.numberOfPatients = null
-			const response = await nextcloudAxios.post(generateUrl('/apps/machbarkeit/machbarkeit/get_request'),
-				{ criteria: JSON.stringify(data) },
+			const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',
+				JSON.stringify(data),
 				{
 					headers: {
 						'Content-Type': 'application/json',
 					},
-				})
+				},
+			)
 			const status = JSON.parse(response.data)
 			this.errorMessage = status.error ? 'Found some error!' : null
 			this.numberOfPatients = response.data

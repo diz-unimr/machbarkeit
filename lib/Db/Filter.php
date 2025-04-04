@@ -10,17 +10,19 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
-class Filter extends Entity implements JsonSerializable {
-	public ?string $filterName = null;
+class Filter extends Entity implements JsonSerializable
+{
+	public ?string $filter_name = null;
 	public ?string $type = null;
-	public string $filterOptions = '';
+	public string $filter_options = '';
 
-	public function jsonSerialize(): array {
+	public function jsonSerialize(): array
+	{
 		return [
 			'id' => $this->id,
-			'filterName' => $this->filterName,
+			'filter_name' => $this->filter_name,
 			'type' => $this->type,
-			'filterOptions' => $this->filterOptions,
+			'filter_options' => $this->filter_options,
 		];
 	}
 }

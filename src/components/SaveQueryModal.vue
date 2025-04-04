@@ -73,7 +73,11 @@ export default Vue.extend({
 
 	methods: {
 		saveQuery(data: FeasibilityQueryBuilderData['queryData'], fileName: string) {
-			data && download(JSON.stringify(data, null, 2), fileName + '.json', 'application/json')
+			// utf-8 encoder
+			const encoder = new TextEncoder()
+			const jsonString = JSON.stringify(data, null, 2)
+			const utf8JsonData = encoder.encode(jsonString)
+			data && download(utf8JsonData, fileName + '.json', 'application/json')
 			this.$emit('close-save-modal')
 		},
 	},

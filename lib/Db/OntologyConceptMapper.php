@@ -16,35 +16,55 @@ header('Access-Control-Allow-Origin: *');
 /**
  * @template-extends QBMapper<OntologyConcept>
  */
-class OntologyConceptMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
+class OntologyConceptMapper extends QBMapper
+{
+	public function __construct(IDBConnection $db)
+	{
 		parent::__construct($db, 'machbarkeit_concepts', OntologyConcept::class);
 	}
 
 
-	public function find(int $moduleId): array {
+	public function find(int $module_id): array
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from('machbarkeit_concepts')
-			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)));
+			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($module_id, IQueryBuilder::PARAM_INT)));
 		return $this->findEntities($qb);
 	}
 
-	public function findFromCode(string $code): array {
+	public function findFromCode(string $code): array
+	{
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
+		/* $qb->select('*')
 			->from('machbarkeit_concepts')
 			->where($qb->expr()->eq('code', $qb->createNamedParameter($code, IQueryBuilder::PARAM_STR)));
-		return $this->findEntities($qb);
+		$qb->select('*')
+			->from('machbarkeit_concepts')
+			->where('termCodes @> :code')  // PostgreSQL JSONB contains operator
+			->setParameter('code', json_encode([["code" => "asd"]], JSON_UNESCAPED_UNICODE)); */
+
+		$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
+			"WHERE jsonb_typeof(c.termCodes) = 'array'
+			AND EXISTS (
+				SELECT 1
+				FROM jsonb_array_elements(c.termCodes) AS elem
+				WHERE elem->>'code' = :code
+			)";
+		$param = ['code' => $code];
+		$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
+		return $result;
+		/* return $this->findEntities($qb); */
 	}
 
-	public function findAll(int $moduleId): array {
+	public function findAll(int $module_id): array
+	{
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from('machbarkeit_concepts')
-			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)))
+			->where($qb->expr()->eq('module_id', $qb->createNamedParameter($module_id, IQueryBuilder::PARAM_INT)))
 			->andWhere($qb->expr()->isNull('parent_id'));
 		// or 'where id = [id]' for sub tree
 		$ontology = 'WITH RECURSIVE ontology AS ( ' . $qb->getSQL() .
@@ -58,12 +78,23 @@ class OntologyConceptMapper extends QBMapper {
 		return $result;
 	}
 
-	public function getOntologyTree(string $searchText, int $moduleId): array {
+	public function select_sql()
+	{
+		$qb = $this->db->getQueryBuilder();
+		$module_id = 1;
+		$query = 'SELECT * from oc_accounts';
+		$param = ['module_id' => $module_id];
+		$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
+		return $result;
+	}
+
+	public function getOntologyTree(string $searchText, int $module_id): array
+	{
 		$qb = $this->db->getQueryBuilder();
 		if ($searchText === '_null_') {
 			$qb->select('*')
 				->from('machbarkeit_concepts')
-				->where($qb->expr()->eq('module_id', $qb->createNamedParameter($moduleId, IQueryBuilder::PARAM_INT)))
+				->where($qb->expr()->eq('module_id', $qb->createNamedParameter($module_id, IQueryBuilder::PARAM_INT)))
 				->andWhere($qb->expr()->isNull('parent_id'));
 			$ontology = 'WITH RECURSIVE ontology AS ( ' . $qb->getSQL() .
 				'UNION ALL SELECT c.* FROM oc_machbarkeit_concepts c ' .
@@ -73,18 +104,19 @@ class OntologyConceptMapper extends QBMapper {
 			return $result;
 		} else {
 			$query = 'SELECT c.* from oc_machbarkeit_concepts c ' .
-				'WHERE c.module_id = :moduleId 
+				'WHERE c.module_id = :module_id 
 					AND (lower(c.display) LIKE :searchText 
-						OR jsonb_path_exists(c.term_codes::jsonb, CAST(:jsonPath AS jsonpath))
+						OR jsonb_path_exists(c.termCodes::jsonb, CAST(:jsonPath AS jsonpath))
 					) 
 					AND c.selectable = true';
-			$param = ['moduleId' => $moduleId, 'searchText' => '%' . strtolower($searchText) . '%', 'jsonPath' => '$[*] ? (@.code like_regex ".*' . $searchText . '.*")'];
+			$param = ['module_id' => $module_id, 'searchText' => '%' . strtolower($searchText) . '%', 'jsonPath' => '$[*] ? (@.code like_regex ".*' . $searchText . '.*")'];
 			$result = $this->findEntitiesWithRawQuery($query, $param, $qb->getParameterTypes());
 			return $result;
 		}
 	}
 
-	protected function findEntitiesWithRawQuery(string $query, array $params, array $types) {
+	protected function findEntitiesWithRawQuery(string $query, array $params, array $types)
+	{
 		try {
 			$cursor = $this->db->executeQuery($query, $params, $types);
 
@@ -104,7 +136,8 @@ class OntologyConceptMapper extends QBMapper {
 	}
 }
 
-function mapTermCodes($entity) {
+function mapTermCodes($entity)
+{
 	$entity->termCodesArray = json_decode($entity->termCodes, true);
 	return $entity;
 }

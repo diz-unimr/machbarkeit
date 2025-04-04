@@ -9,24 +9,52 @@ Vue.use(Vuex)
 
 export default new Store({
 	state: {
-		checkedItems: [], // Store checked state of items by their IDs
+		checkedItems: [], // new Map() // new Set()
 	},
+
 	mutations: {
 		ADD_CHECKED_ITEM(state, item) {
-			if (!state.checkedItems.some(obj => obj.id === item.id)) {
-				state.checkedItems.push(item)
+			// Array
+			if (!state.checkedItems.some(obj => obj.id === item.node.id)) {
+				state.checkedItems.push(item.node)
 			}
+
+			/* // Map()
+			const updatedCheckedItems1 = new Map(state.checkedParents) // Create a new Set instance
+			if (item.isChecked && !updatedCheckedItems1.has(item.node.id)) {
+				updatedCheckedItems1.set(item.node.id, item.node)
+			}
+			state.checkedParents = updatedCheckedItems1 // Replace the old Set with a new one
+
+			// Set()
+			const updatedCheckedItems = new Set(state.checkedItems) // Create a new Set instance
+			if (item.isChecked && !updatedCheckedItems.has(item.node.id)) {
+				updatedCheckedItems.add(item.node.id)
+			}
+			state.checkedItems = updatedCheckedItems // Replace the old Set with a new one */
 		},
 
 		REMOVE_CHECKED_ITEM(state, item) {
-			state.checkedItems = state.checkedItems.filter(obj => obj.id !== item.id)
+			// Array
+			state.checkedItems = state.checkedItems.filter(obj => {
+				return obj.id !== item.id
+			})
+
+			/* // Set()
+			const updatedCheckedItems = new Set(state.checkedItems) // Create a new Set instance
+			if (!item.isChecked && updatedCheckedItems.has(item.id)) {
+				updatedCheckedItems.delete(item.id)
+			}
+			state.checkedItems = updatedCheckedItems // Replace the old Set with a new one */
 		},
 
 		CLEAR_CHECKED_ITEM(state) {
 			state.checkedItems = []
+			// state.checkedItems = new Set() // Clear the checked items
+			state.checkedParents = new Map() // Clear the checked items
 		},
-
 	},
+
 	actions: {
 		addCheckedItem({ commit }, item) {
 			commit('ADD_CHECKED_ITEM', item)
@@ -41,8 +69,10 @@ export default new Store({
 		},
 
 	},
+
 	getters: {
-		checkedItems: (state) => (id) => {
+		getCheckedItems: (state) => (id) => {
+			// return state.checkedItems.has(id)
 			return state.checkedItems.some(item => item.id === id)
 		},
 	},

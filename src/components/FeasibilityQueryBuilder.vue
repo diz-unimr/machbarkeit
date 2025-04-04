@@ -34,7 +34,7 @@
 							<Magnify :size="20" />
 						</NcTextField>
 					</div>
-					<div v-if="inclusionSearchInputText !== '' && searchInputWarning !== ''" class="serach-input-warning">
+					<div v-if="inclusionSearchInputText !== '' && searchInputWarning !== ''" class="search-input-warning">
 						{{ searchInputWarning }}
 					</div>
 				</div>
@@ -69,7 +69,7 @@
 							<Magnify :size="20" />
 						</NcTextField>
 					</div>
-					<div v-if="exclusionSearchInputText !== '' && searchInputWarning !== ''" class="serach-input-warning">
+					<div v-if="exclusionSearchInputText !== '' && searchInputWarning !== ''" class="search-input-warning">
 						{{ searchInputWarning }}
 					</div>
 				</div>
@@ -81,6 +81,7 @@
 			:search-input-text="searchInputText"
 			@get-selected-criteria="getSelectedCriteria"
 			@update-modules="HandleModules"
+			@get-request-status="getRequestStatus"
 			@toggle-ontology-search-tree-modal="toggleOntologySearchTreeModal" />
 
 		<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
@@ -200,10 +201,10 @@ export default Vue.extend({
 			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
-			} else if (newVal.length < 2) {
+			} /* else if (newVal.length < 2) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else {
+			} */ else {
 				this.searchInputWarning = ''
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'einschlusskriterien'
@@ -218,10 +219,10 @@ export default Vue.extend({
 			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
-			} else if (newVal.length < 2) {
+			}/* else if (newVal.length < 2) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else {
+			} */ else {
 				this.searchInputWarning = ''
 				this.debouncedHandler = debounce(() => {
 					this.criteriaOverlayType = 'ausschlusskriterien'
@@ -273,6 +274,17 @@ export default Vue.extend({
 
 		HandleModules(modules: Array<Modules>): void {
 			this.modules = modules
+		},
+
+		getRequestStatus(status: number, message: string | undefined): void {
+			if (status === 200) {
+				this.searchInputWarning = ''
+			} else if (status === 400) {
+				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
+			} else if (status === 500) {
+				this.searchInputWarning = ''
+				alert(message)
+			}
 		},
 
 		getSelectedCriteria(criteriaType: string, items: Criterion[]): void {
@@ -355,16 +367,17 @@ export default Vue.extend({
 			if (selectedIncludeCriteria.characteristics.length > 0) {
 				let tempIndex = 0
 				for (let i = 0; i < selectedIncludeCriteria.characteristics.length; i++) {
-					// const module = this.modules?.find(module => module.id === selectedIncludeCriteria.characteristics[i].moduleId)
+					const module = this.modules?.find(module => module.id === selectedIncludeCriteria.characteristics[i].moduleId)
 					const selectedCharacteristic = {
+						id: selectedIncludeCriteria.characteristics[i].id,
 						termCodes: selectedIncludeCriteria.characteristics[i].termCodes,
-						context: selectedIncludeCriteria.characteristics[i].context,
-						/* context: {
-							code: module?.fdpg_kds_cod,
-							display: module?.kds_module_name,
-							system: fdpg_kds_system,
-							version: fdpg_kds_version,
-						}, */
+						// context: selectedIncludeCriteria.characteristics[i].context,
+						context: {
+							code: module?.fdpgCdsCode,
+							display: module?.name,
+							system: module?.fdpgCdsSystem,
+							version: module?.fdpgCdsVersion,
+						},
 						...(selectedIncludeCriteria.characteristics[i].selectedFilter || {}),
 					} as QueryCriterionData
 
@@ -384,11 +397,18 @@ export default Vue.extend({
 
 			if (selectedExcludeCriteria.characteristics.length > 0) {
 				let tempIndex = 0
-
 				for (let i = 0; i < selectedExcludeCriteria.characteristics.length; i++) {
+					const module = this.modules?.find(module => module.id === selectedExcludeCriteria.characteristics[i].moduleId)
 					const selectedCharacteristic = {
+						id: selectedExcludeCriteria.characteristics[i].id,
 						termCodes: selectedExcludeCriteria.characteristics[i].termCodes,
-						context: selectedExcludeCriteria.characteristics[i].context,
+						// context: selectedExcludeCriteria.characteristics[i].context,
+						context: {
+							code: module?.fdpgCdsCode,
+							display: module?.name,
+							system: module?.fdpgCdsSystem,
+							version: module?.fdpgCdsVersion,
+						},
 						...(selectedExcludeCriteria.characteristics[i].selectedFilter || {}),
 					} as QueryCriterionData
 					if (i === 0) {
@@ -475,9 +495,10 @@ export default Vue.extend({
 	font-size: 15px;
 }
 
-.serach-input-warning {
+.search-input-warning {
 	display: flex;
 	padding-left: 15%;
+	font-size: 14px;
 	color: red;
 }
 

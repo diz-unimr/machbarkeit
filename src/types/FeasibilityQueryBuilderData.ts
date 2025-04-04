@@ -13,6 +13,7 @@ export interface SelectedCharacteristics {
 }
 
 export type QueryCriterionData = {
+    id: Criterion['id'];
     termCodes: Criterion['termCodes'];
     context: Criterion['context'];
 } & (ConceptType | QuantityType | TimeRangeType | undefined)

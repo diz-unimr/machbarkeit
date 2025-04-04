@@ -10,7 +10,7 @@
 					<img :src="imgExpand"
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
 				</button>
-				<p>{{ filterName }} </p>
+				<p>{{ filterName }}</p>
 			</div>
 			<div class="filter-card__button--reset">
 				<button :disabled="isResetDisabled" @click="reset">

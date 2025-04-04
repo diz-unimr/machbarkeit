@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div class="ontology-search-tree-container">
+	<div v-if="requestStatus === 200" class="ontology-search-tree-container">
 		<div :class="['ontology-search-tree-wrapper', { 'ausschlusskriterien-overlay': criteriaType === 'ausschlusskriterien'}]">
 			<div class="criteria-type">
 				{{ criteriaType }}
@@ -15,22 +15,22 @@
 						<button v-for="(module) in modules"
 							:key="module.id"
 							:class="['ontology-tab', { 'active': activeTab === module.id }]"
-							@click="activeTab = module.id">
-							{{ module.moduleName }}
+							@click="activateTab(module.id)">
+							{{ module.name }}
 						</button>
 					</div>
 				</div>
-
 				<div v-if="ontologyTree" class="ontology-search-tree__display">
 					<div v-if="ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab">
 						<div class="ontology-search-tree__body">
-							<div class="module_name">
-								{{ modules.filter(module => module.id === activeTab)[0].moduleName }}
+							<div class="module-name">
+								{{ modules.filter(module => module.id === activeTab)[0].name }}
 							</div>
 							<template v-if="searchInputText.length <= 0">
 								<OntologyNestedTreeNode v-for="criterion in ontologyTree"
 									:key="criterion.id"
 									:criterion="criterion"
+									:parent-ids="[criterion.id]"
 									@input="getCheckboxItems" />
 							</template>
 
@@ -40,6 +40,7 @@
 									class="ontology-tree-node"
 									:criterion="criterion"
 									:search-input-text="searchInputText"
+									:level="0"
 									@input="getCheckboxItems" />
 							</template>
 						</div>
@@ -68,12 +69,13 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { generateUrl } from '@nextcloud/router'
-import nextcloudAxios from '@nextcloud/axios'
+import transformObjectKeys from '../utils/transformObjectKeys'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
 import type { OntologySearchTreeModalData, Modules, Criterion } from '../types/OntologySearchTreeModalData.ts'
 import type { CheckedItem } from './OntologyNestedTreeNode.vue'
+import lodash from 'lodash'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
 
 export default Vue.extend({
 	name: 'OntologySearchTreeModal',
@@ -98,31 +100,40 @@ export default Vue.extend({
 
 	data(): OntologySearchTreeModalData {
 		return {
-			activeTab: 1,
+			activeTab: undefined,
 			wasTabClicked: [],
 			ontologyResponse: null,
+			requestStatus: undefined,
 			selectedItems: [],
+			selectedItems2: new Set(),
 			isSearchResultNoData: [],
 			modules: null,
 			ontologyTree: null,
 			ontologyTreeSearch: [],
 			context: null,
+			isCheckboxChecked: false,
 		}
 	},
+
+	computed: {},
 
 	watch: {
 		searchInputText: {
 			async handler() {
-				if (this.searchInputText.length > 0) {
+				this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
+				/* if (this.searchInputText.length > 1) {
 					this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
-				}
+				} */
+
 			},
-			immediate: true,
 		},
 
 		activeTab: {
-			async handler() {
-				this.searchInputText ? await this.getOntology(this.activeTab!, this.searchInputText) : await this.getOntology(this.activeTab!)
+			handler() {
+				if (this.activeTab) {
+					this.activateTab(this.activeTab)
+				}
+				// this.searchInputText ? await this.getOntology(this.activeTab!, this.searchInputText) : await this.getOntology(this.activeTab!)
 			},
 		},
 	},
@@ -132,13 +143,10 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	async created() {
+		// get Modules and set activeTab
 		if (JSON.parse(localStorage.getItem('moduleName')!)) {
 			this.modules = JSON.parse(localStorage.getItem('moduleName')!)
 		} else await this.getModules()
-
-		if (this.searchInputText.length <= 0) {
-			await this.getOntology(1)
-		}
 	},
 	beforeMount() {},
 	mounted() {},
@@ -148,10 +156,25 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
+		activateTab(moduleId: string): void {
+			this.activeTab = moduleId
+			if (this.searchInputText === '') {
+				this.getOntology(moduleId)
+			} else if (this.searchInputText.length > 1) {
+				this.getOntology(moduleId, this.searchInputText)
+			}
+		},
+
 		async getModules(): Promise<void> {
 			try {
-				const response: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
+				// const response: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
+				const apiResponse = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
+				// Convert object keys to camelCase using lodash
+				const response: Modules[] = apiResponse.data.map(obj =>
+					lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)),
+				)
 				this.modules = response
+				this.activateTab(response[0].id)
 				this.$emit('update-modules', this.modules)
 				// localStorage.setItem('moduleName', JSON.stringify(this.modules))
 			} catch (error) {
@@ -160,16 +183,57 @@ export default Vue.extend({
 			}
 		},
 
-		async getOntology(moduleId: number, searchText: string = '_null_'): Promise<Criterion[] | null> {
+		async getOntology(moduleId: string, searchText: string = '_null_'): Promise<Criterion[] | null> {
 			// Code oder Suchbegriff wurde eingegeben
-			const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/ontology/' + searchText + '/' + moduleId))
-			this.ontologyTree = response ? response.data : []
-			this.ontologyTreeSearch[moduleId] = response ? response.data : []
-			return this.ontologyTree
+			let apiResponse: AxiosResponse
+			try {
+				if (searchText.length > 0 && searchText !== '_null_') {
+					apiResponse = await axios.post('https://mdr.diz.uni-marburg.de/api/ontology/concepts/search',
+						{
+							module_id: moduleId,
+							search_term: searchText,
+						},
+						{
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						},
+					)
+				} else {
+					apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + moduleId)
+				}
+
+				// Convert object keys to camelCase using lodash
+				const response = transformObjectKeys(apiResponse.data)
+
+				this.ontologyTree = response
+				localStorage.setItem('moduleId', JSON.stringify(this.ontologyTree))
+				this.ontologyTreeSearch[moduleId] = response || [] // problem mit moduleId und index
+
+				this.requestStatus = apiResponse.status as number
+				this.$emit('get-request-status', this.requestStatus)
+				return this.ontologyTree
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+				this.requestStatus = (error as AxiosError).status as number
+				this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
+				return null
+			}
 		},
 
+		/* tranformObjectKeys(data: Criterion[]): Criterion[] {
+			const response: Criterion[]  = data.map((obj: Criterion) => {
+				let transformedObj = lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)) as unknown as Criterion
+				if (transformedObj.children) {
+					transformedObj.children = this.tranformObjectKeys(transformedObj.children)
+				}
+				return transformedObj
+			})
+			return response
+		}, */
+
 		getCheckboxItems(checkedItem: CheckedItem): void {
-			checkedItem.node.swlCode = checkedItem.swlCode
 			if (checkedItem.action === 'check') {
 				this.selectedItems = [...this.selectedItems, checkedItem.node]
 			} else if (checkedItem.action === 'uncheck') {
@@ -292,11 +356,12 @@ export default Vue.extend({
 }
 
 .ontology-search-tree__body {
+	max-height: 620px;
 	overflow-y: auto;
 	margin: 30px 25px 20px 30px;
 }
 
-.module_name {
+.module-name {
 	font-size: 18px;
 	font-weight: bold;
 	margin-bottom: 20px;

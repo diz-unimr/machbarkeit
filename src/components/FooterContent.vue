@@ -23,14 +23,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { generateUrl } from '@nextcloud/router'
-import nextcloudAxios from '@nextcloud/axios'
-import type { QueryCriterionData } from './FeasibilityQueryDisplay.vue'
-import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
-import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
+import transformObjectKeys from '../utils/transformObjectKeys'
+import type { QueryCriterionData, FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
+import type { Criterion, Modules } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
+import lodash from 'lodash'
 
 export default Vue.extend({
 	name: 'FooterContent',
@@ -50,7 +50,7 @@ export default Vue.extend({
 				reader.onload = async (e) => {
 					try {
 						const uploadedCriteria: FeasibilityQueryBuilderData['queryData'] = JSON.parse(e.target?.result as string)
-						const isJsonDataValid = (uploadedCriteria.inclusionCriteria && uploadedCriteria.inclusionCriteria?.length > 0) || (uploadedCriteria.exclusionCriteria && uploadedCriteria.exclusionCriteria?.length > 0)
+						const isJsonDataValid = (uploadedCriteria.inclusionCriteria && uploadedCriteria.inclusionCriteria!.length > 0) || (uploadedCriteria.exclusionCriteria && uploadedCriteria.exclusionCriteria!.length > 0)
 						if (isJsonDataValid) {
 							await this.getCriteriaInfo(uploadedCriteria)
 							this.$emit('get-query-data', uploadedCriteria)
@@ -75,17 +75,26 @@ export default Vue.extend({
 				characteristics: [],
 				logic: [],
 			}
+
+			const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
+			const modules: Modules[] = transformObjectKeys(response.data)
+
 			if (criteria.inclusionCriteria) {
 				let tempIndex = 0
 				for (let itemsIndex = 0; itemsIndex < criteria.inclusionCriteria.length; itemsIndex++) {
 					itemsIndex !== 0 && inclusionCharacteristics.logic.push('and')
 					for (let itemIndex = 0; itemIndex < criteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
-						const code = criteria.inclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
-						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntologyFromUploadFile/' + code))
-						const ontology: Criterion = response.data[0]
-						ontology.context = JSON.parse(response.data[0].context)
-						ontology.termCodes = JSON.parse(response.data[0].termCodes)
-						ontology.filterOptions = JSON.parse(response.data[0].filterOptions)
+						const id = criteria.inclusionCriteria[itemsIndex][itemIndex].id
+						const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id))
+						let ontology: Criterion = transformObjectKeys([response.data])[0]
+						
+						const module = modules.find((module) => module.id === ontology.moduleId)
+						ontology.context = {
+							code: module!.fdpgCdsCode,
+							display: module!.name,
+							system: module!.fdpgCdsSystem,
+							version: module!.fdpgCdsVersion,
+						}
 
 						inclusionCharacteristics.characteristics.push(ontology)
 
@@ -125,12 +134,17 @@ export default Vue.extend({
 				for (let itemsIndex = 0; itemsIndex < criteria.exclusionCriteria.length; itemsIndex++) {
 					itemsIndex !== 0 && exclusionCharacteristics.logic.push('or')
 					for (let itemIndex = 0; itemIndex < criteria.exclusionCriteria[itemsIndex].length; itemIndex++) {
-						const code = criteria.exclusionCriteria[itemsIndex][itemIndex].termCodes[0].code
-						const response = await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/findOntology/' + code))
-						const ontology: Criterion = response.data[0]
-						ontology.context = JSON.parse(response.data[0].context)
-						ontology.termCodes = JSON.parse(response.data[0].termCodes)
-						ontology.filterOptions = JSON.parse(response.data[0].filterOptions)
+						const id = criteria.exclusionCriteria[itemsIndex][itemIndex].id
+						const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id))
+						let ontology: Criterion = transformObjectKeys([response.data])[0]
+						
+						const module = modules.find((module) => module.id === ontology.moduleId)
+						ontology.context = {
+							code: module!.fdpgCdsCode,
+							display: module!.name,
+							system: module!.fdpgCdsSystem,
+							version: module!.fdpgCdsVersion,
+						}
 
 						exclusionCharacteristics.characteristics.push(ontology)
 

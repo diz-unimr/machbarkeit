@@ -44,7 +44,7 @@ class MachbarkeitController extends Controller {
 	public function getUiProfile(): JSONResponse {
 		// TODO remove test call
 		$modules = $this->getModules();
-		$ontology = $this->service->getOntology(2);
+		// $ontology = $this->service->getOntology(2);
 
 		return new JSONResponse($this->service->readUiProfile());
 	}
@@ -84,5 +84,9 @@ class MachbarkeitController extends Controller {
 
 	public function getRequest($criteria) {
 		return $this->service->getFhirRequest($criteria);
+	}
+
+	public function selectSql() {
+		return $this->service->select_sql();
 	}
 }

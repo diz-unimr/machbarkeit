@@ -22,7 +22,7 @@ export interface QuantityType2 {
 export interface QuantityType {
     valueFilter: {
         /* access only object inside array */
-        unit: Criterion['filterOptions'][number];
+        unit: NonNullable<Criterion['filterOptions']>[number];
         comparator?: string;
         value?: number;
         minValue?: number;
@@ -35,7 +35,7 @@ export interface QuantityOptionsData {
     newSelectedCriterion: Criterion;
     isFilterComplete: boolean;
     selectedValue: {
-        unit: Criterion['filterOptions'][number];
+        unit: NonNullable<Criterion['filterOptions']>[number];
         comparator: string;
         value: number;
         minValue: number;

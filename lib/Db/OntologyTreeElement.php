@@ -11,7 +11,7 @@ use JsonSerializable;
 class OntologyTreeElement implements JsonSerializable {
 	public int $id;
 	public string $display = '';
-	public ?int $moduleId = null;
+	public ?int $module_id = null;
 	public array $children = [];
 	public bool $selectable = false;
 	public bool $leaf = false;
@@ -20,8 +20,8 @@ class OntologyTreeElement implements JsonSerializable {
 		return [
 			'id' => $this->id,
 			'display' => $this->display,
-			'moduleId' => $this->moduleId,
-			'parentId' => $this->children,
+			'module_id' => $this->module_id,
+			'parent_id' => $this->children,
 			'selectable' => $this->selectable,
 			'leaf' => $this->leaf
 		];
