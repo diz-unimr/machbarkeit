@@ -260,8 +260,8 @@ export default Vue.extend({
 	margin: 0px;
 }
 
-.ontology-head-node input[type="checkbox"]:disabled {
-    cursor: default;
+.ontology-head-node input[type='checkbox']:disabled {
+	cursor: default;
 }
 
 .search-tree-term-entry .swl-code {
