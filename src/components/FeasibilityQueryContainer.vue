@@ -119,6 +119,7 @@ export default Vue.extend({
 			this.numberOfPatients = null
 			this.errorMessage = null
 			this.isQeuryCompleted = true
+			this.cancelTokenSource = axios.CancelToken.source()
 			this.cancelTokenSource!.cancel('User stopped the request')
 			this.cancelTokenSource = null
 		},
@@ -163,7 +164,7 @@ export default Vue.extend({
 .feasibility-query-container {
 	display: flex;
 	flex-direction: column;
-	width: 1200px;
+	width: 55%;
 	max-width: 1200px;
 	height: 100%;
 	margin: 0px auto 0px auto;

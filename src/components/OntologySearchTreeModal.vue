@@ -5,7 +5,7 @@
 	-->
 
 	<div v-if="requestStatus === 200" class="ontology-search-tree-container">
-		<div :class="['ontology-search-tree-wrapper', { 'ausschlusskriterien-overlay': criteriaType === 'ausschlusskriterien'}]">
+		<div class="ontology-search-tree-wrapper">
 			<div class="criteria-type">
 				{{ criteriaType }}
 			</div>
@@ -313,7 +313,7 @@ export default Vue.extend({
 	background-color: #fff;
 	box-shadow: 0px 10px 15px 0px #0003, 0px 0px 25px 2px #00000024, 0px 0px 10px 0px #0000001f;
 	pointer-events: auto;
-	width: 95%;
+	width: 100%;
 }
 
 .criteria-type {

@@ -103,7 +103,7 @@
 					</draggable>
 				</div>
 			</div>
-			<div class="pipe" />
+			<!-- <div class="pipe" />
 			<div id="ausschlusskriterien" class="display-textfield">
 				<div v-if="draggableExclusionCharacteristics.characteristics.length > 0">
 					<draggable v-model="draggableExclusionCharacteristics.characteristics" @end="$emit('update-characteristics', 'ausschlusskriterien', draggableExclusionCharacteristics)">
@@ -196,7 +196,7 @@
 						</div>
 					</draggable>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </template>

@@ -40,7 +40,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="pipe" />
+			<!-- <div class="pipe" />
 			<div class="feasibility-query__search-input-wrapper">
 				<div class="search-input__title">
 					Ausschlusskriterien
@@ -74,7 +74,7 @@
 						{{ searchInputWarning }}
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 
 		<OntologySearchTreeModal v-if="isOntologySearchTreeOpen"
@@ -483,7 +483,7 @@ export default Vue.extend({
 }
 
 .search-input__body .input-field {
-	max-width: 85%;
+	max-width: 90%;
 	font-size: 15px;
 }
 

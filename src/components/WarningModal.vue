@@ -6,17 +6,17 @@
 	<div class="save-query-modal-container">
 		<div class="save-query-modal-wrapper">
 			<h2 class="save-query-modal__title">
-				Warning Modal
+				Achtung!
 			</h2>
 			<div class="save-query-modal__folder-name">
-				<div>Warning Text</div>
+				<div>Beim Verlassen des aktuellen Moduls werden alle ausgewählten Kriterien entfernt.</div>
 			</div>
 			<div class="save-query-modal__button-group">
 				<button @click="$emit('submit-change-tab')">
 					OK
 				</button>
 				<button @click="$emit('cancel-change-tab')">
-					Cancel
+					ABBRECHEN
 				</button>
 			</div>
 		</div>
