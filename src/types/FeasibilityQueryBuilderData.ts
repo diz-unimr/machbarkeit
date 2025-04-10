@@ -5,7 +5,7 @@
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData.ts'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
-import type { Criterion, Modules } from './OntologySearchTreeModalData.ts'
+import type { Criterion, Module } from './OntologySearchTreeModalData.ts'
 
 export interface SelectedCharacteristics {
     characteristics: Array<Criterion>;
@@ -19,7 +19,7 @@ export type QueryCriterionData = {
 } & (ConceptType | QuantityType | TimeRangeType | undefined)
 
 export interface FeasibilityQueryBuilderData {
-    modules: Array<Modules> | null;
+    modules: Array<Module> | null;
     searchInputText: string;
     inclusionSearchInputText: string;
     exclusionSearchInputText: string;
@@ -37,7 +37,6 @@ export interface FeasibilityQueryBuilderData {
 		exclusionCriteria?: Array<QueryCriterionData>[];
     };
     isStateEditFilter: boolean;
-    debouncedHandler: _.DebouncedFunc<() => void> | null;
     searchInputWarning: string;
     imgDelete: string;
 }

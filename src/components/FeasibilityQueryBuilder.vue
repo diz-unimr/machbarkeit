@@ -24,18 +24,19 @@
 									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
 							</svg>
 						</button>
-						<NcTextField :value.sync="inclusionSearchInputText"
+						<NcTextField :id="'einschlusskriterien'"
+							:value.sync="inclusionSearchInputText"
 							label="Code oder Suchbegriff eingeben"
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="inclusionSearchInputText !== ''"
-							@trailing-button-click="closeOntologySearchTreeModal"
-							@focus="focusSearchInput('einschlusskriterien')">
+							@focus="focusSearchInput('einschlusskriterien')"
+							@trailing-button-click="closeOntologySearchTreeModal">
 							<Magnify :size="20" />
 						</NcTextField>
 					</div>
 					<div v-if="inclusionSearchInputText !== '' && searchInputWarning !== ''" class="search-input-warning">
-						{{ searchInputWarning }}
+						<span>Bitte mindestens 2 Buchstaben eingeben</span>
 					</div>
 				</div>
 			</div>
@@ -64,8 +65,8 @@
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="exclusionSearchInputText !== ''"
-							@trailing-button-click="closeOntologySearchTreeModal"
-							@focus="focusSearchInput('ausschlusskriterien')">
+							@focus="focusSearchInput('ausschlusskriterien')"
+							@trailing-button-click="closeOntologySearchTreeModal">
 							<Magnify :size="20" />
 						</NcTextField>
 					</div>
@@ -107,7 +108,7 @@ import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
 import type { FeasibilityQueryBuilderData, SelectedCharacteristics, QueryCriterionData } from '../types/FeasibilityQueryBuilderData'
-import type { Criterion, Modules } from '../types/OntologySearchTreeModalData.ts'
+import type { Criterion, Module } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
@@ -164,7 +165,6 @@ export default Vue.extend({
 				display: '',
 			},
 			isStateEditFilter: false,
-			debouncedHandler: null,
 			searchInputWarning: '',
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
 		}
@@ -202,27 +202,19 @@ export default Vue.extend({
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
 			} else {
-				this.searchInputWarning = ''
-				this.debouncedHandler = debounce(() => {
-					this.criteriaOverlayType = 'einschlusskriterien'
-					this.isOntologySearchTreeOpen = true
-				}, 1000)
-				this.debouncedHandler()
+				const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien'), 1000) // function is called after 500 ms?
+				debouncedHandler()
 			}
 		},
 
 		exclusionSearchInputText(newVal) {
-			this.searchInputText = this.exclusionSearchInputText
+			this.searchInputText = newVal
 			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
 			} else {
-				this.searchInputWarning = ''
-				this.debouncedHandler = debounce(() => {
-					this.criteriaOverlayType = 'ausschlusskriterien'
-					this.isOntologySearchTreeOpen = true
-				}, 1000)
-				this.debouncedHandler()
+				const debouncedHandler = debounce(() => this.checkTextInputLength('ausschlusskriterien'), 1000) // function is called after 500 ms?
+				debouncedHandler()
 			}
 		},
 	},
@@ -240,8 +232,18 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		toggleOntologySearchTreeModal(type: string): void {
-			this.criteriaOverlayType = type
+		checkTextInputLength(criteriaType: string): void {
+			if (this.searchInputText.length <= 1) {
+				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
+			} else {
+				this.searchInputWarning = ''
+				this.criteriaOverlayType = criteriaType
+				this.isOntologySearchTreeOpen = true
+			}
+		},
+
+		toggleOntologySearchTreeModal(criteriaType: string): void {
+			this.criteriaOverlayType = criteriaType
 			this.isOntologySearchTreeOpen = !this.isOntologySearchTreeOpen
 			this.inclusionSearchInputText = ''
 			this.exclusionSearchInputText = ''
@@ -256,17 +258,17 @@ export default Vue.extend({
 		},
 
 		focusSearchInput(criteriaType: string): void {
-			this.isOntologySearchTreeOpen = false
-			if (criteriaType === 'einschlusskriterien') {
-				this.exclusionSearchInputText = ''
+			if (this.criteriaOverlayType !== criteriaType) {
 				this.searchInputText = ''
-			} else if (criteriaType === 'ausschlusskriterien') {
-				this.inclusionSearchInputText = ''
-				this.searchInputText = ''
+				if (criteriaType === 'einschlusskriterien') {
+					this.exclusionSearchInputText = ''
+				} else if (criteriaType === 'ausschlusskriterien') {
+					this.inclusionSearchInputText = ''
+				}
 			}
 		},
 
-		HandleModules(modules: Array<Modules>): void {
+		HandleModules(modules: Array<Module>): void {
 			this.modules = modules
 		},
 
@@ -355,7 +357,6 @@ export default Vue.extend({
 		},
 
 		updateQueryData(selectedIncludeCriteria: SelectedCharacteristics, selectedExcludeCriteria: SelectedCharacteristics) {
-			// TODO: update Context Here
 			this.queryData.inclusionCriteria = []
 			this.queryData.exclusionCriteria = []
 			if (selectedIncludeCriteria.characteristics.length > 0) {
@@ -365,7 +366,6 @@ export default Vue.extend({
 					const selectedCharacteristic = {
 						id: selectedIncludeCriteria.characteristics[i].id,
 						termCodes: selectedIncludeCriteria.characteristics[i].termCodes,
-						// context: selectedIncludeCriteria.characteristics[i].context,
 						context: {
 							code: module?.fdpgCdsCode,
 							display: module?.name,
@@ -396,7 +396,6 @@ export default Vue.extend({
 					const selectedCharacteristic = {
 						id: selectedExcludeCriteria.characteristics[i].id,
 						termCodes: selectedExcludeCriteria.characteristics[i].termCodes,
-						// context: selectedExcludeCriteria.characteristics[i].context,
 						context: {
 							code: module?.fdpgCdsCode,
 							display: module?.name,
@@ -418,7 +417,6 @@ export default Vue.extend({
 
 				}
 			}
-
 			this.queryData.inclusionCriteria?.length === 0 && this.queryData.exclusionCriteria?.length === 0
 				? this.$emit('get-query-data', null)
 				: this.$emit('get-query-data', this.queryData)

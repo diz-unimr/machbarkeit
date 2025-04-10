@@ -5,16 +5,22 @@
 	-->
 	<div>
 		<div class="ontology-nested-tree-node-wrapper">
-			<p class="criterion-code">
-				{{ criterion?.code }}
-			</p>
+			<input :id="String(criterion?.id)"
+				v-model="isChecked"
+				:disabled="onlySwlCode"
+				type="checkbox"
+				:value="criterion?.display">
 			<div class="search-tree-term-entry">
-				<input :id="String(criterion?.id)"
-					v-model="isChecked"
-					type="checkbox"
-					:value="criterion?.display">
-				<p>
-					{{ criterion?.display }}
+				<div class="swl-wrapper" :style="{gap: swlCode ? '1.5%' : '0'}">
+					<p class="swl-code">
+						{{ swlCode }}
+					</p>
+					<p class="swl-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}">
+						{{ criterion?.display }}
+					</p>
+				</div>
+				<p v-if="onlySwlCode && criterion.selectable === true" class="swl-code-warning">
+					(Die Suche nach SWL-Code wird momentan nicht unterstützt)
 				</p>
 			</div>
 		</div>
@@ -27,6 +33,8 @@ import type { Criterion } from '../types/OntologySearchTreeModalData'
 
 interface OntologyNestedTreeNodeSearchInputData {
 	filteredCriterion: Criterion | null;
+	onlySwlCode: boolean;
+	swlCode: string | undefined;
 }
 
 export interface CheckedItem {
@@ -55,21 +63,21 @@ export default Vue.extend({
 	data(): OntologyNestedTreeNodeSearchInputData {
 		return {
 			filteredCriterion: null,
+			swlCode: undefined,
+			onlySwlCode: false,
 		}
 	},
 
 	computed: {
 		isChecked: {
 			get(): boolean {
-				return this.$store.getters.checkedItems(this.criterion.id)
+				return this.$store.getters.getCheckedItems(this.criterion)
 			},
 			set(checked: boolean): void {
 				if (checked) {
-					this.$emit('input', { action: 'check', node: this.criterion })
-					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, display: this.criterion.display })
+					this.$store.dispatch('addCheckedItem', this.criterion)
 				} else {
-					this.$emit('input', { action: 'uncheck', node: this.criterion })
-					this.$store.dispatch('removeCheckedItem', { id: this.criterion.id, display: this.criterion.display })
+					this.$store.dispatch('removeCheckedItem', this.criterion)
 				}
 
 			},
@@ -82,7 +90,9 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {},
+	created() {
+		this.findSWL(this.criterion)
+	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -90,7 +100,15 @@ export default Vue.extend({
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {},
+	methods: {
+		findSWL(criterion: Criterion): void {
+			const onlySwlCode = criterion.termCodes?.every((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
+			// const loinc = criterion.termCodes?.find((termCode) => termCode.system === 'http://loinc.org' || termCode.system === 'http://snomed.info/sct')
+			const swlcode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
+			this.onlySwlCode = onlySwlCode
+			this.swlCode = swlcode?.code ?? undefined
+		},
+	},
 })
 </script>
 
@@ -98,15 +116,28 @@ export default Vue.extend({
 .ontology-nested-tree-node-wrapper {
 	display: flex;
 	margin-top: 5px;
+	gap: clamp(10px, 1.5%, 15px);
+}
+
+.ontology-nested-tree-node-wrapper input[type='checkbox']:disabled {
+	cursor: default;
 }
 
 .search-tree-term-entry {
 	display: flex;
-	align-items: flex-start;
-	margin-left: 5px;
+	flex-direction: column;
 	width: 100%;
-	height: 100%;
-	gap: 20px;
+}
+
+.search-tree-term-entry .swl-description {
+	max-width: fit-content;
+	margin-top: 5px;
+}
+
+.search-tree-term-entry .swl-code {
+	margin-top: 5px;
+	font-weight: 500;
+	font-size: 14px;
 }
 
 .search-tree-term-entry input[type='checkbox'] {
@@ -115,9 +146,16 @@ export default Vue.extend({
 	margin: 0px;
 }
 
-.search-tree-term-entry p {
-	flex: 1;
-	margin-top: 5px;
+.swl-wrapper {
+	display: flex;
+	gap: 1.5%;
+	/* gap: clamp(10px, 1.5%, 15px); */
+}
+
+.swl-code-warning {
+	font-size: 12px;
+	color: #DC3545;
+	cursor: default;
 }
 
 .criterion-code {

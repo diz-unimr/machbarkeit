@@ -6,7 +6,7 @@
 	<div class="limitations-card">
 		<div class="limitations-card__header">
 			<p class="limitations-card__title">
-				{{ selectedCriterion.display }}
+				{{ selectedCriterion.display }} ({{ selectedCriterion.termCodes[0].code }})
 			</p>
 			<button v-if="!isStateEditFilter" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
 				Löschen

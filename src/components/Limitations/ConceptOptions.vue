@@ -50,7 +50,7 @@ export default Vue.extend({
 	},
 	watch: {
 		selectedValue() {
-			this.conceptType = this.selectedValue.length > 0
+			this.conceptType = this.selectedValue!.length > 0
 				? {
 					valueFilter: {
 						selectedConcepts: this.selectedValue,

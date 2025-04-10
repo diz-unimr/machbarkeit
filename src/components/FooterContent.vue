@@ -26,7 +26,7 @@ import Vue from 'vue'
 import axios from 'axios'
 import transformObjectKeys from '../utils/transformObjectKeys'
 import type { QueryCriterionData, FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
-import type { Criterion, Modules } from '../types/OntologySearchTreeModalData.ts'
+import type { Criterion, Module } from '../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../types/ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
@@ -76,7 +76,7 @@ export default Vue.extend({
 			}
 
 			const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
-			const modules: Modules[] = transformObjectKeys(response.data)
+			const modules: Module[] = transformObjectKeys(response.data)
 
 			if (criteria.inclusionCriteria) {
 				let tempIndex = 0

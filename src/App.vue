@@ -37,12 +37,9 @@ export default Vue.extend({
 	created() {
 		const root = document.getElementsByTagName('html')[0]
 		root.setAttribute('class', 'webkit chrome win js')
-		document.body.classList.add('light-mode')
 	},
 	beforeMount() {},
-	mounted() {
-		document.documentElement.setAttribute('data-theme', 'light')
-	},
+	mounted() {},
 	beforeUpdate() {},
 	updated() {},
 	beforeDestroy() {},
@@ -71,10 +68,6 @@ button {
 	font-size: 16px !important;
 }
 
-/* select {
-	background: ;
-} */
-
 .machbarkeit {
 	display: flex;
 	width: 100%;
@@ -88,4 +81,9 @@ button {
 .input-field__input {
 	border: 1px solid #c0c7ce !important;
 }
+
+input[type=checkbox] {
+	cursor: pointer !important;
+}
+
 </style>

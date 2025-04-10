@@ -15,23 +15,22 @@
 						<button v-for="(module) in modules"
 							:key="module.id"
 							:class="['ontology-tab', { 'active': activeTab === module.id }]"
-							@click="activateTab(module.id)">
+							@click="changeTab(module.id)">
 							{{ module.name }}
 						</button>
 					</div>
 				</div>
-				<div v-if="ontologyTree" class="ontology-search-tree__display">
+				<div v-if="ontologyTree && !isLoading" class="ontology-search-tree__display">
 					<div v-if="ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab">
 						<div class="ontology-search-tree__body">
 							<div class="module-name">
 								{{ modules.filter(module => module.id === activeTab)[0].name }}
 							</div>
+
 							<template v-if="searchInputText.length <= 0">
 								<OntologyNestedTreeNode v-for="criterion in ontologyTree"
 									:key="criterion.id"
-									:criterion="criterion"
-									:parent-ids="[criterion.id]"
-									@input="getCheckboxItems" />
+									:criterion="criterion" />
 							</template>
 
 							<template v-else>
@@ -39,9 +38,7 @@
 									:key="criterion.id"
 									class="ontology-tree-node"
 									:criterion="criterion"
-									:search-input-text="searchInputText"
-									:level="0"
-									@input="getCheckboxItems" />
+									:search-input-text="searchInputText" />
 							</template>
 						</div>
 					</div>
@@ -51,17 +48,21 @@
 						</div>
 					</div>
 				</div>
-				<div v-else class="loading-text ontology-search-tree__display">
+				<div v-if="isLoading" class="loading-text ontology-search-tree__display">
 					Loading...
 				</div>
 				<div class="ontology-search-tree__button-group">
-					<button :disabled="selectedItems.length > 0 ? false : true" @click="submit(criteriaType, selectedItems)">
+					<button :disabled="isCheckboxEmpty" @click="submit(criteriaType)">
 						AUSWÄHLEN
 					</button>
 					<button @click="cancel(criteriaType)">
 						ABBRECHEN
 					</button>
 				</div>
+				<WarningModal v-if="!isCheckboxEmpty && isModalOpened"
+					class="middel"
+					@submit-change-tab="submitChangeTab"
+					@cancel-change-tab="cancelChangeTab" />
 			</div>
 		</div>
 	</div>
@@ -72,8 +73,8 @@ import Vue from 'vue'
 import transformObjectKeys from '../utils/transformObjectKeys'
 import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
 import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
-import type { OntologySearchTreeModalData, Modules, Criterion } from '../types/OntologySearchTreeModalData.ts'
-import type { CheckedItem } from './OntologyNestedTreeNode.vue'
+import WarningModal from './WarningModal.vue'
+import type { OntologySearchTreeModalData, Module, Criterion } from '../types/OntologySearchTreeModalData.ts'
 import lodash from 'lodash'
 import axios, { AxiosError, type AxiosResponse } from 'axios'
 
@@ -82,6 +83,7 @@ export default Vue.extend({
 	components: {
 		OntologyNestedTreeNode,
 		OntologyNestedTreeNodeSearchInput,
+		WarningModal,
 	},
 	props: {
 		criteriaType: {
@@ -101,39 +103,33 @@ export default Vue.extend({
 	data(): OntologySearchTreeModalData {
 		return {
 			activeTab: undefined,
-			wasTabClicked: [],
-			ontologyResponse: null,
 			requestStatus: undefined,
 			selectedItems: [],
-			selectedItems2: new Set(),
+			checkedItems: undefined,
 			isSearchResultNoData: [],
 			modules: null,
 			ontologyTree: null,
 			ontologyTreeSearch: [],
 			context: null,
 			isCheckboxChecked: false,
+			isModalOpened: false,
+			activeModule: undefined,
+			isLoading: true,
 		}
 	},
 
-	computed: {},
+	computed: {
+		isCheckboxEmpty() {
+			return this.$store.state.checkedItemsMap.size < 1
+		},
+	},
 
 	watch: {
 		searchInputText: {
-			async handler() {
-				this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
-				/* if (this.searchInputText.length > 1) {
+			async handler(newVal: string) {
+				if (newVal.length > 1) {
 					this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
-				} */
-
-			},
-		},
-
-		activeTab: {
-			handler() {
-				if (this.activeTab) {
-					this.activateTab(this.activeTab)
 				}
-				// this.searchInputText ? await this.getOntology(this.activeTab!, this.searchInputText) : await this.getOntology(this.activeTab!)
 			},
 		},
 	},
@@ -144,9 +140,7 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	async created() {
 		// get Modules and set activeTab
-		if (JSON.parse(localStorage.getItem('moduleName')!)) {
-			this.modules = JSON.parse(localStorage.getItem('moduleName')!)
-		} else await this.getModules()
+		this.getModules()
 	},
 	beforeMount() {},
 	mounted() {},
@@ -156,6 +150,13 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
+		changeTab(moduleId: string): void {
+			this.activeModule = this.modules?.filter(module => module.id === moduleId)[0]
+			if (this.activeTab !== undefined && this.activeTab !== moduleId && !this.isCheckboxEmpty) {
+				this.isModalOpened = true
+			} else this.activateTab(moduleId)
+		},
+
 		activateTab(moduleId: string): void {
 			this.activeTab = moduleId
 			if (this.searchInputText === '') {
@@ -167,10 +168,9 @@ export default Vue.extend({
 
 		async getModules(): Promise<void> {
 			try {
-				// const response: Modules[] = (await nextcloudAxios.get(generateUrl('/apps/machbarkeit/machbarkeit/modules'))).data
 				const apiResponse = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
 				// Convert object keys to camelCase using lodash
-				const response: Modules[] = apiResponse.data.map(obj =>
+				const response: Module[] = apiResponse.data.map(obj =>
 					lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)),
 				)
 				this.modules = response
@@ -184,6 +184,7 @@ export default Vue.extend({
 		},
 
 		async getOntology(moduleId: string, searchText: string = '_null_'): Promise<Criterion[] | null> {
+			this.isLoading = true
 			// Code oder Suchbegriff wurde eingegeben
 			let apiResponse: AxiosResponse
 			try {
@@ -202,48 +203,63 @@ export default Vue.extend({
 				} else {
 					apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + moduleId)
 				}
-
 				// Convert object keys to camelCase using lodash
 				const response = transformObjectKeys(apiResponse.data)
 
 				this.ontologyTree = response
-				localStorage.setItem('moduleId', JSON.stringify(this.ontologyTree))
 				this.ontologyTreeSearch[moduleId] = response || [] // problem mit moduleId und index
 
 				this.requestStatus = apiResponse.status as number
 				this.$emit('get-request-status', this.requestStatus)
+				this.isLoading = false
 				return this.ontologyTree
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log((error as Error).message)
 				this.requestStatus = (error as AxiosError).status as number
 				this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
+				this.isLoading = false
 				return null
 			}
 		},
 
-		/* tranformObjectKeys(data: Criterion[]): Criterion[] {
-			const response: Criterion[]  = data.map((obj: Criterion) => {
-				let transformedObj = lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)) as unknown as Criterion
-				if (transformedObj.children) {
-					transformedObj.children = this.tranformObjectKeys(transformedObj.children)
-				}
-				return transformedObj
-			})
-			return response
-		}, */
+		getCheckedItems(items: Criterion[], checkedItemsId: string[], checkedItems: Criterion[]): Criterion[] {
+			// Clear once at start of root call
+			this.selectedItems = []
 
-		getCheckboxItems(checkedItem: CheckedItem): void {
-			if (checkedItem.action === 'check') {
-				this.selectedItems = [...this.selectedItems, checkedItem.node]
-			} else if (checkedItem.action === 'uncheck') {
-				this.selectedItems = this.selectedItems.filter(name => {
-					return name !== checkedItem.node
-				})
+			const traverse = (items: Criterion[]) => {
+				for (const item of items) {
+					// Early exit if we already found everything
+					if (this.selectedItems.length === checkedItems!.length) {
+						return
+					} else if (item.selectable && checkedItemsId.includes(item.id)) {
+						this.selectedItems.push(item)
+
+						// Optional: remove children from checkedItems based on module logic
+						if (item.children && item.children.length > 0) {
+							const codePrefix = item.termCodes[0].code.slice(0, 3)
+							if (this.activeModule?.name === 'Diagnose' || this.activeModule?.name === 'Prozedur') {
+								checkedItems = checkedItems!.filter(checkedItem =>
+									checkedItem.id === item.id || !checkedItem.termCodes[0].code.startsWith(codePrefix))
+							} else if (this.activeModule?.name === 'Laboruntersuchung') {
+								checkedItems = checkedItems!.filter(checkedItem =>
+									checkedItem.id === item.id || !checkedItem.termCodes[0].code.startsWith(codePrefix))
+							}
+						}
+					} else if (item.children && item.children.length > 0) {
+						traverse(item.children)
+					}
+				}
 			}
+
+			traverse(items)
+			return this.selectedItems
 		},
 
-		submit(criteriaType: string, selectedItems: Criterion[]): void {
+		submit(criteriaType: string): void {
+			const checkedItems = [...Array.from(this.$store.state.checkedItemsMap.values())] as Criterion[]
+			const checkedItemsId = checkedItems!.map(checkedItem => checkedItem.id)
+			const selectedItems = this.getCheckedItems(this.ontologyTree!, checkedItemsId, checkedItems)
 			this.$emit('get-selected-criteria', criteriaType, selectedItems)
 			this.$store.dispatch('clearCheckedItem')
 		},
@@ -252,11 +268,28 @@ export default Vue.extend({
 			this.$emit('toggle-ontology-search-tree-modal', criteriaType)
 			this.$store.dispatch('clearCheckedItem')
 		},
+
+		submitChangeTab(): void {
+			this.isModalOpened = false
+			this.activateTab(this.activeModule!.id)
+			this.$store.dispatch('clearCheckedItem')
+		},
+
+		cancelChangeTab(): void {
+			this.isModalOpened = false
+		},
 	},
 })
 </script>
 
 <style scoped>
+.middel {
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
 .ontology-search-tree-container {
 	display:flex;
 	z-index: 100;
@@ -270,7 +303,6 @@ export default Vue.extend({
 	scrollbar-width: auto;
 	height: 100%;
 	padding: 0px 10px;
-	/* margin-top: 20px; */
 }
 
 .ontology-search-tree-wrapper {
@@ -391,5 +423,10 @@ export default Vue.extend({
 	text-align: center;
 	font-size: large;
 	margin: 100px;
+}
+
+.modal__content {
+	margin: 50px;
+	text-align: center;
 }
 </style>

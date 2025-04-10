@@ -12,9 +12,12 @@
 						<span v-if="isQeuryCompleted !== null && !isQeuryCompleted">
 							<img src="../../img/loading_spinner.svg">
 						</span>
+						<template v-else-if="numberOfPatients !== null">
+							<span v-if="numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>
+							<span v-else>{{ numberOfPatients }}</span>
+						</template>
 						<span v-else-if="errorMessage" class="error-message">{{ errorMessage }}</span>
-						<span v-else-if="numberOfPatients && numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>
-						<span v-else>{{ numberOfPatients && numberOfPatients > 3 ? numberOfPatients : '-' }}</span>
+						<span v-else>-</span>
 					</p>
 				</div>
 				<div class="feasibility-query__button-group">
@@ -51,7 +54,7 @@ import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
 import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
-import axios from 'axios'
+import axios, { type CancelTokenSource } from 'axios'
 
 interface FeasibilityQueryContainerData {
 	queryData: FeasibilityQueryBuilderData['queryData'] | null;
@@ -65,6 +68,7 @@ interface FeasibilityQueryContainerData {
 	isCriteriaAvailable: boolean;
 	errorMessage: string | null;
 	isQeuryCompleted: boolean | null;
+	cancelTokenSource: CancelTokenSource | null;
 }
 
 export default Vue.extend({
@@ -85,6 +89,7 @@ export default Vue.extend({
 			isCriteriaAvailable: false,
 			errorMessage: null,
 			isQeuryCompleted: null,
+			cancelTokenSource: null,
 		}
 	},
 
@@ -113,6 +118,9 @@ export default Vue.extend({
 			this.isCriteriaAvailable = false
 			this.numberOfPatients = null
 			this.errorMessage = null
+			this.isQeuryCompleted = true
+			this.cancelTokenSource!.cancel('User stopped the request')
+			this.cancelTokenSource = null
 		},
 
 		getQueryData(data: FeasibilityQueryBuilderData['queryData'] | null): void {
@@ -129,17 +137,22 @@ export default Vue.extend({
 		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
 			this.isQeuryCompleted = false
 			this.numberOfPatients = null
-			const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',
-				JSON.stringify(data),
-				{
-					headers: {
-						'Content-Type': 'application/json',
+			this.cancelTokenSource = axios.CancelToken.source()
+
+			try {
+				const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',
+					JSON.stringify(data),
+					{
+						headers: {
+							'Content-Type': 'application/json',
+						},
 					},
-				},
-			)
-			const status = JSON.parse(response.data)
-			this.errorMessage = status.error ? 'Found some error!' : null
-			this.numberOfPatients = response.data
+				)
+				this.numberOfPatients = response.data
+				this.isQeuryCompleted = true
+			} catch (error) {
+				this.errorMessage = error ? 'Found some error!' : null
+			}
 			this.isQeuryCompleted = true
 		},
 	},

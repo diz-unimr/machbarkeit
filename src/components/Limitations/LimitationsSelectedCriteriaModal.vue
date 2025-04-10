@@ -118,7 +118,6 @@ export default Vue.extend({
 			this.$emit('get-selected-filter-info', this.selectedCriteriaFiltersInfo)
 			this.$emit('dialog-close')
 		},
-
 	},
 })
 </script>

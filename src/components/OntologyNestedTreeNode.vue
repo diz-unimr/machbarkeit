@@ -7,11 +7,12 @@
 		<keep-alive>
 			<li>
 				<div class="ontology-head-node">
-					<button v-if="!criterion?.leaf" @click="state = !state">
-						<img :src="state
+					<button v-if="!criterion?.leaf" @click="expandTreeNode">
+						<img :src="isExpanded
 							? imgExpand
 							: imgCollapse">
 					</button>
+
 					<input v-if="criterion?.selectable"
 						:id="String(criterion?.id)"
 						v-model="isChecked"
@@ -32,15 +33,14 @@
 						</p>
 					</div>
 				</div>
-				<ul v-show="state">
+				<ul v-if="isExpanded">
 					<template v-if="criterion.children">
 						<OntologyNestedTreeNode v-for="child in criterion.children"
 							:key="child.id"
 							:criterion="child"
 							:parent="criterion"
-							:parent-ids="[...parentIds, criterion.id]"
-							@input="checkboxTrigger"
-							@change="toggleParent(parent, isChecked)" />
+							:parents="[...parents, criterion]"
+							@change="toggleParent" />
 					</template>
 				</ul>
 			</li>
@@ -53,7 +53,7 @@ import Vue, { type PropType } from 'vue'
 import type { Criterion } from '../types/OntologySearchTreeModalData'
 
 interface OntologyNestedTreeNodeData {
-	state: boolean;
+	isExpanded: boolean;
 	imgCollapse: string;
 	imgExpand: string;
 	concepts: [
@@ -90,15 +90,19 @@ export default Vue.extend({
 			type: Object as PropType<Criterion>,
 			default: null,
 		},
+		parents: {
+			type: Array as PropType<Criterion[]>,
+			default: () => [],
+		},
 		parentIds: {
 			type: Array as PropType<string[]>,
-			default: null,
+			default: () => [],
 		},
 	},
 
 	data(): OntologyNestedTreeNodeData {
 		return {
-			state: false,
+			isExpanded: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			concepts: null,
@@ -112,44 +116,34 @@ export default Vue.extend({
 		isChecked: {
 			// Determines if the current item is checked
 			get(): boolean {
-				return this.$store.getters.getCheckedItems(this.criterion.id)
+				return this.$store.state.checkedItemsMap.has(this.criterion.id)
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
 				if (checked) {
-					this.$store.dispatch('addCheckedItem', { node: this.criterion, isChecked: checked })
+					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, node: this.criterion })
 					// if parent is checked, check all children
 					if (this.criterion.children && this.criterion.children.length > 0) {
 						this.toggleChildren(this.criterion.children, checked)
 					}
 					// if all children are checked, check the parent
-					if (this.parent) {
-						this.toggleParent(this.parent, checked)
+					if (this.parent && this.parent.selectable) {
+						this.toggleParent(checked)
 					}
-					this.$emit('input', { action: 'check', node: this.criterion })
 				} else {
-					this.$store.dispatch('removeCheckedItem', { id: this.criterion.id, isChecked: checked })
+					this.$store.dispatch('removeCheckedItem', this.criterion)
 					// if parent is unchecked, uncheck all children
 					if (this.criterion.children && this.criterion.children.length > 0) {
-						this.criterion.children.forEach((child) => {
-							this.$emit('input', { action: 'uncheck', node: child, parentIds: this.parentIds })
-							this.$store.dispatch('removeCheckedItem', { id: child.id, isChecked: checked })
-						})
+						this.toggleChildren(this.criterion.children, checked)
 					}
 					// if child is unchecked, uncheck the parent
-					if (this.parent) {
-						this.$emit('input', { action: 'uncheck', node: this.parent, parentIds: this.parentIds })
-						this.parentIds.forEach((parentId) => {
-							this.$store.dispatch('removeCheckedItem', { id: parentId, isChecked: checked })
-						})
+					if (this.parent && this.parent.selectable) {
+						this.toggleParent(checked)
 					}
-					this.$emit('input', { action: 'uncheck', node: this.criterion, parentIds: this.parentIds })
 				}
 			},
 		},
 	},
-
-	watch: {},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
@@ -166,35 +160,35 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		checkboxTrigger(checkedItem: CheckedItem): void {
-			this.$emit('input', checkedItem)
-		},
-
 		toggleChildren(children: Criterion[], isChecked: boolean): void {
 			children.forEach((child: Criterion) => {
-				this.$store.dispatch('addCheckedItem', { node: child, isChecked })
+				isChecked ? this.$store.dispatch('addCheckedItem', { id: child.id, node: child }) : this.$store.dispatch('removeCheckedItem', child)
 				if (child.children && child.children.length > 0) {
 					this.toggleChildren(child.children, isChecked)
 				}
 			})
 		},
 
-		toggleParent(parent: Criterion, isChecked: boolean): void {
-			if (this.parent && this.parent.selectable) {
-				const children = new Set(parent.children)
-				const checkedItemId = new Set(this.$store.state.checkedItems.map((checkedItem: Criterion) => checkedItem.id))
-				const allChildrenChecked = [...children].every(child => checkedItemId.has(child.id))
-
+		toggleParent(isChecked: boolean): void {
+			if (!isChecked) {
+				this.$store.dispatch('removeCheckedItem', this.parent)
+				if (this.parent.parentId !== null && this.parent.selectable) {
+					this.$emit('change', isChecked) // go back to upper parent level
+				}
+			} else {
+				const checkedItemsMap = this.$store.state.checkedItemsMap
+				const allChildrenChecked = this.parent.children.every(child => checkedItemsMap.has(child.id))
 				if (allChildrenChecked) {
-					this.$store.dispatch('addCheckedItem', { node: this.parent, isChecked })
-					this.$emit('change') // go back to upper parent level
-					this.$emit('input', { action: 'check', node: parent })
+					this.$store.dispatch('addCheckedItem', { id: this.parent.id, node: this.parent })
+					if (this.parent.parentId !== null && this.parent.selectable) {
+						this.$emit('change', isChecked) // go back to upper parent level
+					}
 				}
 			}
 		},
 
 		expandTreeNode(): void {
-			this.state = !this.state
+			this.isExpanded = !this.isExpanded
 		},
 
 		findSWL(criterion: Criterion): void {
@@ -249,9 +243,6 @@ export default Vue.extend({
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	/* align-items: flex-start;
-	gap: clamp(10px, 1.5%, 15px);
-	 */
 }
 
 .ontology-head-node input[type='checkbox'] {
@@ -281,19 +272,17 @@ export default Vue.extend({
 
 .no-checkbox {
 	display: inline-block;
-	width: 17px; /* ขนาดที่เท่ากับ checkbox */
+	width: 17px;
 }
 
 .swl-wrapper {
 	display: flex;
 	gap: 1.5%;
-	/* gap: clamp(10px, 1.5%, 15px); */
 }
 
 .swl-code-warning {
 	font-size: 12px;
 	color: #DC3545;
-	/* margin-top: 5px; */
 	cursor: default;
 }
 

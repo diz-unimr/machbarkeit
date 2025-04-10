@@ -20,7 +20,7 @@
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
-										{{ characteristic.display }} <span v-if="characteristic.loinc">({{ characteristic.loinc }})</span>
+										{{ characteristic.display }} ({{ characteristic.termCodes[0].code }})
 									</div>
 									<div v-if="characteristic.selectedFilter && isConceptType(characteristic.selectedFilter)" class="selected-criteria-condition">
 										<span v-for="(value, value_index) in characteristic.selectedFilter.valueFilter?.selectedConcepts" :key="value_index">
@@ -217,12 +217,6 @@ export interface FeasibilityQueryDisplayData {
     }
 	draggableInclusionCharacteristics: FeasibilityQueryBuilderData['selectedInclusionCharacteristics'];
 	draggableExclusionCharacteristics: FeasibilityQueryBuilderData['selectedExclusionCharacteristics'];
-	/* queryData: {
-		version: string;
-		display: string;
-		inclusionCriteria?: Array<QueryCriterionData>[];
-		exclusionCriteria?: Array<QueryCriterionData>[];
-	}; */
 }
 
 export default Vue.extend({
@@ -267,10 +261,6 @@ export default Vue.extend({
 				inclusionCriteria: [],
 				exclusionCriteria: [],
 			},
-			/* queryData: {
-				version: '',
-				display: '',
-			}, */
 		}
 	},
 

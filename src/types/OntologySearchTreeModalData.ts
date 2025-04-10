@@ -39,7 +39,7 @@ export interface Criterion {
     selectedFilter?: ConceptType | QuantityType | TimeRangeType;
 }
 
-export interface Modules {
+export interface Module {
     id: string;
     name: string;
     fdpgCdsCode: string;
@@ -59,13 +59,11 @@ export interface OntologyTree {
 
 export interface OntologySearchTreeModalData {
 	activeTab?: string;
-    wasTabClicked: Array<boolean>;
-	ontologyResponse: Criterion[] | null;
     requestStatus?: number;
 	selectedItems: Criterion[];
-    selectedItems2: Set<Criterion>;
+    checkedItems?: Criterion[];
     isSearchResultNoData: Array<boolean>;
-    modules: Modules[] | null;
+    modules: Module[] | null;
     ontologyTree: Criterion[] | null;
     ontologyTreeSearch: Array<Criterion | null>;
     context: {
@@ -75,4 +73,7 @@ export interface OntologySearchTreeModalData {
         display: string;
     } | null;
     isCheckboxChecked: boolean;
+    isModalOpened: boolean;
+    activeModule?: Module;
+    isLoading: boolean;
 }
