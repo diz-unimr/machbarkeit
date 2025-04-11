@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div v-if="requestStatus === 200" class="ontology-search-tree-container">
+	<div v-if="requestStatus400 === 200" class="ontology-search-tree-container">
 		<div class="ontology-search-tree-wrapper">
 			<div class="criteria-type">
 				{{ criteriaType }}
@@ -51,6 +51,7 @@
 				<div v-if="isLoading" class="loading-text ontology-search-tree__display">
 					Loading...
 				</div>
+				<div />
 				<div class="ontology-search-tree__button-group">
 					<button :disabled="isCheckboxEmpty" @click="submit(criteriaType)">
 						AUSWÄHLEN
@@ -103,7 +104,7 @@ export default Vue.extend({
 	data(): OntologySearchTreeModalData {
 		return {
 			activeTab: undefined,
-			requestStatus: undefined,
+			requestStatus400: undefined,
 			selectedItems: [],
 			checkedItems: undefined,
 			isSearchResultNoData: [],
@@ -209,42 +210,37 @@ export default Vue.extend({
 				this.ontologyTree = response
 				this.ontologyTreeSearch[moduleId] = response || [] // problem mit moduleId und index
 
-				this.requestStatus = apiResponse.status as number
-				this.$emit('get-request-status', this.requestStatus)
+				this.requestStatus400 = apiResponse.status as number
+				this.$emit('get-request-status', this.requestStatus400)
 				this.isLoading = false
 				return this.ontologyTree
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log((error as Error).message)
-				this.requestStatus = (error as AxiosError).status as number
-				this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
+
+				this.requestStatus400 = (error as AxiosError).status as number
+				this.$emit('get-request-status', this.requestStatus400, (error as AxiosError).message)
 				this.isLoading = false
 				return null
 			}
 		},
 
-		getCheckedItems(items: Criterion[], checkedItemsId: string[], checkedItems: Criterion[]): Criterion[] {
+		getCheckedItems(items: Criterion[], checkedItemsMap: Map<string, Criterion>): Criterion[] {
 			// Clear once at start of root call
 			this.selectedItems = []
 
 			const traverse = (items: Criterion[]) => {
 				for (const item of items) {
 					// Early exit if we already found everything
-					if (this.selectedItems.length === checkedItems!.length) {
+					if (this.selectedItems.length === checkedItemsMap!.size) {
 						return
-					} else if (item.selectable && checkedItemsId.includes(item.id)) {
+					} else if (item.selectable && checkedItemsMap.has(item.id)) {
 						this.selectedItems.push(item)
-
-						// Optional: remove children from checkedItems based on module logic
+						// remove children from checkedItems based on parent (Diagnose, Prozedur and Laboruntersuchung)
 						if (item.children && item.children.length > 0) {
 							const codePrefix = item.termCodes[0].code.slice(0, 3)
-							if (this.activeModule?.name === 'Diagnose' || this.activeModule?.name === 'Prozedur') {
-								checkedItems = checkedItems!.filter(checkedItem =>
-									checkedItem.id === item.id || !checkedItem.termCodes[0].code.startsWith(codePrefix))
-							} else if (this.activeModule?.name === 'Laboruntersuchung') {
-								checkedItems = checkedItems!.filter(checkedItem =>
-									checkedItem.id === item.id || !checkedItem.termCodes[0].code.startsWith(codePrefix))
-							}
+							checkedItemsMap = new Map([...checkedItemsMap!].filter(([id, checkedItem]) =>
+								id === item.id || !checkedItem.termCodes[0].code.startsWith(codePrefix)))
 						}
 					} else if (item.children && item.children.length > 0) {
 						traverse(item.children)
@@ -257,9 +253,8 @@ export default Vue.extend({
 		},
 
 		submit(criteriaType: string): void {
-			const checkedItems = [...Array.from(this.$store.state.checkedItemsMap.values())] as Criterion[]
-			const checkedItemsId = checkedItems!.map(checkedItem => checkedItem.id)
-			const selectedItems = this.getCheckedItems(this.ontologyTree!, checkedItemsId, checkedItems)
+			const checkedItems = this.$store.state.checkedItemsMap
+			const selectedItems = this.getCheckedItems(this.ontologyTree!, checkedItems)
 			this.$emit('get-selected-criteria', criteriaType, selectedItems)
 			this.$store.dispatch('clearCheckedItem')
 		},

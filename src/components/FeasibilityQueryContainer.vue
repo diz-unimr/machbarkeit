@@ -199,7 +199,7 @@ export default Vue.extend({
 	background-position-x: 10px;
 	border: 1px solid #9ea9b3;
 	border-radius: 5px;
-	width: 40%;
+	width: 45%;
 }
 
 .number-patients p {

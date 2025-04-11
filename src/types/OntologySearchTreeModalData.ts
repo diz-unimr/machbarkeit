@@ -59,7 +59,7 @@ export interface OntologyTree {
 
 export interface OntologySearchTreeModalData {
 	activeTab?: string;
-    requestStatus?: number;
+    requestStatus400?: number;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
     isSearchResultNoData: Array<boolean>;

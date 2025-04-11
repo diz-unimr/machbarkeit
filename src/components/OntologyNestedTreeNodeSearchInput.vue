@@ -75,7 +75,7 @@ export default Vue.extend({
 			},
 			set(checked: boolean): void {
 				if (checked) {
-					this.$store.dispatch('addCheckedItem', this.criterion)
+					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, node: this.criterion })
 				} else {
 					this.$store.dispatch('removeCheckedItem', this.criterion)
 				}
