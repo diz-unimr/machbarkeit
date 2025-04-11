@@ -7,7 +7,7 @@ services:
   nextcloud:
     image: ghcr.io/juliusknorr/nextcloud-dev-php81:latest
     environment:
-      SERVER_BRANCH: v27.1.5
+      SERVER_BRANCH: v30.0.6
       SQL: pgsql
       PHP_XDEBUG_MODE: debug #develop
       NEXTCLOUD_AUTOINSTALL: "YES"

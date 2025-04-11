@@ -16,7 +16,7 @@
     <category>tools</category>
     <bugs>https://test.com</bugs>
     <dependencies>
-        <nextcloud min-version="27" max-version="27" />
+        <nextcloud min-version="30" max-version="30" />
     </dependencies>
     <repair-steps>
         <install>
