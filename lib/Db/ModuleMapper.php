@@ -12,37 +12,34 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<Note>
+ * @template-extends QBMapper<Module>
  */
-class NoteMapper extends QBMapper {
+class ModuleMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'machbarkeit', Note::class);
+		parent::__construct($db, 'machbarkeit_modules', Module::class);
 	}
 
 	/**
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function find(int $id, string $userId): Note {
+	public function find(int $id): Module {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
-			->from('machbarkeit')
-			->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)))
-			->andWhere($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)));
+			->from('machbarkeit_modules')
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)));
 		return $this->findEntity($qb);
 	}
 
 	/**
-	 * @param string $userId
 	 * @return array
 	 */
-	public function findAll(string $userId): array {
+	public function findModules(): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
-			->from('machbarkeit')
-			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)));
+			->from('machbarkeit_modules');
 		return $this->findEntities($qb);
 	}
 }

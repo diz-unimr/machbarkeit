@@ -2,8 +2,9 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
+import type { Criterion } from './OntologySearchTreeModalData'
 
-export interface QuantityType {
+export interface QuantityType2 {
     type: string;
     display: string;
     isFilterOptional: boolean;
@@ -18,13 +19,28 @@ export interface QuantityType {
     },
 }
 
+export interface QuantityType {
+    valueFilter: {
+        /* access only object inside array */
+        unit: NonNullable<Criterion['filterOptions']>[number];
+        comparator?: string;
+        value?: number;
+        minValue?: number;
+        maxValue?: number;
+        type: string;
+    };
+}
+
 export interface QuantityOptionsData {
-    typeSymbol: {
-        'kein Filter': string,
-        gleich: string,
-        kleiner: string,
-        größer: string,
-        zwischen: string,
-    },
-    comparisonRestriction: QuantityType['value']
+    newSelectedCriterion: Criterion;
+    isFilterComplete: boolean;
+    selectedValue: {
+        unit: NonNullable<Criterion['filterOptions']>[number];
+        comparator: string;
+        value: number;
+        minValue: number;
+        maxValue: number;
+        type: string;
+    }
+    quantityType?: QuantityType;
 }

@@ -20,10 +20,28 @@ return [
 	],
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
-			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
+		[
+			'name' => 'note_api#preflighted_cors',
+			'url' => '/api/0.1/{path}',
+			'verb' => 'OPTIONS',
+			'requirements' => ['path' => '.+']
+		],
 		['name' => 'machbarkeit#getMetadata', 'url' => '/machbarkeit/metadata', 'verb' => 'GET'],
 		['name' => 'machbarkeit#getOntology', 'url' => '/machbarkeit/ontology', 'verb' => 'GET'],
-		['name' => 'machbarkeit#getUiProfile', 'url' => '/machbarkeit/ui_profile', 'verb' => 'GET']
+		// ['name' => 'machbarkeit#getUiProfile', 'url' => '/machbarkeit/ui_profile', 'verb' => 'GET'],
+
+		// TODO
+		// get module names
+		['name' => 'machbarkeit#getModules', 'url' => '/machbarkeit/modules', 'verb' => 'GET'],
+		// ontology tree
+		['name' => 'machbarkeit#getOntologyTree', 'url' => '/machbarkeit/ontology/{textSearch}/{module_id}', 'verb' => 'GET'],
+		// find ontology from termCodes
+		['name' => 'machbarkeit#findOntology', 'url' => '/machbarkeit/findOntologyFromUploadFile/{code}', 'verb' => 'GET'],
+		// get all filters
+		['name' => 'machbarkeit#getFilters', 'url' => '/machbarkeit/filters/{filter_options_ids}', 'verb' => 'GET'],
+		// get filters (for concepts)
+		['name' => 'machbarkeit#getRequest', 'url' => '/machbarkeit/get_request', 'verb' => 'POST'],
+
+		['name' => 'machbarkeit#selectSql', 'url' => '/machbarkeit/select_sql', 'verb' => 'GET'],
 	]
 ];

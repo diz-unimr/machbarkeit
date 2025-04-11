@@ -10,9 +10,9 @@
 		</div>
 		<div class="display-content">
 			<div id="einschlusskriterien" class="display-textfield">
-				<div v-if="selectedInclusionCharacteristics.length > 0">
-					<draggable v-model="draggableInclusionCharacteristics" @end="$emit('update-display-sequence', 'einschlusskriterien', draggableInclusionCharacteristics)">
-						<div v-for="(characteristic, index) in selectedInclusionCharacteristics"
+				<div v-if="draggableInclusionCharacteristics.characteristics.length > 0">
+					<draggable v-model="draggableInclusionCharacteristics.characteristics" @end="$emit('update-characteristics', 'einschlusskriterien', draggableInclusionCharacteristics)">
+						<div v-for="(characteristic, index) in draggableInclusionCharacteristics.characteristics"
 							:key="index"
 							style="position: relative">
 							<!-- can be changed sequence -->
@@ -20,27 +20,33 @@
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
-										{{ characteristic.display }}
+										{{ characteristic.display }} ({{ characteristic.termCodes[0].code }})
 									</div>
-									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-										<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
-											{{ value }}
+									<div v-if="characteristic.selectedFilter && isConceptType(characteristic.selectedFilter)" class="selected-criteria-condition">
+										<span v-for="(value, value_index) in characteristic.selectedFilter.valueFilter?.selectedConcepts" :key="value_index">
+											{{ value.display }}
 										</span>
 									</div>
-									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+									<div v-if="characteristic.selectedFilter && isQuantityType(characteristic.selectedFilter)" class="selected-criteria-condition">
+										<p v-if="characteristic.selectedFilter.valueFilter?.type === 'quantity-range'">
+											Zwischen {{ characteristic.selectedFilter.valueFilter?.minValue }} - {{ characteristic.selectedFilter.valueFilter?.maxValue }} {{ characteristic.selectedFilter.valueFilter?.unit.display }}
 										</p>
-										<p v-else>
-											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+										<p v-if="characteristic.selectedFilter.valueFilter?.type === 'quantity-comparator'">
+											{{ characteristic.selectedFilter.valueFilter?.comparator === 'lt' ? '<' : characteristic.selectedFilter.valueFilter?.comparator === 'gt' ? '>' : '=' }} {{ characteristic.selectedFilter.valueFilter?.value }} {{ characteristic.selectedFilter.valueFilter?.unit.display }}
 										</p>
 									</div>
-									<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
-										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+									<div v-if="characteristic.selectedFilter && isTimeRangeType(characteristic.selectedFilter)" class="selected-criteria-condition">
+										<p v-if="characteristic.selectedFilter?.timeRestriction?.afterDate && characteristic.selectedFilter?.timeRestriction.beforeDate && new Date(characteristic.selectedFilter?.timeRestriction?.afterDate) < new Date(characteristic.selectedFilter?.timeRestriction.beforeDate)">
+											Von {{ characteristic.selectedFilter?.timeRestriction.afterDate }} bis {{ characteristic.selectedFilter?.timeRestriction.beforeDate }}
 										</p>
-										<p v-else>
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+										<p v-else-if="characteristic.selectedFilter?.timeRestriction?.afterDate === characteristic.selectedFilter?.timeRestriction?.beforeDate">
+											Am {{ characteristic.selectedFilter?.timeRestriction?.afterDate }}
+										</p>
+										<p v-else-if="!characteristic.selectedFilter?.timeRestriction?.afterDate && characteristic.selectedFilter?.timeRestriction?.beforeDate">
+											Vor {{ characteristic.selectedFilter?.timeRestriction.beforeDate }}
+										</p>
+										<p v-else-if="characteristic.selectedFilter?.timeRestriction?.afterDate && !characteristic.selectedFilter?.timeRestriction.beforeDate">
+											Nach {{ characteristic.selectedFilter?.timeRestriction.afterDate }}
 										</p>
 									</div>
 								</div>
@@ -59,9 +65,9 @@
 									</button>
 								</div>
 							</div>
-							<button v-if="index !== (selectedInclusionCharacteristics.length - 1) && (characteristicsLogic.inclusionCriteria[index] === 'and')"
+							<button v-if="index !== (draggableInclusionCharacteristics.characteristics.length - 1) && (draggableInclusionCharacteristics.logic[index] === 'and')"
 								class="combining-operator"
-								@click="switchLogic('einschlussCriteria', index, 'and')">
+								@click="switchLogic('einschlusskriterien', index, 'and')">
 								UND
 								<svg role="img"
 									width="12px"
@@ -76,9 +82,9 @@
 									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
 								</svg>
 							</button>
-							<button v-if="characteristicsLogic.inclusionCriteria[index] === 'or'"
+							<button v-if="draggableInclusionCharacteristics.logic[index] === 'or'"
 								class="combining-operator or-operator"
-								@click="switchLogic('einschlussCriteria', index, 'or')">
+								@click="switchLogic('einschlusskriterien', index, 'or')">
 								<svg role="img"
 									width="12px"
 									height="12px"
@@ -97,44 +103,50 @@
 					</draggable>
 				</div>
 			</div>
-			<div class="pipe" />
+			<!-- <div class="pipe" />
 			<div id="ausschlusskriterien" class="display-textfield">
-				<div v-if="selectedExclusionCharacteristics.length > 0">
-					<draggable v-model="draggableExclusionCharacteristics" @end="$emit('update-display-sequence', 'ausschlusskriterien', draggableExclusionCharacteristics)">
-						<div v-for="(characteristic, index) in selectedExclusionCharacteristics" :key="index" style="position: relative">
+				<div v-if="draggableExclusionCharacteristics.characteristics.length > 0">
+					<draggable v-model="draggableExclusionCharacteristics.characteristics" @end="$emit('update-characteristics', 'ausschlusskriterien', draggableExclusionCharacteristics)">
+						<div v-for="(characteristic, index) in draggableExclusionCharacteristics.characteristics" :key="index" style="position: relative">
 							<div class="selected-criteria-container">
 								<div class="selected-criteria-left" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'ausschlusskriterien')">
 										{{ characteristic.display }}
 									</div>
-									<div v-if="characteristic.conceptType" class="selected-criteria-condition">
-										<span v-for="(value, value_index) in characteristic.conceptType.value" :key="value_index">
-											{{ value }}
+									<div v-if="characteristic.selectedFilter && isConceptType(characteristic.selectedFilter)" class="selected-criteria-condition">
+										<span v-for="(value, value_index) in characteristic.selectedFilter.valueFilter?.selectedConcepts" :key="value_index">
+											{{ value.display }}
 										</span>
 									</div>
-									<div v-if="characteristic.quantityType" class="selected-criteria-condition">
-										<p v-if="characteristic.quantityType.value.type === 'zwischen'">
-											{{ characteristic.quantityType.value.type }} {{ characteristic.quantityType.value.min }} und {{ characteristic.quantityType.value.max }} {{ characteristic.quantityType.value.unit }}
+									<div v-if="characteristic.selectedFilter && isQuantityType(characteristic.selectedFilter)" class="selected-criteria-condition">
+										<p v-if="characteristic.selectedFilter.valueFilter?.type === 'quantity-range'">
+											Zwischen {{ characteristic.selectedFilter.valueFilter?.minValue }} - {{ characteristic.selectedFilter.valueFilter?.maxValue }} {{ characteristic.selectedFilter.valueFilter?.unit.display }}
 										</p>
-										<p v-else>
-											{{ characteristic.quantityType.value.typeSymbol }} {{ characteristic.quantityType.value.value }} {{ characteristic.quantityType.value.unit }}
+										<p v-if="characteristic.selectedFilter.valueFilter?.type === 'quantity-comparator'">
+											{{ characteristic.selectedFilter.valueFilter?.comparator === 'lt' ? '<' : characteristic.selectedFilter.valueFilter?.comparator === 'gt' ? '>' : '=' }} {{ characteristic.selectedFilter.valueFilter?.value }} {{ characteristic.selectedFilter.valueFilter?.unit.display }}
 										</p>
 									</div>
-									<div v-if="characteristic.timeRange?.value.fromDate" class="selected-criteria-condition">
-										<p v-if="characteristic.timeRange.value.type === 'zwischen'">
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }} und {{ characteristic.timeRange.value.toDate }}
+									<div v-if="characteristic.selectedFilter && isTimeRangeType(characteristic.selectedFilter)" class="selected-criteria-condition">
+										<p v-if="characteristic.selectedFilter?.timeRestriction?.afterDate && characteristic.selectedFilter?.timeRestriction.beforeDate && new Date(characteristic.selectedFilter?.timeRestriction?.afterDate) < new Date(characteristic.selectedFilter?.timeRestriction.beforeDate)">
+											Von {{ characteristic.selectedFilter?.timeRestriction.afterDate }} bis {{ characteristic.selectedFilter?.timeRestriction.beforeDate }}
 										</p>
-										<p v-else>
-											{{ characteristic.timeRange.value.type }} {{ characteristic.timeRange.value.fromDate }}
+										<p v-else-if="characteristic.selectedFilter?.timeRestriction?.afterDate === characteristic.selectedFilter?.timeRestriction?.beforeDate">
+											Am {{ characteristic.selectedFilter?.timeRestriction?.afterDate }}
+										</p>
+										<p v-else-if="!characteristic.selectedFilter?.timeRestriction?.afterDate && characteristic.selectedFilter?.timeRestriction?.beforeDate">
+											Vor {{ characteristic.selectedFilter?.timeRestriction.beforeDate }}
+										</p>
+										<p v-else-if="characteristic.selectedFilter?.timeRestriction?.afterDate && !characteristic.selectedFilter?.timeRestriction.beforeDate">
+											Nach {{ characteristic.selectedFilter?.timeRestriction.afterDate }}
 										</p>
 									</div>
 								</div>
 								<div class="selected-criteria-right">
 									<button class="delete-btn" @click="deleteBtn(index, 'ausschlusskriterien')">
 										<svg role="img"
-											width="18px"
-											height="18px"
+											width="20px"
+											height="20px"
 											aria-hidden="true"
 											focusable="false"
 											data-prefix="fas"
@@ -147,9 +159,9 @@
 									</button>
 								</div>
 							</div>
-							<button v-if="index !== (selectedExclusionCharacteristics.length - 1) && (characteristicsLogic.exclusionCriteria[index] === 'and')"
+							<button v-if="index !== (draggableExclusionCharacteristics.characteristics.length - 1) && (draggableExclusionCharacteristics.logic[index] === 'and')"
 								class="combining-operator"
-								@click="switchLogic('ausschlussCriteria', index, 'and')">
+								@click="switchLogic('ausschlusskriterien', index, 'and')">
 								UND
 								<svg role="img"
 									width="12px"
@@ -164,9 +176,9 @@
 									<path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z" />
 								</svg>
 							</button>
-							<button v-if="characteristicsLogic.exclusionCriteria[index] === 'or'"
+							<button v-if="draggableExclusionCharacteristics.logic[index] === 'or'"
 								class="combining-operator or-operator"
-								@click="switchLogic('ausschlussCriteria', index, 'or')">
+								@click="switchLogic('ausschlusskriterien', index, 'or')">
 								<svg role="img"
 									width="12px"
 									height="12px"
@@ -184,32 +196,27 @@
 						</div>
 					</draggable>
 				</div>
-			</div>
+			</div> -->
 		</div>
-		<!-- <span v-for="(ein, ein_index) in selectedInclusionCharacteristics" :key="ein_index">
-			{{ ein.display }} / {{ characteristicsLogic.einschlussCriteria[ein_index] }} /
-		</span>
-		<br>
-		<span v-for="(aus, aus_index) in selectedExclusionCharacteristics" :key="aus_index">
-			{{ aus.display }} / {{ characteristicsLogic.ausschlussCriteria[aus_index] }} /
-		</span> -->
 	</div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import type { FilterInfo } from '../types/LimitationsSelectedCriteriaCardData'
+import Vue, { type PropType } from 'vue'
 import draggable from 'vuedraggable'
+import type { Criterion } from '../types/OntologySearchTreeModalData.ts'
+import type { ConceptType } from '../types/ConceptOptionsData.ts'
+import type { QuantityType } from '../types/QuantityOptionsData.ts'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
+import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData.ts'
 
-interface FeasibilityQueryDisplayData {
-    characteristicsLogic: {
+export interface FeasibilityQueryDisplayData {
+	characteristicsLogic: {
         inclusionCriteria: Array<string>;
         exclusionCriteria: Array<string>;
     }
-    inclusionCriteriaOld: Array<string>;
-	exclusionCriteriaOld: Array<string>;
-	draggableInclusionCharacteristics: Array<FilterInfo>;
-	draggableExclusionCharacteristics: Array<FilterInfo>;
+	draggableInclusionCharacteristics: FeasibilityQueryBuilderData['selectedInclusionCharacteristics'];
+	draggableExclusionCharacteristics: FeasibilityQueryBuilderData['selectedExclusionCharacteristics'];
 }
 
 export default Vue.extend({
@@ -220,12 +227,12 @@ export default Vue.extend({
 
 	props: {
 		selectedInclusionCharacteristics: {
-			type: Array<FilterInfo>,
+			type: Object as PropType<SelectedCharacteristics>,
 			required: true,
 		},
 
 		selectedExclusionCharacteristics: {
-			type: Array<FilterInfo>,
+			type: Object as PropType<SelectedCharacteristics>,
 			required: true,
 		},
 
@@ -242,52 +249,42 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryDisplayData {
 		return {
-			draggableInclusionCharacteristics: [...this.selectedInclusionCharacteristics],
-			draggableExclusionCharacteristics: [...this.selectedExclusionCharacteristics],
+			draggableInclusionCharacteristics: {
+				characteristics: [...this.selectedInclusionCharacteristics.characteristics],
+				logic: [...this.selectedInclusionCharacteristics.logic],
+			},
+			draggableExclusionCharacteristics: {
+				characteristics: [...this.selectedExclusionCharacteristics.characteristics],
+				logic: [...this.selectedExclusionCharacteristics.logic],
+			},
 			characteristicsLogic: {
 				inclusionCriteria: [],
 				exclusionCriteria: [],
 			},
-			inclusionCriteriaOld: [],
-			exclusionCriteriaOld: [],
 		}
 	},
 
-	watch: {
-		selectedInclusionCharacteristics(newVal) {
-			this.draggableInclusionCharacteristics = [...newVal]
+	computed: {
+		hasCharacteristics(): boolean {
+			return this.draggableInclusionCharacteristics.characteristics.length > 0 || this.draggableExclusionCharacteristics.characteristics.length > 0
+		},
+	},
 
-			// first input
-			if (this.inclusionCriteriaOld.length === 0) {
-				const length = newVal.length - this.inclusionCriteriaOld.length
-				for (let i = 1; i < length; i++) {
-					this.characteristicsLogic.inclusionCriteria.push('and')
-				}
-			} else if (newVal.length > 0) {
-				const length = newVal.length - this.inclusionCriteriaOld.length
-				for (let i = 1; i <= length; i++) {
-					this.characteristicsLogic.inclusionCriteria.push('and')
-				}
-			}
-			this.inclusionCriteriaOld = [...newVal]
+	watch: {
+		selectedInclusionCharacteristics: {
+			handler(newVal) {
+				this.draggableInclusionCharacteristics.characteristics = [...newVal.characteristics]
+				this.draggableInclusionCharacteristics.logic = newVal.logic
+			},
+			deep: true,
 		},
 
-		selectedExclusionCharacteristics(newVal) {
-			this.draggableExclusionCharacteristics = [...newVal]
-
-			// first input
-			if (this.exclusionCriteriaOld.length === 0) {
-				const length = newVal.length - this.exclusionCriteriaOld.length
-				for (let i = 1; i < length; i++) {
-					this.characteristicsLogic.exclusionCriteria.push('and')
-				}
-			} else if (this.selectedExclusionCharacteristics.length > 0) {
-				const length = newVal.length - this.exclusionCriteriaOld.length
-				for (let i = 1; i <= length; i++) {
-					this.characteristicsLogic.exclusionCriteria.push('and')
-				}
-			}
-			this.exclusionCriteriaOld = [...newVal]
+		selectedExclusionCharacteristics: {
+			handler(newVal) {
+				this.draggableExclusionCharacteristics.characteristics = [...newVal.characteristics]
+				this.draggableExclusionCharacteristics.logic = newVal.logic
+			},
+			deep: true,
 		},
 	},
 
@@ -295,9 +292,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -306,37 +301,55 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
+		isConceptType(filter: ConceptType | QuantityType | TimeRangeType): filter is ConceptType {
+			return 'valueFilter' in filter && filter.valueFilter!.type === 'concept'
+		},
+
+		isQuantityType(filter: ConceptType | QuantityType | TimeRangeType): filter is QuantityType {
+			return 'valueFilter' in filter && (filter.valueFilter!.type === 'quantity-range' || filter.valueFilter!.type === 'quantity-comparator')
+		},
+
+		isTimeRangeType(filter: ConceptType | QuantityType | TimeRangeType): filter is TimeRangeType {
+			return 'timeRestriction' in filter
+		},
+
 		switchLogic(criteria: string, index: number, logic: string): void {
-			if (criteria === 'einschlussCriteria') {
+			if (criteria === 'einschlusskriterien') {
 				if (logic === 'and') {
-					this.characteristicsLogic.inclusionCriteria.splice(index, 1, 'or')
+					this.draggableInclusionCharacteristics.logic.splice(index, 1, 'or')
 				} else if (logic === 'or') {
-					this.characteristicsLogic.inclusionCriteria.splice(index, 1, 'and')
+					this.draggableInclusionCharacteristics.logic.splice(index, 1, 'and')
 				}
-			} else if (criteria === 'ausschlussCriteria') {
+				this.$emit('update-characteristics', criteria, this.draggableInclusionCharacteristics)
+			} else if (criteria === 'ausschlusskriterien') {
 				if (logic === 'and') {
-					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'or')
+					this.draggableExclusionCharacteristics.logic.splice(index, 1, 'or')
 				} else if (logic === 'or') {
-					this.characteristicsLogic.exclusionCriteria.splice(index, 1, 'and')
+					this.draggableExclusionCharacteristics.logic.splice(index, 1, 'and')
 				}
+				this.$emit('update-characteristics', criteria, this.draggableExclusionCharacteristics)
 			}
 		},
 
-		editLimitation(characteristic: FilterInfo, index: number, criteriaType: string) {
+		editLimitation(characteristic: Criterion, index: number, criteriaType: string) {
 			this.$emit('edit-criteria-limitation', characteristic, index, criteriaType)
 		},
 
 		deleteBtn(index: number, criteriaType: string) {
-			this.$emit('delete-characteristic', index, criteriaType)
 			if (criteriaType === 'einschlusskriterien') {
-				if (this.characteristicsLogic.inclusionCriteria[index - 1] === 'or') {
-					this.characteristicsLogic.inclusionCriteria.splice(index - 1, 1)
-				} else this.characteristicsLogic.inclusionCriteria.splice(index, 1)
+				this.draggableInclusionCharacteristics.characteristics.splice(index, 1)
+				if (this.draggableInclusionCharacteristics.logic[index - 1] === 'or') {
+					this.draggableInclusionCharacteristics.logic.splice(index - 1, 1)
+				} else this.draggableInclusionCharacteristics.logic.splice(index, 1)
+				this.$emit('update-characteristics', criteriaType, this.draggableInclusionCharacteristics)
 			} else if (criteriaType === 'ausschlusskriterien') {
-				if (this.characteristicsLogic.exclusionCriteria[index - 1] === 'or') {
-					this.characteristicsLogic.exclusionCriteria.splice(index - 1, 1)
-				} else this.characteristicsLogic.exclusionCriteria.splice(index, 1)
+				this.draggableExclusionCharacteristics.characteristics.splice(index, 1)
+				if (this.draggableExclusionCharacteristics.logic[index - 1] === 'or') {
+					this.draggableExclusionCharacteristics.logic.splice(index - 1, 1)
+				} else this.draggableExclusionCharacteristics.logic.splice(index, 1)
+				this.$emit('update-characteristics', criteriaType, this.draggableExclusionCharacteristics)
 			}
+
 		},
 	},
 })
@@ -407,7 +420,7 @@ export default Vue.extend({
 	display: flex;
 	flex-direction: column;
 	width: 80%;
-	padding: 10px;
+	padding: 8px;
 }
 
 .selected-criteria-right {
@@ -420,7 +433,7 @@ export default Vue.extend({
 
 .selected-criteria-display {
 	font-weight: 700;
-	margin-bottom: 10px;
+	margin-bottom: 8px;
 }
 
 .selected-criteria-display:hover {
@@ -469,7 +482,7 @@ export default Vue.extend({
 	display: flex;
 	border: none;
 	outline: none;
-	height: 0px;
+	min-height: 20px;
 	margin: 0px;
 	padding: 0px;
 	background-color: unset;

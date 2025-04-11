@@ -7,22 +7,44 @@
 		<div class="feasibility-query-wrapper">
 			<div class="feasibility-query__output">
 				<div class="number-patients">
-					<p>Anzahl der Patienten: {{ numberOfPatients }}</p>
+					<p>
+						Anzahl der Patienten:
+						<span v-if="isQeuryCompleted !== null && !isQeuryCompleted">
+							<img src="../../img/loading_spinner.svg">
+						</span>
+						<template v-else-if="numberOfPatients !== null">
+							<span v-if="numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>
+							<span v-else>{{ numberOfPatients }}</span>
+						</template>
+						<span v-else-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+						<span v-else>-</span>
+					</p>
 				</div>
 				<div class="feasibility-query__button-group">
-					<button :disabled="true">
+					<button :disabled="!isCriteriaAvailable" @click="resetSelectedCriteria()">
 						ZURÜCKSETZEN
 					</button>
-					<button :disabled="hasNoQuery">
+					<button :disabled="!isCriteriaAvailable" @click="startQuery(queryData)">
 						ABFRAGE STARTEN
 					</button>
 				</div>
 			</div>
-			<SaveQueryModal v-if="isSaveModalOpen" @close-save-modal="closeSaveModal" />
-			<FeasibilityQueryBuilder :is-save-modal-open="isSaveModalOpen"
-				@enable-start-query-button="enableStartQueryButton" />
+			<SaveQueryModal v-if="isSaveModalOpen"
+				:query-data="queryData"
+				@close-save-modal="closeSaveModal" />
+
+			<FeasibilityQueryBuilder ref="childComponent"
+				:uploaded-query-data="queryDataFromUpload"
+				:data-from-upload="dataFromUpload"
+				:is-criteria-available="isCriteriaAvailable"
+				:is-save-modal-open="isSaveModalOpen"
+				@get-query-data="getQueryData" />
 		</div>
-		<MachbarkeitFooter @open-save-modal="openSaveModal" @close-save-modal="closeSaveModal" />
+		<MachbarkeitFooter :is-criteria-available="isCriteriaAvailable"
+			@open-save-modal="openSaveModal"
+			@close-save-modal="closeSaveModal"
+			@send-criteria-to-display="forwardCriteriaToDisplay"
+			@get-query-data="getQueryData" />
 	</div>
 </template>
 
@@ -31,11 +53,22 @@ import Vue from 'vue'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
+import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
+import axios, { type CancelTokenSource } from 'axios'
 
 interface FeasibilityQueryContainerData {
-	numberOfPatients: number;
+	queryData: FeasibilityQueryBuilderData['queryData'] | null;
+	queryDataFromUpload: FeasibilityQueryBuilderData['queryData'] | null;
+	dataFromUpload: {
+		inclusionCharacteristics: SelectedCharacteristics;
+		exclusionCharacteristics: SelectedCharacteristics;
+	} | null;
+	numberOfPatients: number | null;
 	isSaveModalOpen: boolean;
-	hasNoQuery: boolean;
+	isCriteriaAvailable: boolean;
+	errorMessage: string | null;
+	isQeuryCompleted: boolean | null;
+	cancelTokenSource: CancelTokenSource | null;
 }
 
 export default Vue.extend({
@@ -48,9 +81,15 @@ export default Vue.extend({
 
 	data(): FeasibilityQueryContainerData {
 		return {
-			numberOfPatients: 0,
+			queryData: null,
+			queryDataFromUpload: null,
+			dataFromUpload: null,
+			numberOfPatients: null,
 			isSaveModalOpen: false,
-			hasNoQuery: true,
+			isCriteriaAvailable: false,
+			errorMessage: null,
+			isQeuryCompleted: null,
+			cancelTokenSource: null,
 		}
 	},
 
@@ -75,8 +114,47 @@ export default Vue.extend({
 			this.isSaveModalOpen = false
 		},
 
-		enableStartQueryButton(hasData: boolean): void {
-			this.hasNoQuery = !hasData
+		resetSelectedCriteria() {
+			this.isCriteriaAvailable = false
+			this.numberOfPatients = null
+			this.errorMessage = null
+			this.isQeuryCompleted = true
+			this.cancelTokenSource = axios.CancelToken.source()
+			this.cancelTokenSource!.cancel('User stopped the request')
+			this.cancelTokenSource = null
+		},
+
+		getQueryData(data: FeasibilityQueryBuilderData['queryData'] | null): void {
+			this.queryData = data
+			this.isCriteriaAvailable = !!data
+			this.numberOfPatients = null
+			this.errorMessage = null
+		},
+
+		forwardCriteriaToDisplay(data: { inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics }) {
+			this.dataFromUpload = data
+		},
+
+		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
+			this.isQeuryCompleted = false
+			this.numberOfPatients = null
+			this.cancelTokenSource = axios.CancelToken.source()
+
+			try {
+				const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',
+					JSON.stringify(data),
+					{
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					},
+				)
+				this.numberOfPatients = response.data
+				this.isQeuryCompleted = true
+			} catch (error) {
+				this.errorMessage = error ? 'Found some error!' : null
+			}
+			this.isQeuryCompleted = true
 		},
 	},
 })
@@ -86,7 +164,7 @@ export default Vue.extend({
 .feasibility-query-container {
 	display: flex;
 	flex-direction: column;
-	width: 1200px;
+	width: 55%;
 	max-width: 1200px;
 	height: 100%;
 	margin: 0px auto 0px auto;
@@ -121,12 +199,23 @@ export default Vue.extend({
 	background-position-x: 10px;
 	border: 1px solid #9ea9b3;
 	border-radius: 5px;
-	width: 40%;
+	width: 45%;
 }
 
 .number-patients p {
+	display: flex;
+	align-items: center;
 	margin-left: 30px;
 	font-size: medium;
+}
+
+.number-patients span {
+	display: flex;
+	padding-left: 5px;
+}
+
+.error-message {
+	color: red;
 }
 
 .feasibility-query__button-group {

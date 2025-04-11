@@ -4,42 +4,76 @@
 */
 import type { ConceptType } from './ConceptOptionsData.ts'
 import type { QuantityType } from '../types/QuantityOptionsData.ts'
-import type { TimeRange } from '../types/TimeRangeOptionsData.ts'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 
-export interface OntologyTreeElement {
-    children: Array<OntologyTreeElement> | undefined;
+export interface Criterion {
+    children: Array<Criterion>;
     id: string;
+    moduleId: string;
+    parentId: string | null;
     display: string;
-    context: {
-        code: string,
-        display: string,
-        system: string,
-        version: string,
+    termCodes: {
+        code: string;
+        system: string;
+        display: string;
+        version: string;
+    }[],
+    context?: {
+        code: string;
+        system: string;
+        version: string;
+        display: string;
     };
-    leaf: boolean | undefined;
-    selectable: boolean | undefined;
-    termCodes: [
-        {
-            code: string,
-            display: string,
-            system: string,
-        }
-    ] | undefined;
-    conceptType: ConceptType | undefined;
-	timeRange: TimeRange | undefined;
-	quantityType: QuantityType | undefined;
+    loinc?: string;
+    selectable: boolean;
+    leaf: boolean;
+    timeRestrictionAllowed?: boolean | null;
+    filterName?: string;
+    filterType: string | null;
+    filterOptions: {
+        code: string;
+        display: string;
+        system?: string;
+        version?: string;
+    }[] | null;
+    selectedFilter?: ConceptType | QuantityType | TimeRangeType;
 }
 
-/* interface CriteriaData extends OntologyTreeElement {
-    conceptType: ConceptType | undefined;
-	timeRange: TimeRange | undefined;
-	quantityType: QuantityType | undefined;
-} */
+export interface Module {
+    id: string;
+    name: string;
+    fdpgCdsCode: string;
+    fdpgCdsSystem: string;
+    fdpgCdsVersion: string;
+    version: string;
+}
+
+export interface OntologyTree {
+    display: string;
+    id: number;
+    leaf: boolean;
+    moduleId: number;
+    parentId: number | null;
+    selectable: boolean;
+}
 
 export interface OntologySearchTreeModalData {
-	activeTab: number | string;
-	ontologyResponse: OntologyTreeElement[] | null;
-    /* criteriaData: CriteriaData[] | null; */
-	selectedItems: OntologyTreeElement[];
+	activeTab?: string;
+    requestStatus400?: number;
+	selectedItems: Criterion[];
+    checkedItems?: Criterion[];
     isSearchResultNoData: Array<boolean>;
+    modules: Module[] | null;
+    ontologyTree: Criterion[] | null;
+    ontologyTreeSearch: Array<Criterion | null>;
+    context: {
+        code: string;
+        system: string;
+        version: string;
+        display: string;
+    } | null;
+    isCheckboxChecked: boolean;
+    isModalOpened: boolean;
+    activeModule?: Module;
+    isLoading: boolean;
 }

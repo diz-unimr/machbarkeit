@@ -2,63 +2,41 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { OntologyTreeElement } from './OntologySearchTreeModalData.ts'
-import type { FilterInfo } from './LimitationsSelectedCriteriaCardData.ts'
+import type { ConceptType } from '../types/ConceptOptionsData.ts'
+import type { QuantityType } from '../types/QuantityOptionsData.ts'
+import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
+import type { Criterion, Module } from './OntologySearchTreeModalData.ts'
 
-interface ValueDefinition {
-    allowedUnits: [
-        {
-            code: string;
-            display: string;
-            system: string;
-            version: string | null | undefined;
-        }
-    ];
-    max: number | null;
-    min: number | null;
-    optional: boolean;
-    precision: number;
-    referenceCriteriaSet: null;
-    selectableConcepts: [
-        {
-            code: string;
-            display: string;
-            system: string;
-            version: string | null | undefined;
-        }
-    ];
-    type: string;
+export interface SelectedCharacteristics {
+    characteristics: Array<Criterion>;
+    logic: Array<string>;
 }
 
-export interface Profile {
-    attributeDefinitions: Array<object>;
-    name: string;
-    timeRestrictionAllowed: boolean;
-    valueDefinition: ValueDefinition | null;
-}
-
-export interface UiProfile {
-    Diagnose: Profile;
-    Prozedur: Profile;
-    'Gegenwärtiges chronologisches Alter': Profile;
-    Geschlecht: Profile;
-}
+export type QueryCriterionData = {
+    id: Criterion['id'];
+    termCodes: Criterion['termCodes'];
+    context: Criterion['context'];
+} & (ConceptType | QuantityType | TimeRangeType | undefined)
 
 export interface FeasibilityQueryBuilderData {
-    uiProfile: UiProfile | null;
-    inclusionSearchInputTemp: string;
-    exclusionSearchInputTemp: string;
-    inclusionSearchInput: string;
-    exclusionSearchInput: string;
+    modules: Array<Module> | null;
+    searchInputText: string;
+    inclusionSearchInputText: string;
+    exclusionSearchInputText: string;
     isLimitationsCriteriaOpen: boolean;
     isOntologySearchTreeOpen: boolean;
     criteriaOverlayType: string;
-    selectedCriteria: OntologyTreeElement[] | null;
-    selectedEditedCriteria: FilterInfo[] | null;
-    selectedEditedCriteriaIndex: number | null
-    selectedInclusionCharacteristics: Array<FilterInfo>;
-    selectedExclusionCharacteristics: Array<FilterInfo>;
+    selectedCriteria: Criterion[] | null;
+    selectedEditedCriteriaIndex: number | null;
+    selectedInclusionCharacteristics: SelectedCharacteristics;
+    selectedExclusionCharacteristics: SelectedCharacteristics;
+    queryData: {
+        version: string;
+        display: string;
+        inclusionCriteria?: Array<QueryCriterionData>[];
+		exclusionCriteria?: Array<QueryCriterionData>[];
+    };
     isStateEditFilter: boolean;
-    debouncedHandler: _.DebouncedFunc<() => void> | null;
+    searchInputWarning: string;
     imgDelete: string;
 }

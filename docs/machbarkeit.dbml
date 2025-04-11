@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2024 Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table modules {
+  id integer [pk, increment]
+  name string [not null]
+  version string [not null]
+}
+
+Table ontology_concepts {
+  id integer [pk, increment]
+  name string [not null]
+  module_id integer
+  parent_id integer
+}
+
+Table filters {
+  id integer [pk, increment]
+  concept_id integer
+}
+
+Table termcodes {
+  id integer [pk, increment]
+  code string
+  system string
+  display string
+}
+
+// TODO
+Ref: ontology_concepts.id <> termcodes.id
+Ref: modules.id < ontology_concepts.module_id
+Ref: ontology_concepts.id < ontology_concepts.parent_id
+Ref: filters.concept_id > ontology_concepts.id // many-to-one

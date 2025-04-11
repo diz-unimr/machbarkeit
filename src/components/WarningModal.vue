@@ -6,21 +6,16 @@
 	<div class="save-query-modal-container">
 		<div class="save-query-modal-wrapper">
 			<h2 class="save-query-modal__title">
-				Abspeichern der aktuellen Suchanfrage
+				Achtung!
 			</h2>
 			<div class="save-query-modal__folder-name">
-				<NcTextField :value.sync="fileName"
-					label="Dateiname"
-					trailing-button-icon="close"
-					placeholder=" "
-					:show-trailing-button="fileName !== ''"
-					@trailing-button-click="fileName = ''" />
+				<div>Beim Verlassen des aktuellen Moduls werden alle ausgewählten Kriterien entfernt.</div>
 			</div>
 			<div class="save-query-modal__button-group">
-				<button :disabled="fileName.length === 0" @click="saveQuery(queryData, fileName)">
-					SPEICHERN
+				<button @click="$emit('submit-change-tab')">
+					OK
 				</button>
-				<button @click="$emit('close-save-modal')">
+				<button @click="$emit('cancel-change-tab')">
 					ABBRECHEN
 				</button>
 			</div>
@@ -30,20 +25,15 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import download from 'downloadjs'
-import { NcTextField } from '@nextcloud/vue'
 import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
 
-interface SaveQueryModalData {
+interface WarningModalData {
 	fileName:string;
 	isModalVisible: boolean;
 }
 
 export default Vue.extend({
-	name: 'SaveQueryModal',
-	components: {
-		NcTextField,
-	},
+	name: 'WarningModal',
 
 	props: {
 		queryData: {
@@ -52,7 +42,7 @@ export default Vue.extend({
 		},
 	},
 
-	data(): SaveQueryModalData {
+	data(): WarningModalData {
 		return {
 			fileName: '',
 			isModalVisible: true,
@@ -71,16 +61,7 @@ export default Vue.extend({
 	beforeDestroy() {},
 	destroyed() {},
 
-	methods: {
-		saveQuery(data: FeasibilityQueryBuilderData['queryData'], fileName: string) {
-			// utf-8 encoder
-			const encoder = new TextEncoder()
-			const jsonString = JSON.stringify(data, null, 2)
-			const utf8JsonData = encoder.encode(jsonString)
-			data && download(utf8JsonData, fileName + '.json', 'application/json')
-			this.$emit('close-save-modal')
-		},
-	},
+	methods: {},
 })
 </script>
 

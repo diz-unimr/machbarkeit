@@ -1,20 +1,33 @@
 # SPDX-FileCopyrightText: 2024 Sebastian Stöcker <sebastian.stoecker@uni-marburg.de>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: "3"
 name: "nc-dev"
 
 services:
   nextcloud:
-    image: ghcr.io/juliushaertl/nextcloud-dev-php80:latest
+    image: ghcr.io/juliusknorr/nextcloud-dev-php81:latest
     environment:
       SERVER_BRANCH: v27.1.5
+      SQL: pgsql
       PHP_XDEBUG_MODE: debug #develop
+      NEXTCLOUD_AUTOINSTALL: "YES"
     volumes:
       - ./data/shared:/shared
       - ./data/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      # - ./data/server:/var/www/html
+      - ./bootstrap.sh:/usr/local/bin/bootstrap.sh
       - ../:/var/www/html/apps-extra/machbarkeit
     ports:
       - "8080:80"
     extra_hosts:
       - host.docker.internal:host-gateway
+    depends_on:
+      - database-pgsql
+
+  database-pgsql:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"

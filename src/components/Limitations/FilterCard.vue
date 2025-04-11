@@ -10,10 +10,7 @@
 					<img :src="imgExpand"
 						:style="{transform: state ? 'rotate(180deg)': 'rotate(0deg)'}">
 				</button>
-				<p>{{ display }} </p>
-				<p v-if="display === 'Zeitraum' || profile.valueDefinition?.optional">
-					(optional)
-				</p>
+				<p>{{ filterName }}</p>
 			</div>
 			<div class="filter-card__button--reset">
 				<button :disabled="isResetDisabled" @click="reset">
@@ -21,32 +18,23 @@
 				</button>
 			</div>
 		</div>
-		<component :is="filterType"
-			:profile="profile"
-			:is-reset-disabled="isResetDisabled"
-			:selected-criterion="selectedCriterion"
-			@toggle-reset-button="toggleResetButton"
-			@get-selected-filter-option="getSelectedFilterOption" />
-		<!-- <TimeRangeOptions v-if="profile.timeRestrictionAllowed && display === 'Zeitraum'"
-			:profile="profile"
+		<TimeRangeOptions v-if="selectedCriterion.timeRestrictionAllowed"
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
 			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<QuantityOptions v-if="profile.valueDefinition?.type === 'quantity' && display === 'Wertebereich'"
-			:profile="profile"
+		<QuantityOptions v-if="selectedCriterion.filterType === 'quantity'"
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
 			@get-selected-filter-option="getSelectedFilterOption" />
 
-		<ConceptOptions v-if="profile.valueDefinition?.type === 'concept' && display === 'Wertebereich'"
-			:profile="profile"
+		<ConceptOptions v-if="selectedCriterion.filterType === 'concept'"
 			:is-reset-disabled="isResetDisabled"
 			:selected-criterion="selectedCriterion"
 			@toggle-reset-button="toggleResetButton"
-			@get-selected-filter-option="getSelectedFilterOption" /> -->
+			@get-selected-filter-option="getSelectedFilterOption" />
 	</div>
 </template>
 
@@ -55,16 +43,15 @@ import Vue, { type PropType } from 'vue'
 import TimeRangeOptions from './TimeRangeOptions.vue'
 import ConceptOptions from './ConceptOptions.vue'
 import QuantityOptions from './QuantityOptions.vue'
-import type { Profile } from '../../types/FeasibilityQueryBuilderData'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { Criterion } from '../../types/OntologySearchTreeModalData'
 import type { ConceptType } from '../../types/ConceptOptionsData'
 import type { QuantityType } from '../../types/QuantityOptionsData'
-import type { TimeRange } from '../../types/TimeRangeOptionsData'
+import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
 
 interface FilterCardData {
+	filterName: string | null;
 	state: boolean;
 	isResetDisabled: boolean;
-	filterType: string | null;
 	imgExpand: string;
 }
 
@@ -76,32 +63,16 @@ export default Vue.extend({
 		QuantityOptions,
 	},
 	props: {
-		profile: {
-			type: Object as PropType<Profile>,
-			required: true,
-		},
-		attribute: {
-			type: String,
-			default: String,
-		},
-		isFilterOptional: {
-			type: Boolean,
-			default: true,
-		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
 			required: true,
-		},
-		display: {
-			type: String,
-			default: String,
 		},
 	},
 	data(): FilterCardData {
 		return {
-			state: this.profile.valueDefinition ? !this.profile.valueDefinition?.optional : false, // set state = false for optional Filter
-			isResetDisabled: this.display === 'Wertebereich' ? !(this.selectedCriterion.conceptType?.value || this.selectedCriterion.quantityType?.value) : (!this.selectedCriterion.timeRange?.value.type || this.selectedCriterion.timeRange?.value.type === 'kein Filter'),
-			filterType: null,
+			filterName: null,
+			state: true,
+			isResetDisabled: !(this.selectedCriterion.selectedFilter !== undefined && (!('valueFilter' in this.selectedCriterion.selectedFilter) || !('timeRestriction' in this.selectedCriterion.selectedFilter))),
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
 	},
@@ -111,9 +82,7 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		if (this.profile.timeRestrictionAllowed && this.display === 'Zeitraum') { this.filterType = 'time-range-options' }
-		if (this.profile.valueDefinition?.type === 'quantity' && this.display === 'Wertebereich') { this.filterType = 'quantity-options' }
-		if (this.profile.valueDefinition?.type === 'concept' && this.display === 'Wertebereich') { this.filterType = 'concept-options' }
+		this.selectedCriterion.timeRestrictionAllowed ? this.filterName = 'Zeitraum (Option)' : this.filterName = 'Wertbereich'
 	},
 	beforeMount() {},
 	mounted() {},
@@ -123,14 +92,8 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		setState(): void {
-			if (!this.profile.valueDefinition?.optional) {
-				this.state = true
-			}
-		},
-
-		getSelectedFilterOption(status: string, selectedFilterInfo: ConceptType | QuantityType | TimeRange) {
-			this.$emit('get-selected-filters', status, selectedFilterInfo)
+		getSelectedFilterOption(selectedFilterInfo: ConceptType | QuantityType | TimeRangeType | undefined, isFilterComplete: boolean | undefined) {
+			this.$emit('get-selected-filters', selectedFilterInfo, isFilterComplete)
 		},
 
 		toggleResetButton(isReset: boolean): void {
@@ -157,7 +120,7 @@ export default Vue.extend({
 }
 
 .filter-card__expand {
-	max-height: 315px;
+	max-height: 350px;
 }
 
 .filter-card__header {

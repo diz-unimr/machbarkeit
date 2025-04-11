@@ -5,67 +5,63 @@
 	-->
 	<div class="content-option-container dialog-border">
 		<div class="content-option__text">
-			<span>*</span> Geben Sie einen oder mehrere zulässige Werte an:
+			Geben Sie einen oder mehrere zulässige Werte an:
 		</div>
 		<div class="content-option__body">
 			<div class="content-option__checkbox">
-				<div v-for="(code, index) in profile.valueDefinition?.selectableConcepts"
+				<div v-for="(option, index) in newSelectedCriterion.filterOptions"
 					:key="index"
 					class="checkbox-option">
 					<!-- https://kyoshee.medium.com/building-custom-checkbox-using-only-html-and-css-no-js-1-babd79d5e2e9 -->
-					<input v-model="selectedConcepts"
+					<input v-model="selectedValue"
 						type="checkbox"
-						:value="code.display">
-					<label>{{ code.display }}</label>
+						:value="option">
+					<label>{{ option.display }}</label>
 				</div>
 			</div>
-		</div>
-		<div v-if="selectedConcepts?.length <= 0" class="content-option-alert">
-			Wählen Sie mindestens einen Wert
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { ConceptOptionsData } from '../../types/ConceptOptionsData'
-import type { Profile } from '../../types/FeasibilityQueryBuilderData'
-import type { OntologyTreeElement } from '../../types/OntologySearchTreeModalData'
+import type { ConceptOptionsData, ConceptType } from '../../types/ConceptOptionsData'
+import type { Criterion } from '../../types/OntologySearchTreeModalData'
 
 export default Vue.extend({
 	name: 'ConceptOptions',
 	props: {
-		profile: {
-			type: Object as PropType<Profile>,
-			required: true,
-		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
 		},
 		selectedCriterion: {
-			type: Object as PropType<OntologyTreeElement>,
+			type: Object as PropType<Criterion>,
+			default: undefined,
 			required: true,
 		},
 	},
 	data(): ConceptOptionsData {
 		return {
-			selectedConcepts: this.selectedCriterion.conceptType?.value
-				? this.selectedCriterion.conceptType.value
-				: [],
+			newSelectedCriterion: this.selectedCriterion,
+			selectedValue: (this.selectedCriterion.selectedFilter as ConceptType)?.valueFilter?.selectedConcepts
+				?? [],
 		}
 	},
 	watch: {
-		selectedConcepts() {
-			this.$emit('get-selected-filter-option', 'update', {
-				type: 'conceptType',
-				display: this.selectedCriterion.display,
-				isFilterOptional: this.profile.valueDefinition?.optional,
-				isFilterComplete: this.selectedConcepts.length > 0,
-				value: this.selectedConcepts,
-			})
+		selectedValue() {
+			this.conceptType = this.selectedValue!.length > 0
+				? {
+					valueFilter: {
+						selectedConcepts: this.selectedValue,
+						type: 'concept',
+					},
+				}
+				: undefined
 
-			if (this.selectedConcepts.length > 0) {
+			this.$emit('get-selected-filter-option', this.conceptType)
+
+			if (this.conceptType && this.conceptType.valueFilter) {
 				this.$emit('toggle-reset-button', true)
 			} else {
 				this.$emit('toggle-reset-button', false)
@@ -74,7 +70,7 @@ export default Vue.extend({
 
 		isResetDisabled(): void {
 			if (this.isResetDisabled) {
-				this.selectedConcepts = []
+				this.selectedValue = []
 			}
 		},
 	},
@@ -84,15 +80,15 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.$emit('get-selected-filter-option', 'initial', {
-			type: 'conceptType',
-			display: this.selectedCriterion.display,
-			isFilterOptional: this.profile.valueDefinition?.optional,
-			isFilterComplete: this.selectedCriterion.conceptType?.isFilterComplete
-				? this.selectedCriterion.conceptType?.isFilterComplete
-				: this.profile.valueDefinition?.optional,
-			value: this.selectedConcepts,
-		})
+		if (typeof this.newSelectedCriterion.context === 'string') {
+			this.newSelectedCriterion.context = JSON.parse(this.newSelectedCriterion.context)
+		}
+		if (typeof this.newSelectedCriterion.termCodes === 'string') {
+			this.newSelectedCriterion.termCodes = JSON.parse(this.newSelectedCriterion.termCodes)
+		}
+		if (typeof this.newSelectedCriterion.filterOptions === 'string') {
+			this.newSelectedCriterion.filterOptions = JSON.parse(this.newSelectedCriterion.filterOptions)
+		}
 	},
 
 	beforeMount() {},

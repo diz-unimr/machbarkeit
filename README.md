@@ -53,7 +53,7 @@ To create a 'Machbarkeit' database, kds_beschreibung.csv and kds_concept.csv are
    docker compose up -d
    ```
 
-This starts the [nextcloud-docker-dev](https://github.com/juliushaertl/nextcloud-docker-dev) container.
+This starts the [nextcloud-docker-dev](https://github.com/juliusknorr/nextcloud-docker-dev) container.
 
 ## Enable apps
 
