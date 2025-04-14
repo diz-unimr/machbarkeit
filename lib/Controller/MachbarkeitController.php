@@ -21,7 +21,7 @@ class MachbarkeitController extends Controller {
 	public function __construct(
 		IRequest $request,
 		MachbarkeitService $service,
-		?string $userId
+		?string $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 		$this->service = $service;
