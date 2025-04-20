@@ -3,19 +3,6 @@
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
 import type { Criterion } from './OntologySearchTreeModalData'
-export interface TimeRange2 {
-    type: string;
-    display: string;
-    isFilterOptional: boolean;
-    isFilterComplete: boolean;
-    value: {
-        type: string,
-        fromDate: string | null,
-        fromDateFormatted: string | null,
-        toDate: string | null,
-        toDateFormatted: string | null,
-    };
-}
 
 export interface TimeRangeType {
     timeRestriction: {

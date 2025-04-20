@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div v-if="requestStatus400 === 200" class="ontology-search-tree-container">
+	<div v-if="requestStatus === 200" class="ontology-search-tree-container">
 		<div class="ontology-search-tree-wrapper">
 			<div class="criteria-type">
 				{{ criteriaType }}
@@ -32,7 +32,6 @@
 									:key="criterion.id"
 									:criterion="criterion" />
 							</template>
-
 							<template v-else>
 								<OntologyNestedTreeNodeSearchInput v-for="criterion in ontologyTree"
 									:key="criterion.id"
@@ -51,7 +50,6 @@
 				<div v-if="isLoading" class="loading-text ontology-search-tree__display">
 					Loading...
 				</div>
-				<div />
 				<div class="ontology-search-tree__button-group">
 					<button :disabled="isCheckboxEmpty" @click="submit(criteriaType)">
 						AUSWÄHLEN
@@ -104,13 +102,12 @@ export default Vue.extend({
 	data(): OntologySearchTreeModalData {
 		return {
 			activeTab: undefined,
-			requestStatus400: undefined,
+			requestStatus: undefined,
 			selectedItems: [],
 			checkedItems: undefined,
 			isSearchResultNoData: [],
 			modules: null,
 			ontologyTree: null,
-			ontologyTreeSearch: [],
 			context: null,
 			isCheckboxChecked: false,
 			isModalOpened: false,
@@ -181,6 +178,7 @@ export default Vue.extend({
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log((error as Error).message)
+				alert((error as Error).message)
 			}
 		},
 
@@ -206,20 +204,19 @@ export default Vue.extend({
 				}
 				// Convert object keys to camelCase using lodash
 				const response = transformObjectKeys(apiResponse.data)
-
 				this.ontologyTree = response
-				this.ontologyTreeSearch[moduleId] = response || [] // problem mit moduleId und index
 
-				this.requestStatus400 = apiResponse.status as number
-				this.$emit('get-request-status', this.requestStatus400)
+				this.requestStatus = apiResponse.status as number
+				this.$emit('get-request-status', this.requestStatus)
 				this.isLoading = false
 				return this.ontologyTree
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log((error as Error).message)
-
-				this.requestStatus400 = (error as AxiosError).status as number
-				this.$emit('get-request-status', this.requestStatus400, (error as AxiosError).message)
+				if ((error as AxiosError).code === 'ERR_NETWORK') {
+					alert('Network Error')
+				} else {
+					this.requestStatus = (error as AxiosError).status as number
+					this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
+				}
 				this.isLoading = false
 				return null
 			}

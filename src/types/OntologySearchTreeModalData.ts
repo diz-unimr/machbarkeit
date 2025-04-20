@@ -48,24 +48,14 @@ export interface Module {
     version: string;
 }
 
-export interface OntologyTree {
-    display: string;
-    id: number;
-    leaf: boolean;
-    moduleId: number;
-    parentId: number | null;
-    selectable: boolean;
-}
-
 export interface OntologySearchTreeModalData {
 	activeTab?: string;
-    requestStatus400?: number;
+    requestStatus?: number;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
     isSearchResultNoData: Array<boolean>;
     modules: Module[] | null;
     ontologyTree: Criterion[] | null;
-    ontologyTreeSearch: Array<Criterion | null>;
     context: {
         code: string;
         system: string;

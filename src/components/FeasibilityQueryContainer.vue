@@ -158,10 +158,10 @@ export default Vue.extend({
 				if (errorMessage.startsWith(errorText)) {
 					const labCodeError = [...errorMessage.matchAll(/code=([^,\]]+)/g)].map(m => m[1]).filter(item => item !== 'Laboruntersuchung')
 					const labCodeErrorAlert = labCodeError.length > 1
-						? labCodeError.slice(0, -1).join(', ') + ' and ' + labCodeError[labCodeError.length - 1]
+						? labCodeError.slice(0, -1).join(', ') + ' und ' + labCodeError[labCodeError.length - 1]
 						: labCodeError[0] || ''
-					const textAlert = labCodeError.length === 1 ? ' was not found in the code tree' : ' were not found in the code tree'
-					alert(labCodeErrorAlert + textAlert)
+					const textAlert = labCodeError.length === 1 ? ' wurde im Codebaum nicht gefunden.' : ' wurden im Codebaum nicht gefunden.'
+					alert(labCodeErrorAlert + textAlert + ' Bitte kontaktieren Sie den DIZ-Support.')
 				}
 				this.errorMessage = error ? 'Found some error!' : null
 			}
