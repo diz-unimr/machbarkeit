@@ -21,7 +21,7 @@ class MachbarkeitController extends Controller {
 	public function __construct(
 		IRequest $request,
 		MachbarkeitService $service,
-		?string $userId
+		?string $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 		$this->service = $service;
@@ -52,13 +52,6 @@ class MachbarkeitController extends Controller {
 	public function getModules() {
 		return $this->service->getModules();
 	}
-
-	/* public function getOntologyTree(int $module_id)
-	{
-		$ontology = $this->service->getOntology($module_id);
-		$ontologyTree = $this->service->buildTree($ontology, null);
-		return $ontologyTree;
-	} */
 
 	public function findOntology(string $code) {
 		$ontology = $this->service->getOntologyFromCode($code);

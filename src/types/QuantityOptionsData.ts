@@ -4,21 +4,6 @@
 */
 import type { Criterion } from './OntologySearchTreeModalData'
 
-export interface QuantityType2 {
-    type: string;
-    display: string;
-    isFilterOptional: boolean;
-    isFilterComplete: boolean;
-    value: {
-        type: string,
-        typeSymbol: string,
-        unit: string | undefined,
-        value: string,
-        min: string,
-        max: string,
-    },
-}
-
 export interface QuantityType {
     valueFilter: {
         /* access only object inside array */

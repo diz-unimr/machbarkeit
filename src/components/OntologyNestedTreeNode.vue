@@ -12,7 +12,6 @@
 							? imgExpand
 							: imgCollapse">
 					</button>
-
 					<input v-if="criterion?.selectable"
 						:id="String(criterion?.id)"
 						v-model="isChecked"
@@ -116,7 +115,7 @@ export default Vue.extend({
 		isChecked: {
 			// Determines if the current item is checked
 			get(): boolean {
-				return this.$store.state.checkedItemsMap.has(this.criterion.id)
+				return this.$store.getters.getCheckedItems(this.criterion)
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
