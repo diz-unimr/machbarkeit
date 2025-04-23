@@ -53,13 +53,6 @@ class MachbarkeitController extends Controller {
 		return $this->service->getModules();
 	}
 
-	/* public function getOntologyTree(int $module_id)
-	{
-		$ontology = $this->service->getOntology($module_id);
-		$ontologyTree = $this->service->buildTree($ontology, null);
-		return $ontologyTree;
-	} */
-
 	public function findOntology(string $code) {
 		$ontology = $this->service->getOntologyFromCode($code);
 		return $ontology;
