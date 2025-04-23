@@ -12,7 +12,7 @@
 			<div v-if="modules && modules.length > 0">
 				<div class="ontology-search-tree__tabs">
 					<div class="ontology-search-tree__tabs-container">
-						<button v-for="(module) in modules"
+						<button v-for="module in modules"
 							:key="module.id"
 							:class="['ontology-tab', { 'active': activeTab === module.id }]"
 							@click="changeTab(module.id)">

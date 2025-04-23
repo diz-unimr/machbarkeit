@@ -207,7 +207,7 @@ export default Vue.extend({
 			}
 		},
 
-		exclusionSearchInputText(newVal) {
+		/* exclusionSearchInputText(newVal) {
 			this.searchInputText = newVal
 			if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
@@ -216,7 +216,7 @@ export default Vue.extend({
 				const debouncedHandler = debounce(() => this.checkTextInputLength('ausschlusskriterien'), 1000) // function is called after 500 ms?
 				debouncedHandler()
 			}
-		},
+		}, */
 	},
 
 	// life cycle of vue js
@@ -233,9 +233,9 @@ export default Vue.extend({
 
 	methods: {
 		checkTextInputLength(criteriaType: string): void {
-			if (this.searchInputText.length <= 1) {
+			if (this.searchInputText.length > 0 && this.searchInputText.length < 2) {
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else {
+			} else if (this.searchInputText.length >= 2) {
 				this.searchInputWarning = ''
 				this.criteriaOverlayType = criteriaType
 				this.isOntologySearchTreeOpen = true
