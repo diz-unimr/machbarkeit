@@ -9,6 +9,8 @@ namespace OCA\Machbarkeit\Controller;
 use OCA\Machbarkeit\AppInfo\Application;
 use OCA\Machbarkeit\Service\MachbarkeitService;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\CORS;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
@@ -28,11 +30,9 @@ class MachbarkeitController extends Controller {
 		$this->userId = $userId;
 	}
 
-	/*
-	 * @CORS
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
-	 */
+	#[CORS]
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
 	public function getMetadata(): JSONResponse {
 		return new JSONResponse($this->service->readCsv());
 	}
