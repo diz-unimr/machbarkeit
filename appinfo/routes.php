@@ -28,7 +28,6 @@ return [
 		],
 		['name' => 'machbarkeit#getMetadata', 'url' => '/machbarkeit/metadata', 'verb' => 'GET'],
 		['name' => 'machbarkeit#getOntology', 'url' => '/machbarkeit/ontology', 'verb' => 'GET'],
-		// ['name' => 'machbarkeit#getUiProfile', 'url' => '/machbarkeit/ui_profile', 'verb' => 'GET'],
 
 		// TODO
 		// get module names

@@ -41,14 +41,6 @@ class MachbarkeitController extends Controller {
 		return new JSONResponse($this->service->readOntology());
 	}
 
-	public function getUiProfile(): JSONResponse {
-		// TODO remove test call
-		$modules = $this->getModules();
-		// $ontology = $this->service->getOntology(2);
-
-		return new JSONResponse($this->service->readUiProfile());
-	}
-
 	public function getModules() {
 		return $this->service->getModules();
 	}
