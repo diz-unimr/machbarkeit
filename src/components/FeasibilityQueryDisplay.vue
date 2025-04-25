@@ -464,9 +464,11 @@ export default Vue.extend({
 }
 
 .combining-operator {
-	margin-left: 10px;
+	margin-left: 10px !important;
+	top: 70%;
 	padding: 5px 10px;
 	border: solid 1px black;
+	border-radius: 12px;
 	font-size: small;
 	font-weight: 600;
 	min-height: 20px;
@@ -485,6 +487,10 @@ export default Vue.extend({
 	min-height: 20px;
 	margin: 0px;
 	padding: 0px;
+	background-color: unset;
+}
+
+.delete-btn:hover {
 	background-color: unset;
 }
 
