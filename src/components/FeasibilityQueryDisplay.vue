@@ -402,7 +402,7 @@ export default Vue.extend({
 .selected-criteria-container {
 	display: flex;
 	border: 1px solid #5270a7;
-	justify-content: flex-end;
+	justify-content: space-between;
 }
 
 .selected-criteria-container:last-child {
@@ -410,7 +410,7 @@ export default Vue.extend({
 }
 
 .selected-criteria-left {
-	width: 15%;
+	width: clamp(40px, 12%, 70px);
 	padding: 10px 0px;
 	cursor: all-scroll;
 	background-color: #5270a7;
@@ -419,14 +419,14 @@ export default Vue.extend({
 .selected-criteria-middle {
 	display: flex;
 	flex-direction: column;
-	width: 80%;
+	width: 85%;
 	padding: 8px;
 }
 
 .selected-criteria-right {
 	display: flex;
 	justify-content: center;
-	width: 7%;
+	width: clamp(10px, 7%, 50px);
 	background-color: #5270a7;
 	padding: 10px 0px;
 }
@@ -464,18 +464,18 @@ export default Vue.extend({
 }
 
 .combining-operator {
-	margin-left: 10px;
+	margin-left: 10px !important;
 	padding: 5px 10px;
 	border: solid 1px black;
-	font-size: small;
+	border-radius: 14px !important;
+	font-size: small !important;
 	font-weight: 600;
-	min-height: 20px;
 }
 
 .or-operator {
-	position: absolute;
-	margin-top: -15px;
-	z-index: 1;
+	position: absolute !important;
+	margin-top: -17px !important;
+	z-index: 1 !important;
 }
 
 .delete-btn {
