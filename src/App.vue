@@ -82,6 +82,17 @@ button {
 	border: 1px solid #c0c7ce !important;
 }
 
+.input-field__main-wrapper {
+	height: 45px !important;
+}
+.input-field__main-wrapper input[type='text'] {
+	height: 100% !important;
+}
+
+.input-field__icon {
+	height: 100% !important;
+}
+
 input[type=checkbox] {
 	cursor: pointer !important;
 }
