@@ -492,6 +492,10 @@ export default Vue.extend({
 	background-color: unset;
 }
 
+.selected-criteria-right button:hover {
+	background-color: #5270a7;
+}
+
 .delete-btn img {
 	width: 25px;
 	height: 20px;

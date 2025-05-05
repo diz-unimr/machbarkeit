@@ -7,7 +7,7 @@
 		<keep-alive>
 			<li>
 				<div class="ontology-head-node">
-					<button v-if="!criterion?.leaf" @click="expandTreeNode">
+					<button v-if="!criterion?.leaf && !isSearchInput" @click="expandTreeNode">
 						<img :src="isExpanded
 							? imgExpand
 							: imgCollapse">
@@ -32,9 +32,9 @@
 						</p>
 					</div>
 				</div>
-				<ul v-if="isExpanded">
+				<ul v-if="isExpanded && !isSearchInput">
 					<template v-if="criterion.children">
-						<OntologyNestedTreeNode v-for="child in criterion.children"
+						<OntologyTreeNode v-for="child in criterion.children"
 							:key="child.id"
 							:criterion="child"
 							:parent="criterion"
@@ -51,7 +51,7 @@
 import Vue, { type PropType } from 'vue'
 import type { Criterion } from '../types/OntologySearchTreeModalData'
 
-interface OntologyNestedTreeNodeData {
+interface OntologyTreeNodeData {
 	isExpanded: boolean;
 	imgCollapse: string;
 	imgExpand: string;
@@ -78,12 +78,16 @@ export interface CheckedItem {
 }
 
 export default Vue.extend({
-	name: 'OntologyNestedTreeNode',
+	name: 'OntologyTreeNode',
 	components: {},
 	props: {
 		criterion: {
 			type: Object as PropType<Criterion>,
 			default: null,
+		},
+		isSearchInput: {
+			type: Boolean,
+			default: false,
 		},
 		parent: {
 			type: Object as PropType<Criterion>,
@@ -99,7 +103,7 @@ export default Vue.extend({
 		},
 	},
 
-	data(): OntologyNestedTreeNodeData {
+	data(): OntologyTreeNodeData {
 		return {
 			isExpanded: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
@@ -206,8 +210,7 @@ export default Vue.extend({
 	overflow-y: auto;
 	scrollbar-width: auto;
 	height: 100%;
-	padding-right: 10px;
-	margin-left: 15px;
+	padding: 0 10px 0 15px;
 }
 
 .ontology-nested-tree-node li {
@@ -220,8 +223,8 @@ export default Vue.extend({
 
 .ontology-head-node {
 	display: flex;
-	place-content: center flex-start;
-	align-items: flex-start;
+	/* place-content: center flex-start;
+	align-items: flex-start; */
 	margin-top: 5px;
 	gap: clamp(10px, 1.5%, 15px);
 }
@@ -255,7 +258,7 @@ export default Vue.extend({
 }
 
 .search-tree-term-entry .swl-code {
-	margin-top: 5px;
+	margin-top: 7px;
 	font-weight: 500;
 	font-size: 14px;
 }

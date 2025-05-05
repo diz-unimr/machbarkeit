@@ -26,19 +26,10 @@
 							<div class="module-name">
 								{{ modules.filter(module => module.id === activeTab)[0].name }}
 							</div>
-
-							<template v-if="searchInputText.length <= 0">
-								<OntologyNestedTreeNode v-for="criterion in ontologyTree"
-									:key="criterion.id"
-									:criterion="criterion" />
-							</template>
-							<template v-else>
-								<OntologyNestedTreeNodeSearchInput v-for="criterion in ontologyTree"
-									:key="criterion.id"
-									class="ontology-tree-node"
-									:criterion="criterion"
-									:search-input-text="searchInputText" />
-							</template>
+							<OntologyTreeNode v-for="criterion in ontologyTree"
+								:key="criterion.id"
+								:is-search-input="searchInputText.length <= 0 ? false : true"
+								:criterion="criterion" />
 						</div>
 					</div>
 					<div v-else-if="ontologyTree?.length === 0">
@@ -70,8 +61,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import transformObjectKeys from '../utils/transformObjectKeys'
-import OntologyNestedTreeNode from './OntologyNestedTreeNode.vue'
-import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
+import OntologyTreeNode from './OntologyTreeNode.vue'
 import WarningModal from './WarningModal.vue'
 import type { OntologySearchTreeModalData, Module, Criterion } from '../types/OntologySearchTreeModalData.ts'
 import lodash from 'lodash'
@@ -80,8 +70,7 @@ import axios, { AxiosError, type AxiosResponse } from 'axios'
 export default Vue.extend({
 	name: 'OntologySearchTreeModal',
 	components: {
-		OntologyNestedTreeNode,
-		OntologyNestedTreeNodeSearchInput,
+		OntologyTreeNode,
 		WarningModal,
 	},
 	props: {

@@ -97,4 +97,8 @@ input[type=checkbox] {
 	cursor: pointer !important;
 }
 
+select:hover {
+	background-color: unset !important;
+}
+
 </style>

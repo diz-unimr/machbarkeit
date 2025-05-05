@@ -208,14 +208,13 @@ export default Vue.extend({
 	min-height: 36px;
 	cursor: pointer;
 	box-sizing: border-box;
-	background-color: #ededed;
-	border: 1px solid #dbdbdb;
+	background-color: var(--color-primary-element-light);
 	color: #222222;
 	outline: none;
 }
 
 .upload-query-button:hover {
-	border: 1px solid #006aa3;
+	background-color: var(--color-primary-element-light-hover);
 }
 
 .upload-query-button:active {
