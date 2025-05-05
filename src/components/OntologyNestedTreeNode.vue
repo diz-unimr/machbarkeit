@@ -102,8 +102,8 @@ export default Vue.extend({
 	data(): OntologyNestedTreeNodeData {
 		return {
 			isExpanded: false,
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
-			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			imgCollapse: './img/arrow-collapse-blue.png',
+			imgExpand: './img/arrow-expand.png',
 			concepts: null,
 			swlCode: undefined,
 			onlySwlCode: false,

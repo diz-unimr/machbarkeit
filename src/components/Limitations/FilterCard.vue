@@ -73,7 +73,7 @@ export default Vue.extend({
 			filterName: null,
 			state: true,
 			isResetDisabled: !(this.selectedCriterion.selectedFilter !== undefined && (!('valueFilter' in this.selectedCriterion.selectedFilter) || !('timeRestriction' in this.selectedCriterion.selectedFilter))),
-			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			imgExpand: './img/arrow-expand.png',
 		}
 	},
 

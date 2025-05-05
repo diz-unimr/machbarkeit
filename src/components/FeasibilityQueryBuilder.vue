@@ -166,7 +166,7 @@ export default Vue.extend({
 			},
 			isStateEditFilter: false,
 			searchInputWarning: '',
-			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete-black.png',
+			imgDelete: './img/delete-black.png',
 		}
 	},
 

@@ -4,10 +4,14 @@
 # This file is licensed under the Affero General Public License version 3 or
 # later. See the COPYING file.
 app_name=$(notdir $(CURDIR))
+appstore_build_directory=$(CURDIR)/../deploy
+appstore_package_name=$(appstore_build_directory)/$(app_name)
 build_tools_directory=$(CURDIR)/build/tools
 composer=$(shell which composer 2> /dev/null)
 
 all: dev-setup lint build-js-production test
+
+build-prod: dev-setup lint build-js-production package
 
 # Dev env management
 dev-setup: clean clean-dev composer npm-init
@@ -89,6 +93,40 @@ source:
 # Builds the source package for the app store, ignores php tests, js tests
 # and build related folders that are unnecessary for an appstore release
 appstore:
+	rm -rf $(appstore_build_directory)
+	mkdir -p $(appstore_build_directory)
+	tar cvzf $(appstore_package_name).tar.gz \
+	--exclude-vcs \
+	--exclude="../$(app_name)/build" \
+	--exclude="../$(app_name)/tests" \
+	--exclude="../$(app_name)/Makefile" \
+	--exclude="../$(app_name)/*.log" \
+	--exclude="../$(app_name)/phpunit*xml" \
+	--exclude="../$(app_name)/composer.*" \
+	--exclude="../$(app_name)/node_modules" \
+	--exclude="../$(app_name)/js/node_modules" \
+	--exclude="../$(app_name)/js/tests" \
+	--exclude="../$(app_name)/js/test" \
+	--exclude="../$(app_name)/js/*.log" \
+	--exclude="../$(app_name)/js/package.json" \
+	--exclude="../$(app_name)/js/bower.json" \
+	--exclude="../$(app_name)/js/karma.*" \
+	--exclude="../$(app_name)/js/protractor.*" \
+	--exclude="../$(app_name)/package.json" \
+	--exclude="../$(app_name)/bower.json" \
+	--exclude="../$(app_name)/karma.*" \
+	--exclude="../$(app_name)/protractor\.*" \
+	--exclude="../$(app_name)/.*" \
+	--exclude="../$(app_name)/js/.*" \
+	--exclude="../$(app_name)/webpack.config.js" \
+	--exclude="../$(app_name)/stylelint.config.js" \
+	--exclude="../$(app_name)/CHANGELOG.md" \
+	--exclude="../$(app_name)/README.md" \
+	--exclude="../$(app_name)/package-lock.json" \
+	--exclude="../$(app_name)/LICENSES" \
+	../$(app_name) \
+
+package:
 	rm -rf $(appstore_build_directory)
 	mkdir -p $(appstore_build_directory)
 	tar cvzf $(appstore_package_name).tar.gz \

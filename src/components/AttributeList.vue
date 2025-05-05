@@ -118,8 +118,8 @@ export default Vue.extend({
 			selectedAttribute: [],
 			selectedModulName: [],
 			tooltipPosition: 0,
-			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
+			imgExpand: './img/arrow-expand.png',
+			imgCollapse: './img/arrow-collapse-blue.png',
 			metadata: {
 				kds_modul: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_KDS_MODUL',
 				kds_name: 'Main.Metadatenrepository.KDS-Module.Code.KDS-ModuleClass_ATTRIBUT_NAME',
