@@ -4,7 +4,7 @@
 # This file is licensed under the Affero General Public License version 3 or
 # later. See the COPYING file.
 app_name=$(notdir $(CURDIR))
-appstore_build_directory=$(CURDIR)/../deploy
+appstore_build_directory=$(CURDIR)/deploy
 appstore_package_name=$(appstore_build_directory)/$(app_name)
 build_tools_directory=$(CURDIR)/build/tools
 composer=$(shell which composer 2> /dev/null)
@@ -124,6 +124,7 @@ appstore:
 	--exclude="../$(app_name)/README.md" \
 	--exclude="../$(app_name)/package-lock.json" \
 	--exclude="../$(app_name)/LICENSES" \
+	--exclude="../$(app_name)/deploy" \
 	../$(app_name) \
 
 package:
@@ -158,6 +159,7 @@ package:
 	--exclude="../$(app_name)/README.md" \
 	--exclude="../$(app_name)/package-lock.json" \
 	--exclude="../$(app_name)/LICENSES" \
+	--exclude="../$(app_name)/deploy" \
 	../$(app_name) \
 
 # Tests
