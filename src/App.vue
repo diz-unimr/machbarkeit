@@ -85,6 +85,7 @@ button {
 .input-field__main-wrapper {
 	height: 45px !important;
 }
+
 .input-field__main-wrapper input[type='text'] {
 	height: 100% !important;
 }
