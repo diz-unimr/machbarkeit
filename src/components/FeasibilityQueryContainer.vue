@@ -154,7 +154,6 @@ export default Vue.extend({
 			} catch (error) {
 				const errorMessage = ((error as AxiosError).response!.data as { error: string }).error
 				const errorText = 'None of the following contextual term codes'
-
 				if (errorMessage.startsWith(errorText)) {
 					const labCodeError = [...errorMessage.matchAll(/code=([^,\]]+)/g)].map(m => m[1]).filter(item => item !== 'Laboruntersuchung')
 					const labCodeErrorAlert = labCodeError.length > 1
@@ -192,6 +191,7 @@ export default Vue.extend({
 
 .feasibility-query__output {
 	display: flex;
+	column-gap: 5%;
 	flex-direction: row;
 	place-content: center space-between;
 	align-items: center;

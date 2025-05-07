@@ -247,31 +247,22 @@ export default Vue.extend({
 }
 
 .attribute-list__header {
+	display: flex;
 	background-color: #5270a7;
 	font-weight: bold;
 	font-size: large;
-	text-align: center;
+	justify-content: center;
+	align-items: center;
 	color: white;
-	padding: 15px 0px;
+	height: clamp(45px, 10%, 60px);
 }
 
-/* For Firefox */
-.gecko .attribute-list__content {
+.attribute-list__content {
 	display: flex;
 	flex-direction: column;
 	position: absolute;
 	width: 100%;
 	height: 90%;
-	padding: 20px;
-}
-
-/* For Chrome */
-.chrome .attribute-list__content {
-	display: flex;
-	flex-direction: column;
-	position: absolute;
-	width: 100%;
-	height: -webkit-fill-available;
 	padding: 20px;
 }
 
