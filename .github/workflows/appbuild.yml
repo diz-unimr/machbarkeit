@@ -37,9 +37,6 @@ jobs:
       - name: Build & Package
         run: |
           make build-prod
-          uname -a
-          RUST_BACKTRACE=1 krankerl --version
-          RUST_BACKTRACE=1 krankerl package
       - uses: actions/upload-artifact@v4
         with:
           name: machbarkeit app tarball
