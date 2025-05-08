@@ -4,7 +4,7 @@
 # This file is licensed under the Affero General Public License version 3 or
 # later. See the COPYING file.
 app_name=$(notdir $(CURDIR))
-appstore_build_directory=$(CURDIR)/deploy
+appstore_build_directory=$(CURDIR)/build/artifacts
 appstore_package_name=$(appstore_build_directory)/$(app_name)
 build_tools_directory=$(CURDIR)/build/tools
 composer=$(shell which composer 2> /dev/null)
@@ -128,7 +128,6 @@ appstore:
 	../$(app_name) \
 
 package:
-	rm -rf $(appstore_build_directory)
 	mkdir -p $(appstore_build_directory)
 	tar cvzf $(appstore_package_name).tar.gz \
 	--exclude-vcs \
