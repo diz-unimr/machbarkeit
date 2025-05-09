@@ -4,46 +4,44 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 	<div class="ontology-nested-tree-node">
-		<keep-alive>
-			<li>
-				<div class="ontology-head-node">
-					<button v-if="!criterion?.leaf && !isSearchInput" @click="expandTreeNode">
-						<img :src="isExpanded
-							? imgExpand
-							: imgCollapse">
-					</button>
-					<input v-if="criterion?.selectable"
-						:id="String(criterion?.id)"
-						v-model="isChecked"
-						:disabled="onlySwlCode"
-						type="checkbox"
-						:value="criterion?.display">
-					<div class="search-tree-term-entry">
-						<div class="swl-wrapper" :style="{gap: swlCode ? '1.5%' : '0'}">
-							<p class="swl-code" @click="expandTreeNode">
-								{{ swlCode }}
-							</p>
-							<p class="swl-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
-								{{ criterion?.display }}
-							</p>
-						</div>
-						<p v-if="onlySwlCode && criterion.selectable === true" class="swl-code-warning">
-							(Die Suche nach SWL-Code wird momentan nicht unterstützt)
+		<li>
+			<div class="ontology-head-node">
+				<button v-if="!criterion?.leaf" @click="expandTreeNode">
+					<img :src="isExpanded
+						? imgExpand
+						: imgCollapse">
+				</button>
+				<input v-if="criterion?.selectable"
+					:id="String(criterion?.id)"
+					v-model="isChecked"
+					:disabled="onlySwlCode"
+					type="checkbox"
+					:value="criterion?.display">
+				<div class="search-tree-term-entry">
+					<div class="swl-wrapper" :style="{gap: swlCode ? '1.5%' : '0'}">
+						<p class="swl-code" @click="expandTreeNode">
+							{{ swlCode }}
+						</p>
+						<p class="swl-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
+							{{ criterion?.display }}
 						</p>
 					</div>
+					<p v-if="onlySwlCode && criterion.selectable === true" class="swl-code-warning">
+						(Die Suche nach SWL-Code wird momentan nicht unterstützt)
+					</p>
 				</div>
-				<ul v-if="isExpanded && !isSearchInput">
-					<template v-if="criterion.children">
-						<OntologyTreeNode v-for="child in criterion.children"
-							:key="child.id"
-							:criterion="child"
-							:parent="criterion"
-							:parents="[...parents, criterion]"
-							@change="toggleParent" />
-					</template>
-				</ul>
-			</li>
-		</keep-alive>
+			</div>
+			<ul v-if="isExpanded">
+				<template v-if="criterion.children">
+					<OntologyTreeNode v-for="child in criterion.children"
+						:key="child.id"
+						:criterion="child"
+						:parent="criterion"
+						:parents="[...parents, criterion]"
+						@change="toggleParent" />
+				</template>
+			</ul>
+		</li>
 	</div>
 </template>
 

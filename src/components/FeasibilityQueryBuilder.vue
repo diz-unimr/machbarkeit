@@ -248,6 +248,7 @@ export default Vue.extend({
 			this.inclusionSearchInputText = ''
 			this.exclusionSearchInputText = ''
 			this.searchInputText = ''
+			this.isStateEditFilter = false
 		},
 
 		closeOntologySearchTreeModal() {
@@ -474,7 +475,7 @@ export default Vue.extend({
 }
 
 .search-input__body button:hover {
-	background-color: #9ea9b3;
+	background-color: #808f9d;
 }
 
 .search-input__body button:active {
@@ -500,4 +501,9 @@ export default Vue.extend({
 	border-radius: 4px;
 	background-color: #5270a7;
 }
+
+button {
+	border-style: unset !important;
+}
+
 </style>

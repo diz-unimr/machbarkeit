@@ -5,7 +5,7 @@
 	-->
 	<div class="content-option-container dialog-border">
 		<div class="content-option__text">
-			<span>*</span> Geben Sie einen Wertebereich ein:
+			<!-- <span>*</span> --> Geben Sie einen Wertebereich ein:
 		</div>
 		<div class="content-option__body">
 			<div class="content-option-wrapper">

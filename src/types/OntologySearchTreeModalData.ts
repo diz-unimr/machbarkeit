@@ -49,7 +49,8 @@ export interface Module {
 }
 
 export interface OntologySearchTreeModalData {
-	activeTab?: string;
+	currentModule?: Module;
+    nextModule?: Module;
     requestStatus?: number;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
@@ -63,7 +64,7 @@ export interface OntologySearchTreeModalData {
         display: string;
     } | null;
     isCheckboxChecked: boolean;
-    isModalOpened: boolean;
-    activeModule?: Module;
+    isWarningModalOpened: boolean;
+    abortController?: AbortController;
     isLoading: boolean;
 }

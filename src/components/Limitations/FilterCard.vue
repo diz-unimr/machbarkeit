@@ -71,7 +71,7 @@ export default Vue.extend({
 	data(): FilterCardData {
 		return {
 			filterName: null,
-			state: true,
+			state: false,
 			isResetDisabled: !(this.selectedCriterion.selectedFilter !== undefined && (!('valueFilter' in this.selectedCriterion.selectedFilter) || !('timeRestriction' in this.selectedCriterion.selectedFilter))),
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}

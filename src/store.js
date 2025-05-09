@@ -9,34 +9,26 @@ Vue.use(Vuex)
 
 export default new Store({
 	state: {
-		checkedItemsSet: new Set(),
 		checkedItemsMap: new Map(),
 	},
 
 	mutations: {
 		ADD_CHECKED_ITEM(state, item) {
-			const checkedItemsMapTemp = new Map(state.checkedItemsMap) // Create a new Set instance
-			if (!checkedItemsMapTemp.has(item.id)) {
-				checkedItemsMapTemp.set(item.id, item.node)
+			const newMap = new Map(state.checkedItemsMap) // Create a new Set instance
+			if (!newMap.has(item.id)) {
+				newMap.set(item.id, item.node)
 			}
-			state.checkedItemsMap = checkedItemsMapTemp // Replace the old Set with a new one
+			state.checkedItemsMap = newMap // Replace the old Set with a new one
 		},
 
 		REMOVE_CHECKED_ITEM(state, node) {
-			const checkedItemsMapTemp = new Map(state.checkedItemsMap) // Create a new Set instance
-			checkedItemsMapTemp.delete(node.id) // Remove the item from the Set
-			state.checkedItemsMap = checkedItemsMapTemp // Replace the old Set with a new one
+			const newMap = new Map(state.checkedItemsMap) // Create a new Set instance
+			newMap.delete(node.id) // Remove the item from the Set
+			state.checkedItemsMap = newMap // Replace the old Set with a new one
 		},
 
-		CLEAR_CHECKED_ITEM(state) {
-			state.checkedItemsSet = new Set() // Clear the checked items
+		CLEAR_CHECKED_ITEMS(state) {
 			state.checkedItemsMap = new Map() // Clear the checked items
-		},
-
-		ADD_OPENED_ITEM(state, id) {
-			if (!state.openedItems.some(item => item.id === id)) {
-				state.openedItems.push(id)
-			}
 		},
 	},
 
@@ -50,7 +42,7 @@ export default new Store({
 		},
 
 		clearCheckedItem({ commit }) {
-			commit('CLEAR_CHECKED_ITEM')
+			commit('CLEAR_CHECKED_ITEMS')
 		},
 	},
 
