@@ -199,10 +199,8 @@ export default Vue.extend({
 							signal: this.abortController.signal,
 						},
 					)
-					console.log('getOntology', apiResponse)
 				} else {
 					apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + moduleId, { signal: this.abortController.signal })
-					console.log('getOntology', apiResponse)
 				}
 				// Convert object keys to camelCase using lodash
 				const response = transformObjectKeys(apiResponse.data)
@@ -262,7 +260,6 @@ export default Vue.extend({
 		submit(criteriaType: string): void {
 			const checkedItems = this.$store.state.checkedItemsMap
 			const selectedItems = this.getCheckedItems(this.ontologyTree!, checkedItems, this.currentModule!.fdpgCdsCode)
-			console.log('selectedItems', selectedItems)
 			this.$emit('get-selected-criteria', criteriaType, selectedItems)
 			this.$store.dispatch('clearCheckedItem')
 		},
