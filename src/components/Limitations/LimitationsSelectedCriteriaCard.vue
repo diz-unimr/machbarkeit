@@ -15,6 +15,7 @@
 		</div>
 		<!-- Loop, Falls mehrere Filter vorkommen -->
 		<FilterCard :selected-criterion="selectedCriterion"
+			:is-state-edit-filter="isStateEditFilter"
 			@get-selected-filters="getSelectedFilters" />
 	</div>
 </template>

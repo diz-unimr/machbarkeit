@@ -18,16 +18,16 @@
 					type="checkbox"
 					:value="criterion?.display">
 				<div class="search-tree-term-entry">
-					<div class="swl-wrapper" :style="{gap: swlCode ? '1.5%' : '0'}">
-						<p class="swl-code" @click="expandTreeNode">
-							{{ swlCode }}
+					<div class="terminology-code-wrapper" :style="{gap: terminologyCode ? '1.5%' : '0'}">
+						<p class="terminology-code" @click="expandTreeNode">
+							{{ criterion?.selectable && terminologyCode ? terminologyCode : null }}
 						</p>
-						<p class="swl-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
+						<p class="terminology-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
 							{{ criterion?.display }}
 						</p>
 					</div>
-					<p v-if="onlySwlCode && criterion.selectable === true" class="swl-code-warning">
-						(Die Suche nach SWL-Code wird momentan nicht unterstützt)
+					<p v-if="onlySwlCode && criterion.selectable === true" class="only-swl-code-warning">
+						(Die Suche nach SWL Code wird momentan nicht unterstützt)
 					</p>
 				</div>
 			</div>
@@ -35,6 +35,7 @@
 				<template v-if="criterion.children">
 					<OntologyTreeNode v-for="child in criterion.children"
 						:key="child.id"
+						:module-name="moduleName"
 						:criterion="child"
 						:parent="criterion"
 						:parents="[...parents, criterion]"
@@ -64,7 +65,7 @@ interface OntologyTreeNodeData {
 		}
 	] | null;
 	onlySwlCode: boolean;
-	swlCode: string | undefined;
+	terminologyCode: string | undefined;
 	loinc: string | undefined;
 }
 
@@ -83,9 +84,9 @@ export default Vue.extend({
 			type: Object as PropType<Criterion>,
 			default: null,
 		},
-		isSearchInput: {
-			type: Boolean,
-			default: false,
+		moduleName: {
+			type: String,
+			default: '',
 		},
 		parent: {
 			type: Object as PropType<Criterion>,
@@ -107,7 +108,7 @@ export default Vue.extend({
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			concepts: null,
-			swlCode: undefined,
+			terminologyCode: undefined,
 			onlySwlCode: false,
 			loinc: undefined,
 		}
@@ -151,7 +152,7 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		this.findSWL(this.criterion)
+		[this.onlySwlCode, this.terminologyCode] = this.findTerminologyCode(this.criterion)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -192,12 +193,15 @@ export default Vue.extend({
 			this.isExpanded = !this.isExpanded
 		},
 
-		findSWL(criterion: Criterion): void {
-			const onlySwlCode = criterion.termCodes?.every((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
-			// const loinc = criterion.termCodes?.find((termCode) => termCode.system === 'http://loinc.org' || termCode.system === 'http://snomed.info/sct')
-			const swlcode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
-			this.onlySwlCode = onlySwlCode
-			this.swlCode = swlcode?.code ?? undefined
+		findTerminologyCode(criterion: Criterion): [boolean, string | undefined] {
+			if (this.moduleName === 'Laboruntersuchung') {
+				const onlySwlCode = criterion.termCodes?.every((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
+				const terminologyCode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')?.code
+				return [onlySwlCode, terminologyCode]
+			} else {
+				const terminologyCode = criterion.termCodes[0]?.code
+				return [false, terminologyCode]
+			}
 		},
 	},
 })
@@ -255,13 +259,13 @@ export default Vue.extend({
 	cursor: default;
 }
 
-.search-tree-term-entry .swl-code {
+.search-tree-term-entry .terminology-code {
 	margin-top: 7px;
 	font-weight: 500;
 	font-size: 14px;
 }
 
-.search-tree-term-entry .swl-description {
+.search-tree-term-entry .terminology-description {
 	max-width: fit-content;
 	margin-top: 5px;
 }
@@ -275,12 +279,12 @@ export default Vue.extend({
 	width: 17px;
 }
 
-.swl-wrapper {
+.terminology-code-wrapper {
 	display: flex;
 	gap: 1.5%;
 }
 
-.swl-code-warning {
+.only-swl-code-warning {
 	font-size: 12px;
 	color: #DC3545;
 	cursor: default;

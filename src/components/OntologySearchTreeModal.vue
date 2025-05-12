@@ -35,7 +35,7 @@
 						</div>
 						<OntologyTreeNode v-for="criterion in ontologyTree"
 							:key="criterion.id"
-							:is-search-input="searchInputText.length <= 0 ? false : true"
+							:module-name="modules.filter(module => module.id === currentModule?.id)[0].name"
 							:criterion="criterion" />
 					</div>
 				</div>
@@ -177,6 +177,7 @@ export default Vue.extend({
 
 		async getOntology(moduleId: string, searchText: string = '_null_'): Promise<Criterion[] | null> {
 			this.isLoading = true
+			this.ontologyTree = null
 			// Cancel previous request if exists
 			if (this.abortController) {
 				this.abortController.abort()

@@ -67,11 +67,15 @@ export default Vue.extend({
 			type: Object as PropType<Criterion>,
 			required: true,
 		},
+		isStateEditFilter: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	data(): FilterCardData {
 		return {
 			filterName: null,
-			state: false,
+			state: this.isStateEditFilter,
 			isResetDisabled: !(this.selectedCriterion.selectedFilter !== undefined && (!('valueFilter' in this.selectedCriterion.selectedFilter) || !('timeRestriction' in this.selectedCriterion.selectedFilter))),
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 		}
