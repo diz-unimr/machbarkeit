@@ -464,6 +464,7 @@ export default Vue.extend({
 }
 
 .combining-operator {
+	min-width: 70px;
 	margin-left: 10px !important;
 	padding: 5px 10px;
 	border: solid 1px black;

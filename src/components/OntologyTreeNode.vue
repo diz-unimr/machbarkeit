@@ -263,6 +263,7 @@ export default Vue.extend({
 	margin-top: 7px;
 	font-weight: 500;
 	font-size: 14px;
+	min-width: fit-content;
 }
 
 .search-tree-term-entry .terminology-description {

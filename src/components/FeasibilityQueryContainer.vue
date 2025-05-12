@@ -174,7 +174,7 @@ export default Vue.extend({
 .feasibility-query-container {
 	display: flex;
 	flex-direction: column;
-	width: 55%;
+	width: 60%;
 	max-width: 1200px;
 	height: 100%;
 	margin: 0px auto 0px auto;
