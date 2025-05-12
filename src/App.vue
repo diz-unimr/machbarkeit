@@ -51,7 +51,7 @@ export default Vue.extend({
 
 <style>
 :root {
-  color-scheme: light;
+	color-scheme: light;
 }
 /* force ui in dark mode as light mode */
 @media (prefers-color-scheme: dark) {

@@ -473,6 +473,11 @@ export default Vue.extend({
 	font-weight: 600;
 }
 
+button.combining-operator:active {
+	background-color: var(--color-primary-element-light) !important;
+
+}
+
 .or-operator {
 	position: absolute !important;
 	margin-top: -17px !important;
@@ -486,11 +491,11 @@ export default Vue.extend({
 	min-height: 20px;
 	margin: 0px;
 	padding: 0px;
-	background-color: unset;
+	background-color: unset !important;
 }
 
 .selected-criteria-right button.delete-btn:active {
-	background-color: unset;
+	background-color: unset !important;
 }
 
 .selected-criteria-right button:hover {
