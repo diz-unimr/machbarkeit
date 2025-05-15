@@ -146,7 +146,7 @@ export default Vue.extend({
 			modules: null,
 			inclusionSearchInputText: '',
 			exclusionSearchInputText: '',
-			searchInputText: '',
+			searchInputText: undefined,
 			isLimitationsCriteriaOpen: false,
 			isOntologySearchTreeOpen: false,
 			criteriaOverlayType: '',
@@ -199,12 +199,18 @@ export default Vue.extend({
 		inclusionSearchInputText(newVal) {
 			this.searchInputText = newVal
 			if (newVal.length === 0) {
+				// this.isOntologySearchTreeOpen = false
+				this.searchInputWarning = ''
+			}
+			const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien'), 1000) // function is called after 500 ms?
+			debouncedHandler()
+			/* if (newVal.length === 0) {
 				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
 			} else {
 				const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien'), 1000) // function is called after 500 ms?
 				debouncedHandler()
-			}
+			} */
 		},
 
 		/* exclusionSearchInputText(newVal) {
@@ -233,9 +239,9 @@ export default Vue.extend({
 
 	methods: {
 		checkTextInputLength(criteriaType: string): void {
-			if (this.searchInputText.length > 0 && this.searchInputText.length < 2) {
+			if (this.searchInputText!.length > 0 && this.searchInputText!.length < 2) {
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else if (this.searchInputText.length >= 2) {
+			} else {
 				this.searchInputWarning = ''
 				this.criteriaOverlayType = criteriaType
 				this.isOntologySearchTreeOpen = true
@@ -247,7 +253,7 @@ export default Vue.extend({
 			this.isOntologySearchTreeOpen = !this.isOntologySearchTreeOpen
 			this.inclusionSearchInputText = ''
 			this.exclusionSearchInputText = ''
-			this.searchInputText = ''
+			this.searchInputText = undefined
 			this.isStateEditFilter = false
 		},
 
@@ -273,14 +279,17 @@ export default Vue.extend({
 			this.modules = modules
 		},
 
-		getRequestStatus(status: number, message: string | undefined): void {
-			if (status === 200) {
+		getRequestStatus(status: string, message: string | undefined): void {
+			if (status === '200') {
 				this.searchInputWarning = ''
-			} else if (status === 400) {
+			} else if (status === '400') {
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else if (status === 500) {
+			} else if (status === '500') {
 				this.searchInputWarning = ''
 				alert(message)
+			} else if (status === 'Network Error') {
+				this.searchInputWarning = ''
+				this.isOntologySearchTreeOpen = false
 			}
 		},
 

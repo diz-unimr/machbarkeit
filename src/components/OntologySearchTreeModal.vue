@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div v-if="requestStatus === 200" class="ontology-search-tree-container">
+	<div v-if="requestStatus === '200'" class="ontology-search-tree-container">
 		<div class="ontology-search-tree-wrapper">
 			<div class="criteria-type">
 				{{ criteriaType }}
@@ -78,7 +78,7 @@ export default Vue.extend({
 		},
 		searchInputText: {
 			type: String,
-			default: null,
+			default: undefined,
 		},
 		getSelectedCriteria: {
 			type: Function,
@@ -113,8 +113,10 @@ export default Vue.extend({
 	watch: {
 		searchInputText: {
 			async handler(newVal: string) {
-				if (newVal.length > 1) {
-					this.ontologyTree = await this.getOntology(this.currentModule!.id, this.searchInputText)
+				if (newVal.length > 1 || newVal.length === 0) {
+					if (this.ontologyTree) {
+						this.isWarningModalOpened = true
+					} else this.ontologyTree = await this.getOntology(this.currentModule!.id, this.searchInputText)
 				}
 			},
 		},
@@ -126,8 +128,8 @@ export default Vue.extend({
 	// Call functions before the template is rendered
 	async created() {
 		// get Modules and set currentModule
-		const modules = this.getModules()
-		this.currentModule = modules[0]
+		this.getModules()
+		// this.currentModule = modules[0]
 	},
 	beforeMount() {},
 	mounted() {},
@@ -148,7 +150,7 @@ export default Vue.extend({
 
 		async activateTab(module: Module): Promise<void> {
 			this.currentModule = module
-			if (this.searchInputText === '') {
+			if (this.searchInputText === '' || this.searchInputText === undefined) {
 				this.ontologyTree = await this.getOntology(module.id)
 			} else if (this.searchInputText.length > 1) {
 				this.ontologyTree = await this.getOntology(module.id, this.searchInputText)
@@ -163,6 +165,7 @@ export default Vue.extend({
 					lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)),
 				)
 				this.modules = response
+				this.currentModule = this.modules[0]
 				this.handleTab(response[0])
 				this.$emit('update-modules', this.modules)
 				// localStorage.setItem('moduleName', JSON.stringify(this.modules))
@@ -171,6 +174,7 @@ export default Vue.extend({
 				// eslint-disable-next-line no-console
 				console.log((error as Error).message)
 				alert((error as Error).message)
+				this.$emit('get-request-status', (error as Error).message)
 				return null
 			}
 		},
@@ -207,7 +211,7 @@ export default Vue.extend({
 				const response = transformObjectKeys(apiResponse.data)
 				// this.ontologyTree = response
 
-				this.requestStatus = apiResponse.status as number
+				this.requestStatus = apiResponse.status!.toString()
 				this.$emit('get-request-status', this.requestStatus)
 				this.isLoading = false
 				return response
@@ -218,13 +222,18 @@ export default Vue.extend({
 					if ((error as AxiosError).code === 'ERR_NETWORK') {
 						alert('Network Error')
 					} else {
-						this.requestStatus = (error as AxiosError).status as number
+						this.requestStatus = (error as AxiosError).status!.toString()
 						this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
 					}
 					this.isLoading = false
 				}
 				return null
 			}
+		},
+
+		activateWarningModal(): boolean {
+			this.isWarningModalOpened = true
+			return this.isWarningModalOpened
 		},
 
 		getCheckedItems(ontologyTree: Criterion[], checkedItemsMap: Map<string, Criterion>, currentModuleName: string): Criterion[] {

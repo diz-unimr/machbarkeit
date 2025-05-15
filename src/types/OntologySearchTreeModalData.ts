@@ -51,7 +51,7 @@ export interface Module {
 export interface OntologySearchTreeModalData {
 	currentModule?: Module;
     nextModule?: Module;
-    requestStatus?: number;
+    requestStatus?: string;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
     isSearchResultNoData: Array<boolean>;

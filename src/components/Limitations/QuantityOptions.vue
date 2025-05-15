@@ -29,7 +29,7 @@
 				<div class="input-wrapper">
 					<div v-if="selectedValue.comparator === 'eq' || selectedValue.comparator === 'lt' || selectedValue.comparator === 'gt'"
 						class="text-floating-wrapper">
-						<input v-model="selectedValue.value"
+						<input v-model.number="selectedValue.value"
 							type="number"
 							@change="checkEmptyValue($event, 'value')">
 						<label class="text-floating">Wert</label>
@@ -37,7 +37,7 @@
 					<div v-if="selectedValue.comparator === 'between'"
 						class="input-wrapper input-wrapper--between">
 						<div class="text-floating-wrapper">
-							<input v-model="selectedValue.minValue"
+							<input v-model.number="selectedValue.minValue"
 								style="width: 100px !important;"
 								type="number"
 								@change="checkEmptyValue($event, 'minValue')">
@@ -45,7 +45,7 @@
 						</div>
 						<span class="font-bold">und</span>
 						<div class="text-floating-wrapper">
-							<input v-model="selectedValue.maxValue"
+							<input v-model.number="selectedValue.maxValue"
 								style="width: 100px !important;"
 								type="number"
 								@change="checkEmptyValue($event, 'maxValue')">

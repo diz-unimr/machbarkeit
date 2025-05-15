@@ -29,8 +29,7 @@
 					<input id="atDate"
 						v-model="selectedValue.atDate"
 						type="date"
-						name="atDate"
-						@input="formatDate($event)">
+						name="atDate">
 					<label class="text-floating">{{ selectedValue.type }}</label>
 				</div>
 				<div v-if="selectedValue.type === 'vor'"
@@ -38,8 +37,7 @@
 					<input id="beforeDate"
 						v-model="selectedValue.atDate"
 						type="date"
-						name="beforeDate"
-						@input="formatDate($event)">
+						name="beforeDate">
 					<label class="text-floating">{{ selectedValue.type }}</label>
 				</div>
 				<div v-if="selectedValue.type === 'nach'"
@@ -47,8 +45,8 @@
 					<input id="afterDate"
 						v-model="selectedValue.atDate"
 						type="date"
-						name="afterDate"
-						@input="formatDate($event)">
+						name="afterDate">
+					<input type="date">
 					<label class="text-floating">{{ selectedValue.type }}</label>
 				</div>
 				<div v-if="selectedValue.type === 'zwischen'"
@@ -58,8 +56,7 @@
 						<input id="afterDate"
 							v-model="selectedValue.afterDate"
 							type="date"
-							name="afterDate"
-							@input="formatDate($event)">
+							name="afterDate">
 						<label class="text-floating">von</label>
 					</div>
 					<div class="text-floating-wrapper">
@@ -67,8 +64,7 @@
 						<input id="beforeDate"
 							v-model="selectedValue.beforeDate"
 							type="date"
-							name="beforeDate"
-							@input="formatDate($event)">
+							name="beforeDate">
 						<label class="text-floating">bis</label>
 					</div>
 				</div>
@@ -198,7 +194,8 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		formatDate(event: Event): void {
+		/* formatDate(event: Event): void {
+			console.log('formatDate')
 			const eventTarget = event.target as HTMLInputElement
 			const date = new Date(eventTarget.value)
 			const day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
@@ -207,7 +204,7 @@ export default Vue.extend({
 			const formattedDate = year + '-' + month + '-' + day
 			const AttributeName = eventTarget.name
 			this.selectedValue[AttributeName.replace('Date', '') + 'Date'] = formattedDate
-		},
+		}, */
 	},
 })
 </script>

@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import transformObjectKeys from '../utils/transformObjectKeys'
 import type { QueryCriterionData, FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
 import type { Criterion, Module } from '../types/OntologySearchTreeModalData.ts'
@@ -57,7 +57,7 @@ export default Vue.extend({
 							alert('Invalid JSON Format')
 						}
 					} catch (error) {
-						alert('Invalid JSON Format')
+						alert((error as AxiosError).message)
 					}
 				}
 				reader.readAsText(file)

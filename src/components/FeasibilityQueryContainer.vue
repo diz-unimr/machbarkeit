@@ -175,7 +175,7 @@ export default Vue.extend({
 	display: flex;
 	flex-direction: column;
 	width: 60%;
-	max-width: 1200px;
+	max-width: 1000px;
 	height: 100%;
 	margin: 0px auto 0px auto;
 	padding: 20px 20px 0px 20px;
