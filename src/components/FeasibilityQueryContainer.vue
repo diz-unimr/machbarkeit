@@ -10,7 +10,7 @@
 					<p>
 						Anzahl der Patienten:
 						<span v-if="isQeuryCompleted !== null && !isQeuryCompleted">
-							<img src="../../img/loading_spinner.svg">
+							<img src="http://localhost:8080/apps-extra/machbarkeit/img/loading_spinner.svg">
 						</span>
 						<template v-else-if="numberOfPatients !== null">
 							<span v-if="numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>

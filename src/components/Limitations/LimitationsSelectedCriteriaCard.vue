@@ -59,7 +59,7 @@ export default Vue.extend({
 	data(): LimitationsSelectedCriteriaCardData {
 		return {
 			filterInfo: null,
-			imgDelete: './img/delete.png',
+			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
 		}
 	},
 

@@ -24,13 +24,13 @@
 									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
 							</svg>
 						</button>
+						<!-- @focus="focusSearchInput('einschlusskriterien')" -->
 						<NcTextField :id="'einschlusskriterien'"
 							:value.sync="inclusionSearchInputText"
 							label="Code oder Suchbegriff eingeben"
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="inclusionSearchInputText !== ''"
-							@focus="focusSearchInput('einschlusskriterien')"
 							@trailing-button-click="closeOntologySearchTreeModal">
 							<Magnify :size="20" />
 						</NcTextField>
@@ -114,6 +114,7 @@ import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
 
 import debounce from 'lodash.debounce'
+// import { useDebounce } from '../utils/debounce.ts'
 
 export default Vue.extend({
 	name: 'FeasibilityQueryBuilder',
@@ -146,7 +147,7 @@ export default Vue.extend({
 			modules: null,
 			inclusionSearchInputText: '',
 			exclusionSearchInputText: '',
-			searchInputText: undefined,
+			searchInputText: '',
 			isLimitationsCriteriaOpen: false,
 			isOntologySearchTreeOpen: false,
 			criteriaOverlayType: '',
@@ -199,19 +200,21 @@ export default Vue.extend({
 		inclusionSearchInputText(newVal) {
 			this.searchInputText = newVal
 			if (newVal.length === 0) {
-				// this.isOntologySearchTreeOpen = false
-				this.searchInputWarning = ''
-			}
-			const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien'), 1000) // function is called after 500 ms?
-			debouncedHandler()
-			/* if (newVal.length === 0) {
-				this.isOntologySearchTreeOpen = false
 				this.searchInputWarning = ''
 			} else {
-				const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien'), 1000) // function is called after 500 ms?
+				const debouncedHandler = debounce(() => this.checkTextInputLength('ausschlusskriterien'), 1000) // function is called after 500 ms?
 				debouncedHandler()
-			} */
+			}
 		},
+
+		/* inclusionSearchInputText: useDebounce(function() {
+			if (this.inclusionSearchInputText === '') {
+				console.log('inclusionSearchInputText is empty')
+				this.searchInputWarning = ''
+			}
+			this.searchInputText = this.inclusionSearchInputText
+			this.checkTextInputLength('einschlusskriterien')
+		}, 1000), */
 
 		/* exclusionSearchInputText(newVal) {
 			this.searchInputText = newVal
@@ -239,7 +242,7 @@ export default Vue.extend({
 
 	methods: {
 		checkTextInputLength(criteriaType: string): void {
-			if (this.searchInputText!.length > 0 && this.searchInputText!.length < 2) {
+			if (this.searchInputText.length > 0 && this.searchInputText.length < 2) {
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
 			} else {
 				this.searchInputWarning = ''
@@ -253,8 +256,7 @@ export default Vue.extend({
 			this.isOntologySearchTreeOpen = !this.isOntologySearchTreeOpen
 			this.inclusionSearchInputText = ''
 			this.exclusionSearchInputText = ''
-			this.searchInputText = undefined
-			this.isStateEditFilter = false
+			this.searchInputText = ''
 		},
 
 		closeOntologySearchTreeModal() {
@@ -279,17 +281,14 @@ export default Vue.extend({
 			this.modules = modules
 		},
 
-		getRequestStatus(status: string, message: string | undefined): void {
-			if (status === '200') {
+		getRequestStatus(status: number, message: string | undefined): void {
+			if (status === 200) {
 				this.searchInputWarning = ''
-			} else if (status === '400') {
+			} else if (status === 400) {
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else if (status === '500') {
+			} else if (status === 500) {
 				this.searchInputWarning = ''
 				alert(message)
-			} else if (status === 'Network Error') {
-				this.searchInputWarning = ''
-				this.isOntologySearchTreeOpen = false
 			}
 		},
 
@@ -484,7 +483,7 @@ export default Vue.extend({
 }
 
 .search-input__body button:hover {
-	background-color: #808f9d;
+	background-color: #9ea9b3;
 }
 
 .search-input__body button:active {
@@ -510,9 +509,4 @@ export default Vue.extend({
 	border-radius: 4px;
 	background-color: #5270a7;
 }
-
-button {
-	border-style: unset !important;
-}
-
 </style>

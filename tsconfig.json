@@ -19,6 +19,7 @@
     "resolveJsonModule": true,
     "strict": true,
     "sourceMap": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noImplicitThis": false
   }
 }

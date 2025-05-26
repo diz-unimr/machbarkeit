@@ -20,7 +20,7 @@ export type QueryCriterionData = {
 
 export interface FeasibilityQueryBuilderData {
     modules: Array<Module> | null;
-    searchInputText?: string;
+    searchInputText: string;
     inclusionSearchInputText: string;
     exclusionSearchInputText: string;
     isLimitationsCriteriaOpen: boolean;

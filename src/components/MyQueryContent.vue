@@ -5,7 +5,7 @@
 	-->
 	<div style="padding: 50px; height: 90%; width: 100%;">
 		<div style="display: flex; justify-content: center;margin: 20px;">
-			<img :src="'./img/mockup.png'">
+			<img :src="'http://localhost:8080/apps-extra/machbarkeit/img/mockup.png'">
 		</div>
 	</div>
 </template>

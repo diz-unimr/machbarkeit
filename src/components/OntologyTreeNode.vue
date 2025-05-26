@@ -14,19 +14,42 @@
 				<input v-if="criterion?.selectable"
 					:id="String(criterion?.id)"
 					v-model="isChecked"
-					:disabled="onlySwlCode"
+					:disabled="moduleName === 'Laboruntersuchung' && !isLoincSupport"
 					type="checkbox"
 					:value="criterion?.display">
 				<div class="search-tree-term-entry">
-					<div class="terminology-code-wrapper" :style="{gap: terminologyCode ? '1.5%' : '0'}">
-						<p class="terminology-code" @click="expandTreeNode">
-							{{ criterion?.selectable && terminologyCode ? terminologyCode : null }}
-						</p>
-						<p class="terminology-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
-							{{ criterion?.display }}
-						</p>
+					<div class="terminology-wrapper">
+						<div v-if="moduleName === 'Laboruntersuchung' && criterion.selectable" class="terminology-code-wrapper" @click="expandTreeNode">
+							<span class="terminology-code">{{ criterion?.selectable && loinc ? loinc : 'Kein Loinc' }}
+								<div class="hover-modal">
+									{{ loinc ? 'Loinc: ' + loinc : 'Kein Loinc' }}
+								</div>
+							</span><span class="separator">|</span>
+						</div>
+						<div v-if="moduleName === 'Laboruntersuchung' && criterion.selectable" class="terminology-code-wrapper" @click="expandTreeNode">
+							<span class="terminology-code">{{ criterion?.selectable && swlCode ? swlCode : 'Kein Swisslab Code' }}
+								<div class="hover-modal">
+									{{ swlCode ? 'Swisslab Code: ' + swlCode : 'Kein Swisslab Code' }}
+								</div>
+							</span><span class="separator">|</span>
+						</div>
+						<div v-if="moduleName !== 'Laboruntersuchung' && criterion?.selectable && termCode" class="terminology-code-wrapper" @click="expandTreeNode">
+							<span class="terminology-code">{{ termCode }}
+								<div class="hover-modal">
+									{{ termCode ? 'Terminologie Code: ' + termCode : 'Kein Terminologie Code' }}
+								</div>
+							</span><span class="separator">|</span>
+						</div>
+						<div class="terminology-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
+							<span :style="{fontSize: criterion.selectable ? '14px' : '16px'}">
+								{{ criterion?.display }}
+								<div v-if="criterion.selectable" class="hover-modal">
+									Beschreibung
+								</div>
+							</span>
+						</div>
 					</div>
-					<p v-if="onlySwlCode && criterion.selectable === true" class="only-swl-code-warning">
+					<p v-if="moduleName === 'Laboruntersuchung' && !isLoincSupport && criterion.selectable === true" class="only-swl-code-warning">
 						(Die Suche nach SWL Code wird momentan nicht unterstützt)
 					</p>
 				</div>
@@ -64,9 +87,10 @@ interface OntologyTreeNodeData {
 			selectable: boolean;
 		}
 	] | null;
-	onlySwlCode: boolean;
-	terminologyCode: string | undefined;
-	loinc: string | undefined;
+	termCode?: string | null;
+	swlCode?: string | null;
+	loinc?: string | null ;
+	isLoincSupport: boolean;
 }
 
 export interface CheckedItem {
@@ -105,12 +129,13 @@ export default Vue.extend({
 	data(): OntologyTreeNodeData {
 		return {
 			isExpanded: false,
-			imgCollapse: './img/arrow-collapse-blue.png',
-			imgExpand: './img/arrow-expand.png',
+			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
+			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
 			concepts: null,
-			terminologyCode: undefined,
-			onlySwlCode: false,
+			termCode: undefined,
+			swlCode: undefined,
 			loinc: undefined,
+			isLoincSupport: false,
 		}
 	},
 
@@ -152,7 +177,7 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		[this.onlySwlCode, this.terminologyCode] = this.findTerminologyCode(this.criterion)
+		[this.termCode, this.loinc, this.swlCode, this.isLoincSupport] = this.findTerminologyCode(this.criterion)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -193,14 +218,19 @@ export default Vue.extend({
 			this.isExpanded = !this.isExpanded
 		},
 
-		findTerminologyCode(criterion: Criterion): [boolean, string | undefined] {
+		findTerminologyCode(criterion: Criterion): [string | null | undefined, string | null | undefined, string | null | undefined, boolean] {
+			const termCode = undefined
+			const loinc = undefined
+			const swlCode = undefined
+			const isLoincSupport = false
 			if (this.moduleName === 'Laboruntersuchung') {
-				const onlySwlCode = criterion.termCodes?.every((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')
-				const terminologyCode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')?.code
-				return [onlySwlCode, terminologyCode]
+				const loinc = criterion.termCodes?.find((termCode) => termCode.system === 'http://loinc.org')?.code
+				const swlCode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')?.code
+				const isLoincSupport = loinc !== undefined && loinc !== null
+				return [termCode, loinc, swlCode, isLoincSupport]
 			} else {
-				const terminologyCode = criterion.termCodes[0]?.code
-				return [false, terminologyCode]
+				const termCode = criterion.termCodes[0]?.code
+				return [termCode, loinc, swlCode, isLoincSupport]
 			}
 		},
 	},
@@ -210,6 +240,7 @@ export default Vue.extend({
 <style scoped>
 .ontology-nested-tree-node {
 	overflow-y: auto;
+	overflow: visible;
 	scrollbar-width: auto;
 	height: 100%;
 	padding: 0 10px 0 15px;
@@ -233,7 +264,7 @@ export default Vue.extend({
 
 .ontology-head-node button {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	width: auto;
 	text-decoration: none;
 	background-color: white;
@@ -259,13 +290,53 @@ export default Vue.extend({
 	cursor: default;
 }
 
-.search-tree-term-entry .terminology-code {
+.search-tree-term-entry .terminology-code-wrapper {
 	margin-top: 7px;
 	font-weight: 500;
 	font-size: 14px;
 	min-width: fit-content;
 }
 
+.terminology-wrapper {
+	display: flex;
+}
+
+.terminology-code-wrapper span {
+	white-space: nowrap;
+}
+
+.terminology-code {
+	display: inline-block;
+	position: relative;
+}
+
+.hover-modal {
+  display: none;
+  position: absolute;
+  top: -60%;
+  min-width: 50px;
+  padding: 0px 2px;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  z-index: 100;
+  font-size: 9px;
+}
+
+.terminology-code:hover .hover-modal,
+.terminology-description span:hover .hover-modal {
+	display: block;
+}
+
+.separator {
+	margin: 0 7px;
+}
+
+.terminology-description span {
+	display: inline-block;
+    position: relative;
+}
 .search-tree-term-entry .terminology-description {
 	max-width: fit-content;
 	margin-top: 5px;
@@ -280,11 +351,6 @@ export default Vue.extend({
 	width: 17px;
 }
 
-.terminology-code-wrapper {
-	display: flex;
-	gap: 1.5%;
-}
-
 .only-swl-code-warning {
 	font-size: 12px;
 	color: #DC3545;
@@ -294,6 +360,7 @@ export default Vue.extend({
 img {
 	height: 15px;
 	width: 15px;
+	margin-top: 10px;
 }
 
 ul {
