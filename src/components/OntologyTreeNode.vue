@@ -239,7 +239,7 @@ export default Vue.extend({
 
 <style scoped>
 .ontology-nested-tree-node {
-	overflow-y: auto;
+	/* overflow-y: auto; */
 	overflow: visible;
 	scrollbar-width: auto;
 	height: 100%;
@@ -311,17 +311,17 @@ export default Vue.extend({
 }
 
 .hover-modal {
-  display: none;
-  position: absolute;
-  top: -60%;
-  min-width: 50px;
-  padding: 0px 2px;
-  background: #fff;
-  border: 1px solid #bbb;
-  border-radius: 3px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  z-index: 100;
-  font-size: 9px;
+	display: none;
+	position: absolute;
+	top: -60%;
+	min-width: 50px;
+	padding: 0px 2px;
+	background: #fff;
+	border: 1px solid #bbb;
+	border-radius: 3px;
+	box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+	z-index: 100;
+	font-size: 9px;
 }
 
 .terminology-code:hover .hover-modal,
@@ -335,8 +335,9 @@ export default Vue.extend({
 
 .terminology-description span {
 	display: inline-block;
-    position: relative;
+	position: relative;
 }
+
 .search-tree-term-entry .terminology-description {
 	max-width: fit-content;
 	margin-top: 5px;
