@@ -16,8 +16,8 @@
 							:key="index"
 							style="position: relative">
 							<!-- can be changed sequence -->
-							<div class="selected-criteria-container">
-								<div class="selected-criteria-left" />
+							<div class="selected-criteria-container" :style="{ 'border': '1px solid' + draggableInclusionCharacteristics.characteristics[index].color }">
+								<div class="selected-criteria-left" :style="{ 'background-color': draggableInclusionCharacteristics.characteristics[index].color}" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'einschlusskriterien')">
 										{{ characteristic.display }} ({{ characteristic.termCodes[0].code }})
@@ -50,7 +50,7 @@
 										</p>
 									</div>
 								</div>
-								<div class="selected-criteria-right">
+								<div class="selected-criteria-right" :style="{ 'background-color': draggableInclusionCharacteristics.characteristics[index].color}">
 									<button class="delete-btn" @click="deleteBtn(index, 'einschlusskriterien')">
 										<svg role="img"
 											width="20px"
@@ -212,8 +212,8 @@ import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../ty
 
 export interface FeasibilityQueryDisplayData {
 	characteristicsLogic: {
-        inclusionCriteria: Array<string>;
-        exclusionCriteria: Array<string>;
+        inclusionCriteria: string[];
+        exclusionCriteria: string[];
     }
 	draggableInclusionCharacteristics: FeasibilityQueryBuilderData['selectedInclusionCharacteristics'];
 	draggableExclusionCharacteristics: FeasibilityQueryBuilderData['selectedExclusionCharacteristics'];
@@ -401,7 +401,6 @@ export default Vue.extend({
 
 .selected-criteria-container {
 	display: flex;
-	border: 1px solid #5270a7;
 	justify-content: space-between;
 }
 
@@ -418,9 +417,10 @@ export default Vue.extend({
 
 .selected-criteria-middle {
 	display: flex;
+	flex: 1;
 	flex-direction: column;
-	width: 85%;
 	padding: 8px;
+	padding-left: clamp(10px, 5%, 25px);
 }
 
 .selected-criteria-right {
@@ -429,6 +429,10 @@ export default Vue.extend({
 	width: clamp(10px, 7%, 50px);
 	background-color: #5270a7;
 	padding: 10px 0px;
+}
+
+.selected-criteria-right button{
+	margin: 3px 3px 3px 3px !important;
 }
 
 .selected-criteria-display {
@@ -486,6 +490,7 @@ button.combining-operator:active {
 
 .delete-btn {
 	display: flex;
+	align-items: center;
 	border: none;
 	outline: none;
 	min-height: 20px;

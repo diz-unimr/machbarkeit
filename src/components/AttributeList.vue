@@ -85,13 +85,13 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 interface AttributeListData {
-    attributeList: Array<object>;
-    attributeName: Array<string>;
-    moduleName: Array<string>;
-    expandedGroup: Array<number>;
+    attributeList: object[];
+    attributeName: string[];
+    moduleName: string[];
+    expandedGroup: number[];
 	attributeTextSearch: string;
-    selectedAttribute: Array<object>;
-    selectedModulName: Array<string>;
+    selectedAttribute: object[];
+    selectedModulName: string[];
     tooltipPosition: number;
     imgExpand: string;
     imgCollapse:string;
@@ -129,7 +129,7 @@ export default Vue.extend({
 	},
 
 	computed: {
-		filteredAttribute(): Array<object> {
+		filteredAttribute(): object[] {
 			return this.attributeList.filter((item) =>
 				item[this.metadata.kds_name].toLowerCase().includes(this.attributeTextSearch.toLowerCase()),
 			)
@@ -180,8 +180,8 @@ export default Vue.extend({
 			return data
 		},
 
-		getModuleName(attributeList: Array<object>): Array<string> {
-			const moduleName: Array<string> = attributeList
+		getModuleName(attributeList: object[]): string[] {
+			const moduleName: string[] = attributeList
 				.map(
 					(item) => item[this.metadata.kds_modul],
 				).filter(
@@ -190,7 +190,7 @@ export default Vue.extend({
 			return moduleName
 		},
 
-		getAttributeName(attributeList: Array<object>): Array<string> {
+		getAttributeName(attributeList: object[]): string[] {
 			const attributeName = attributeList
 				.map(
 					(item) => item[this.metadata.kds_name],

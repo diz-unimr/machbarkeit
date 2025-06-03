@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { type PropType } from 'vue'
 import LimitationsSelectedCriteriaCard from './LimitationsSelectedCriteriaCard.vue'
 import type { Criterion } from '../../types/OntologySearchTreeModalData.ts'
 import type { ConceptType } from '../../types/ConceptOptionsData'
@@ -46,9 +46,9 @@ import type { QuantityType } from '../../types/QuantityOptionsData'
 import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
 
 interface LimitationsSelectedCriteriaModalData {
-    selectedCriteriaFiltersInfo: Array<ConceptType | QuantityType | TimeRangeType>;
+    selectedCriteriaFiltersInfo: ConceptType[] | QuantityType[] | TimeRangeType[];
     isAllFilterComplete: boolean;
-	filterCompleteStatus: Array<boolean>;
+	filterCompleteStatus: boolean[];
 }
 
 interface FilterInfo {
@@ -63,7 +63,7 @@ export default Vue.extend({
 	},
 	props: {
 		selectedCriteria: {
-			type: Array<Criterion>,
+			type: Array as PropType<Criterion[]>,
 			required: true,
 		},
 		isStateEditFilter: {
