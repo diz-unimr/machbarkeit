@@ -7,7 +7,7 @@ import type { QuantityType } from '../types/QuantityOptionsData.ts'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 
 export interface Criterion {
-    children: Array<Criterion>;
+    children: Criterion[];
     id: string;
     moduleId: string;
     parentId: string | null;
@@ -17,14 +17,13 @@ export interface Criterion {
         system: string;
         display: string;
         version: string;
-    }[],
+    }[];
     context?: {
         code: string;
         system: string;
         version: string;
         display: string;
     };
-    loinc?: string;
     selectable: boolean;
     leaf: boolean;
     timeRestrictionAllowed?: boolean | null;
@@ -37,6 +36,7 @@ export interface Criterion {
         version?: string;
     }[] | null;
     selectedFilter?: ConceptType | QuantityType | TimeRangeType;
+    color?: string;
 }
 
 export interface Module {
@@ -46,16 +46,16 @@ export interface Module {
     fdpgCdsSystem: string;
     fdpgCdsVersion: string;
     version: string;
+    color: string;
 }
 
 export interface OntologySearchTreeModalData {
-	activeTab?: string;
+    activeModule?: Module;
+	nextModule?: Module;
     requestStatus?: number;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
-    isSearchResultNoData: Array<boolean>;
-    modules: Module[] | null;
-    ontologyTree: Criterion[] | null;
+    isSearchResultNoData: boolean[];
     context: {
         code: string;
         system: string;
@@ -63,7 +63,6 @@ export interface OntologySearchTreeModalData {
         display: string;
     } | null;
     isCheckboxChecked: boolean;
-    isModalOpened: boolean;
-    activeModule?: Module;
-    isLoading: boolean;
+    isWarningModalOpened: boolean;
+    currentTheme: string;
 }

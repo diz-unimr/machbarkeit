@@ -46,7 +46,6 @@
 						v-model="selectedValue.atDate"
 						type="date"
 						name="afterDate">
-					<input type="date">
 					<label class="text-floating">{{ selectedValue.type }}</label>
 				</div>
 				<div v-if="selectedValue.type === 'zwischen'"
@@ -195,7 +194,6 @@ export default Vue.extend({
 
 	methods: {
 		/* formatDate(event: Event): void {
-			console.log('formatDate')
 			const eventTarget = event.target as HTMLInputElement
 			const date = new Date(eventTarget.value)
 			const day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
@@ -268,5 +266,6 @@ select, input {
 	height: 45px !important;
 	width: 150px !important;
 	margin: 3px !important;
+	background-color: unset !important;
 }
 </style>

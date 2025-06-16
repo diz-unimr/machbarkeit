@@ -279,5 +279,6 @@ select, input {
 	height: 45px !important;
 	width: 150px !important;
 	margin: 3px !important;
+	background-color: unset !important;
 }
 </style>

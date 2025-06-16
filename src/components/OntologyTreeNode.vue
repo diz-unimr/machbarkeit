@@ -6,7 +6,7 @@
 	<div class="ontology-nested-tree-node">
 		<li>
 			<div class="ontology-head-node">
-				<button v-if="!criterion?.leaf" @click="expandTreeNode">
+				<button v-if="!criterion?.leaf && criterion.children" @click="expandTreeNode">
 					<img :src="isExpanded
 						? imgExpand
 						: imgCollapse">
@@ -40,8 +40,11 @@
 								</div>
 							</span><span class="separator">|</span>
 						</div>
-						<div class="terminology-description" :style="{cursor: criterion.leaf ? 'default' : 'pointer'}" @click="expandTreeNode">
-							<span :style="{fontSize: criterion.selectable ? '14px' : '16px'}">
+						<div v-if="criterion?.selectable || criterion?.children?.length > 0"
+							class="terminology-description-wrapper"
+							:style="{cursor: criterion.leaf ? 'default' : 'pointer'}"
+							@click="expandTreeNode">
+							<span :style="{fontSize: criterion.selectable ? '15px' : '16px'}">
 								{{ criterion?.display }}
 								<div v-if="criterion.selectable" class="hover-modal">
 									Beschreibung
@@ -60,6 +63,7 @@
 						:key="child.id"
 						:module-name="moduleName"
 						:criterion="child"
+						:current-theme="currentTheme"
 						:parent="criterion"
 						:parents="[...parents, criterion]"
 						@change="toggleParent" />
@@ -112,6 +116,10 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
+		currentTheme: {
+			type: String,
+			default: 'default',
+		},
 		parent: {
 			type: Object as PropType<Criterion>,
 			default: null,
@@ -143,30 +151,33 @@ export default Vue.extend({
 		isChecked: {
 			// Determines if the current item is checked
 			get(): boolean {
-				return this.$store.getters.getCheckedItems(this.criterion)
+				return this.$store.getters.getCheckedItems(this.criterion.id)
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
+				let selectedItem = this.criterion // Get the selected item
 				if (checked) {
-					this.$store.dispatch('addCheckedItem', { id: this.criterion.id, node: this.criterion })
+					this.$store.dispatch('addCheckedItem', this.criterion.id)
 					// if parent is checked, check all children
 					if (this.criterion.children && this.criterion.children.length > 0) {
 						this.toggleChildren(this.criterion.children, checked)
 					}
 					// if all children are checked, check the parent
 					if (this.parent && this.parent.selectable) {
-						this.toggleParent(checked)
+						selectedItem = this.toggleParent(checked, selectedItem)
 					}
+					this.$store.dispatch('addSelectedItem', { item: selectedItem, color: this.currentTheme })
 				} else {
-					this.$store.dispatch('removeCheckedItem', this.criterion)
+					this.$store.dispatch('removeCheckedItem', this.criterion.id)
 					// if parent is unchecked, uncheck all children
 					if (this.criterion.children && this.criterion.children.length > 0) {
 						this.toggleChildren(this.criterion.children, checked)
 					}
 					// if child is unchecked, uncheck the parent
 					if (this.parent && this.parent.selectable) {
-						this.toggleParent(checked)
+						selectedItem = this.toggleParent(checked, selectedItem)
 					}
+					this.$store.dispatch('removeSelectedItem', selectedItem)
 				}
 			},
 		},
@@ -189,29 +200,38 @@ export default Vue.extend({
 	methods: {
 		toggleChildren(children: Criterion[], isChecked: boolean): void {
 			children.forEach((child: Criterion) => {
-				isChecked ? this.$store.dispatch('addCheckedItem', { id: child.id, node: child }) : this.$store.dispatch('removeCheckedItem', child)
+				if (isChecked) {
+					this.$store.dispatch('addCheckedItem', child.id)
+					this.$store.dispatch('removeSelectedItem', child)
+				} else {
+					this.$store.dispatch('removeCheckedItem', child.id)
+					this.$store.dispatch('removeSelectedItem', child)
+				}
+				// isChecked ? this.$store.dispatch('addCheckedItem', child.id) : this.$store.dispatch('removeCheckedItem', child.id)
 				if (child.children && child.children.length > 0) {
 					this.toggleChildren(child.children, isChecked)
 				}
 			})
 		},
 
-		toggleParent(isChecked: boolean): void {
-			if (!isChecked) {
-				this.$store.dispatch('removeCheckedItem', this.parent)
+		toggleParent(isChecked: boolean, selectedItem: Criterion): Criterion {
+			if (isChecked) {
+				const checkedItems = this.$store.state.checkedItems
+				const areAllChildrenChecked = this.parent.children.every(child => checkedItems.has(child.id))
+				if (areAllChildrenChecked) {
+					this.$store.dispatch('addCheckedItem', this.parent.id)
+					selectedItem = this.parent
+					if (this.parent.parentId !== null && this.parent.selectable) {
+						this.$emit('change', isChecked, selectedItem) // go back to upper parent level
+					}
+				}
+			} else {
+				this.$store.dispatch('removeCheckedItem', this.parent.id)
 				if (this.parent.parentId !== null && this.parent.selectable) {
 					this.$emit('change', isChecked) // go back to upper parent level
 				}
-			} else {
-				const checkedItemsMap = this.$store.state.checkedItemsMap
-				const allChildrenChecked = this.parent.children.every(child => checkedItemsMap.has(child.id))
-				if (allChildrenChecked) {
-					this.$store.dispatch('addCheckedItem', { id: this.parent.id, node: this.parent })
-					if (this.parent.parentId !== null && this.parent.selectable) {
-						this.$emit('change', isChecked) // go back to upper parent level
-					}
-				}
 			}
+			return selectedItem
 		},
 
 		expandTreeNode(): void {
@@ -242,7 +262,7 @@ export default Vue.extend({
 	/* overflow-y: auto; */
 	overflow: visible;
 	scrollbar-width: auto;
-	height: 100%;
+	/* height: 100%; */
 	padding: 0 10px 0 15px;
 }
 
@@ -267,7 +287,7 @@ export default Vue.extend({
 	align-items: flex-start;
 	width: auto;
 	text-decoration: none;
-	background-color: white;
+	background-color: unset;
 	border: none;
 	outline: none;
 	margin: 0px;
@@ -292,7 +312,6 @@ export default Vue.extend({
 
 .search-tree-term-entry .terminology-code-wrapper {
 	margin-top: 7px;
-	font-weight: 500;
 	font-size: 14px;
 	min-width: fit-content;
 }
@@ -308,12 +327,13 @@ export default Vue.extend({
 .terminology-code {
 	display: inline-block;
 	position: relative;
+	font-weight: 500;
 }
 
 .hover-modal {
 	display: none;
 	position: absolute;
-	top: -60%;
+	top: -14px;
 	min-width: 50px;
 	padding: 0px 2px;
 	background: #fff;
@@ -322,25 +342,30 @@ export default Vue.extend({
 	box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 	z-index: 100;
 	font-size: 9px;
-}
-
-.terminology-code:hover .hover-modal,
-.terminology-description span:hover .hover-modal {
-	display: block;
+	font-weight: normal;
 }
 
 .separator {
 	margin: 0 7px;
 }
 
-.terminology-description span {
+.terminology-description-wrapper span {
 	display: inline-block;
 	position: relative;
 }
 
-.search-tree-term-entry .terminology-description {
+.search-tree-term-entry .terminology-description-wrapper {
 	max-width: fit-content;
 	margin-top: 5px;
+}
+
+/* .terminology-description-wrapper .hover-modal {
+	top: -12px;
+} */
+
+.terminology-code:hover .hover-modal,
+.terminology-description-wrapper span:hover .hover-modal {
+	display: block;
 }
 
 .search-tree-term-entry p:hover {

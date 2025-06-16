@@ -76,13 +76,13 @@
 				</div>
 			</div> -->
 		</div>
-
 		<OntologySearchTreeModal v-if="isOntologySearchTreeOpen"
 			:criteria-type="criteriaOverlayType"
-			:search-input-text="searchInputText"
+			:modules="modules"
+			:ontology-tree="ontologyTree"
+			:is-loading="isLoading"
+			@update-ontology-tree="updateOntologyTree"
 			@get-selected-criteria="getSelectedCriteria"
-			@update-modules="HandleModules"
-			@get-request-status="getRequestStatus"
 			@toggle-ontology-search-tree-modal="toggleOntologySearchTreeModal" />
 
 		<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
@@ -102,8 +102,11 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
+import lodash from 'lodash'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
+import transformObjectKeys from '../utils/transformObjectKeys'
 import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
 import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
@@ -114,7 +117,7 @@ import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
 
 import debounce from 'lodash.debounce'
-// import { useDebounce } from '../utils/debounce.ts'
+import { useDebounce } from '../utils/debounce.ts'
 
 export default Vue.extend({
 	name: 'FeasibilityQueryBuilder',
@@ -145,6 +148,8 @@ export default Vue.extend({
 	data(): FeasibilityQueryBuilderData {
 		return {
 			modules: null,
+			ontologyTree: null,
+			activeModule: null,
 			inclusionSearchInputText: '',
 			exclusionSearchInputText: '',
 			searchInputText: '',
@@ -165,8 +170,11 @@ export default Vue.extend({
 				version: '',
 				display: '',
 			},
-			isStateEditFilter: false,
 			searchInputWarning: '',
+			isLoading: true,
+			isStateEditFilter: false,
+			isinputTextCleared: false,
+			controller: null as AbortController | null,
 			imgDelete: './img/delete-black.png',
 		}
 	},
@@ -197,24 +205,28 @@ export default Vue.extend({
 			if (value) this.isOntologySearchTreeOpen = false
 		},
 
-		inclusionSearchInputText(newVal) {
+		inclusionSearchInputText2(newVal) {
 			this.searchInputText = newVal
-			if (newVal.length === 0) {
+			const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien', this.searchInputText), 1000) // function is called after 500 ms?
+			debouncedHandler()
+			/* if (newVal.length === 0) {
 				this.searchInputWarning = ''
+				this.modules = await this.getModules()
+				this.ontologyTree = this.getOntology(this.module![0].id)
 			} else {
-				const debouncedHandler = debounce(() => this.checkTextInputLength('ausschlusskriterien'), 1000) // function is called after 500 ms?
+				const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien', this.activedModule!.id), 1000) // function is called after 500 ms?
 				debouncedHandler()
-			}
+			} */
 		},
 
-		/* inclusionSearchInputText: useDebounce(function() {
-			if (this.inclusionSearchInputText === '') {
-				console.log('inclusionSearchInputText is empty')
+		inclusionSearchInputText: useDebounce(function() {
+			if (this.inclusionSearchInputText.length > 0 || (!this.isinputTextCleared && this.inclusionSearchInputText === '')) {
 				this.searchInputWarning = ''
+				this.searchInputText = this.inclusionSearchInputText
+				this.isinputTextCleared = false
+				this.checkTextInputLength('einschlusskriterien', this.searchInputText)
 			}
-			this.searchInputText = this.inclusionSearchInputText
-			this.checkTextInputLength('einschlusskriterien')
-		}, 1000), */
+		}, 1000),
 
 		/* exclusionSearchInputText(newVal) {
 			this.searchInputText = newVal
@@ -237,21 +249,139 @@ export default Vue.extend({
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {},
+	beforeDestroy() {
+		// Cleanup when component is destroyed
+		/* if (this.controller) {
+			this.controller.abort()
+		} */
+	},
 	destroyed() {},
 
 	methods: {
-		checkTextInputLength(criteriaType: string): void {
-			if (this.searchInputText.length > 0 && this.searchInputText.length < 2) {
+		async checkTextInputLength(criteriaType: string, searchText: string): Promise<void> {
+			this.isinputTextCleared = false
+			if (searchText.length === 1) {
 				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
 			} else {
+				if (!this.modules) {
+					this.modules = await this.getModules()
+				}
+				this.ontologyTree = await this.getOntology(this.activeModule.id)
 				this.searchInputWarning = ''
 				this.criteriaOverlayType = criteriaType
 				this.isOntologySearchTreeOpen = true
 			}
 		},
 
-		toggleOntologySearchTreeModal(criteriaType: string): void {
+		getTabTheme(moduleName: string): string {
+			if (moduleName === 'Person') {
+				return '#3498DB'
+			} else if (moduleName === 'Diagnose') {
+				return '#9B59B6'
+			} else if (moduleName === 'Prozedur') {
+				return '#FBB016'
+			} else if (moduleName === 'Laboruntersuchung') {
+				return '#1FC48B' // '#1BC885'
+			} else return 'default'
+		},
+
+		async getModules(): Promise<Module[] | null> {
+			try {
+				const apiResponse = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
+				console.log(apiResponse)
+				// Convert object keys to camelCase using lodash
+				/* const response: Module[] = apiResponse.data.map(module =>
+					lodash.mapKeys(module, (value, key) => lodash.camelCase(key))) */
+				const response: Module[] = apiResponse.data.map((module: Module) => {
+					const newModule = lodash.mapKeys(module, (value, key) => lodash.camelCase(key))
+					newModule.color = this.getTabTheme(newModule.name)
+					return newModule
+				})
+				this.activeModule = response[0] // Set the first module as active
+				return response
+				// localStorage.setItem('moduleName', JSON.stringify(this.modules))
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.log((error as Error).message)
+				alert((error as Error).message)
+				return null
+			}
+		},
+
+		async updateOntologyTree(activeModule: Module): Promise<void> {
+			this.activeModule = activeModule
+			this.ontologyTree = await this.getOntology(activeModule.id)
+		},
+
+		async getOntology(moduleId: string): Promise<Criterion[] | null> {
+			this.isLoading = true
+			// Code oder Suchbegriff wurde eingegeben
+			const searchText = this.searchInputText
+
+			// Cancel any previous request if still pending
+			this.AbortController()
+			this.controller = new AbortController()
+			let apiResponse: AxiosResponse
+			// this.isLoading = true
+			console.log('Fetching ontology Module ID: ', moduleId, ' Search Text: ', searchText)
+			try {
+				if (searchText.length > 1) {
+					apiResponse = await axios.post('https://mdr.diz.uni-marburg.de/api/ontology/concepts/search',
+						{
+							module_id: moduleId,
+							search_term: searchText,
+							display: 'tree',
+						},
+						{
+							signal: this.controller.signal, // Attach the cancel token to the request
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						},
+					)
+				} else {
+					apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + moduleId,
+						{ signal: this.controller.signal })
+				}
+				// Convert object keys to camelCase using lodash
+				const response = transformObjectKeys(apiResponse.data)
+				// this.ontologyTree = response
+
+				// this.requestStatus = apiResponse.status as number
+				this.getRequestWarning(apiResponse.status as number)
+				// this.$emit('get-request-status', this.requestStatus)
+				this.isLoading = false
+				console.log(response)
+				return response
+			} catch (error) {
+				this.isLoading = false
+				if ((error as AxiosError).code === 'ERR_CANCELED' && !this.controller.signal.aborted) {
+					console.log('Request was canceled: ', moduleId)
+					this.isLoading = true
+				} else if ((error as AxiosError).code === 'ERR_NETWORK') {
+					alert('Network Error')
+				} else {
+					// this.requestStatus = (error as AxiosError).status as number
+					this.getRequestWarning((error as AxiosError).status as number, (error as AxiosError).message)
+					// this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
+				}
+				return null
+			}
+		},
+
+		AbortController(): void {
+			if (this.controller) {
+				this.controller.abort()
+				this.controller = null
+				console.log('AbortController called')
+			}
+		},
+
+		async toggleOntologySearchTreeModal(criteriaType: string): Promise<void> {
+			if (!this.isOntologySearchTreeOpen) {
+				this.modules = await this.getModules()
+				this.ontologyTree = await this.getOntology(this.modules![0].id)
+			}
 			this.criteriaOverlayType = criteriaType
 			this.isOntologySearchTreeOpen = !this.isOntologySearchTreeOpen
 			this.inclusionSearchInputText = ''
@@ -277,11 +407,11 @@ export default Vue.extend({
 			}
 		},
 
-		HandleModules(modules: Array<Module>): void {
+		/* HandleModules(modules: Array<Module>): void {
 			this.modules = modules
-		},
+		}, */
 
-		getRequestStatus(status: number, message: string | undefined): void {
+		getRequestWarning(status: number, message: string | undefined): void {
 			if (status === 200) {
 				this.searchInputWarning = ''
 			} else if (status === 400) {
@@ -289,19 +419,24 @@ export default Vue.extend({
 			} else if (status === 500) {
 				this.searchInputWarning = ''
 				alert(message)
+			} else {
+				alert(message)
 			}
 		},
 
 		getSelectedCriteria(criteriaType: string, items: Criterion[]): void {
 			this.inclusionSearchInputText = ''
 			this.exclusionSearchInputText = ''
+			this.isinputTextCleared = true
 			this.searchInputText = ''
 			this.selectedCriteria = items
-			this.toggleOntologySearchTreeModal(criteriaType)
+			// this.toggleOntologySearchTreeModal(criteriaType)
+			this.closeOntologySearchTreeModal()
+			this.isStateEditFilter = false
 			this.isLimitationsCriteriaOpen = true
 		},
 
-		getSelectedFilterInfo(filterInfo: Array<ConceptType | QuantityType | TimeRangeType>) {
+		getSelectedFilterInfo(filterInfo: ConceptType[] | QuantityType[] | TimeRangeType[]): void {
 			this.selectedCriteria = this.selectedCriteria!.map((item, index) => {
 				if (filterInfo[index]) {
 					item.selectedFilter = filterInfo[index] as ConceptType | QuantityType | TimeRangeType
@@ -383,7 +518,6 @@ export default Vue.extend({
 						},
 						...(selectedIncludeCriteria.characteristics[i].selectedFilter || {}),
 					} as QueryCriterionData
-
 					if (i === 0) {
 						this.queryData.inclusionCriteria.push([selectedCharacteristic])
 					} else {

@@ -9,46 +9,79 @@ Vue.use(Vuex)
 
 export default new Store({
 	state: {
-		checkedItemsMap: new Map(),
+		checkedItems: new Set(),
+		selectedItems: new Set(),
 	},
 
 	mutations: {
-		ADD_CHECKED_ITEM(state, item) {
-			const newMap = new Map(state.checkedItemsMap) // Create a new Set instance
-			if (!newMap.has(item.id)) {
-				newMap.set(item.id, item.node)
+		ADD_CHECKED_ITEM(state, id) {
+			const newSet = new Set(state.checkedItems) // Create a new Set instance
+			if (!newSet.has(id)) {
+				newSet.add(id)
 			}
-			state.checkedItemsMap = newMap // Replace the old Set with a new one
+			state.checkedItems = newSet // Replace the old Set with a new one
 		},
 
-		REMOVE_CHECKED_ITEM(state, node) {
-			const newMap = new Map(state.checkedItemsMap) // Create a new Set instance
-			newMap.delete(node.id) // Remove the item from the Set
-			state.checkedItemsMap = newMap // Replace the old Set with a new one
+		REMOVE_CHECKED_ITEM(state, id) {
+			const newSet = new Set(state.checkedItems) // Create a new Set instance
+			newSet.delete(id) // Remove the item from the Set
+			state.checkedItems = newSet // Replace the old Set with a new one
 		},
 
 		CLEAR_CHECKED_ITEMS(state) {
-			state.checkedItemsMap = new Map() // Clear the checked items
+			state.checkedItems = new Set() // Clear the checked items
+		},
+
+		ADD_SELECTED_ITEM(state, { item, color }) {
+			const selectedItems = item
+			selectedItems.color = color // Add color to the item
+			const newSet = new Set(state.selectedItems) // Create a new Set instance
+			if (!newSet.has(selectedItems)) {
+				newSet.add(selectedItems)
+			}
+			state.selectedItems = newSet // Replace the old Set with a new one
+		},
+
+		REMOVE_SELECTED_ITEM(state, id) {
+			const newSet = new Set(state.selectedItems) // Create a new Set instance
+			newSet.delete(id) // Remove the item from the Set
+			state.selectedItems = newSet // Replace the old Set with a new one
+		},
+
+		CLEAR_SELECTED_ITEMS(state) {
+			state.selectedItems = new Set() // Clear the checked items
 		},
 	},
 
 	actions: {
-		addCheckedItem({ commit }, item) {
-			commit('ADD_CHECKED_ITEM', item)
+		addCheckedItem({ commit }, id) {
+			commit('ADD_CHECKED_ITEM', id)
 		},
 
 		removeCheckedItem({ commit }, id) {
 			commit('REMOVE_CHECKED_ITEM', id)
 		},
 
-		clearCheckedItem({ commit }) {
+		clearCheckedItems({ commit }) {
 			commit('CLEAR_CHECKED_ITEMS')
+		},
+
+		addSelectedItem({ commit }, { item, color }) {
+			commit('ADD_SELECTED_ITEM', { item, color })
+		},
+
+		removeSelectedItem({ commit }, item) {
+			commit('REMOVE_SELECTED_ITEM', item)
+		},
+
+		clearSelectedItems({ commit }) {
+			commit('CLEAR_SELECTED_ITEMS')
 		},
 	},
 
 	getters: {
-		getCheckedItems: (state) => (node) => {
-			return state.checkedItemsMap.has(node.id)
+		getCheckedItems: (state) => (id) => {
+			return state.checkedItems.has(id)
 		},
 	},
 })

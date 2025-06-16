@@ -8,8 +8,8 @@ import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
 import type { Criterion, Module } from './OntologySearchTreeModalData.ts'
 
 export interface SelectedCharacteristics {
-    characteristics: Array<Criterion>;
-    logic: Array<string>;
+    characteristics: Criterion[];
+    logic: string[];
 }
 
 export type QueryCriterionData = {
@@ -19,7 +19,9 @@ export type QueryCriterionData = {
 } & (ConceptType | QuantityType | TimeRangeType | undefined)
 
 export interface FeasibilityQueryBuilderData {
-    modules: Array<Module> | null;
+    modules: Module[] | null;
+    ontologyTree: Criterion[] | null;
+    activeModule: Module | null;
     searchInputText: string;
     inclusionSearchInputText: string;
     exclusionSearchInputText: string;
@@ -35,8 +37,11 @@ export interface FeasibilityQueryBuilderData {
         display: string;
         inclusionCriteria?: Array<QueryCriterionData>[];
 		exclusionCriteria?: Array<QueryCriterionData>[];
-    };
-    isStateEditFilter: boolean;
+    },
     searchInputWarning: string;
+    isLoading: boolean;
+    isStateEditFilter: boolean;
+    isinputTextCleared: boolean;
+    controller: AbortController | null;
     imgDelete: string;
 }

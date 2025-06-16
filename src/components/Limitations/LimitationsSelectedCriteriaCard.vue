@@ -119,7 +119,7 @@ export default Vue.extend({
 	outline: none;
 	margin: 0px;
 	padding: 0px;
-	background-color: white;
+	background-color: unset !important;
 	align-items: center;
 	max-width: 20%;
 }

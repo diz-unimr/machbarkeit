@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div v-if="requestStatus === 200" class="ontology-search-tree-container">
+	<div class="ontology-search-tree-container" :style="{ '--theme-color': currentTheme}">
 		<div class="ontology-search-tree-wrapper">
 			<div class="criteria-type">
 				{{ criteriaType }}
@@ -14,33 +14,36 @@
 					<div class="ontology-search-tree__tabs-container">
 						<button v-for="module in modules"
 							:key="module.id"
-							:class="['ontology-tab', { 'active': activeTab === module.id }]"
+							:class="['ontology-tab', { 'active': activeModule?.id === module.id }]"
+							:style="{ 'background-color': module.color }"
 							@click="changeTab(module.id)">
 							{{ module.name }}
 						</button>
 					</div>
 				</div>
-				<div v-if="ontologyTree && !isLoading" class="ontology-search-tree__display">
-					<div v-if="ontologyTree.length > 0 && ontologyTree[0].moduleId === activeTab">
-						<div class="ontology-search-tree__body">
-							<div class="module-name">
-								{{ modules.filter(module => module.id === activeTab)[0].name }}
+				<div class="ontology-search-tree__display">
+					<div v-if="ontologyTree && !isLoading">
+						<div v-if="ontologyTree.length > 0 && ontologyTree[0].moduleId === activeModule?.id">
+							<div class="ontology-search-tree__body">
+								<div class="module-name">
+									{{ modules.filter(module => module.id === activeModule?.id)[0].name }}
+								</div>
+								<OntologyTreeNode v-for="criterion in ontologyTree"
+									:key="criterion.id"
+									:module-name="modules.filter(module => module.id === activeModule?.id)[0].name"
+									:criterion="criterion"
+									:current-theme="currentTheme" />
 							</div>
-							<OntologyTreeNode v-for="criterion in ontologyTree"
-								:key="criterion.id"
-								:module-name="modules.filter(module => module.id === activeTab)[0].name"
-								:criterion="criterion" />
 						</div>
-					</div>
-					<div v-else-if="ontologyTree?.length === 0">
-						<div class="no-result-data">
+						<div v-else-if="ontologyTree?.length === 0" class="no-result-data">
 							Keine Daten
 						</div>
 					</div>
+					<div v-else-if="isLoading" class="loading-text">
+						Loading...
+					</div>
 				</div>
-				<div v-if="isLoading" class="loading-text ontology-search-tree__display">
-					Loading...
-				</div>
+
 				<div class="ontology-search-tree__button-group">
 					<button :disabled="isCheckboxEmpty" @click="submit(criteriaType)">
 						AUSWÄHLEN
@@ -49,8 +52,8 @@
 						ABBRECHEN
 					</button>
 				</div>
-				<WarningModal v-if="!isCheckboxEmpty && isModalOpened"
-					class="middel"
+				<WarningModal v-if="!isCheckboxEmpty && isWarningModalOpened"
+					class="warning-modal"
 					@submit-change-tab="submitChangeTab"
 					@cancel-change-tab="cancelChangeTab" />
 			</div>
@@ -59,14 +62,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import transformObjectKeys from '../utils/transformObjectKeys'
+import Vue, { type PropType } from 'vue'
 import OntologyTreeNode from './OntologyTreeNode.vue'
-// import OntologyNestedTreeNodeSearchInput from './OntologyNestedTreeNodeSearchInput.vue'
 import WarningModal from './WarningModal.vue'
 import type { OntologySearchTreeModalData, Module, Criterion } from '../types/OntologySearchTreeModalData.ts'
-import lodash from 'lodash'
-import axios, { AxiosError, type AxiosResponse } from 'axios'
 
 export default Vue.extend({
 	name: 'OntologySearchTreeModal',
@@ -79,9 +78,17 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
-		searchInputText: {
-			type: String,
+		modules: {
+			type: Array as PropType<Module[]>,
+			default: undefined,
+		},
+		ontologyTree: {
+			type: Array as PropType<Criterion[]>,
 			default: null,
+		},
+		isLoading: {
+			type: Boolean,
+			default: true,
 		},
 		getSelectedCriteria: {
 			type: Function,
@@ -91,190 +98,109 @@ export default Vue.extend({
 
 	data(): OntologySearchTreeModalData {
 		return {
-			activeTab: undefined,
+			activeModule: undefined,
+			nextModule: undefined,
 			requestStatus: undefined,
 			selectedItems: [],
 			checkedItems: undefined,
 			isSearchResultNoData: [],
-			modules: null,
-			ontologyTree: null,
 			context: null,
 			isCheckboxChecked: false,
-			isModalOpened: false,
-			activeModule: undefined,
-			isLoading: true,
+			isWarningModalOpened: false,
+			currentTheme: 'default',
 		}
 	},
 
 	computed: {
 		isCheckboxEmpty() {
-			return this.$store.state.checkedItemsMap.size < 1
+			return this.$store.state.checkedItems.size < 1
 		},
 	},
 
 	watch: {
-		searchInputText: {
+		/* searchInputText: {
 			async handler(newVal: string) {
 				if (newVal.length > 1) {
-					this.ontologyTree = await this.getOntology(this.activeTab!, this.searchInputText)
+					this.ontologyTree = await this.getOntology(this.activeModule!, this.searchInputText)
 				} else if (newVal.length === 0) {
-					this.ontologyTree = await this.getOntology(this.activeTab!)
+					this.ontologyTree = await this.getOntology(this.activeModule!)
 				}
 			},
-		},
+		}, */
 	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	async created() {
-		// get Modules and set activeTab
-		this.getModules()
+	created() {
+		if (!this.activeModule && this.modules) {
+			this.activeModule = this.modules[0]
+		}
+		if (this.modules) {
+			this.currentTheme = this.activeModule.color || this.modules[0].color
+		}
 	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {},
+	updated() {
+		/*
+		if (!this.activeModule && this.modules) {
+			this.activeModule = this.modules[0]
+		}
+		if (this.modules) {
+			this.currentTheme = this.activeModule.color || this.modules[0].color
+		} */
+	},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
 		changeTab(moduleId: string): void {
-			this.activeModule = this.modules?.filter(module => module.id === moduleId)[0]
-			if (this.activeTab !== undefined && this.activeTab !== moduleId && !this.isCheckboxEmpty) {
-				this.isModalOpened = true
-			} else this.activateTab(moduleId)
-		},
-
-		activateTab(moduleId: string): void {
-			this.activeTab = moduleId
-			if (this.searchInputText === '') {
-				this.getOntology(moduleId)
-			} else if (this.searchInputText.length > 1) {
-				this.getOntology(moduleId, this.searchInputText)
-			}
-		},
-
-		async getModules(): Promise<void> {
-			try {
-				const apiResponse = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
-				// Convert object keys to camelCase using lodash
-				const response: Module[] = apiResponse.data.map(obj =>
-					lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)),
-				)
-				this.modules = response
-				this.activateTab(response[0].id)
-				this.$emit('update-modules', this.modules)
-				// localStorage.setItem('moduleName', JSON.stringify(this.modules))
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log((error as Error).message)
-				alert((error as Error).message)
-			}
-		},
-
-		async getOntology(moduleId: string, searchText: string = '_null_'): Promise<Criterion[] | null> {
-			this.isLoading = true
-			// Code oder Suchbegriff wurde eingegeben
-			let apiResponse: AxiosResponse
-			try {
-				if (searchText.length > 1 && searchText !== '_null_') {
-					apiResponse = await axios.post('https://mdr.diz.uni-marburg.de/api/ontology/concepts/search',
-						{
-							module_id: moduleId,
-							search_term: searchText,
-							display: 'tree',
-						},
-						{
-							headers: {
-								'Content-Type': 'application/json',
-							},
-						},
-					)
+			this.nextModule = this.modules?.filter(module => module.id === moduleId)[0]
+			if (this.activeModule.id !== moduleId) {
+				if (this.activeModule && !this.isCheckboxEmpty) {
+					this.isWarningModalOpened = true
 				} else {
-					apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + moduleId)
-				}
-				// Convert object keys to camelCase using lodash
-				const response = transformObjectKeys(apiResponse.data)
-				this.ontologyTree = response
-
-				this.requestStatus = apiResponse.status as number
-				this.$emit('get-request-status', this.requestStatus)
-				this.isLoading = false
-				return this.ontologyTree
-			} catch (error) {
-				if ((error as AxiosError).code === 'ERR_NETWORK') {
-					alert('Network Error')
-				} else {
-					this.requestStatus = (error as AxiosError).status as number
-					this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
-				}
-				this.isLoading = false
-				return null
-			}
-		},
-
-		getCheckedItems(items: Criterion[], checkedItemsMap: Map<string, Criterion>): Criterion[] {
-			// Clear once at start of root call
-			this.selectedItems = []
-
-			const traverse = (items: Criterion[]) => {
-				for (const item of items) {
-					// Early exit if we already found everything
-					if (this.selectedItems.length === checkedItemsMap!.size) {
-						return
-					} else if (item.selectable && checkedItemsMap.has(item.id)) {
-						this.selectedItems.push(item)
-						// remove children from checkedItems based on parent (Diagnose, Prozedur and Laboruntersuchung)
-						if (item.children && item.children.length > 0) {
-							const codePrefix = item.termCodes[0].code.slice(0, 3)
-							checkedItemsMap = new Map([...checkedItemsMap!].filter(([id, checkedItem]) =>
-								id === item.id || !checkedItem.termCodes[0].code.startsWith(codePrefix)))
-						}
-					} else if (item.children && item.children.length > 0) {
-						traverse(item.children)
-					}
+					this.activeModule = this.nextModule
+					this.currentTheme = this.activeModule.color
+					this.activeModule && this.$emit('update-ontology-tree', this.activeModule)
 				}
 			}
-
-			traverse(items)
-			return this.selectedItems
 		},
 
 		submit(criteriaType: string): void {
-			const checkedItems = this.$store.state.checkedItemsMap
-			const selectedItems = this.getCheckedItems(this.ontologyTree!, checkedItems)
+			const selectedItems: Criterion[] = [...this.$store.state.selectedItems]
 			this.$emit('get-selected-criteria', criteriaType, selectedItems)
-			this.$store.dispatch('clearCheckedItem')
+			this.$store.dispatch('clearCheckedItems')
+			this.$store.dispatch('clearSelectedItems')
 		},
 
 		cancel(criteriaType: string): void {
 			this.$emit('toggle-ontology-search-tree-modal', criteriaType)
-			this.$store.dispatch('clearCheckedItem')
+			this.$store.dispatch('clearCheckedItems')
+			this.$store.dispatch('clearSelectedItems')
+
 		},
 
 		submitChangeTab(): void {
-			this.isModalOpened = false
-			this.activateTab(this.activeModule!.id)
-			this.$store.dispatch('clearCheckedItem')
+			this.isWarningModalOpened = false
+			this.activeModule = this.nextModule
+			this.currentTheme = this.activeModule.color
+			this.$emit('update-ontology-tree', this.activeModule)
+			this.$store.dispatch('clearCheckedItems')
+			this.$store.dispatch('clearSelectedItems')
 		},
 
 		cancelChangeTab(): void {
-			this.isModalOpened = false
+			this.isWarningModalOpened = false
 		},
 	},
 })
 </script>
 
 <style scoped>
-.middel {
-	position: absolute;
-	top: 40%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
-
 .ontology-search-tree-container {
 	display:flex;
 	z-index: 100;
@@ -332,8 +258,8 @@ export default Vue.extend({
 
 .ontology-search-tree__tabs-container button {
 	background-color: #ffffff;
-	color: black;
-	border: 1px solid #2e4884;
+	color: #ffffff;
+	border: unset !important;
 	border-radius: 5px;
 	padding: 8px;
 	margin: 10px;
@@ -344,39 +270,51 @@ export default Vue.extend({
 	min-width: 70px;
 }
 
-.ontology-search-tree__tabs-container button:hover {
-	border: 1px solid #004cff;
-}
+/* .ontology-search-tree__tabs-container button:hover {
+	border: unset !important;
+} */
 
-.ontology-search-tree__tabs-container button:active {
-	background-color: #738cba;
+/* .ontology-search-tree__tabs-container button:active {
 	color: #ffffff;
-}
+} */
 
 .ontology-tab {
 	padding: 10px 20px;
 	cursor: pointer;
 	border-bottom: none;
+	/* border-color: unset !important; */
 }
 
-.ontology-tab.active {
-	background-color: #738cba;
-	color: white;
+.ontology-tab:active {
+	color: #ffffff !important;
+	/* border: 3px solid var(--theme-color) !important; */
+	/* filter: brightness(85%); */
+}
+
+.ontology-tab:hover {
+	/* opacity: 0.85; */
+	filter: brightness(105%)
 }
 
 .ontology-search-tree__display {
-	min-height: 450px;
-	max-height: 650px;
+	/* min-height: 450px;
+	max-height: 650px; */
+	height: 580px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+	margin: 30px;
 }
 
 .ontology-search-tree__body {
-	max-height: 620px;
+	height: 580px;
 	overflow-y: auto;
-	margin: 30px 25px 20px 30px;
+	/* margin: 30px 25px 20px 30px; */
 }
+
+/* .ontology-search-tree__body div {
+	color: var(--theme-color)
+} */
 
 .module-name {
 	font-size: 18px;
@@ -387,9 +325,10 @@ export default Vue.extend({
 .ontology-search-tree__button-group {
 	display: flex;
 	column-gap: 15px;
-	margin: 20px;
+	padding: 20px;
 	justify-content: flex-end;
 	flex-direction: row;
+	background-color: var(--theme-color);
 }
 
 .ontology-search-tree__button-group button {
@@ -400,8 +339,8 @@ export default Vue.extend({
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 150px;
-	border-top: 2px solid #adbcd7;
+	height: 100%;
+	/* border-top: 2px solid #adbcd7; */
 }
 
 .no-result-data {
@@ -413,5 +352,12 @@ export default Vue.extend({
 .modal__content {
 	margin: 50px;
 	text-align: center;
+}
+
+.warning-modal {
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 </style>

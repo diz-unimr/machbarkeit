@@ -5,10 +5,15 @@ import type { Criterion, Module } from '../types/OntologySearchTreeModalData' //
 import lodash from 'lodash'
 
 /**
+ * Transforms the keys of each object in the data array to camelCase recursively.
+ * @param data Array of Criterion objects to be transformed.
+ */
+
+/**
  *
  * @param data
  */
-function transformObjectKeys(data: any): any {
+function transformObjectKeys(data: Criterion[]): Criterion[] {
 	const response: Criterion[] = data.map((obj: Criterion | Module) => {
 		const transformedObj = lodash.mapKeys(obj, (value, key) => lodash.camelCase(key)) as unknown as Criterion
 		if (transformedObj.children && transformedObj.children.length > 0) {
