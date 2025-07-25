@@ -5,7 +5,7 @@
 
 import { generateFilePath } from '@nextcloud/router'
 import Vuex from 'vuex'
-import store from './store.js' // Import the Vuex store
+import store from './store/store.js' // Import the Vuex store
 import Vue from 'vue'
 import App from './App.vue'
 

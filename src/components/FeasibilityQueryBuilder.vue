@@ -6,12 +6,12 @@
 	<div class="feasibility-query-builder">
 		<div class="feasibility-query__search-input">
 			<div class="feasibility-query__search-input-wrapper">
-				<div class="search-input__title">
+				<div id="inclusionCriteria" class="search-input__title">
 					Einschlusskriterien
 				</div>
 				<div>
-					<div class="search-input__body" :style="{marginBottom: searchInputWarning !== '' ? '0px' : '10px'}">
-						<button id="einschlusskriterien" @click="toggleOntologySearchTreeModal('einschlusskriterien')">
+					<div class="search-input__body" :style="{marginBottom: requestWarning !== '' ? '0px' : '10px'}">
+						<button id="inclusionCriteria" @click="toggleOntologyPanel('inclusionCriteria')">
 							<svg role="img"
 								aria-hidden="true"
 								focusable="false"
@@ -24,30 +24,29 @@
 									d="M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z" />
 							</svg>
 						</button>
-						<!-- @focus="focusSearchInput('einschlusskriterien')" -->
-						<NcTextField :id="'einschlusskriterien'"
-							:value.sync="inclusionSearchInputText"
+						<NcTextField :value.sync="inclusionSearchInputText"
 							label="Code oder Suchbegriff eingeben"
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="inclusionSearchInputText !== ''"
-							@trailing-button-click="closeOntologySearchTreeModal">
+							@input="onInput('inclusionCriteria')"
+							@trailing-button-click="closeOntologyPanel">
 							<Magnify :size="20" />
 						</NcTextField>
 					</div>
-					<div v-if="inclusionSearchInputText !== '' && searchInputWarning !== ''" class="search-input-warning">
-						<span>Bitte mindestens 2 Buchstaben eingeben</span>
+					<div v-if="inclusionSearchInputText !== '' && requestWarning !== ''" class="search-input-warning">
+						<span>{{ requestWarning }}</span>
 					</div>
 				</div>
 			</div>
 			<!-- <div class="pipe" />
 			<div class="feasibility-query__search-input-wrapper">
-				<div class="search-input__title">
+				<div id="exclusionCriteria" class="search-input__title">
 					Ausschlusskriterien
 				</div>
 				<div>
-					<div class="search-input__body" :style="{marginBottom: searchInputWarning !== '' ? '0px' : '10px'}">
-						<button id="ausschlusskriterien" @click="toggleOntologySearchTreeModal('ausschlusskriterien')">
+					<div class="search-input__body" :style="{marginBottom: requestWarning !== '' ? '0px' : '10px'}">
+						<button id="exclusionCriteria" @click="toggleOntologyPanel('exclusionCriteria')">
 							<svg role="img"
 								aria-hidden="true"
 								focusable="false"
@@ -65,67 +64,54 @@
 							trailing-button-icon="close"
 							placeholder=" "
 							:show-trailing-button="exclusionSearchInputText !== ''"
-							@focus="focusSearchInput('ausschlusskriterien')"
-							@trailing-button-click="closeOntologySearchTreeModal">
+							@focus="focusSearchInput('exclusionCriteria')"
+							@trailing-button-click="closeOntologyPanel">
 							<Magnify :size="20" />
 						</NcTextField>
 					</div>
-					<div v-if="exclusionSearchInputText !== '' && searchInputWarning !== ''" class="search-input-warning">
-						{{ searchInputWarning }}
+					<div v-if="exclusionSearchInputText !== '' && requestWarning !== ''" class="search-input-warning">
+						{{ requestWarning }}
 					</div>
 				</div>
 			</div> -->
 		</div>
-		<OntologySearchTreeModal v-if="isOntologySearchTreeOpen"
+
+		<OntologyPanel v-if="isOntologyPanelOpen"
+			:search-input-text="searchInputText"
+			:is-input-text-cleared="isInputTextCleared"
 			:criteria-type="criteriaOverlayType"
-			:modules="modules"
-			:ontology-tree="ontologyTree"
-			:is-loading="isLoading"
-			@update-ontology-tree="updateOntologyTree"
-			@get-selected-criteria="getSelectedCriteria"
-			@toggle-ontology-search-tree-modal="toggleOntologySearchTreeModal" />
+			@submit-selected-criteria="submitSelectedCriteria"
+			@toggle-ontology-panel="toggleOntologyPanel"
+			@close-ontology-panel="closeOntologyPanel"
+			@send-request-warning="getRequestWarning" />
 
-		<LimitationsSelectedCriteriaModal v-if="isLimitationsCriteriaOpen"
-			:selected-criteria="selectedCriteria"
+		<FilterPanel v-if="isFilterPanelOpen"
 			:is-state-edit-filter="isStateEditFilter"
-			@get-selected-filter-info="getSelectedFilterInfo"
-			@dialog-close="isLimitationsCriteriaOpen = false"
-			@delete-selected-criteria="deleteSelectedCriteria" />
+			:edit-filter-information="editFilterInformation"
+			:criteria-type="criteriaOverlayType"
+			@dialog-close="isFilterPanelOpen = false" />
 
-		<FeasibilityQueryDisplay :selected-inclusion-characteristics="selectedInclusionCharacteristics"
-			:selected-exclusion-characteristics="selectedExclusionCharacteristics"
-			@update-characteristics="updateCharacteristics"
-			@edit-criteria-limitation="editCriteriaLimitation"
-			@delete-characteristic="deleteCharacteristic" />
+		<FeasibilityQueryDisplay @edit-filter="editFilter" />
 	</div>
 </template>
 
 <script lang="ts">
-import Vue, { type PropType } from 'vue'
-import axios, { AxiosError, type AxiosResponse } from 'axios'
-import lodash from 'lodash'
+import Vue from 'vue'
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
-import transformObjectKeys from '../utils/transformObjectKeys'
-import OntologySearchTreeModal from './OntologySearchTreeModal.vue'
-import LimitationsSelectedCriteriaModal from './Limitations/LimitationsSelectedCriteriaModal.vue'
+import OntologyPanel from './OntologyPanel.vue'
+import FilterPanel from './filters/FilterPanel.vue'
 import FeasibilityQueryDisplay from './FeasibilityQueryDisplay.vue'
-import type { FeasibilityQueryBuilderData, SelectedCharacteristics, QueryCriterionData } from '../types/FeasibilityQueryBuilderData'
-import type { Criterion, Module } from '../types/OntologySearchTreeModalData.ts'
-import type { ConceptType } from '../types/ConceptOptionsData.ts'
-import type { QuantityType } from '../types/QuantityOptionsData'
-import type { TimeRangeType } from '../types/TimeRangeOptionsData'
-
+import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
 import debounce from 'lodash.debounce'
-import { useDebounce } from '../utils/debounce.ts'
 
 export default Vue.extend({
 	name: 'FeasibilityQueryBuilder',
 	components: {
 		NcTextField,
 		Magnify,
-		OntologySearchTreeModal,
-		LimitationsSelectedCriteriaModal,
+		OntologyPanel,
+		FilterPanel,
 		FeasibilityQueryDisplay,
 	},
 	props: {
@@ -138,106 +124,33 @@ export default Vue.extend({
 			type: Boolean,
 			required: true,
 		},
-
-		dataFromUpload: {
-			type: Object as PropType<{ inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics }>,
-			default: null,
-		},
 	},
 
 	data(): FeasibilityQueryBuilderData {
 		return {
-			modules: null,
-			ontologyTree: null,
-			activeModule: null,
 			inclusionSearchInputText: '',
 			exclusionSearchInputText: '',
 			searchInputText: '',
-			isLimitationsCriteriaOpen: false,
-			isOntologySearchTreeOpen: false,
+			isFilterPanelOpen: false,
+			isOntologyPanelOpen: false,
 			criteriaOverlayType: '',
-			selectedCriteria: null,
-			selectedEditedCriteriaIndex: null,
-			selectedInclusionCharacteristics: {
-				characteristics: [],
-				logic: [],
-			},
-			selectedExclusionCharacteristics: {
-				characteristics: [],
-				logic: [],
-			},
-			queryData: {
-				version: '',
-				display: '',
-			},
-			searchInputWarning: '',
-			isLoading: true,
+			requestWarning: '',
 			isStateEditFilter: false,
-			isinputTextCleared: false,
-			controller: null as AbortController | null,
+			editFilterInformation: undefined,
+			isInputTextCleared: false,
 			imgDelete: './img/delete-black.png',
 		}
 	},
 
 	watch: {
-		dataFromUpload(data) {
-			if (data) {
-				this.selectedInclusionCharacteristics = data.inclusionCharacteristics
-				this.selectedExclusionCharacteristics = data.exclusionCharacteristics
-			}
-		},
-
-		isCriteriaAvailable(value) {
-			if (!value) {
-				this.selectedInclusionCharacteristics = {
-					characteristics: [],
-					logic: [],
-				}
-				this.selectedExclusionCharacteristics = {
-					characteristics: [],
-					logic: [],
-				}
-				this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
-			}
-		},
-
 		isSaveModalOpen(value) {
-			if (value) this.isOntologySearchTreeOpen = false
-		},
-
-		inclusionSearchInputText2(newVal) {
-			this.searchInputText = newVal
-			const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien', this.searchInputText), 1000) // function is called after 500 ms?
-			debouncedHandler()
-			/* if (newVal.length === 0) {
-				this.searchInputWarning = ''
-				this.modules = await this.getModules()
-				this.ontologyTree = this.getOntology(this.module![0].id)
-			} else {
-				const debouncedHandler = debounce(() => this.checkTextInputLength('einschlusskriterien', this.activedModule!.id), 1000) // function is called after 500 ms?
-				debouncedHandler()
-			} */
-		},
-
-		inclusionSearchInputText: useDebounce(function() {
-			if (this.inclusionSearchInputText.length > 0 || (!this.isinputTextCleared && this.inclusionSearchInputText === '')) {
-				this.searchInputWarning = ''
-				this.searchInputText = this.inclusionSearchInputText
-				this.isinputTextCleared = false
-				this.checkTextInputLength('einschlusskriterien', this.searchInputText)
+			if (value) {
+				this.isOntologyPanelOpen = false
+				this.isFilterPanelOpen = false
+				this.$store.dispatch('clearCheckedItems')
+				this.$store.dispatch('clearSelectedItems')
 			}
-		}, 1000),
-
-		/* exclusionSearchInputText(newVal) {
-			this.searchInputText = newVal
-			if (newVal.length === 0) {
-				this.isOntologySearchTreeOpen = false
-				this.searchInputWarning = ''
-			} else {
-				const debouncedHandler = debounce(() => this.checkTextInputLength('ausschlusskriterien'), 1000) // function is called after 500 ms?
-				debouncedHandler()
-			}
-		}, */
+		},
 	},
 
 	// life cycle of vue js
@@ -249,320 +162,77 @@ export default Vue.extend({
 	mounted() {},
 	beforeUpdate() {},
 	updated() {},
-	beforeDestroy() {
-		// Cleanup when component is destroyed
-		/* if (this.controller) {
-			this.controller.abort()
-		} */
-	},
+	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
-		async checkTextInputLength(criteriaType: string, searchText: string): Promise<void> {
-			this.isinputTextCleared = false
-			if (searchText.length === 1) {
-				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else {
-				if (!this.modules) {
-					this.modules = await this.getModules()
-				}
-				this.ontologyTree = await this.getOntology(this.activeModule.id)
-				this.searchInputWarning = ''
-				this.criteriaOverlayType = criteriaType
-				this.isOntologySearchTreeOpen = true
-			}
-		},
-
-		getTabTheme(moduleName: string): string {
-			if (moduleName === 'Person') {
-				return '#3498DB'
-			} else if (moduleName === 'Diagnose') {
-				return '#9B59B6'
-			} else if (moduleName === 'Prozedur') {
-				return '#FBB016'
-			} else if (moduleName === 'Laboruntersuchung') {
-				return '#1FC48B' // '#1BC885'
-			} else return 'default'
-		},
-
-		async getModules(): Promise<Module[] | null> {
-			try {
-				const apiResponse = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
-				console.log(apiResponse)
-				// Convert object keys to camelCase using lodash
-				/* const response: Module[] = apiResponse.data.map(module =>
-					lodash.mapKeys(module, (value, key) => lodash.camelCase(key))) */
-				const response: Module[] = apiResponse.data.map((module: Module) => {
-					const newModule = lodash.mapKeys(module, (value, key) => lodash.camelCase(key))
-					newModule.color = this.getTabTheme(newModule.name)
-					return newModule
-				})
-				this.activeModule = response[0] // Set the first module as active
-				return response
-				// localStorage.setItem('moduleName', JSON.stringify(this.modules))
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log((error as Error).message)
-				alert((error as Error).message)
-				return null
-			}
-		},
-
-		async updateOntologyTree(activeModule: Module): Promise<void> {
-			this.activeModule = activeModule
-			this.ontologyTree = await this.getOntology(activeModule.id)
-		},
-
-		async getOntology(moduleId: string): Promise<Criterion[] | null> {
-			this.isLoading = true
-			// Code oder Suchbegriff wurde eingegeben
-			const searchText = this.searchInputText
-
-			// Cancel any previous request if still pending
-			this.AbortController()
-			this.controller = new AbortController()
-			let apiResponse: AxiosResponse
-			// this.isLoading = true
-			console.log('Fetching ontology Module ID: ', moduleId, ' Search Text: ', searchText)
-			try {
-				if (searchText.length > 1) {
-					apiResponse = await axios.post('https://mdr.diz.uni-marburg.de/api/ontology/concepts/search',
-						{
-							module_id: moduleId,
-							search_term: searchText,
-							display: 'tree',
-						},
-						{
-							signal: this.controller.signal, // Attach the cancel token to the request
-							headers: {
-								'Content-Type': 'application/json',
-							},
-						},
-					)
-				} else {
-					apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + moduleId,
-						{ signal: this.controller.signal })
-				}
-				// Convert object keys to camelCase using lodash
-				const response = transformObjectKeys(apiResponse.data)
-				// this.ontologyTree = response
-
-				// this.requestStatus = apiResponse.status as number
-				this.getRequestWarning(apiResponse.status as number)
-				// this.$emit('get-request-status', this.requestStatus)
-				this.isLoading = false
-				console.log(response)
-				return response
-			} catch (error) {
-				this.isLoading = false
-				if ((error as AxiosError).code === 'ERR_CANCELED' && !this.controller.signal.aborted) {
-					console.log('Request was canceled: ', moduleId)
-					this.isLoading = true
-				} else if ((error as AxiosError).code === 'ERR_NETWORK') {
-					alert('Network Error')
-				} else {
-					// this.requestStatus = (error as AxiosError).status as number
-					this.getRequestWarning((error as AxiosError).status as number, (error as AxiosError).message)
-					// this.$emit('get-request-status', this.requestStatus, (error as AxiosError).message)
-				}
-				return null
-			}
-		},
-
-		AbortController(): void {
-			if (this.controller) {
-				this.controller.abort()
-				this.controller = null
-				console.log('AbortController called')
-			}
-		},
-
-		async toggleOntologySearchTreeModal(criteriaType: string): Promise<void> {
-			if (!this.isOntologySearchTreeOpen) {
-				this.modules = await this.getModules()
-				this.ontologyTree = await this.getOntology(this.modules![0].id)
-			}
+		onInput(criteriaType: string): void {
 			this.criteriaOverlayType = criteriaType
-			this.isOntologySearchTreeOpen = !this.isOntologySearchTreeOpen
-			this.inclusionSearchInputText = ''
-			this.exclusionSearchInputText = ''
-			this.searchInputText = ''
-		},
-
-		closeOntologySearchTreeModal() {
-			this.isOntologySearchTreeOpen = false
-			this.inclusionSearchInputText = ''
-			this.exclusionSearchInputText = ''
-			this.searchInputText = ''
-		},
-
-		focusSearchInput(criteriaType: string): void {
-			if (this.criteriaOverlayType !== criteriaType) {
+			this.requestWarning = ''
+			if (this.inclusionSearchInputText.length === 0) {
 				this.searchInputText = ''
-				if (criteriaType === 'einschlusskriterien') {
+				if (this.isOntologyPanelOpen === false) this.isOntologyPanelOpen = true
+			} else this.checkTextInputLengthdebounce()
+		},
+
+		checkTextInputLengthdebounce: debounce(function(): void {
+			this.isOntologyPanelOpen = true
+			this.searchInputText = this.inclusionSearchInputText
+		}, 1000),
+
+		clearOntologyInput(): void {
+			this.inclusionSearchInputText = ''
+			this.exclusionSearchInputText = ''
+			this.searchInputText = ''
+			this.requestWarning = ''
+		},
+
+		toggleOntologyPanel(criteriaType: string): void {
+			this.clearOntologyInput()
+			this.criteriaOverlayType = criteriaType
+			this.isOntologyPanelOpen = !this.isOntologyPanelOpen
+		},
+
+		closeOntologyPanel() {
+			this.clearOntologyInput()
+			this.isInputTextCleared = true
+			this.isOntologyPanelOpen = false
+			// wait for vue update then reset isInputTextCleared = false
+			this.$nextTick(() => {
+				this.isInputTextCleared = false
+			})
+		},
+
+		getRequestWarning(requestWarning: string): void {
+			this.requestWarning = requestWarning
+			if (this.requestWarning !== '') this.isOntologyPanelOpen = false
+		},
+
+		/* focusSearchInput(criteriaType: string): void {
+			if (this.criteriaOverlayType !== criteriaType) {
+				// this.searchInputText = ''
+				if (criteriaType === 'inclusionCriteria') {
 					this.exclusionSearchInputText = ''
-				} else if (criteriaType === 'ausschlusskriterien') {
+				} else if (criteriaType === 'exclusionCriteria') {
 					this.inclusionSearchInputText = ''
 				}
 			}
-		},
-
-		/* HandleModules(modules: Array<Module>): void {
-			this.modules = modules
 		}, */
 
-		getRequestWarning(status: number, message: string | undefined): void {
-			if (status === 200) {
-				this.searchInputWarning = ''
-			} else if (status === 400) {
-				this.searchInputWarning = 'Bitte mindestens 2 Buchstaben eingeben'
-			} else if (status === 500) {
-				this.searchInputWarning = ''
-				alert(message)
-			} else {
-				alert(message)
-			}
-		},
-
-		getSelectedCriteria(criteriaType: string, items: Criterion[]): void {
-			this.inclusionSearchInputText = ''
-			this.exclusionSearchInputText = ''
-			this.isinputTextCleared = true
-			this.searchInputText = ''
-			this.selectedCriteria = items
-			// this.toggleOntologySearchTreeModal(criteriaType)
-			this.closeOntologySearchTreeModal()
+		submitSelectedCriteria(): void {
+			this.closeOntologyPanel()
 			this.isStateEditFilter = false
-			this.isLimitationsCriteriaOpen = true
+			this.isFilterPanelOpen = true
 		},
 
-		getSelectedFilterInfo(filterInfo: ConceptType[] | QuantityType[] | TimeRangeType[]): void {
-			this.selectedCriteria = this.selectedCriteria!.map((item, index) => {
-				if (filterInfo[index]) {
-					item.selectedFilter = filterInfo[index] as ConceptType | QuantityType | TimeRangeType
-				} else {
-					item.selectedFilter = undefined
-				}
-				return item
-			})
-
-			// put filterInfo into this.selectedInclusionCharacteristics with for loop, condition with id and display
-			if (this.criteriaOverlayType === 'einschlusskriterien') {
-				if (this.selectedEditedCriteriaIndex !== null) { // when criterion is edited
-					this.selectedInclusionCharacteristics.characteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
-					this.selectedEditedCriteriaIndex = null
-				} else {
-					this.selectedInclusionCharacteristics.characteristics.push(...this.selectedCriteria)
-					const length = this.selectedInclusionCharacteristics.characteristics.length === 0 ? this.selectedCriteria.length - 1 : this.selectedCriteria.length
-					this.selectedInclusionCharacteristics.logic.push(...Array.from({ length }, () => 'and'))
-				}
-			} else if (this.criteriaOverlayType === 'ausschlusskriterien') {
-				if (this.selectedEditedCriteriaIndex !== null) {
-					this.selectedExclusionCharacteristics.characteristics.splice(this.selectedEditedCriteriaIndex, 1, ...this.selectedCriteria)
-					this.selectedEditedCriteriaIndex = null
-				} else {
-					this.selectedExclusionCharacteristics.characteristics.push(...this.selectedCriteria)
-					const length = this.selectedInclusionCharacteristics.characteristics.length === 0 ? this.selectedCriteria.length - 1 : this.selectedCriteria.length
-					this.selectedExclusionCharacteristics.logic.push(...Array.from({ length }, () => 'and'))
-				}
-			}
-			this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
-		},
-
-		deleteSelectedCriteria(index: number): void {
-			this.selectedCriteria?.splice(index, 1)
-		},
-
-		deleteCharacteristic(index: number, criteriaType: string): void {
-			if (criteriaType === 'einschlusskriterien') {
-				this.selectedInclusionCharacteristics.characteristics.splice(index, 1)
-			} else if (criteriaType === 'ausschlusskriterien') {
-				this.selectedExclusionCharacteristics.characteristics.splice(index, 1)
-			}
-		},
-
-		editCriteriaLimitation(characteristic: Criterion, index: number, criteriaType: string): void {
-			this.criteriaOverlayType = criteriaType
-			if (criteriaType === 'einschlusskriterien') {
-				const selectedEditedCriteria = this.selectedInclusionCharacteristics.characteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
-				this.selectedCriteria = selectedEditedCriteria as Criterion[]
-			} else if (criteriaType === 'ausschlusskriterien') {
-				const selectedEditedCriteria = this.selectedExclusionCharacteristics.characteristics?.filter((item, itemIndex) => (item.id === characteristic.id) && (itemIndex === index))
-				this.selectedCriteria = selectedEditedCriteria as Criterion[]
-			}
-			this.selectedEditedCriteriaIndex = index
-			this.isLimitationsCriteriaOpen = true
+		editFilter(characteristicId: string, index: number, criteriaType: string): void {
+			this.isFilterPanelOpen = true
 			this.isStateEditFilter = true
-		},
-
-		updateCharacteristics(type: string, newOrder: SelectedCharacteristics) {
-			type === 'einschlusskriterien' ? (this.selectedInclusionCharacteristics = { ...newOrder }) : (this.selectedExclusionCharacteristics = { ...newOrder })
-			this.updateQueryData(this.selectedInclusionCharacteristics, this.selectedExclusionCharacteristics)
-		},
-
-		updateQueryData(selectedIncludeCriteria: SelectedCharacteristics, selectedExcludeCriteria: SelectedCharacteristics) {
-			this.queryData.inclusionCriteria = []
-			this.queryData.exclusionCriteria = []
-			if (selectedIncludeCriteria.characteristics.length > 0) {
-				let tempIndex = 0
-				for (let i = 0; i < selectedIncludeCriteria.characteristics.length; i++) {
-					const module = this.modules?.find(module => module.id === selectedIncludeCriteria.characteristics[i].moduleId)
-					const selectedCharacteristic = {
-						id: selectedIncludeCriteria.characteristics[i].id,
-						termCodes: selectedIncludeCriteria.characteristics[i].termCodes,
-						context: {
-							code: module?.fdpgCdsCode,
-							display: module?.name,
-							system: module?.fdpgCdsSystem,
-							version: module?.fdpgCdsVersion,
-						},
-						...(selectedIncludeCriteria.characteristics[i].selectedFilter || {}),
-					} as QueryCriterionData
-					if (i === 0) {
-						this.queryData.inclusionCriteria.push([selectedCharacteristic])
-					} else {
-						if (selectedIncludeCriteria.logic[i - 1] === 'or') {
-							this.queryData.inclusionCriteria[tempIndex].push(selectedCharacteristic)
-						} else if (selectedIncludeCriteria.logic[i - 1] === 'and') {
-							this.queryData.inclusionCriteria.push([selectedCharacteristic])
-							tempIndex++
-						}
-					}
-
-				}
+			this.editFilterInformation = {
+				id: characteristicId,
+				index,
+				criteriaType,
 			}
-
-			if (selectedExcludeCriteria.characteristics.length > 0) {
-				let tempIndex = 0
-				for (let i = 0; i < selectedExcludeCriteria.characteristics.length; i++) {
-					const module = this.modules?.find(module => module.id === selectedExcludeCriteria.characteristics[i].moduleId)
-					const selectedCharacteristic = {
-						id: selectedExcludeCriteria.characteristics[i].id,
-						termCodes: selectedExcludeCriteria.characteristics[i].termCodes,
-						context: {
-							code: module?.fdpgCdsCode,
-							display: module?.name,
-							system: module?.fdpgCdsSystem,
-							version: module?.fdpgCdsVersion,
-						},
-						...(selectedExcludeCriteria.characteristics[i].selectedFilter || {}),
-					} as QueryCriterionData
-					if (i === 0) {
-						this.queryData.exclusionCriteria.push([selectedCharacteristic])
-					} else {
-						if (selectedExcludeCriteria.logic[i - 1] === 'or') {
-							this.queryData.exclusionCriteria.push([selectedCharacteristic])
-							tempIndex++
-						} else if (selectedExcludeCriteria.logic[i - 1] === 'and') {
-							this.queryData.exclusionCriteria[tempIndex].push(selectedCharacteristic)
-						}
-					}
-
-				}
-			}
-			this.queryData.inclusionCriteria?.length === 0 && this.queryData.exclusionCriteria?.length === 0
-				? this.$emit('get-query-data', null)
-				: this.$emit('get-query-data', this.queryData)
 		},
 	},
 })
@@ -628,6 +298,39 @@ export default Vue.extend({
 .search-input__body .input-field {
 	max-width: 90%;
 	font-size: 15px;
+}
+
+.text-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding: 6px 28px;
+  font-size: 14px;
+}
+
+.input-with-icon .icon {
+  position: absolute;
+  left: 6px;
+  pointer-events: none;
+}
+
+.clear-button {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .search-input-warning {

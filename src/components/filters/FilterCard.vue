@@ -3,42 +3,46 @@
 		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
-	<div class="limitations-card">
-		<div class="limitations-card__header">
-			<p class="limitations-card__title">
+	<div class="filter-card">
+		<div class="filter-card__header">
+			<p class="filter-card__title">
 				{{ selectedCriterion.display }} ({{ selectedCriterion.termCodes[0].code }})
 			</p>
-			<button v-if="!isStateEditFilter" class="limitations-card__delete-button" @click="deleteCard($vnode?.data?.attrs?.id)">
+			<button v-if="!isStateEditFilter" class="filter-card__delete-button" @click="deleteCard(index, selectedCriterion.id)">
 				Löschen
 				<img :src="imgDelete">
 			</button>
 		</div>
 		<!-- Loop, Falls mehrere Filter vorkommen -->
-		<FilterCard :selected-criterion="selectedCriterion"
+		<FilterSection :selected-criterion="selectedCriterion"
+			:index="index"
 			:is-state-edit-filter="isStateEditFilter"
-			@get-selected-filters="getSelectedFilters" />
+			:time-restriction="timeRestriction"
+			@update-filter="$emit('update-filter', $event)" />
 	</div>
 </template>
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import FilterCard from './FilterCard.vue'
-import type { Criterion } from '../../types/OntologySearchTreeModalData.ts'
-import type { ConceptType } from '../../types/ConceptOptionsData.ts'
-import type { QuantityType } from '../../types/QuantityOptionsData'
-import type { TimeRangeType } from '../../types/TimeRangeOptionsData'
+import FilterSection from './FilterSection.vue'
+import type { Criterion } from '../../types/OntologyPanelData'
+import type { TimeRangeFilter } from '../../types/TimeRangeOptionsData'
 
-interface LimitationsSelectedCriteriaCardData {
+interface FilterCardData {
     filterInfo: Criterion | null,
     imgDelete: string,
 }
 
 export default Vue.extend({
-	name: 'LimitationsSelectedCriteriaCard',
+	name: 'FilterCard',
 	components: {
-		FilterCard,
+		FilterSection,
 	},
 	props: {
+		index: {
+			type: Number,
+			required: true,
+		},
 		selectedCriterion: {
 			type: Object as PropType<Criterion>,
 			default: undefined,
@@ -47,16 +51,12 @@ export default Vue.extend({
 			type: Boolean,
 			default: false,
 		},
-		getSelectedCriteriaFilter: {
-			type: Function,
-			default: () => {},
-		},
-		deleteDialogCard: {
-			type: Function,
-			default: () => {},
+		timeRestriction: {
+			type: Object as PropType<TimeRangeFilter>,
+			default: undefined,
 		},
 	},
-	data(): LimitationsSelectedCriteriaCardData {
+	data(): FilterCardData {
 		return {
 			filterInfo: null,
 			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
@@ -76,20 +76,15 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		// This function is called every time when user click/update a filter
-		getSelectedFilters(selectedFiltersInfo: ConceptType | QuantityType | TimeRangeType | undefined, isFilterComplete: boolean = true): void {
-			this.$emit('get-selected-criteria-filter', { selectedFiltersInfo, isFilterComplete })
-		},
-
-		deleteCard(key: number): void {
-			this.$emit('delete-dialog-card', key)
+		deleteCard(index: number, id: string): void {
+			this.$emit('delete-dialog-card', index, id)
 		},
 	},
 })
 </script>
 
 <style scoped>
-.limitations-card {
+.filter-card {
 	display: flex;
 	flex-direction: column;
 	place-content: center space-around;
@@ -99,7 +94,7 @@ export default Vue.extend({
 	border-radius: 4px;
 }
 
-.limitations-card__header {
+.filter-card__header {
 	display: flex;
 	column-gap: 10px;
 	align-items: center;
@@ -107,12 +102,12 @@ export default Vue.extend({
 	margin: 0px 10px 20px 10px;
 }
 
-.limitations-card__title {
+.filter-card__title {
 	font-weight: 500;
 	max-width: 80%;
 }
 
-.limitations-card__delete-button {
+.filter-card__delete-button {
 	display: flex;
 	column-gap: 5px;
 	border: none;

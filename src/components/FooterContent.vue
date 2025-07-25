@@ -14,7 +14,7 @@
 			<label for="upload" class="upload-query-button">
 				ABFRAGE LADEN
 			</label>
-			<button :disabled="!isCriteriaAvailable" @click="$emit('open-save-modal')">
+			<button :disabled="!hasSelectedCharacteristic" @click="$emit('open-save-modal')">
 				ABFRAGE SPEICHERN
 			</button>
 		</div>
@@ -23,36 +23,34 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import axios, { AxiosError } from 'axios'
-import transformObjectKeys from '../utils/transformObjectKeys'
-import type { QueryCriterionData, FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
-import type { Criterion, Module } from '../types/OntologySearchTreeModalData.ts'
-import type { ConceptType } from '../types/ConceptOptionsData.ts'
+import { AxiosError } from 'axios'
+import { getModules } from '../services/modules-service'
+import { getConcept } from '../services/ontology-service'
+import type { CharacteristicGroup, MachbarkeitQueryData, QueryCriterion } from '../types/FeasibilityQueryContainerData'
+import type { Module } from '../types/OntologyPanelData'
+import type { ConceptType } from '../types/ConceptOptionsData'
 import type { QuantityType } from '../types/QuantityOptionsData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
 
 export default Vue.extend({
 	name: 'FooterContent',
-	props: {
-		isCriteriaAvailable: {
-			type: Boolean,
-			default: false,
+	computed: {
+		hasSelectedCharacteristic(): boolean {
+			return this.$store.state.selectedCharacteristics.inclusionCriteria.characteristics.length > 0 || this.$store.state.selectedCharacteristics.exclusionCriteria.characteristics.length > 0
 		},
 	},
-
 	methods: {
 		handleFileUpload(event: Event) {
 			const target = event.target as HTMLInputElement
 			if (target.files && target.files.length > 0) {
 				const file = target.files[0]
 				const reader = new FileReader()
-				reader.onload = async (e) => {
+				reader.onload = (e) => {
 					try {
-						const uploadedCriteria: FeasibilityQueryBuilderData['queryData'] = JSON.parse(e.target?.result as string)
-						const isJsonDataValid = (uploadedCriteria.inclusionCriteria && uploadedCriteria.inclusionCriteria!.length > 0) || (uploadedCriteria.exclusionCriteria && uploadedCriteria.exclusionCriteria!.length > 0)
+						const uploadedCriteria: MachbarkeitQueryData = JSON.parse(e.target?.result as string)
+						const isJsonDataValid = !!(uploadedCriteria.inclusionCriteria && uploadedCriteria.inclusionCriteria!.length > 0) || (uploadedCriteria.exclusionCriteria && uploadedCriteria.exclusionCriteria!.length > 0)
 						if (isJsonDataValid) {
-							await this.getCriteriaInfo(uploadedCriteria)
-							this.$emit('get-query-data', uploadedCriteria)
+							this.convertToCharacteristicsDisplay(uploadedCriteria)
 						} else {
 							alert('Invalid JSON Format')
 						}
@@ -65,120 +63,116 @@ export default Vue.extend({
 			target.value = ''
 		},
 
-		async getCriteriaInfo(criteria: FeasibilityQueryBuilderData['queryData']) {
-			const inclusionCharacteristics : SelectedCharacteristics = {
+		async convertToCharacteristicsDisplay(uploadedCriteria: MachbarkeitQueryData) {
+			const inclusionCriteria : CharacteristicGroup = {
 				characteristics: [],
 				logic: [],
 			}
-			const exclusionCharacteristics: SelectedCharacteristics = {
+			const exclusionCriteria: CharacteristicGroup = {
 				characteristics: [],
 				logic: [],
 			}
+			const modules = await getModules()
 
-			const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
-			const modules: Module[] = transformObjectKeys(response.data)
-
-			if (criteria.inclusionCriteria) {
+			if (uploadedCriteria.inclusionCriteria && modules) {
 				let tempIndex = 0
-				for (let itemsIndex = 0; itemsIndex < criteria.inclusionCriteria.length; itemsIndex++) {
-					itemsIndex !== 0 && inclusionCharacteristics.logic.push('and')
-					for (let itemIndex = 0; itemIndex < criteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
-						const id = criteria.inclusionCriteria[itemsIndex][itemIndex].id
-						const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id))
-						const ontology: Criterion = transformObjectKeys([response.data])[0]
+				for (let itemsIndex = 0; itemsIndex < uploadedCriteria.inclusionCriteria.length; itemsIndex++) {
+					itemsIndex !== 0 && inclusionCriteria.logic.push('and')
+					for (let itemIndex = 0; itemIndex < uploadedCriteria.inclusionCriteria[itemsIndex].length; itemIndex++) {
+						const id = uploadedCriteria.inclusionCriteria[itemsIndex][itemIndex].id
+						const concept = await getConcept(id)
+						if (!concept) continue
 
-						const module = modules.find((module) => module.id === ontology.moduleId)
-						ontology.context = {
-							code: module!.fdpgCdsCode,
-							display: module!.name,
-							system: module!.fdpgCdsSystem,
-							version: module!.fdpgCdsVersion,
+						const module: Module | undefined = modules.find((module) => module.id === concept.moduleId)
+						if (module) {
+							concept.color = module.color
+							concept.context = {
+								code: module.fdpgCdsCode,
+								display: module.name,
+								system: module.fdpgCdsSystem,
+								version: module.fdpgCdsVersion,
+							}
 						}
+						inclusionCriteria.characteristics.push(concept)
 
-						inclusionCharacteristics.characteristics.push(ontology)
-
-						if (['valueFilter', 'timeRestriction'].some(key => key in criteria.inclusionCriteria![itemsIndex][itemIndex])) {
-							switch (ontology.filterType) {
+						if (['valueFilter', 'timeRestriction'].some(key => key in uploadedCriteria.inclusionCriteria![itemsIndex][itemIndex])) {
+							switch (concept.filterType) {
 							case 'concept': {
-								const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & ConceptType
-								inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
+								const item = uploadedCriteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterion & ConceptType
+								inclusionCriteria.characteristics[tempIndex].valueFilter = item.valueFilter
 								break
 							}
 							case 'quantity': {
-								const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & QuantityType
-								inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
+								const item = uploadedCriteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterion & QuantityType
+								inclusionCriteria.characteristics[tempIndex].valueFilter = item.valueFilter
 								break
 							}
 							default: {
-								if (ontology.timeRestrictionAllowed) {
-									const item = criteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & TimeRangeType
-									inclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-										timeRestriction: item.timeRestriction,
-									}
+								if (concept.timeRestrictionAllowed) {
+									const item = uploadedCriteria.inclusionCriteria[itemsIndex][itemIndex] as QueryCriterion & TimeRangeType
+									inclusionCriteria.characteristics[tempIndex].timeRestriction = item.timeRestriction
 								}
 							}
 							}
 						}
-						itemIndex !== 0 && inclusionCharacteristics.logic.push('or')
+						itemIndex !== 0 && inclusionCriteria.logic.push('or')
 						tempIndex++
 					}
 				}
 			}
-			if (criteria.exclusionCriteria) {
+			if (uploadedCriteria.exclusionCriteria && modules) {
 				let tempIndex = 0
-				for (let itemsIndex = 0; itemsIndex < criteria.exclusionCriteria.length; itemsIndex++) {
-					itemsIndex !== 0 && exclusionCharacteristics.logic.push('or')
-					for (let itemIndex = 0; itemIndex < criteria.exclusionCriteria[itemsIndex].length; itemIndex++) {
-						const id = criteria.exclusionCriteria[itemsIndex][itemIndex].id
-						const response = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id))
-						const ontology: Criterion = transformObjectKeys([response.data])[0]
+				for (let itemsIndex = 0; itemsIndex < uploadedCriteria.exclusionCriteria.length; itemsIndex++) {
+					itemsIndex !== 0 && exclusionCriteria.logic.push('or')
+					for (let itemIndex = 0; itemIndex < uploadedCriteria.exclusionCriteria[itemsIndex].length; itemIndex++) {
+						const id = uploadedCriteria.exclusionCriteria[itemsIndex][itemIndex].id
+						const concept = await getConcept(id)
+						if (!concept) continue
 
-						const module = modules.find((module) => module.id === ontology.moduleId)
-						ontology.context = {
-							code: module!.fdpgCdsCode,
-							display: module!.name,
-							system: module!.fdpgCdsSystem,
-							version: module!.fdpgCdsVersion,
+						const module: Module | undefined = modules.find((module) => module.id === concept.moduleId)
+						if (module) {
+							concept.color = module.color
+							concept.context = {
+								code: module.fdpgCdsCode,
+								display: module.name,
+								system: module.fdpgCdsSystem,
+								version: module.fdpgCdsVersion,
+							}
 						}
+						exclusionCriteria.characteristics.push(concept)
 
-						exclusionCharacteristics.characteristics.push(ontology)
-
-						if (['valueFilter', 'timeRestriction'].some(key => key in criteria.exclusionCriteria![itemsIndex][itemIndex])) {
-							switch (ontology.filterType) {
+						if (['valueFilter', 'timeRestriction'].some(key => key in uploadedCriteria.exclusionCriteria![itemsIndex][itemIndex])) {
+							switch (concept.filterType) {
 							case 'concept': {
-								const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & ConceptType
-								exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
+								const item = uploadedCriteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterion & ConceptType
+								exclusionCriteria.characteristics[tempIndex].valueFilter = item.valueFilter
 								break
 							}
 							case 'quantity': {
-								const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & QuantityType
-								exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-									valueFilter: item.valueFilter,
-								}
+								const item = uploadedCriteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterion & QuantityType
+								exclusionCriteria.characteristics[tempIndex].valueFilter = item.valueFilter
 								break
 							}
 							default: {
-								if (ontology.timeRestrictionAllowed) {
-									const item = criteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterionData & TimeRangeType
-									exclusionCharacteristics.characteristics[tempIndex].selectedFilter = {
-										timeRestriction: item.timeRestriction,
-									}
+								if (concept.timeRestrictionAllowed) {
+									const item = uploadedCriteria.exclusionCriteria[itemsIndex][itemIndex] as QueryCriterion & TimeRangeType
+									exclusionCriteria.characteristics[tempIndex].timeRestriction = item.timeRestriction
 								}
 							}
 							}
 						}
-						itemIndex !== 0 && exclusionCharacteristics.logic.push('and')
+						itemIndex !== 0 && exclusionCriteria.logic.push('and')
 						tempIndex++
 					}
 				}
 			}
-			this.$emit('send-criteria-to-display', { inclusionCharacteristics, exclusionCharacteristics })
+			this.$emit('get-data-from-upload', {
+				uploadedCriteria,
+				characteristicsDisplay: {
+					inclusionCriteria,
+					exclusionCriteria,
+				},
+			})
 		},
 	},
 })

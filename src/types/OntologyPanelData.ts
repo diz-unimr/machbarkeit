@@ -2,9 +2,9 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { ConceptType } from './ConceptOptionsData.ts'
-import type { QuantityType } from '../types/QuantityOptionsData.ts'
-import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
+import type { ConceptType } from './ConceptOptionsData'
+import type { QuantityType } from './QuantityOptionsData'
+import type { TimeRangeType } from './TimeRangeOptionsData'
 
 export interface Criterion {
     children: Criterion[];
@@ -35,7 +35,9 @@ export interface Criterion {
         system?: string;
         version?: string;
     }[] | null;
-    selectedFilter?: ConceptType | QuantityType | TimeRangeType;
+    valueFilter?: ConceptType['valueFilter'] | QuantityType['valueFilter'];
+    timeRestriction?: TimeRangeType['timeRestriction'];
+    filterCompleteStatus?: boolean;
     color?: string;
 }
 
@@ -49,20 +51,14 @@ export interface Module {
     color: string;
 }
 
-export interface OntologySearchTreeModalData {
+export interface OntologyPanelData {
+    modules?: Module[] | null;
+    ontologyTree?: Criterion[] | null;
+    isLoading: boolean;
     activeModule?: Module;
 	nextModule?: Module;
-    requestStatus?: number;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
-    isSearchResultNoData: boolean[];
-    context: {
-        code: string;
-        system: string;
-        version: string;
-        display: string;
-    } | null;
-    isCheckboxChecked: boolean;
     isWarningModalOpened: boolean;
     currentTheme: string;
 }

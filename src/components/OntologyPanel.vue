@@ -4,11 +4,9 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div class="ontology-search-tree-container" :style="{ '--theme-color': currentTheme}">
+	<div v-show="searchInputText.length !== 1 && ontologyTree" class="ontology-search-tree-container" :style="{ '--theme-color': currentTheme}">
 		<div class="ontology-search-tree-wrapper">
-			<div class="criteria-type">
-				{{ criteriaType }}
-			</div>
+			<div class="criteria-type" />
 			<div v-if="modules && modules.length > 0">
 				<div class="ontology-search-tree__tabs">
 					<div class="ontology-search-tree__tabs-container">
@@ -62,50 +60,44 @@
 </template>
 
 <script lang="ts">
-import Vue, { type PropType } from 'vue'
+import Vue from 'vue'
 import OntologyTreeNode from './OntologyTreeNode.vue'
 import WarningModal from './WarningModal.vue'
-import type { OntologySearchTreeModalData, Module, Criterion } from '../types/OntologySearchTreeModalData.ts'
+import type { OntologyPanelData, Module } from '../types/OntologyPanelData'
+
+import { getModules } from '../services/modules-service'
+import { getOntology, setAbortController } from '../services/ontology-service'
 
 export default Vue.extend({
-	name: 'OntologySearchTreeModal',
+	name: 'OntologyPanel',
 	components: {
 		OntologyTreeNode,
 		WarningModal,
 	},
 	props: {
+		searchInputText: {
+			type: String,
+			default: '',
+		},
+		isInputTextCleared: {
+			type: Boolean,
+			default: false,
+		},
 		criteriaType: {
 			type: String,
 			default: '',
 		},
-		modules: {
-			type: Array as PropType<Module[]>,
-			default: undefined,
-		},
-		ontologyTree: {
-			type: Array as PropType<Criterion[]>,
-			default: null,
-		},
-		isLoading: {
-			type: Boolean,
-			default: true,
-		},
-		getSelectedCriteria: {
-			type: Function,
-			default: () => {},
-		},
 	},
 
-	data(): OntologySearchTreeModalData {
+	data(): OntologyPanelData {
 		return {
+			modules: undefined,
+			ontologyTree: undefined,
+			isLoading: true,
 			activeModule: undefined,
 			nextModule: undefined,
-			requestStatus: undefined,
 			selectedItems: [],
 			checkedItems: undefined,
-			isSearchResultNoData: [],
-			context: null,
-			isCheckboxChecked: false,
 			isWarningModalOpened: false,
 			currentTheme: 'default',
 		}
@@ -113,20 +105,19 @@ export default Vue.extend({
 
 	computed: {
 		isCheckboxEmpty() {
-			return this.$store.state.checkedItems.size < 1
+			return this.$store.state.checkedItems.length < 1
 		},
 	},
 
 	watch: {
-		/* searchInputText: {
-			async handler(newVal: string) {
-				if (newVal.length > 1) {
-					this.ontologyTree = await this.getOntology(this.activeModule!, this.searchInputText)
-				} else if (newVal.length === 0) {
-					this.ontologyTree = await this.getOntology(this.activeModule!)
-				}
+		searchInputText: {
+			async handler(newText: string) {
+				// clear previous selections
+				this.$store.dispatch('clearCheckedItems')
+				this.$store.dispatch('clearSelectedItems')
+				await this.sendOntologyRequest(this.activeModule!, newText)
 			},
-		}, */
+		},
 	},
 
 	// life cycle of vue js
@@ -134,51 +125,68 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		if (!this.activeModule && this.modules) {
-			this.activeModule = this.modules[0]
-		}
-		if (this.modules) {
-			this.currentTheme = this.activeModule.color || this.modules[0].color
-		}
+		this.getRequest()
 	},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
-	updated() {
-		/*
-		if (!this.activeModule && this.modules) {
-			this.activeModule = this.modules[0]
-		}
-		if (this.modules) {
-			this.currentTheme = this.activeModule.color || this.modules[0].color
-		} */
-	},
+	updated() {},
 	beforeDestroy() {},
 	destroyed() {},
 
 	methods: {
+		async getRequest(): Promise<void> {
+			if (!this.isInputTextCleared) {
+				// Fetch modules and set the first module as active
+				this.modules = await getModules()
+				if (this.modules && this.modules.length > 0) {
+					this.$store.dispatch('addModules', this.modules)
+					this.activeModule = this.modules[0]
+					this.currentTheme = this.activeModule.color
+					// Fetch ontology data for the active module
+					this.sendOntologyRequest(this.activeModule, this.searchInputText)
+				} else {
+					this.$emit('close-ontology-panel')
+				}
+			}
+		},
+
+		async sendOntologyRequest(module: Module, searchText: string = ''): Promise<void> {
+			if (!this.isInputTextCleared) {
+				this.isLoading = true
+				const [ontologyTree, requestWarning] = await getOntology(module, searchText)
+				if (requestWarning === 'canceled') {
+					this.isLoading = true
+					return
+				} else if (requestWarning !== '') {
+					this.$emit('send-request-warning', requestWarning)
+				}
+				this.ontologyTree = ontologyTree
+				this.isLoading = false
+			}
+		},
+
 		changeTab(moduleId: string): void {
-			this.nextModule = this.modules?.filter(module => module.id === moduleId)[0]
 			if (this.activeModule.id !== moduleId) {
+				this.nextModule = this.modules?.filter((module: Module) => module.id === moduleId)[0] as Module
+				setAbortController()
 				if (this.activeModule && !this.isCheckboxEmpty) {
 					this.isWarningModalOpened = true
 				} else {
 					this.activeModule = this.nextModule
 					this.currentTheme = this.activeModule.color
-					this.activeModule && this.$emit('update-ontology-tree', this.activeModule)
+					this.sendOntologyRequest(this.activeModule, this.searchInputText)
 				}
 			}
 		},
 
 		submit(criteriaType: string): void {
-			const selectedItems: Criterion[] = [...this.$store.state.selectedItems]
-			this.$emit('get-selected-criteria', criteriaType, selectedItems)
+			this.$emit('submit-selected-criteria', criteriaType)
 			this.$store.dispatch('clearCheckedItems')
-			this.$store.dispatch('clearSelectedItems')
 		},
 
 		cancel(criteriaType: string): void {
-			this.$emit('toggle-ontology-search-tree-modal', criteriaType)
+			this.$emit('toggle-ontology-panel', criteriaType)
 			this.$store.dispatch('clearCheckedItems')
 			this.$store.dispatch('clearSelectedItems')
 
@@ -186,9 +194,9 @@ export default Vue.extend({
 
 		submitChangeTab(): void {
 			this.isWarningModalOpened = false
-			this.activeModule = this.nextModule
+			this.activeModule = this.nextModule || this.activeModule
 			this.currentTheme = this.activeModule.color
-			this.$emit('update-ontology-tree', this.activeModule)
+			this.activeModule && this.sendOntologyRequest(this.activeModule, this.searchInputText)
 			this.$store.dispatch('clearCheckedItems')
 			this.$store.dispatch('clearSelectedItems')
 		},

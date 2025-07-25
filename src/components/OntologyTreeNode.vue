@@ -14,7 +14,6 @@
 				<input v-if="criterion?.selectable"
 					:id="String(criterion?.id)"
 					v-model="isChecked"
-					:disabled="moduleName === 'Laboruntersuchung' && !isLoincSupport"
 					type="checkbox"
 					:value="criterion?.display">
 				<div class="search-tree-term-entry">
@@ -52,9 +51,9 @@
 							</span>
 						</div>
 					</div>
-					<p v-if="moduleName === 'Laboruntersuchung' && !isLoincSupport && criterion.selectable === true" class="only-swl-code-warning">
+					<!-- <p v-if="moduleName === 'Laboruntersuchung' && !isLoincSupport && criterion.selectable === true" class="only-swl-code-warning">
 						(Die Suche nach SWL Code wird momentan nicht unterstützt)
-					</p>
+					</p> -->
 				</div>
 			</div>
 			<ul v-if="isExpanded">
@@ -75,26 +74,16 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { Criterion } from '../types/OntologySearchTreeModalData'
+import type { Criterion, Module } from '../types/OntologyPanelData'
 
 interface OntologyTreeNodeData {
 	isExpanded: boolean;
 	imgCollapse: string;
 	imgExpand: string;
-	concepts: [
-		{
-			display: string;
-			id: number;
-			leaf: boolean;
-			moduleId: number;
-			parentId: number | null;
-			selectable: boolean;
-		}
-	] | null;
 	termCode?: string | null;
 	swlCode?: string | null;
 	loinc?: string | null ;
-	isLoincSupport: boolean;
+	// isLoincSupport: boolean;
 }
 
 export interface CheckedItem {
@@ -139,23 +128,26 @@ export default Vue.extend({
 			isExpanded: false,
 			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
 			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
-			concepts: null,
 			termCode: undefined,
 			swlCode: undefined,
 			loinc: undefined,
-			isLoincSupport: false,
+			// isLoincSupport: false,
 		}
 	},
 
 	computed: {
+		modules() {
+			return this.$store.state.modules
+		},
+
 		isChecked: {
 			// Determines if the current item is checked
 			get(): boolean {
-				return this.$store.getters.getCheckedItems(this.criterion.id)
+				return this.$store.getters.getCheckedItem(this.criterion.id)
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
-				let selectedItem = this.criterion // Get the selected item
+				let selectedItem = this.setObjectForCriterion(this.criterion) // Get the selected item
 				if (checked) {
 					this.$store.dispatch('addCheckedItem', this.criterion.id)
 					// if parent is checked, check all children
@@ -166,7 +158,7 @@ export default Vue.extend({
 					if (this.parent && this.parent.selectable) {
 						selectedItem = this.toggleParent(checked, selectedItem)
 					}
-					this.$store.dispatch('addSelectedItem', { item: selectedItem, color: this.currentTheme })
+					this.$store.dispatch('addSelectedItem', { key: selectedItem.id, item: selectedItem })
 				} else {
 					this.$store.dispatch('removeCheckedItem', this.criterion.id)
 					// if parent is unchecked, uncheck all children
@@ -177,7 +169,7 @@ export default Vue.extend({
 					if (this.parent && this.parent.selectable) {
 						selectedItem = this.toggleParent(checked, selectedItem)
 					}
-					this.$store.dispatch('removeSelectedItem', selectedItem)
+					this.$store.dispatch('removeSelectedItem', selectedItem.id)
 				}
 			},
 		},
@@ -188,7 +180,7 @@ export default Vue.extend({
 	beforeCreate() {},
 	// Call functions before the template is rendered
 	created() {
-		[this.termCode, this.loinc, this.swlCode, this.isLoincSupport] = this.findTerminologyCode(this.criterion)
+		[this.termCode, this.loinc, this.swlCode] = this.findTerminologyCode(this.criterion)
 	},
 	beforeMount() {},
 	mounted() {},
@@ -198,16 +190,29 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
+		setObjectForCriterion(criterion: Criterion) {
+			if (this.modules) {
+				const module = this.modules.filter((module: Module) => module.id === criterion.moduleId)[0]
+				criterion.context = {
+					code: module.fdpgCdsCode || '',
+					display: module.name || '',
+					system: module.fdpgCdsSystem || '',
+					version: module.version || '',
+				}
+				criterion.color = module.color
+				return criterion
+			}
+		},
+
 		toggleChildren(children: Criterion[], isChecked: boolean): void {
 			children.forEach((child: Criterion) => {
 				if (isChecked) {
 					this.$store.dispatch('addCheckedItem', child.id)
-					this.$store.dispatch('removeSelectedItem', child)
+					this.$store.dispatch('removeSelectedItem', child.id)
 				} else {
 					this.$store.dispatch('removeCheckedItem', child.id)
-					this.$store.dispatch('removeSelectedItem', child)
+					this.$store.dispatch('removeSelectedItem', child.id)
 				}
-				// isChecked ? this.$store.dispatch('addCheckedItem', child.id) : this.$store.dispatch('removeCheckedItem', child.id)
 				if (child.children && child.children.length > 0) {
 					this.toggleChildren(child.children, isChecked)
 				}
@@ -217,18 +222,32 @@ export default Vue.extend({
 		toggleParent(isChecked: boolean, selectedItem: Criterion): Criterion {
 			if (isChecked) {
 				const checkedItems = this.$store.state.checkedItems
-				const areAllChildrenChecked = this.parent.children.every(child => checkedItems.has(child.id))
+				const areAllChildrenChecked = this.parent.children.every(child => checkedItems.includes(child.id))
 				if (areAllChildrenChecked) {
 					this.$store.dispatch('addCheckedItem', this.parent.id)
 					selectedItem = this.parent
 					if (this.parent.parentId !== null && this.parent.selectable) {
+						this.parent.children.forEach((child: Criterion) => {
+							this.$store.dispatch('removeSelectedItem', child.id)
+						})
 						this.$emit('change', isChecked, selectedItem) // go back to upper parent level
 					}
 				}
 			} else {
-				this.$store.dispatch('removeCheckedItem', this.parent.id)
 				if (this.parent.parentId !== null && this.parent.selectable) {
-					this.$emit('change', isChecked) // go back to upper parent level
+					if (this.$store.getters.getCheckedItem(this.parent.id)) {
+						this.$store.dispatch('removeCheckedItem', this.parent.id)
+					}
+					if (this.$store.getters.getSelectedItem(this.parent.id)) {
+						this.$store.dispatch('removeSelectedItem', this.parent.id)
+					}
+
+					// check for siblings and add them to selected items
+					this.parent.children.forEach((child: Criterion) => {
+						const isChildChecked = this.$store.getters.getCheckedItem(child.id)
+						isChildChecked && this.$store.dispatch('addSelectedItem', { key: child.id, item: child })
+					})
+					this.$emit('change', isChecked, selectedItem) // go back to upper parent level
 				}
 			}
 			return selectedItem
@@ -238,19 +257,19 @@ export default Vue.extend({
 			this.isExpanded = !this.isExpanded
 		},
 
-		findTerminologyCode(criterion: Criterion): [string | null | undefined, string | null | undefined, string | null | undefined, boolean] {
+		findTerminologyCode(criterion: Criterion): [string | null | undefined, string | null | undefined, string | null | undefined] {
 			const termCode = undefined
 			const loinc = undefined
 			const swlCode = undefined
-			const isLoincSupport = false
+			// const isLoincSupport = false
 			if (this.moduleName === 'Laboruntersuchung') {
 				const loinc = criterion.termCodes?.find((termCode) => termCode.system === 'http://loinc.org')?.code
 				const swlCode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')?.code
-				const isLoincSupport = loinc !== undefined && loinc !== null
-				return [termCode, loinc, swlCode, isLoincSupport]
+				// const isLoincSupport = loinc !== undefined && loinc !== null
+				return [termCode, loinc, swlCode]
 			} else {
 				const termCode = criterion.termCodes[0]?.code
-				return [termCode, loinc, swlCode, isLoincSupport]
+				return [termCode, loinc, swlCode]
 			}
 		},
 	},

@@ -37,6 +37,8 @@ export default Vue.extend({
 	created() {
 		// const root = document.getElementsByTagName('html')[0]
 		// root.setAttribute('class', 'webkit chrome win js')
+
+		// get request from DB and save inti IndexedDB
 	},
 	beforeMount() {},
 	mounted() {},
