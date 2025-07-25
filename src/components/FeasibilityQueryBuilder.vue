@@ -301,36 +301,36 @@ export default Vue.extend({
 }
 
 .text-field-wrapper {
-  display: flex;
-  flex-direction: column;
-  max-width: 300px;
+	display: flex;
+	flex-direction: column;
+	max-width: 300px;
 }
 
 .input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
+	position: relative;
+	display: flex;
+	align-items: center;
 }
 
 .input-with-icon input {
-  width: 100%;
-  padding: 6px 28px;
-  font-size: 14px;
+	width: 100%;
+	padding: 6px 28px;
+	font-size: 14px;
 }
 
 .input-with-icon .icon {
-  position: absolute;
-  left: 6px;
-  pointer-events: none;
+	position: absolute;
+	left: 6px;
+	pointer-events: none;
 }
 
 .clear-button {
-  position: absolute;
-  right: 6px;
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
+	position: absolute;
+	right: 6px;
+	background: none;
+	border: none;
+	font-size: 16px;
+	cursor: pointer;
 }
 
 .search-input-warning {
