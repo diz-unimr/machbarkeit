@@ -106,10 +106,6 @@ export default Vue.extend({
 			handler(newValue) {
 				// deep copy object and array
 				this.selectedCriteria = JSON.parse(JSON.stringify(newValue))
-				if (this.selectedCriteria.length === 0) {
-					this.$emit('dialog-close')
-					this.$store.dispatch('clearSelectedItems')
-				}
 			},
 			deep: true,
 			immediate: true,
@@ -135,7 +131,7 @@ export default Vue.extend({
 					this.selectedCriteria.splice(index, 1)
 				}
 			}
-			this.selectedCriteria.length === 0 && this.$emit('dialog-close')
+			this.selectedCriteria.length === 0 && this.$emit('dialog-close') && this.$store.dispatch('clearSelectedItems')
 		},
 
 		updateFilter(payload: FilterInfo): void {

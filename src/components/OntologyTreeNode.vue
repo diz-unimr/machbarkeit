@@ -126,8 +126,8 @@ export default Vue.extend({
 	data(): OntologyTreeNodeData {
 		return {
 			isExpanded: false,
-			imgCollapse: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-collapse-blue.png',
-			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			imgCollapse: './img/arrow-collapse-blue.png',
+			imgExpand: './img/arrow-expand.png',
 			termCode: undefined,
 			swlCode: undefined,
 			loinc: undefined,

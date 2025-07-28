@@ -10,7 +10,7 @@
 					<p>
 						Anzahl der Patienten:
 						<span v-if="isQueryRunning">
-							<img src="http://localhost:8080/apps-extra/machbarkeit/img/loading_spinner.svg">
+							<img :src="imgLoadingSpinner">
 						</span>
 						<template v-else-if="numberOfPatients !== null && hasSelectedCharacteristics">
 							<span v-if="numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>
@@ -70,6 +70,7 @@ export default Vue.extend({
 			isQueryRunning: false,
 			abortController: null,
 			hasDataFromUpload: false,
+			imgLoadingSpinner: './img/loading_spinner.svg',
 		}
 	},
 

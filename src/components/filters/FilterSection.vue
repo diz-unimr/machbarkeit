@@ -102,7 +102,7 @@ export default Vue.extend({
 				: null,
 			state: this.isStateEditFilter,
 			isResetDisabled: !(this.selectedCriterion && (hasConceptFilter || hasQuantityFilter || hasTimeRestriction)),
-			imgExpand: 'http://localhost:8080/apps-extra/machbarkeit/img/arrow-expand.png',
+			imgExpand: './img/arrow-expand.png',
 		}
 	},
 

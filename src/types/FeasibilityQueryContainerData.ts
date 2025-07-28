@@ -38,4 +38,5 @@ export interface FeasibilityQueryContainerData {
 	isQueryRunning: boolean;
 	abortController: AbortController | null,
 	hasDataFromUpload: boolean;
+	imgLoadingSpinner: string;
 }
