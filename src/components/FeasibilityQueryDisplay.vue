@@ -439,6 +439,10 @@ button.combining-operator:active {
 	background-color: unset !important;
 }
 
+.delete-btn:hover {
+	background-color: unset;
+}
+
 .selected-criteria-right button.delete-btn:active {
 	background-color: unset !important;
 }

@@ -9,12 +9,10 @@ namespace OCA\Machbarkeit\Controller;
 use OCA\Machbarkeit\AppInfo\Application;
 use OCA\Machbarkeit\Service\MachbarkeitService;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
 class MachbarkeitController extends Controller {
-	#[NoCSRFRequired]
 	private MachbarkeitService $service;
 	private ?string $userId;
 
@@ -28,7 +26,7 @@ class MachbarkeitController extends Controller {
 		$this->userId = $userId;
 	}
 
-	/*
+	/**
 	 * @CORS
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
@@ -39,14 +37,6 @@ class MachbarkeitController extends Controller {
 
 	public function getOntology(): JSONResponse {
 		return new JSONResponse($this->service->readOntology());
-	}
-
-	public function getUiProfile(): JSONResponse {
-		// TODO remove test call
-		$modules = $this->getModules();
-		// $ontology = $this->service->getOntology(2);
-
-		return new JSONResponse($this->service->readUiProfile());
 	}
 
 	public function getModules() {

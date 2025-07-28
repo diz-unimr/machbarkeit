@@ -8,6 +8,7 @@
 name: Package build
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -31,17 +32,11 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@2.30.2
         with:
-          php-version: '7.4'
+          php-version: '8.1'
           tools: composer
-      - name: install dependencies
+      - name: Build & Package
         run: |
-          wget https://github.com/ChristophWurst/krankerl/releases/download/v0.14.0/krankerl_0.14.0_amd64.deb
-          sudo dpkg -i krankerl_0.14.0_amd64.deb
-      - name: package
-        run: |
-          uname -a
-          RUST_BACKTRACE=1 krankerl --version
-          RUST_BACKTRACE=1 krankerl package
+          make build-prod
       - uses: actions/upload-artifact@v4
         with:
           name: machbarkeit app tarball

@@ -59,7 +59,7 @@ export default Vue.extend({
 	data(): FilterCardData {
 		return {
 			filterInfo: null,
-			imgDelete: 'http://localhost:8080/apps-extra/machbarkeit/img/delete.png',
+			imgDelete: './img/delete.png',
 		}
 	},
 
