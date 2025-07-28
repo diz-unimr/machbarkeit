@@ -2,7 +2,7 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { Criterion } from './OntologySearchTreeModalData'
+import type { Criterion } from './OntologyPanelData'
 
 export interface QuantityType {
     valueFilter: {
@@ -14,11 +14,10 @@ export interface QuantityType {
         maxValue?: number;
         type: string;
     };
+    isFilterComplete?: boolean;
 }
 
 export interface QuantityOptionsData {
-    newSelectedCriterion: Criterion;
-    isFilterComplete: boolean;
     selectedValue: {
         unit: NonNullable<Criterion['filterOptions']>[number];
         comparator: string;

@@ -85,13 +85,13 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 
 interface AttributeListData {
-    attributeList: Array<object>;
-    attributeName: Array<string>;
-    moduleName: Array<string>;
-    expandedGroup: Array<number>;
+    attributeList: object[];
+    attributeName: string[];
+    moduleName: string[];
+    expandedGroup: number[];
 	attributeTextSearch: string;
-    selectedAttribute: Array<object>;
-    selectedModulName: Array<string>;
+    selectedAttribute: object[];
+    selectedModulName: string[];
     tooltipPosition: number;
     imgExpand: string;
     imgCollapse:string;
@@ -129,7 +129,7 @@ export default Vue.extend({
 	},
 
 	computed: {
-		filteredAttribute(): Array<object> {
+		filteredAttribute(): object[] {
 			return this.attributeList.filter((item) =>
 				item[this.metadata.kds_name].toLowerCase().includes(this.attributeTextSearch.toLowerCase()),
 			)
@@ -180,8 +180,8 @@ export default Vue.extend({
 			return data
 		},
 
-		getModuleName(attributeList: Array<object>): Array<string> {
-			const moduleName: Array<string> = attributeList
+		getModuleName(attributeList: object[]): string[] {
+			const moduleName: string[] = attributeList
 				.map(
 					(item) => item[this.metadata.kds_modul],
 				).filter(
@@ -190,7 +190,7 @@ export default Vue.extend({
 			return moduleName
 		},
 
-		getAttributeName(attributeList: Array<object>): Array<string> {
+		getAttributeName(attributeList: object[]): string[] {
 			const attributeName = attributeList
 				.map(
 					(item) => item[this.metadata.kds_name],
@@ -247,31 +247,22 @@ export default Vue.extend({
 }
 
 .attribute-list__header {
+	display: flex;
 	background-color: #5270a7;
 	font-weight: bold;
 	font-size: large;
-	text-align: center;
+	justify-content: center;
+	align-items: center;
 	color: white;
-	padding: 15px 0px;
+	height: clamp(45px, 10%, 60px);
 }
 
-/* For Firefox */
-.gecko .attribute-list__content {
+.attribute-list__content {
 	display: flex;
 	flex-direction: column;
 	position: absolute;
 	width: 100%;
 	height: 90%;
-	padding: 20px;
-}
-
-/* For Chrome */
-.chrome .attribute-list__content {
-	display: flex;
-	flex-direction: column;
-	position: absolute;
-	width: 100%;
-	height: -webkit-fill-available;
 	padding: 20px;
 }
 

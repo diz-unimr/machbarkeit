@@ -5,7 +5,7 @@
 	-->
 	<div class="content-option-container dialog-border">
 		<div class="content-option__text">
-			<span>*</span> Geben Sie einen Wertebereich ein:
+			Geben Sie einen Wertebereich ein:
 		</div>
 		<div class="content-option__body">
 			<div class="content-option-wrapper">
@@ -29,7 +29,7 @@
 				<div class="input-wrapper">
 					<div v-if="selectedValue.comparator === 'eq' || selectedValue.comparator === 'lt' || selectedValue.comparator === 'gt'"
 						class="text-floating-wrapper">
-						<input v-model="selectedValue.value"
+						<input v-model.number="selectedValue.value"
 							type="number"
 							@change="checkEmptyValue($event, 'value')">
 						<label class="text-floating">Wert</label>
@@ -37,7 +37,7 @@
 					<div v-if="selectedValue.comparator === 'between'"
 						class="input-wrapper input-wrapper--between">
 						<div class="text-floating-wrapper">
-							<input v-model="selectedValue.minValue"
+							<input v-model.number="selectedValue.minValue"
 								style="width: 100px !important;"
 								type="number"
 								@change="checkEmptyValue($event, 'minValue')">
@@ -45,7 +45,7 @@
 						</div>
 						<span class="font-bold">und</span>
 						<div class="text-floating-wrapper">
-							<input v-model="selectedValue.maxValue"
+							<input v-model.number="selectedValue.maxValue"
 								style="width: 100px !important;"
 								type="number"
 								@change="checkEmptyValue($event, 'maxValue')">
@@ -56,8 +56,8 @@
 					<div v-if="selectedValue.comparator !== 'no filter'"
 						class="text-floating-wrapper">
 						<select v-model="selectedValue.unit">
-							<option v-for="(unit, index) in newSelectedCriterion.filterOptions"
-								:key="index"
+							<option v-for="(unit, unit_index) in selectedCriterion.filterOptions"
+								:key="unit_index"
 								:value="unit">
 								{{ unit.display }}
 							</option>
@@ -67,7 +67,7 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="checkCompleteValue()">
+		<div v-if="!checkCompleteValue()">
 			<label class="content-option-alert">Der minimale Wert muss kleiner als der maximale Wert sein</label>
 		</div>
 	</div>
@@ -75,13 +75,17 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { QuantityOptionsData, QuantityType } from '../../types/QuantityOptionsData.ts'
-import type { Criterion } from '../../types/OntologySearchTreeModalData'
+import type { QuantityOptionsData, QuantityType } from '../../../types/QuantityOptionsData'
+import type { Criterion } from '../../../types/OntologyPanelData'
 
 export default Vue.extend({
 	name: 'QuantityOptions',
 	components: {},
 	props: {
+		index: {
+			type: Number,
+			required: true,
+		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
@@ -92,23 +96,22 @@ export default Vue.extend({
 		},
 	},
 	data(): QuantityOptionsData {
+		const quantityOption = this.selectedCriterion?.valueFilter as QuantityType['valueFilter']
 		return {
-			newSelectedCriterion: this.selectedCriterion,
-			isFilterComplete: true,
 			selectedValue: {
-				comparator: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.comparator
-					?? ((this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.type === 'quantity-range'
+				comparator: quantityOption?.comparator
+					?? (quantityOption?.type === 'quantity-range'
 						? 'between'
 						: 'no filter'),
-				unit: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.unit
+				unit: quantityOption?.unit
 					?? this.selectedCriterion.filterOptions![0],
-				value: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.value
+				value: quantityOption?.value
 					?? 0,
-				minValue: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.minValue
+				minValue: quantityOption?.minValue
 					?? 0,
-				maxValue: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.maxValue
+				maxValue: quantityOption?.maxValue
 					?? 0,
-				type: (this.selectedCriterion.selectedFilter as QuantityType)?.valueFilter?.type
+				type: quantityOption?.type
 					?? '',
 			},
 		}
@@ -116,33 +119,49 @@ export default Vue.extend({
 
 	watch: {
 		selectedValue: {
-			handler() {
-				if (this.selectedValue?.comparator === 'no filter') {
-					this.$emit('toggle-reset-button', false)
+			handler(newValue) {
+				const hasFilterValue = !(newValue?.comparator === 'no filter')
+				if (newValue?.comparator === 'no filter') {
+					this.$emit('handle-filter-change', {
+						index: this.index,
+						id: this.selectedCriterion.id,
+						value: {},
+						type: this.selectedCriterion.filterType,
+						isFilterComplete: true,
+						hasFilterValue,
+					})
 				} else {
-					this.$emit('toggle-reset-button', true)
-					if (this.selectedValue.comparator === 'between') {
-						this.checkCompleteValue()
-						this.quantityType = {
-							valueFilter: {
-								unit: this.selectedValue.unit,
-								minValue: Number(this.selectedValue.minValue),
-								maxValue: Number(this.selectedValue.maxValue),
+					if (newValue.comparator === 'between') {
+						const isFilterComplete = this.checkCompleteValue()
+						this.$emit('handle-filter-change', {
+							index: this.index,
+							id: this.selectedCriterion.id,
+							value: {
+								unit: newValue.unit,
+								minValue: Number(newValue.minValue),
+								maxValue: Number(newValue.maxValue),
 								type: 'quantity-range',
 							},
-						}
-					} else if (this.selectedValue.comparator === 'eq' || this.selectedValue.comparator === 'lt' || this.selectedValue.comparator === 'gt') {
-						this.quantityType = {
-							valueFilter: {
-								unit: this.selectedValue.unit,
-								comparator: this.selectedValue.comparator,
-								value: Number(this.selectedValue.value),
+							type: this.selectedCriterion.filterType,
+							isFilterComplete,
+							hasFilterValue,
+						})
+					} else if (newValue.comparator === 'eq' || newValue.comparator === 'lt' || newValue.comparator === 'gt') {
+						this.$emit('handle-filter-change', {
+							index: this.index,
+							id: this.selectedCriterion.id,
+							value: {
+								unit: newValue.unit,
+								comparator: newValue.comparator,
+								value: Number(newValue.value),
 								type: 'quantity-comparator',
 							},
-						}
+							type: this.selectedCriterion.filterType,
+							isFilterComplete: true,
+							hasFilterValue,
+						})
 					}
 				}
-				this.$emit('get-selected-filter-option', this.quantityType, this.isFilterComplete)
 			},
 			deep: true,
 		},
@@ -163,17 +182,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		if (typeof this.newSelectedCriterion.context === 'string') {
-			this.newSelectedCriterion.context = JSON.parse(this.newSelectedCriterion.context)
-		}
-		if (typeof this.newSelectedCriterion.termCodes === 'string') {
-			this.newSelectedCriterion.termCodes = JSON.parse(this.newSelectedCriterion.termCodes)
-		}
-		if (typeof this.newSelectedCriterion.filterOptions === 'string') {
-			this.newSelectedCriterion.filterOptions = JSON.parse(this.newSelectedCriterion.filterOptions)
-		}
-	},
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},
@@ -194,11 +203,9 @@ export default Vue.extend({
 
 		checkCompleteValue() {
 			if (this.selectedValue.comparator === 'between' && (this.selectedValue.minValue >= this.selectedValue.maxValue)) {
-				this.isFilterComplete = false
-				return true
-			} else {
-				this.isFilterComplete = true
 				return false
+			} else {
+				return true
 			}
 		},
 	},
@@ -236,13 +243,13 @@ export default Vue.extend({
 .content-option-wrapper {
 	display: flex;
 	align-items: center;
-	column-gap: 50px;
-	margin: 20px 0px;
+	column-gap: 30px;
+	margin: 10px 0px;
 }
 
 .input-wrapper {
 	display: flex;
-	column-gap: 20px;
+	column-gap: 10px;
 	align-items: center;
 }
 
@@ -279,5 +286,6 @@ select, input {
 	height: 45px !important;
 	width: 150px !important;
 	margin: 3px !important;
+	background-color: unset !important;
 }
 </style>

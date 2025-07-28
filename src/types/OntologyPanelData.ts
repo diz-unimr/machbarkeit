@@ -2,12 +2,12 @@
 	SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
-import type { ConceptType } from './ConceptOptionsData.ts'
-import type { QuantityType } from '../types/QuantityOptionsData.ts'
-import type { TimeRangeType } from '../types/TimeRangeOptionsData.ts'
+import type { ConceptType } from './ConceptOptionsData'
+import type { QuantityType } from './QuantityOptionsData'
+import type { TimeRangeType } from './TimeRangeOptionsData'
 
 export interface Criterion {
-    children: Array<Criterion>;
+    children: Criterion[];
     id: string;
     moduleId: string;
     parentId: string | null;
@@ -17,14 +17,13 @@ export interface Criterion {
         system: string;
         display: string;
         version: string;
-    }[],
+    }[];
     context?: {
         code: string;
         system: string;
         version: string;
         display: string;
     };
-    loinc?: string;
     selectable: boolean;
     leaf: boolean;
     timeRestrictionAllowed?: boolean | null;
@@ -36,7 +35,10 @@ export interface Criterion {
         system?: string;
         version?: string;
     }[] | null;
-    selectedFilter?: ConceptType | QuantityType | TimeRangeType;
+    valueFilter?: ConceptType['valueFilter'] | QuantityType['valueFilter'];
+    timeRestriction?: TimeRangeType['timeRestriction'];
+    filterCompleteStatus?: boolean;
+    color?: string;
 }
 
 export interface Module {
@@ -46,24 +48,17 @@ export interface Module {
     fdpgCdsSystem: string;
     fdpgCdsVersion: string;
     version: string;
+    color: string;
 }
 
-export interface OntologySearchTreeModalData {
-	activeTab?: string;
-    requestStatus?: number;
+export interface OntologyPanelData {
+    modules?: Module[] | null;
+    ontologyTree?: Criterion[] | null;
+    isLoading: boolean;
+    activeModule?: Module;
+	nextModule?: Module;
 	selectedItems: Criterion[];
     checkedItems?: Criterion[];
-    isSearchResultNoData: Array<boolean>;
-    modules: Module[] | null;
-    ontologyTree: Criterion[] | null;
-    context: {
-        code: string;
-        system: string;
-        version: string;
-        display: string;
-    } | null;
-    isCheckboxChecked: boolean;
-    isModalOpened: boolean;
-    activeModule?: Module;
-    isLoading: boolean;
+    isWarningModalOpened: boolean;
+    currentTheme: string;
 }

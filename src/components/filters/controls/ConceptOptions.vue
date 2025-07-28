@@ -9,8 +9,8 @@
 		</div>
 		<div class="content-option__body">
 			<div class="content-option__checkbox">
-				<div v-for="(option, index) in newSelectedCriterion.filterOptions"
-					:key="index"
+				<div v-for="(option, index_option) in selectedCriterion.filterOptions"
+					:key="index_option"
 					class="checkbox-option">
 					<!-- https://kyoshee.medium.com/building-custom-checkbox-using-only-html-and-css-no-js-1-babd79d5e2e9 -->
 					<input v-model="selectedValue"
@@ -25,53 +25,53 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { ConceptOptionsData, ConceptType } from '../../types/ConceptOptionsData'
-import type { Criterion } from '../../types/OntologySearchTreeModalData'
+import type { ConceptOptionsData, ConceptType } from '../../../types/ConceptOptionsData'
+import type { Criterion } from '../../../types/OntologyPanelData'
 
 export default Vue.extend({
 	name: 'ConceptOptions',
 	props: {
+		index: {
+			type: Number,
+			required: true,
+		},
 		isResetDisabled: {
 			type: Boolean,
 			default: true,
 		},
 		selectedCriterion: {
 			type: Object as PropType<Criterion>,
-			default: undefined,
 			required: true,
 		},
 	},
 	data(): ConceptOptionsData {
 		return {
-			newSelectedCriterion: this.selectedCriterion,
-			selectedValue: (this.selectedCriterion.selectedFilter as ConceptType)?.valueFilter?.selectedConcepts
-				?? [],
+			selectedValue: Array.isArray((this.selectedCriterion.valueFilter as ConceptType['valueFilter'])?.selectedConcepts)
+				? (this.selectedCriterion.valueFilter as ConceptType['valueFilter'])?.selectedConcepts
+				: [],
 		}
 	},
+
 	watch: {
-		selectedValue() {
-			this.conceptType = this.selectedValue!.length > 0
-				? {
-					valueFilter: {
-						selectedConcepts: this.selectedValue,
-						type: 'concept',
-					},
-				}
-				: undefined
-
-			this.$emit('get-selected-filter-option', this.conceptType)
-
-			if (this.conceptType && this.conceptType.valueFilter) {
-				this.$emit('toggle-reset-button', true)
-			} else {
-				this.$emit('toggle-reset-button', false)
-			}
-		},
-
-		isResetDisabled(): void {
-			if (this.isResetDisabled) {
+		isResetDisabled(newValue): void {
+			if (newValue && this.selectedValue.length > 0) {
 				this.selectedValue = []
 			}
+		},
+		selectedValue(newValue) {
+			this.$emit('handle-filter-change', {
+				index: this.index,
+				id: this.selectedCriterion.id,
+				value: newValue.length > 0
+					? {
+						selectedConcepts: newValue,
+						type: this.selectedCriterion.filterType,
+					}
+					: {},
+				type: this.selectedCriterion.filterType,
+				isFilterComplete: true,
+				hasFilterValue: newValue.length > 0,
+			})
 		},
 	},
 
@@ -79,18 +79,7 @@ export default Vue.extend({
 	// Call functions before all component are rendered
 	beforeCreate() {},
 	// Call functions before the template is rendered
-	created() {
-		if (typeof this.newSelectedCriterion.context === 'string') {
-			this.newSelectedCriterion.context = JSON.parse(this.newSelectedCriterion.context)
-		}
-		if (typeof this.newSelectedCriterion.termCodes === 'string') {
-			this.newSelectedCriterion.termCodes = JSON.parse(this.newSelectedCriterion.termCodes)
-		}
-		if (typeof this.newSelectedCriterion.filterOptions === 'string') {
-			this.newSelectedCriterion.filterOptions = JSON.parse(this.newSelectedCriterion.filterOptions)
-		}
-	},
-
+	created() {},
 	beforeMount() {},
 	mounted() {},
 	beforeUpdate() {},

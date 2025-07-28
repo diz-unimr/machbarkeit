@@ -17,7 +17,7 @@
 					@trailing-button-click="fileName = ''" />
 			</div>
 			<div class="save-query-modal__button-group">
-				<button :disabled="fileName.length === 0" @click="saveQuery(queryData, fileName)">
+				<button :disabled="fileName.length === 0" @click="saveQuery()">
 					SPEICHERN
 				</button>
 				<button @click="$emit('close-save-modal')">
@@ -32,11 +32,10 @@
 import Vue, { type PropType } from 'vue'
 import download from 'downloadjs'
 import { NcTextField } from '@nextcloud/vue'
-import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
+import type { MachbarkeitQueryData } from '../types/FeasibilityQueryContainerData'
 
 interface SaveQueryModalData {
-	fileName:string;
-	isModalVisible: boolean;
+	fileName: string;
 }
 
 export default Vue.extend({
@@ -47,7 +46,7 @@ export default Vue.extend({
 
 	props: {
 		queryData: {
-			type: Object as PropType<FeasibilityQueryBuilderData['queryData']>,
+			type: Object as PropType<MachbarkeitQueryData>,
 			default: null,
 		},
 	},
@@ -55,7 +54,6 @@ export default Vue.extend({
 	data(): SaveQueryModalData {
 		return {
 			fileName: '',
-			isModalVisible: true,
 		}
 	},
 
@@ -72,12 +70,12 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		saveQuery(data: FeasibilityQueryBuilderData['queryData'], fileName: string) {
+		saveQuery() {
 			// utf-8 encoder
 			const encoder = new TextEncoder()
-			const jsonString = JSON.stringify(data, null, 2)
+			const jsonString = JSON.stringify(this.queryData, null, 2)
 			const utf8JsonData = encoder.encode(jsonString)
-			data && download(utf8JsonData, fileName + '.json', 'application/json')
+			this.queryData && download(utf8JsonData, this.fileName + '.json', 'application/json')
 			this.$emit('close-save-modal')
 		},
 	},

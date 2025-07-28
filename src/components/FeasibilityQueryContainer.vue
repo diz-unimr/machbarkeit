@@ -9,10 +9,10 @@
 				<div class="number-patients">
 					<p>
 						Anzahl der Patienten:
-						<span v-if="isQeuryCompleted !== null && !isQeuryCompleted">
-							<img src="../../img/loading_spinner.svg">
+						<span v-if="isQueryRunning">
+							<img src="http://localhost:8080/apps-extra/machbarkeit/img/loading_spinner.svg">
 						</span>
-						<template v-else-if="numberOfPatients !== null">
+						<template v-else-if="numberOfPatients !== null && hasSelectedCharacteristics">
 							<span v-if="numberOfPatients <= 3" class="error-message">Das Ergebnis ist zu klein</span>
 							<span v-else>{{ numberOfPatients }}</span>
 						</template>
@@ -21,30 +21,27 @@
 					</p>
 				</div>
 				<div class="feasibility-query__button-group">
-					<button :disabled="!isCriteriaAvailable" @click="resetSelectedCriteria()">
+					<button :disabled="!hasSelectedCharacteristics" @click="resetSelectedCriteria()">
 						ZURÜCKSETZEN
 					</button>
-					<button :disabled="!isCriteriaAvailable" @click="startQuery(queryData)">
-						ABFRAGE STARTEN
+					<button :disabled="!hasSelectedCharacteristics" @click="queryData && toggleQuery(queryData)">
+						{{ isQueryRunning ? 'ABFRAGE STOPPEN': 'ABFRAGE STARTEN' }}
 					</button>
 				</div>
 			</div>
+
 			<SaveQueryModal v-if="isSaveModalOpen"
 				:query-data="queryData"
 				@close-save-modal="closeSaveModal" />
 
 			<FeasibilityQueryBuilder ref="childComponent"
-				:uploaded-query-data="queryDataFromUpload"
-				:data-from-upload="dataFromUpload"
-				:is-criteria-available="isCriteriaAvailable"
-				:is-save-modal-open="isSaveModalOpen"
-				@get-query-data="getQueryData" />
+				:is-criteria-available="hasSelectedCharacteristics"
+				:is-save-modal-open="isSaveModalOpen" />
 		</div>
-		<MachbarkeitFooter :is-criteria-available="isCriteriaAvailable"
+		<MachbarkeitFooter :is-criteria-available="hasSelectedCharacteristics"
 			@open-save-modal="openSaveModal"
 			@close-save-modal="closeSaveModal"
-			@send-criteria-to-display="forwardCriteriaToDisplay"
-			@get-query-data="getQueryData" />
+			@get-data-from-upload="getDataFromUpload" />
 	</div>
 </template>
 
@@ -53,23 +50,8 @@ import Vue from 'vue'
 import FeasibilityQueryBuilder from './FeasibilityQueryBuilder.vue'
 import SaveQueryModal from './SaveQueryModal.vue'
 import MachbarkeitFooter from './FooterContent.vue'
-import type { FeasibilityQueryBuilderData, SelectedCharacteristics } from '../types/FeasibilityQueryBuilderData'
-import axios, { AxiosError, type CancelTokenSource } from 'axios'
-
-interface FeasibilityQueryContainerData {
-	queryData: FeasibilityQueryBuilderData['queryData'] | null;
-	queryDataFromUpload: FeasibilityQueryBuilderData['queryData'] | null;
-	dataFromUpload: {
-		inclusionCharacteristics: SelectedCharacteristics;
-		exclusionCharacteristics: SelectedCharacteristics;
-	} | null;
-	numberOfPatients: number | null;
-	isSaveModalOpen: boolean;
-	isCriteriaAvailable: boolean;
-	errorMessage: string | null;
-	isQeuryCompleted: boolean | null;
-	cancelTokenSource: CancelTokenSource | null;
-}
+import type { FeasibilityQueryContainerData, MachbarkeitQueryData, SelectedCharacteristics, QueryCriterion } from '../types/FeasibilityQueryContainerData'
+import { getMachbarkeit } from '../services/machbarkeit-service'
 
 export default Vue.extend({
 	name: 'FeasibilityQueryContainer',
@@ -82,15 +64,37 @@ export default Vue.extend({
 	data(): FeasibilityQueryContainerData {
 		return {
 			queryData: null,
-			queryDataFromUpload: null,
-			dataFromUpload: null,
 			numberOfPatients: null,
 			isSaveModalOpen: false,
-			isCriteriaAvailable: false,
 			errorMessage: null,
-			isQeuryCompleted: null,
-			cancelTokenSource: null,
+			isQueryRunning: false,
+			abortController: null,
+			hasDataFromUpload: false,
 		}
+	},
+
+	computed: {
+		selectedCharacteristics() {
+			return this.$store.state.selectedCharacteristics
+		},
+
+		hasSelectedCharacteristics() {
+			return this.selectedCharacteristics.inclusionCriteria.characteristics.length > 0 || this.selectedCharacteristics.exclusionCriteria.characteristics.length > 0
+		},
+	},
+
+	watch: {
+		// Get update selectedCharacteristics
+		selectedCharacteristics: {
+			handler(newValue) {
+				if (!this.hasDataFromUpload) {
+					this.clearRunningQuery()
+					this.queryData = this.updateQueryData(newValue)
+				}
+				this.hasDataFromUpload = false
+			},
+			deep: true,
+		},
 	},
 
 	// life cycle of vue js
@@ -114,58 +118,114 @@ export default Vue.extend({
 			this.isSaveModalOpen = false
 		},
 
-		resetSelectedCriteria() {
-			this.isCriteriaAvailable = false
-			this.numberOfPatients = null
-			this.errorMessage = null
-			this.isQeuryCompleted = true
-			this.cancelTokenSource = axios.CancelToken.source()
-			this.cancelTokenSource!.cancel('User stopped the request')
-			this.cancelTokenSource = null
-		},
-
-		getQueryData(data: FeasibilityQueryBuilderData['queryData'] | null): void {
-			this.queryData = data
-			this.isCriteriaAvailable = !!data
-			this.numberOfPatients = null
-			this.errorMessage = null
-		},
-
-		forwardCriteriaToDisplay(data: { inclusionCharacteristics: SelectedCharacteristics, exclusionCharacteristics: SelectedCharacteristics }) {
-			this.dataFromUpload = data
-		},
-
-		async startQuery(data: FeasibilityQueryContainerData['queryData']) {
-			this.isQeuryCompleted = false
-			this.numberOfPatients = null
-			this.cancelTokenSource = axios.CancelToken.source()
-
-			try {
-				const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',
-					JSON.stringify(data),
-					{
-						headers: {
-							'Content-Type': 'application/json',
-						},
-					},
-				)
-				this.numberOfPatients = response.data
-				this.isQeuryCompleted = true
-			} catch (error) {
-				const errorMessage = ((error as AxiosError).response!.data as { error: string }).error
-				const errorText = 'None of the following contextual term codes'
-
-				if (errorMessage.startsWith(errorText)) {
-					const labCodeError = [...errorMessage.matchAll(/code=([^,\]]+)/g)].map(m => m[1]).filter(item => item !== 'Laboruntersuchung')
-					const labCodeErrorAlert = labCodeError.length > 1
-						? labCodeError.slice(0, -1).join(', ') + ' und ' + labCodeError[labCodeError.length - 1]
-						: labCodeError[0] || ''
-					const textAlert = labCodeError.length === 1 ? ' wurde im Codebaum nicht gefunden.' : ' wurden im Codebaum nicht gefunden.'
-					alert(labCodeErrorAlert + textAlert + ' Bitte kontaktieren Sie den DIZ-Support.')
+		clearRunningQuery(): void {
+			if (this.isQueryRunning) {
+				this.isQueryRunning = false
+				if (this.abortController) {
+					this.abortController.abort()
+					this.abortController = null
 				}
-				this.errorMessage = error ? 'Found some error!' : null
 			}
-			this.isQeuryCompleted = true
+			this.numberOfPatients = null
+			this.errorMessage = null
+			this.isQueryRunning = false
+		},
+
+		resetSelectedCriteria() {
+			this.clearRunningQuery()
+			this.$store.dispatch('clearSelectedCharacteristics')
+		},
+
+		updateQueryData(data: SelectedCharacteristics): MachbarkeitQueryData {
+			const templateQuery = {
+				version: '1.0',
+				display: 'Feasibility Query',
+				inclusionCriteria: [] as QueryCriterion[][],
+				exclusionCriteria: [] as QueryCriterion[][],
+			}
+			if (data.inclusionCriteria.characteristics.length > 0) {
+				const inclusioncharacteristics = data.inclusionCriteria.characteristics
+				const inclusionLogic = data.inclusionCriteria.logic || []
+
+				let tempIndex = 0
+				for (let i = 0; i < inclusioncharacteristics.length; i++) {
+					const selectedCharacteristic = {
+						id: inclusioncharacteristics[i].id,
+						termCodes: inclusioncharacteristics[i].termCodes,
+						context: inclusioncharacteristics[i].context,
+						...(inclusioncharacteristics[i].valueFilter
+							? { valueFilter: inclusioncharacteristics[i].valueFilter }
+							: inclusioncharacteristics[i].timeRestriction
+								? { timeRestriction: inclusioncharacteristics[i].timeRestriction }
+								: {}
+						),
+					} as QueryCriterion
+					if (i === 0) {
+						templateQuery.inclusionCriteria.push([selectedCharacteristic])
+					} else {
+						if (inclusionLogic[i - 1] === 'or') {
+							templateQuery.inclusionCriteria[tempIndex].push(selectedCharacteristic)
+						} else if (inclusionLogic[i - 1] === 'and') {
+							templateQuery.inclusionCriteria.push([selectedCharacteristic])
+							tempIndex++
+						}
+					}
+				}
+			}
+
+			if (data.exclusionCriteria.characteristics.length > 0) {
+				const exclusioncharacteristics = data.exclusionCriteria.characteristics
+				const exclusionLogic = data.exclusionCriteria.logic || []
+
+				let tempIndex = 0
+				for (let i = 0; i < exclusioncharacteristics.length; i++) {
+					const selectedCharacteristic = {
+						id: exclusioncharacteristics[i].id,
+						termCodes: exclusioncharacteristics[i].termCodes,
+						context: exclusioncharacteristics[i].context,
+						...(exclusioncharacteristics[i].valueFilter
+							? { valueFilter: exclusioncharacteristics[i].valueFilter }
+							: exclusioncharacteristics[i].timeRestriction
+								? { timeRestriction: exclusioncharacteristics[i].timeRestriction }
+								: {}
+						),
+					} as QueryCriterion
+					if (i === 0) {
+						templateQuery.exclusionCriteria.push([selectedCharacteristic])
+					} else {
+						if (exclusionLogic[i - 1] === 'or') {
+							templateQuery.exclusionCriteria.push([selectedCharacteristic])
+							tempIndex++
+						} else if (exclusionLogic[i - 1] === 'and') {
+							templateQuery.exclusionCriteria[tempIndex].push(selectedCharacteristic)
+						}
+					}
+				}
+			}
+			return templateQuery
+		},
+
+		getDataFromUpload(data: { uploadedCriteria: MachbarkeitQueryData, characteristicsDisplay: SelectedCharacteristics }): void {
+			this.clearRunningQuery()
+			this.hasDataFromUpload = true
+			this.$store.dispatch('getUploadCharacteristics', data.characteristicsDisplay)
+			this.queryData = data.uploadedCriteria
+		},
+
+		async toggleQuery(data: MachbarkeitQueryData): Promise<void> {
+			// Stop Query if it is running
+			if (this.isQueryRunning === true) {
+				this.clearRunningQuery()
+				return
+			}
+			// Start Query
+			this.abortController = new AbortController()
+			this.isQueryRunning = true
+			const [numberOfPatients, errorMessage] = await getMachbarkeit(data, this.abortController)
+			this.numberOfPatients = numberOfPatients
+			this.errorMessage = errorMessage
+			this.isQueryRunning = false
+			this.abortController = null
 		},
 	},
 })
@@ -192,6 +252,7 @@ export default Vue.extend({
 
 .feasibility-query__output {
 	display: flex;
+	column-gap: 5%;
 	flex-direction: row;
 	place-content: center space-between;
 	align-items: center;

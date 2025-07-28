@@ -5,9 +5,9 @@
 	-->
 	<div class="save-query-modal-container">
 		<div class="save-query-modal-wrapper">
-			<h2 class="save-query-modal__title">
+			<h3 class="save-query-modal__title">
 				Achtung!
-			</h2>
+			</h3>
 			<div class="save-query-modal__folder-name">
 				<div>Beim Verlassen des aktuellen Moduls werden alle ausgewählten Kriterien entfernt.</div>
 			</div>
@@ -24,30 +24,10 @@
 </template>
 
 <script lang="ts">
-import Vue, { type PropType } from 'vue'
-import type { FeasibilityQueryBuilderData } from '../types/FeasibilityQueryBuilderData'
-
-interface WarningModalData {
-	fileName:string;
-	isModalVisible: boolean;
-}
+import Vue from 'vue'
 
 export default Vue.extend({
 	name: 'WarningModal',
-
-	props: {
-		queryData: {
-			type: Object as PropType<FeasibilityQueryBuilderData['queryData']>,
-			default: null,
-		},
-	},
-
-	data(): WarningModalData {
-		return {
-			fileName: '',
-			isModalVisible: true,
-		}
-	},
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
