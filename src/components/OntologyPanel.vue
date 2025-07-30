@@ -4,7 +4,7 @@
 		SPDX-License-Identifier: AGPL-3.0-or-later
 	-->
 
-	<div v-show="searchInputText.length !== 1 && ontologyTree" class="ontology-search-tree-container" :style="{ '--theme-color': currentTheme}">
+	<div v-show="searchInputText.length !== 1 && modules" class="ontology-search-tree-container" :style="{ '--theme-color': currentTheme}">
 		<div class="ontology-search-tree-wrapper">
 			<div class="criteria-type" />
 			<div v-if="modules && modules.length > 0">
@@ -107,6 +107,9 @@ export default Vue.extend({
 		isCheckboxEmpty() {
 			return this.$store.state.checkedItems.length < 1
 		},
+		ontologies() {
+			return this.$store.state.ontologies
+		},
 	},
 
 	watch: {
@@ -156,10 +159,12 @@ export default Vue.extend({
 				this.isLoading = true
 				const [ontologyTree, requestWarning] = await getOntology(module, searchText)
 				if (requestWarning === 'canceled') {
-					this.isLoading = true
+					console.warn('Ontology request was canceled')
 					return
 				} else if (requestWarning !== '') {
 					this.$emit('send-request-warning', requestWarning)
+				} else if (ontologyTree && requestWarning === '') {
+					if (searchText === '') this.$store.dispatch('addOntologyTree', { ontologyTree, moduleId: module.id })
 				}
 				this.ontologyTree = ontologyTree
 				this.isLoading = false
@@ -175,7 +180,10 @@ export default Vue.extend({
 				} else {
 					this.activeModule = this.nextModule
 					this.currentTheme = this.activeModule.color
-					this.sendOntologyRequest(this.activeModule, this.searchInputText)
+					if (this.searchInputText.trim() === '' && this.ontologies[this.activeModule.id]) {
+						this.ontologyTree = this.ontologies[this.activeModule.id]
+						this.isLoading = false
+					} else this.sendOntologyRequest(this.activeModule, this.searchInputText)
 				}
 			}
 		},
@@ -196,7 +204,9 @@ export default Vue.extend({
 			this.isWarningModalOpened = false
 			this.activeModule = this.nextModule || this.activeModule
 			this.currentTheme = this.activeModule.color
-			this.activeModule && this.sendOntologyRequest(this.activeModule, this.searchInputText)
+			if (this.searchInputText === '' && this.ontologies[this.activeModule.id]) {
+				 this.ontologyTree = this.ontologies[this.activeModule.id]
+			} else this.activeModule && this.sendOntologyRequest(this.activeModule, this.searchInputText)
 			this.$store.dispatch('clearCheckedItems')
 			this.$store.dispatch('clearSelectedItems')
 		},

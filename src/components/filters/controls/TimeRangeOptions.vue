@@ -198,10 +198,11 @@ export default Vue.extend({
 
 	methods: {
 		checkDateInputValue(timeRangeData: TimeRangeOptionsData['selectedValue']) {
-			const isValidDate = (d: Date) => !isNaN(d.getTime())
 			const at = new Date(timeRangeData.atDate)
 			const after = new Date(timeRangeData.afterDate)
 			const before = new Date(timeRangeData.beforeDate)
+
+			const isValidDate = (d: Date) => !isNaN(d.getTime())
 
 			const isValidRange = timeRangeData.type === 'between'
 				&& (isValidDate(after) && isValidDate(before)
@@ -262,6 +263,12 @@ export default Vue.extend({
 
 		setAllDateChanged() {
 			this.label === 'master filter' && this.isFilterComplete && this.$emit('set-all-filter', this.selectedValue)
+			this.selectedValue = {
+				type: 'no filter',
+				beforeDate: '',
+				afterDate: '',
+				atDate: '',
+			}
 		},
 		/* formatDate(event: Event): void {
 			const eventTarget = event.target as HTMLInputElement
