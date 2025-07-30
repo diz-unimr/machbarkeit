@@ -10,6 +10,7 @@ Vue.use(Vuex)
 export default new Store({
 	state: {
 		modules: undefined,
+		ontologies: undefined,
 		checkedItems: [],
 		selectedItems: {},
 		filterOptionsItem: new Map(),
@@ -29,6 +30,15 @@ export default new Store({
 	mutations: {
 		ADD_MODULES(state, modules) {
 			state.modules = modules
+		},
+
+		ADD_ONTOLOGY_TREE(state, { ontologyTree, moduleId }) {
+			if (state.ontologies === undefined) {
+				state.ontologies = {}
+			}
+			if (!state.ontologies[moduleId]) {
+				set(state.ontologies, moduleId, ontologyTree)
+			}
 		},
 
 		ADD_CHECKED_ITEM(state, id) {
@@ -123,6 +133,15 @@ export default new Store({
 			commit('ADD_MODULES', modules)
 		},
 
+		addOntologyTree({ commit }, payload) {
+			if (payload.ontologyTree && payload.moduleId) {
+				commit('ADD_ONTOLOGY_TREE', payload)
+			} else {
+				console.error('Ontology tree or module name is missing')
+			}
+
+		},
+
 		addCheckedItem({ commit }, id) {
 			commit('ADD_CHECKED_ITEM', id)
 		},
@@ -184,14 +203,20 @@ export default new Store({
 		getCheckedItem: (state) => (id) => {
 			return state.checkedItems.includes(id)
 		},
+
 		getSelectedItem: (state) => (id) => {
 			return state.selectedItems[id]
 		},
+
 		getEditCharacteristic: (state) => (id, index, criteriaType) => {
 			const characteristic = state.selectedCharacteristics[criteriaType].characteristics[index]
 			if (characteristic.id === id) {
 				return characteristic
 			}
+		},
+		
+		getOntologyTree: (state) => (moduleName) => {
+			return state.ontologies && moduleName ? state.ontologies[moduleName] : null
 		},
 	},
 })
