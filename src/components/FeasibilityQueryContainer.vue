@@ -171,7 +171,7 @@ export default Vue.extend({
 						}
 					}
 				}
-			}
+			} // test
 
 			if (data.exclusionCriteria.characteristics.length > 0) {
 				const exclusioncharacteristics = data.exclusionCriteria.characteristics
