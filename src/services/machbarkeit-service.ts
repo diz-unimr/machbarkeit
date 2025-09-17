@@ -22,17 +22,37 @@ export async function getMachbarkeit(data: FeasibilityQueryContainerData['queryD
 	let numberOfPatients: number | null = null
 	let errorMessage: string | null = null
 	try {
-		const response = await axios.post('https://feasibility.diz.uni-marburg.de/query/execute',
+		const response = await axios.post('https://machbarkeit.diz.uni-marburg.de/feasibility/request',
 			JSON.stringify(data),
 			{
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				signal: abortController.signal,
+				withCredentials: true,
 			},
 		)
-		if (response && String(response.data)) {
-			numberOfPatients = response.data
+
+		// check if accepted
+		if (response.status === 202) {
+			// check location header
+			const poll = response.headers['location']
+
+			const intervalId = setInterval(async (p: string) => {
+				// poll result url
+				const r = await axios.get(p)
+				// 404 => not yet ready
+				if (r.status !== 404) {
+
+					clearInterval(intervalId)
+
+					// result: parse response
+					if (r && String(r.data)) {
+						numberOfPatients = r.data
+					}
+				}
+
+			}, 1000)
 		}
 	} catch (error) {
 		if ((error as AxiosError).name === 'CanceledError' || (error as AxiosError).message === 'canceled') {

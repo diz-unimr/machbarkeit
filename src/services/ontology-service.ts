@@ -32,7 +32,7 @@ export async function getOntology(module: Module, searchText: string = ''): Prom
 	let apiResponse: AxiosResponse
 	try {
 		if (searchText.length > 0) {
-			apiResponse = await axios.post('https://mdr.diz.uni-marburg.de/api/ontology/concepts/search',
+			apiResponse = await axios.post('https://machbarkeit.diz.uni-marburg.de/mdr/ontology/concepts/search',
 				{
 					module_id: module.id,
 					search_term: searchText,
@@ -46,7 +46,7 @@ export async function getOntology(module: Module, searchText: string = ''): Prom
 				},
 			)
 		} else {
-			apiResponse = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/tree/' + module.id,
+			apiResponse = await axios.get('https://machbarkeit.diz.uni-marburg.de/mdr/ontology/tree/' + module.id,
 				{ signal: abortController.signal })
 		}
 		// Convert object keys to camelCase using lodash
@@ -72,7 +72,7 @@ export async function getOntology(module: Module, searchText: string = ''): Prom
 export async function getConcept(id: string): Promise<Criterion | null> {
 	let response: AxiosResponse
 	try {
-		response = await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/concepts/' + id)
+		response = await axios.get('https://machbarkeit.diz.uni-marburg.de/mdr/ontology/concepts/' + id)
 		const conceptResponse = transformObjectKeys([response.data]) as Criterion[]
 		return conceptResponse[0]
 	} catch (error) {

@@ -14,7 +14,7 @@ import { getTabColor } from '../utils/utilities'
  */
 export async function getModules(): Promise<Module[] | null> {
 	try {
-		const apiResponse: AxiosResponse = (await axios.get('https://mdr.diz.uni-marburg.de/api/ontology/modules'))
+		const apiResponse: AxiosResponse = (await axios.get('https://machbarkeit.diz.uni-marburg.de/mdr/ontology/modules'))
 		const response: Module[] = apiResponse.data.map((module: Module) => {
 			const modules = lodash.mapKeys(module, (value, key) => lodash.camelCase(key))
 			modules.color = getTabColor(modules.name)
