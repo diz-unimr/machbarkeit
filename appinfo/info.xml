@@ -29,4 +29,5 @@
             <route>machbarkeit.page.index</route>
         </navigation>
     </navigations>
+    <icon>img/feasibility.png</icon>
 </info>
