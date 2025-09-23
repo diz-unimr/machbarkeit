@@ -27,6 +27,7 @@
         <navigation>
             <name>Machbarkeit</name>
             <route>machbarkeit.page.index</route>
+            <icon>app.svg</icon>
         </navigation>
     </navigations>
 </info>
