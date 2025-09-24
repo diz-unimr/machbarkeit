@@ -4,5 +4,6 @@ const webpackConfig = require('@nextcloud/webpack-vue-config')
 
 // use source-map for dev env, too
 webpackConfig.devtool = 'source-map'
+webpackConfig.devServer.port = 9000
 
 module.exports = webpackConfig
