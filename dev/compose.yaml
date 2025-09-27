@@ -31,3 +31,47 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+
+  backend:
+    image: ghcr.io/diz-unimr/machbarkeit-backend:1.2.7
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=debug
+      - BASE_URL=http://localhost:3000
+      - AUTH__OIDC__AUTH_ENDPOINT
+      - AUTH__OIDC__TOKEN_ENDPOINT
+      - AUTH__OIDC__USERINFO_ENDPOINT
+      - AUTH__OIDC__CLIENT_ID
+      - AUTH__OIDC__CLIENT_SECRET
+      - CORS__ALLOW_ORIGIN=http://localhost:8080
+      - MDR__ENDPOINT=https://mdr.diz.uni-marburg.de/api
+      - DATABASE__URL=sqlite://db.sqlite?mode=rwc
+    ports:
+      - "3000:3000"
+
+  mdr-db:
+    image: postgres:17.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${MDR_DB_USER:-postgres}
+      POSTGRES_DB: ${MDR_DB_DATABASE:-mdr}
+      POSTGRES_PASSWORD: ${MDR_DB_PASSWORD:-postgres}
+    expose:
+      - 5432
+    volumes:
+      - ./data/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      retries: 5
+
+  mdr:
+    image: ghcr.io/diz-unimr/mdr-service:1.4.0
+    restart: unless-stopped
+    environment:
+      database.url: postgres://postgres:postgres@mdr-db/mdr
+    expose:
+      - 3000
+    depends_on:
+      mdr-db:
+        condition: service_healthy

@@ -14,7 +14,7 @@ import {getTabColor} from '../utils/utilities'
  */
 export async function getModules(): Promise<Module[] | null> {
     try {
-        const apiResponse: AxiosResponse = (await axios.get('https://machbarkeit.diz.uni-marburg.de/mdr/ontology/modules', {
+        const apiResponse: AxiosResponse = (await axios.get(process.env.BACKEND_API_BASE + '/mdr/ontology/modules', {
             withCredentials: true,
         }))
         // const apiResponse = (await fetch('http://localhost:3000/mdr/ontology/modules', {

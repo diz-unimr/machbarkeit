@@ -1,6 +1,7 @@
 export async function login() {
 
-    const res = await fetch("https://machbarkeit.diz.uni-marburg.de/login?next=http://localhost:8080/index.php/apps/machbarkeit", {
+    const loginUrl = process.env.BACKEND_API_BASE + "/login?next=http://localhost:8080/index.php/apps/machbarkeit"
+    const res = await fetch(loginUrl, {
         credentials: "include",
         redirect: "manual"
     })
