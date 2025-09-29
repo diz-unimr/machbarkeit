@@ -5,7 +5,7 @@
 
 export async function login() {
 
-    const loginUrl = process.env.BACKEND_API_BASE + "/login?next=" + process.env.BASE_URL + "/index.php/apps/machbarkeit"
+    const loginUrl = `${process.env.BACKEND_API_BASE}/login?next=${process.env.BASE_URL}`
     const res = await fetch(loginUrl, {
         credentials: "include",
         redirect: "manual"
