@@ -14,3 +14,4 @@ dev/data/server
 lib/Service/.env
 .env
 .*.env
+tests/.phpunit.result.cache
