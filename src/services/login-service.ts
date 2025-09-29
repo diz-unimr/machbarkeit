@@ -11,10 +11,8 @@ export async function login() {
         redirect: "manual"
     })
 
-    console.log("Login request", res)
-
-    if (res.type === "opaqueredirect") {
-        window.location.href = res.url
-    }
+	if (res.type === 'opaqueredirect') {
+		window.location.href = res.url
+	}
 
 }
