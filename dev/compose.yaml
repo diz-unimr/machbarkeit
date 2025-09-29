@@ -31,3 +31,20 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+
+  backend:
+    image: ghcr.io/diz-unimr/machbarkeit-backend:1.2.9
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=debug
+      - BASE_URL=http://localhost:3000
+      - AUTH__OIDC__AUTH_ENDPOINT
+      - AUTH__OIDC__TOKEN_ENDPOINT
+      - AUTH__OIDC__USERINFO_ENDPOINT
+      - AUTH__OIDC__CLIENT_ID
+      - AUTH__OIDC__CLIENT_SECRET
+      - CORS__ALLOW_ORIGIN=http://localhost:8080
+      - MDR__ENDPOINT=https://mdr.diz.uni-marburg.de/api
+      - DATABASE__URL=sqlite://db.sqlite?mode=rwc
+    ports:
+      - "3000:3000"

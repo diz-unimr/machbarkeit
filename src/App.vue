@@ -1,8 +1,8 @@
 <template>
 	<!--
-		SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
-		SPDX-License-Identifier: AGPL-3.0-or-later
-	-->
+    SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
+    SPDX-License-Identifier: AGPL-3.0-or-later
+  -->
 	<div id="content" class="app-machbarkeit">
 		<div id="machbarkeit" class="machbarkeit">
 			<div class="machbarkeit machbarkeit__body">
@@ -17,6 +17,7 @@
 import Vue from 'vue'
 import AttributeList from './components/AttributeList.vue'
 import FeasibilityQueryContainer from './components/FeasibilityQueryContainer.vue'
+import { login } from './services/login-service.ts'
 
 export default Vue.extend({
 	name: 'App',
@@ -32,20 +33,31 @@ export default Vue.extend({
 
 	// life cycle of vue js
 	// Call functions before all component are rendered
-	beforeCreate() {},
+	beforeCreate() {
+	},
 	// Call functions before the template is rendered
 	created() {
+
+		login()
+
 		// const root = document.getElementsByTagName('html')[0]
 		// root.setAttribute('class', 'webkit chrome win js')
 
 		// get request from DB and save inti IndexedDB
 	},
-	beforeMount() {},
-	mounted() {},
-	beforeUpdate() {},
-	updated() {},
-	beforeDestroy() {},
-	destroyed() {},
+	beforeMount() {
+	},
+	mounted() {
+
+	},
+	beforeUpdate() {
+	},
+	updated() {
+	},
+	beforeDestroy() {
+	},
+	destroyed() {
+	},
 
 	methods: {},
 })
@@ -55,11 +67,12 @@ export default Vue.extend({
 :root {
 	color-scheme: light;
 }
+
 /* force ui in dark mode as light mode */
 @media (prefers-color-scheme: dark) {
 	:root {
 		--color-main-background: #ffffff;
-		--color-main-background-rgb: 255,255,255;
+		--color-main-background-rgb: 255, 255, 255;
 		--color-main-background-translucent: rgba(var(--color-main-background-rgb), .97);
 		--color-main-background-blur: rgba(var(--color-main-background-rgb), .8);
 		--filter-background-blur: none;
@@ -77,25 +90,25 @@ export default Vue.extend({
 		--color-text-lighter: var(--color-text-maxcontrast);
 		--color-scrollbar: var(--color-border-maxcontrast) transparent;
 		--color-error: #DB0606;
-		--color-error-rgb: 219,6,6;
+		--color-error-rgb: 219, 6, 6;
 		--color-error-hover: #df2525;
 		--color-error-text: #c20505;
 		--color-warning: #A37200;
-		--color-warning-rgb: 163,114,0;
+		--color-warning-rgb: 163, 114, 0;
 		--color-warning-hover: #8a6000;
 		--color-warning-text: #7f5900;
 		--color-success: #2d7b41;
-		--color-success-rgb: 45,123,65;
+		--color-success-rgb: 45, 123, 65;
 		--color-success-hover: #428854;
 		--color-success-text: #286c39;
 		--color-info: #0071ad;
-		--color-info-rgb: 0,113,173;
+		--color-info-rgb: 0, 113, 173;
 		--color-info-hover: #197fb5;
 		--color-info-text: #006499;
 		--color-favorite: #A37200;
 		--color-loading-light: #cccccc;
 		--color-loading-dark: #444444;
-		--color-box-shadow-rgb: 77,77,77;
+		--color-box-shadow-rgb: 77, 77, 77;
 		--color-box-shadow: rgba(var(--color-box-shadow-rgb), 0.5);
 		--color-border: #ededed;
 		--color-border-dark: #dbdbdb;

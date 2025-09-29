@@ -214,7 +214,7 @@ export default new Store({
 				return characteristic
 			}
 		},
-		
+
 		getOntologyTree: (state) => (moduleName) => {
 			return state.ontologies && moduleName ? state.ontologies[moduleName] : null
 		},
