@@ -37,10 +37,8 @@ export default Vue.extend({
   },
   // Call functions before the template is rendered
   created() {
-    console.log("NODE_ENV", process.env.NODE_ENV)
-    console.log("BACKEND_API_BASE", process.env.BACKEND_API_BASE)
 
-    login().catch(console.log)
+    login()
 
     // const root = document.getElementsByTagName('html')[0]
     // root.setAttribute('class', 'webkit chrome win js')
@@ -50,7 +48,7 @@ export default Vue.extend({
   beforeMount() {
   },
   mounted() {
-    
+
   },
   beforeUpdate() {
   },
