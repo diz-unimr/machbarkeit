@@ -1,211 +1,211 @@
 <template>
-  <!--
+	<!--
     SPDX-FileCopyrightText: Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>
     SPDX-License-Identifier: AGPL-3.0-or-later
   -->
-  <div id="content" class="app-machbarkeit">
-    <div id="machbarkeit" class="machbarkeit">
-      <div class="machbarkeit machbarkeit__body">
-        <AttributeList/>
-        <FeasibilityQueryContainer/>
-      </div>
-    </div>
-  </div>
+	<div id="content" class="app-machbarkeit">
+		<div id="machbarkeit" class="machbarkeit">
+			<div class="machbarkeit machbarkeit__body">
+				<AttributeList />
+				<FeasibilityQueryContainer />
+			</div>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import AttributeList from './components/AttributeList.vue'
 import FeasibilityQueryContainer from './components/FeasibilityQueryContainer.vue'
-import {login} from "./services/login-service.ts";
+import { login } from './services/login-service.ts'
 
 export default Vue.extend({
-  name: 'App',
-  components: {
-    AttributeList,
-    FeasibilityQueryContainer,
-  },
-  data() {
-    return {}
-  },
+	name: 'App',
+	components: {
+		AttributeList,
+		FeasibilityQueryContainer,
+	},
+	data() {
+		return {}
+	},
 
-  computed: {},
+	computed: {},
 
-  // life cycle of vue js
-  // Call functions before all component are rendered
-  beforeCreate() {
-  },
-  // Call functions before the template is rendered
-  created() {
+	// life cycle of vue js
+	// Call functions before all component are rendered
+	beforeCreate() {
+	},
+	// Call functions before the template is rendered
+	created() {
 
-    login()
+		login()
 
-    // const root = document.getElementsByTagName('html')[0]
-    // root.setAttribute('class', 'webkit chrome win js')
+		// const root = document.getElementsByTagName('html')[0]
+		// root.setAttribute('class', 'webkit chrome win js')
 
-    // get request from DB and save inti IndexedDB
-  },
-  beforeMount() {
-  },
-  mounted() {
+		// get request from DB and save inti IndexedDB
+	},
+	beforeMount() {
+	},
+	mounted() {
 
-  },
-  beforeUpdate() {
-  },
-  updated() {
-  },
-  beforeDestroy() {
-  },
-  destroyed() {
-  },
+	},
+	beforeUpdate() {
+	},
+	updated() {
+	},
+	beforeDestroy() {
+	},
+	destroyed() {
+	},
 
-  methods: {},
+	methods: {},
 })
 </script>
 
 <style>
 :root {
-  color-scheme: light;
+	color-scheme: light;
 }
 
 /* force ui in dark mode as light mode */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --color-main-background: #ffffff;
-    --color-main-background-rgb: 255, 255, 255;
-    --color-main-background-translucent: rgba(var(--color-main-background-rgb), .97);
-    --color-main-background-blur: rgba(var(--color-main-background-rgb), .8);
-    --filter-background-blur: none;
-    --gradient-main-background: var(--color-main-background) 0%, var(--color-main-background-translucent) 85%, transparent 100%;
-    --color-background-hover: #f5f5f5;
-    --color-background-dark: #ededed;
-    --color-background-darker: #dbdbdb;
-    --color-placeholder-light: #e6e6e6;
-    --color-placeholder-dark: #cccccc;
-    --color-main-text: #222222;
-    --color-text-maxcontrast: #6b6b6b;
-    --color-text-maxcontrast-default: #6b6b6b;
-    --color-text-maxcontrast-background-blur: #595959;
-    --color-text-light: var(--color-main-text);
-    --color-text-lighter: var(--color-text-maxcontrast);
-    --color-scrollbar: var(--color-border-maxcontrast) transparent;
-    --color-error: #DB0606;
-    --color-error-rgb: 219, 6, 6;
-    --color-error-hover: #df2525;
-    --color-error-text: #c20505;
-    --color-warning: #A37200;
-    --color-warning-rgb: 163, 114, 0;
-    --color-warning-hover: #8a6000;
-    --color-warning-text: #7f5900;
-    --color-success: #2d7b41;
-    --color-success-rgb: 45, 123, 65;
-    --color-success-hover: #428854;
-    --color-success-text: #286c39;
-    --color-info: #0071ad;
-    --color-info-rgb: 0, 113, 173;
-    --color-info-hover: #197fb5;
-    --color-info-text: #006499;
-    --color-favorite: #A37200;
-    --color-loading-light: #cccccc;
-    --color-loading-dark: #444444;
-    --color-box-shadow-rgb: 77, 77, 77;
-    --color-box-shadow: rgba(var(--color-box-shadow-rgb), 0.5);
-    --color-border: #ededed;
-    --color-border-dark: #dbdbdb;
-    --color-border-maxcontrast: #7d7d7d;
-    --font-face: system-ui, -apple-system, 'Segoe UI', Roboto, Oxygen-Sans, Cantarell, Ubuntu, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --default-font-size: 15px;
-    --font-size-small: 13px;
-    --default-line-height: 1.5;
-    --animation-quick: 100ms;
-    --animation-slow: 300ms;
-    --border-width-input: 1px;
-    --border-width-input-focused: 2px;
-    --border-radius-small: 4px;
-    --border-radius-element: 8px;
-    --border-radius-container: 12px;
-    --border-radius-container-large: 16px;
-    --border-radius: var(--border-radius-small);
-    --border-radius-large: var(--border-radius-element);
-    --border-radius-rounded: 28px;
-    --border-radius-pill: 100px;
-    --default-clickable-area: 34px;
-    --clickable-area-large: 48px;
-    --clickable-area-small: 24px;
-    --default-grid-baseline: 4px;
-    --header-height: 50px;
-    --header-menu-item-height: 44px;
-    --navigation-width: 300px;
-    --sidebar-min-width: 300px;
-    --sidebar-max-width: 500px;
-    --body-container-radius: var(--border-radius-container-large);
-    --body-container-margin: calc(var(--default-grid-baseline) * 2);
-    --body-height: calc(100% - env(safe-area-inset-bottom) - var(--header-height) - var(--body-container-margin));
-    --breakpoint-mobile: 1024px;
-    --background-invert-if-dark: no;
-    --background-invert-if-bright: invert(100%);
-    --background-image-invert-if-bright: no;
-    --primary-invert-if-bright: no;
-    --primary-invert-if-dark: invert(100%);
-    --color-primary: #00679e;
-    --color-primary-text: #ffffff;
-    --color-primary-hover: #3285b1;
-    --color-primary-light: #e5eff5;
-    --color-primary-light-text: #00293f;
-    --color-primary-light-hover: #dbe4ea;
-    --color-primary-element: #00679e;
-    --color-primary-element-hover: #005a8a;
-    --color-primary-element-text: #ffffff;
-    --color-primary-element-text-dark: #f5f5f5;
-    --color-primary-element-light: #e5eff5;
-    --color-primary-element-light-hover: #dbe4ea;
-    --color-primary-element-light-text: #00293f;
-    --gradient-primary-background: linear-gradient(40deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-    --color-background-plain: #00679e;
-    --color-background-plain-text: #ffffff;
-  }
+	:root {
+		--color-main-background: #ffffff;
+		--color-main-background-rgb: 255, 255, 255;
+		--color-main-background-translucent: rgba(var(--color-main-background-rgb), .97);
+		--color-main-background-blur: rgba(var(--color-main-background-rgb), .8);
+		--filter-background-blur: none;
+		--gradient-main-background: var(--color-main-background) 0%, var(--color-main-background-translucent) 85%, transparent 100%;
+		--color-background-hover: #f5f5f5;
+		--color-background-dark: #ededed;
+		--color-background-darker: #dbdbdb;
+		--color-placeholder-light: #e6e6e6;
+		--color-placeholder-dark: #cccccc;
+		--color-main-text: #222222;
+		--color-text-maxcontrast: #6b6b6b;
+		--color-text-maxcontrast-default: #6b6b6b;
+		--color-text-maxcontrast-background-blur: #595959;
+		--color-text-light: var(--color-main-text);
+		--color-text-lighter: var(--color-text-maxcontrast);
+		--color-scrollbar: var(--color-border-maxcontrast) transparent;
+		--color-error: #DB0606;
+		--color-error-rgb: 219, 6, 6;
+		--color-error-hover: #df2525;
+		--color-error-text: #c20505;
+		--color-warning: #A37200;
+		--color-warning-rgb: 163, 114, 0;
+		--color-warning-hover: #8a6000;
+		--color-warning-text: #7f5900;
+		--color-success: #2d7b41;
+		--color-success-rgb: 45, 123, 65;
+		--color-success-hover: #428854;
+		--color-success-text: #286c39;
+		--color-info: #0071ad;
+		--color-info-rgb: 0, 113, 173;
+		--color-info-hover: #197fb5;
+		--color-info-text: #006499;
+		--color-favorite: #A37200;
+		--color-loading-light: #cccccc;
+		--color-loading-dark: #444444;
+		--color-box-shadow-rgb: 77, 77, 77;
+		--color-box-shadow: rgba(var(--color-box-shadow-rgb), 0.5);
+		--color-border: #ededed;
+		--color-border-dark: #dbdbdb;
+		--color-border-maxcontrast: #7d7d7d;
+		--font-face: system-ui, -apple-system, 'Segoe UI', Roboto, Oxygen-Sans, Cantarell, Ubuntu, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+		--default-font-size: 15px;
+		--font-size-small: 13px;
+		--default-line-height: 1.5;
+		--animation-quick: 100ms;
+		--animation-slow: 300ms;
+		--border-width-input: 1px;
+		--border-width-input-focused: 2px;
+		--border-radius-small: 4px;
+		--border-radius-element: 8px;
+		--border-radius-container: 12px;
+		--border-radius-container-large: 16px;
+		--border-radius: var(--border-radius-small);
+		--border-radius-large: var(--border-radius-element);
+		--border-radius-rounded: 28px;
+		--border-radius-pill: 100px;
+		--default-clickable-area: 34px;
+		--clickable-area-large: 48px;
+		--clickable-area-small: 24px;
+		--default-grid-baseline: 4px;
+		--header-height: 50px;
+		--header-menu-item-height: 44px;
+		--navigation-width: 300px;
+		--sidebar-min-width: 300px;
+		--sidebar-max-width: 500px;
+		--body-container-radius: var(--border-radius-container-large);
+		--body-container-margin: calc(var(--default-grid-baseline) * 2);
+		--body-height: calc(100% - env(safe-area-inset-bottom) - var(--header-height) - var(--body-container-margin));
+		--breakpoint-mobile: 1024px;
+		--background-invert-if-dark: no;
+		--background-invert-if-bright: invert(100%);
+		--background-image-invert-if-bright: no;
+		--primary-invert-if-bright: no;
+		--primary-invert-if-dark: invert(100%);
+		--color-primary: #00679e;
+		--color-primary-text: #ffffff;
+		--color-primary-hover: #3285b1;
+		--color-primary-light: #e5eff5;
+		--color-primary-light-text: #00293f;
+		--color-primary-light-hover: #dbe4ea;
+		--color-primary-element: #00679e;
+		--color-primary-element-hover: #005a8a;
+		--color-primary-element-text: #ffffff;
+		--color-primary-element-text-dark: #f5f5f5;
+		--color-primary-element-light: #e5eff5;
+		--color-primary-element-light-hover: #dbe4ea;
+		--color-primary-element-light-text: #00293f;
+		--gradient-primary-background: linear-gradient(40deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+		--color-background-plain: #00679e;
+		--color-background-plain-text: #ffffff;
+	}
 }
 
 html body {
-  font-size: 16px !important;
+	font-size: 16px !important;
 }
 
 button {
-  font-size: 16px !important;
+	font-size: 16px !important;
 }
 
 .machbarkeit {
-  display: flex;
-  width: 100%;
-  background-color: white;
+	display: flex;
+	width: 100%;
+	background-color: white;
 }
 
 .machbarkeit__body {
-  height: 97%;
+	height: 97%;
 }
 
 .input-field__input {
-  border: 1px solid #c0c7ce !important;
+	border: 1px solid #c0c7ce !important;
 }
 
 .input-field__main-wrapper {
-  height: 45px !important;
+	height: 45px !important;
 }
 
 .input-field__main-wrapper input[type='text'] {
-  height: 100% !important;
+	height: 100% !important;
 }
 
 .input-field__icon {
-  height: 100% !important;
+	height: 100% !important;
 }
 
 input[type=checkbox] {
-  cursor: pointer !important;
+	cursor: pointer !important;
 }
 
 select:hover {
-  background-color: unset !important;
+	background-color: unset !important;
 }
 
 </style>
