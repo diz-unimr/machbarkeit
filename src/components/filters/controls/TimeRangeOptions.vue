@@ -30,7 +30,7 @@
 						v-model="selectedValue.atDate"
 						type="date"
 						name="atDate">
-					<label class="text-floating">{{ selectedValue.type }}</label>
+					<label class="text-floating">Am</label>
 				</div>
 				<div v-if="selectedValue.type === 'before'"
 					class="text-floating-wrapper">
@@ -38,7 +38,7 @@
 						v-model="selectedValue.beforeDate"
 						type="date"
 						name="beforeDate">
-					<label class="text-floating">{{ selectedValue.type }}</label>
+					<label class="text-floating">Vor</label>
 				</div>
 				<div v-if="selectedValue.type === 'after'"
 					class="text-floating-wrapper">
@@ -46,7 +46,7 @@
 						v-model="selectedValue.afterDate"
 						type="date"
 						name="afterDate">
-					<label class="text-floating">{{ selectedValue.type }}</label>
+					<label class="text-floating">Nach</label>
 				</div>
 				<div v-if="selectedValue.type === 'between'"
 					class="input-wrapper">
@@ -56,7 +56,7 @@
 							v-model="selectedValue.afterDate"
 							type="date"
 							name="afterDate">
-						<label class="text-floating">von</label>
+						<label class="text-floating">Von</label>
 					</div>
 					<div class="text-floating-wrapper">
 						<!-- to date -->
@@ -64,7 +64,7 @@
 							v-model="selectedValue.beforeDate"
 							type="date"
 							name="beforeDate">
-						<label class="text-floating">bis</label>
+						<label class="text-floating">Bis</label>
 					</div>
 				</div>
 			</div>

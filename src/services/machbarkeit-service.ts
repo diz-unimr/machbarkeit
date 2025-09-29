@@ -14,9 +14,8 @@ import type { FeasibilityQueryContainerData } from '../types/FeasibilityQueryCon
  */
 
 /**
- *
- * @param data
- * @param abortController
+ * @param data The query data to be sent for feasibility checking.
+ * @param abortController The AbortController instance to allow request cancellation.
  */
 export async function getMachbarkeit(data: FeasibilityQueryContainerData['queryData'], abortController: AbortController): Promise<[number | null, string | null]> {
 	let numberOfPatients: number | null = null
@@ -70,6 +69,7 @@ export async function getMachbarkeit(data: FeasibilityQueryContainerData['queryD
 		}
 	} catch (error) {
 		if ((error as AxiosError).name === 'CanceledError' || (error as AxiosError).message === 'canceled') {
+			// eslint-disable-next-line no-console
 			console.log('Request was canceled by user')
 		} else if ((error as AxiosError).response) {
 			errorMessage = ((error as AxiosError).response!.data as { error: string }).error
