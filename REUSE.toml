@@ -7,7 +7,7 @@ SPDX-PackageSupplier = "Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>"
 SPDX-PackageDownloadLocation = "https://github.com/diz-unimr/machbarkeit"
 
 [[annotations]]
-path = ["**.json", "composer.lock", ".github/renovate.json", ".vscode/**.json", "**.csv", "**.png"]
+path = ["**.json", "composer.lock", ".github/renovate.json", ".vscode/**.json", "**.csv", "**.png", "**.env"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Nattika Jugkaeo <nattika.jugkaeo@uni-marburg.de>"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
