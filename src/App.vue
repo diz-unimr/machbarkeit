@@ -14,7 +14,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import AttributeList from './components/AttributeList.vue'
 import FeasibilityQueryContainer from './components/FeasibilityQueryContainer.vue'
 import { login } from './services/login-service.ts'
 
