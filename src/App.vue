@@ -6,7 +6,6 @@
 	<div id="content" class="app-machbarkeit">
 		<div id="machbarkeit" class="machbarkeit">
 			<div class="machbarkeit machbarkeit__body">
-				<!-- <AttributeList /> -->
 				<FeasibilityQueryContainer />
 			</div>
 		</div>
@@ -22,7 +21,6 @@ import { login } from './services/login-service.ts'
 export default Vue.extend({
 	name: 'App',
 	components: {
-		AttributeList,
 		FeasibilityQueryContainer,
 	},
 	data() {
