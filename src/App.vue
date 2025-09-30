@@ -6,7 +6,7 @@
 	<div id="content" class="app-machbarkeit">
 		<div id="machbarkeit" class="machbarkeit">
 			<div class="machbarkeit machbarkeit__body">
-				<AttributeList />
+				<!-- <AttributeList /> -->
 				<FeasibilityQueryContainer />
 			</div>
 		</div>
