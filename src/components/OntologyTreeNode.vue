@@ -192,7 +192,7 @@ export default Vue.extend({
 	methods: {
 		setCriterionContext(criterion: Criterion) {
 			if (this.modules) {
-				const module = this.modules.find((module: Module) => module.id === criterion.moduleId)[0]
+				const module = this.modules.find((module: Module) => module.id === criterion.moduleId)
 				criterion.context = {
 					code: module.fdpgCdsCode || '',
 					display: module.name || '',
