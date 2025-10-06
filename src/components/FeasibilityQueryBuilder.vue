@@ -138,7 +138,7 @@ export default Vue.extend({
 			isStateEditFilter: false,
 			editFilterInformation: undefined,
 			isInputTextCleared: false,
-			imgDelete: './img/delete-black.png',
+			imgDelete: process.env.BASE_URL + '/img/delete-black.png',
 		}
 	},
 

@@ -59,7 +59,7 @@ export default Vue.extend({
 	data(): FilterCardData {
 		return {
 			filterInfo: null,
-			imgDelete: './img/delete.png',
+			imgDelete: process.env.BASE_URL + '/img/delete.png',
 		}
 	},
 

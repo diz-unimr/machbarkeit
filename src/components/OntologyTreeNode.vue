@@ -126,8 +126,8 @@ export default Vue.extend({
 	data(): OntologyTreeNodeData {
 		return {
 			isExpanded: false,
-			imgCollapse: './img/arrow-collapse-blue.png',
-			imgExpand: './img/arrow-expand.png',
+			imgCollapse: process.env.BASE_URL + '/img/arrow-collapse-blue.png',
+			imgExpand: process.env.BASE_URL + '/img/arrow-expand.png',
 			termCode: undefined,
 			swlCode: undefined,
 			loinc: undefined,
@@ -147,7 +147,7 @@ export default Vue.extend({
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
-				let selectedItem = this.setObjectForCriterion(this.criterion) // Get the selected item
+				let selectedItem = this.setCriterionContext(this.criterion) // Get the selected item
 				if (checked) {
 					this.$store.dispatch('addCheckedItem', this.criterion.id)
 					// if parent is checked, check all children
@@ -190,9 +190,9 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		setObjectForCriterion(criterion: Criterion) {
+		setCriterionContext(criterion: Criterion) {
 			if (this.modules) {
-				const module = this.modules.filter((module: Module) => module.id === criterion.moduleId)[0]
+				const module = this.modules.find((module: Module) => module.id === criterion.moduleId)[0]
 				criterion.context = {
 					code: module.fdpgCdsCode || '',
 					display: module.name || '',

@@ -102,7 +102,7 @@ export default Vue.extend({
 				: null,
 			state: this.isStateEditFilter,
 			isResetDisabled: !(this.selectedCriterion && (hasConceptFilter || hasQuantityFilter || hasTimeRestriction)),
-			imgExpand: './img/arrow-expand.png',
+			imgExpand: process.env.BASE_URL + '/img/arrow-expand.png',
 		}
 	},
 

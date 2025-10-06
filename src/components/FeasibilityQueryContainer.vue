@@ -70,7 +70,7 @@ export default Vue.extend({
 			isQueryRunning: false,
 			abortController: null,
 			hasDataFromUpload: false,
-			imgLoadingSpinner: './img/loading_spinner.svg',
+			imgLoadingSpinner: process.env.BASE_URL + '/img/loading_spinner.svg',
 		}
 	},
 
