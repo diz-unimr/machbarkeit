@@ -157,16 +157,19 @@ export default Vue.extend({
 		async sendOntologyRequest(module: Module, searchText: string = ''): Promise<void> {
 			if (!this.isInputTextCleared) {
 				this.isLoading = true
-				const [ontologyTree, requestWarning] = await getOntology(module, searchText)
+				let [ontologyTree, requestWarning] = await getOntology(module, searchText)
 				if (requestWarning === 'canceled') {
 					console.warn('Ontology request was canceled')
 					return
 				} else if (requestWarning !== '') {
 					this.$emit('send-request-warning', requestWarning)
 				} else if (ontologyTree && requestWarning === '') {
-					if (searchText === '') this.$store.dispatch('addOntologyTree', { ontologyTree, moduleId: module.id })
+					ontologyTree = this.sortOntologyTree(ontologyTree, true)
+					if (searchText === '') {
+						this.$store.dispatch('addOntologyTree', { ontologyTree, moduleId: module.id })
+					}
 				}
-				this.ontologyTree = this.sortOntologyTree(ontologyTree, true)
+				this.ontologyTree = ontologyTree
 				this.isLoading = false
 			}
 		},
