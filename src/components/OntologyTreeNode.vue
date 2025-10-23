@@ -74,7 +74,7 @@
 
 <script lang="ts">
 import Vue, { type PropType } from 'vue'
-import type { Criterion, Module } from '../types/OntologyPanelData'
+import type { Criterion } from '../types/OntologyPanelData'
 
 interface OntologyTreeNodeData {
 	isExpanded: boolean;

@@ -166,8 +166,21 @@ export default Vue.extend({
 				} else if (ontologyTree && requestWarning === '') {
 					if (searchText === '') this.$store.dispatch('addOntologyTree', { ontologyTree, moduleId: module.id })
 				}
-				this.ontologyTree = ontologyTree
+				this.ontologyTree = this.sortOntologyTree(ontologyTree, true)
 				this.isLoading = false
+			}
+		},
+
+		sortOntologyTree(ontologyTree: OntologyPanelData['ontologyTree'], isFirstParent: boolean = false): OntologyPanelData['ontologyTree'] {
+			if (ontologyTree) {
+				if (isFirstParent) ontologyTree.sort((a, b) => a.display.localeCompare(b.display))
+				else ontologyTree.sort((a, b) => a.termCodes[0].code.localeCompare(b.termCodes[0].code))
+				ontologyTree.forEach((node) => {
+					if (node.children && node.children.length > 0) {
+						this.sortOntologyTree(node.children)
+					}
+				})
+				return ontologyTree
 			}
 		},
 
