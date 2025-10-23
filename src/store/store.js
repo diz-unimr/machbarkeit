@@ -4,6 +4,7 @@
  */
 import Vue, { set } from 'vue'
 import Vuex, { Store } from 'vuex'
+import { setCriterionContext } from '../utils/utilities.ts'
 
 Vue.use(Vuex)
 
@@ -58,8 +59,9 @@ export default new Store({
 		},
 
 		ADD_SELECTED_ITEM(state, { key, item }) {
+			const criterionContext = setCriterionContext(item)
 			if (!state.selectedItems[key]) {
-				set(state.selectedItems, key, item) // Use Vue.set to ensure reactivity
+				set(state.selectedItems, key, criterionContext) // Use Vue.set to ensure reactivity
 			}
 		},
 
@@ -215,8 +217,14 @@ export default new Store({
 			}
 		},
 
-		getOntologyTree: (state) => (moduleName) => {
-			return state.ontologies && moduleName ? state.ontologies[moduleName] : null
+		getOntologyTree: (state) => (moduleId) => {
+			return state.ontologies && moduleId ? state.ontologies[moduleId] : null
+		},
+
+		getOntologyInfo: (state) => (moduleId, parentId, criterionId) => {
+			const parent = state.ontologies ? state.ontologies[moduleId].find((ontology) => ontology.id === parentId) : null
+			const childInfo = parent ? parent.children.find((child) => child.id === criterionId) : null
+			return childInfo
 		},
 	},
 })

@@ -147,7 +147,8 @@ export default Vue.extend({
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
-				let selectedItem = this.setCriterionContext(this.criterion) // Get the selected item
+				// let selectedItem = this.setCriterionContext(this.criterion) // Get the selected item
+				let selectedItem = this.criterion
 				if (checked) {
 					this.$store.dispatch('addCheckedItem', this.criterion.id)
 					// if parent is checked, check all children
@@ -190,7 +191,7 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		setCriterionContext(criterion: Criterion) {
+		/* setCriterionContext(criterion: Criterion) {
 			if (this.modules) {
 				const module = this.modules.find((module: Module) => module.id === criterion.moduleId)
 				criterion.context = {
@@ -202,7 +203,7 @@ export default Vue.extend({
 				criterion.color = module.color
 				return criterion
 			}
-		},
+		}, */
 
 		toggleChildren(children: Criterion[], isChecked: boolean): void {
 			children.forEach((child: Criterion) => {
@@ -220,6 +221,9 @@ export default Vue.extend({
 		},
 
 		toggleParent(isChecked: boolean, selectedItem: Criterion): Criterion {
+			/* if (!this.parent) {
+				const parent = this.$store.getters.getOntologyInfo(this.criterion.moduleId, this.criterion.parentId, this.criterion.id)
+			} */
 			if (this.parent) {
 				if (isChecked) {
 					const checkedItems = this.$store.state.checkedItems
