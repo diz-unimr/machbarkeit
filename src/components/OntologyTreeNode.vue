@@ -220,34 +220,36 @@ export default Vue.extend({
 		},
 
 		toggleParent(isChecked: boolean, selectedItem: Criterion): Criterion {
-			if (isChecked) {
-				const checkedItems = this.$store.state.checkedItems
-				const areAllChildrenChecked = this.parent.children.every(child => checkedItems.includes(child.id))
-				if (areAllChildrenChecked) {
-					this.$store.dispatch('addCheckedItem', this.parent.id)
-					selectedItem = this.parent
+			if (this.parent) {
+				if (isChecked) {
+					const checkedItems = this.$store.state.checkedItems
+					const areAllChildrenChecked = this.parent.children.every(child => checkedItems.includes(child.id))
+					if (areAllChildrenChecked) {
+						this.$store.dispatch('addCheckedItem', this.parent.id)
+						selectedItem = this.parent
+						if (this.parent.parentId !== null && this.parent.selectable) {
+							this.parent.children.forEach((child: Criterion) => {
+								this.$store.dispatch('removeSelectedItem', child.id)
+							})
+							this.$emit('change', isChecked, selectedItem) // go back to upper parent level
+						}
+					}
+				} else {
 					if (this.parent.parentId !== null && this.parent.selectable) {
+						if (this.$store.getters.getCheckedItem(this.parent.id)) {
+							this.$store.dispatch('removeCheckedItem', this.parent.id)
+						}
+						if (this.$store.getters.getSelectedItem(this.parent.id)) {
+							this.$store.dispatch('removeSelectedItem', this.parent.id)
+						}
+
+						// check for siblings and add them to selected items
 						this.parent.children.forEach((child: Criterion) => {
-							this.$store.dispatch('removeSelectedItem', child.id)
+							const isChildChecked = this.$store.getters.getCheckedItem(child.id)
+							isChildChecked && this.$store.dispatch('addSelectedItem', { key: child.id, item: child })
 						})
 						this.$emit('change', isChecked, selectedItem) // go back to upper parent level
 					}
-				}
-			} else {
-				if (this.parent.parentId !== null && this.parent.selectable) {
-					if (this.$store.getters.getCheckedItem(this.parent.id)) {
-						this.$store.dispatch('removeCheckedItem', this.parent.id)
-					}
-					if (this.$store.getters.getSelectedItem(this.parent.id)) {
-						this.$store.dispatch('removeSelectedItem', this.parent.id)
-					}
-
-					// check for siblings and add them to selected items
-					this.parent.children.forEach((child: Criterion) => {
-						const isChildChecked = this.$store.getters.getCheckedItem(child.id)
-						isChildChecked && this.$store.dispatch('addSelectedItem', { key: child.id, item: child })
-					})
-					this.$emit('change', isChecked, selectedItem) // go back to upper parent level
 				}
 			}
 			return selectedItem

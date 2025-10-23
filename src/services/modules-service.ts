@@ -17,11 +17,6 @@ export async function getModules(): Promise<Module[] | null> {
 		const apiResponse: AxiosResponse = (await axios.get(process.env.BACKEND_API_BASE + '/mdr/ontology/modules', {
 			withCredentials: true,
 		}))
-		// const apiResponse = (await fetch('http://localhost:3000/mdr/ontology/modules', {
-		//     credentials: "include",
-		// }))
-		// const resp = await apiResponse.text()
-		// console.log(resp)
 
 		const response: Module[] = apiResponse.data.map((module: Module) => {
 			const modules = lodash.mapKeys(module, (value, key) => lodash.camelCase(key))
