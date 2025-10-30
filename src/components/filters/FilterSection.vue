@@ -98,7 +98,7 @@ export default Vue.extend({
 			filterName: this.selectedCriterion
 				? this.selectedCriterion.timeRestrictionAllowed
 					? 'Zeitraum (Option)'
-					: 'Wertbereich'
+					: 'Wertbereich (Option)'
 				: null,
 			state: this.isStateEditFilter,
 			isResetDisabled: !(this.selectedCriterion && (hasConceptFilter || hasQuantityFilter || hasTimeRestriction)),

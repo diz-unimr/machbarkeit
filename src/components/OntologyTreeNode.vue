@@ -51,9 +51,6 @@
 							</span>
 						</div>
 					</div>
-					<!-- <p v-if="moduleName === 'Laboruntersuchung' && !isLoincSupport && criterion.selectable === true" class="only-swl-code-warning">
-						(Die Suche nach SWL Code wird momentan nicht unterstützt)
-					</p> -->
 				</div>
 			</div>
 			<ul v-if="isExpanded">
@@ -83,7 +80,6 @@ interface OntologyTreeNodeData {
 	termCode?: string | null;
 	swlCode?: string | null;
 	loinc?: string | null ;
-	// isLoincSupport: boolean;
 }
 
 export interface CheckedItem {
@@ -131,7 +127,6 @@ export default Vue.extend({
 			termCode: undefined,
 			swlCode: undefined,
 			loinc: undefined,
-			// isLoincSupport: false,
 		}
 	},
 

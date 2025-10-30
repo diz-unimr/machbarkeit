@@ -69,7 +69,7 @@
 				</div>
 			</div>
 			<button v-if="label === 'master filter'" :disabled="selectedValue?.type === 'no filter' || !(isDateInputValid && isFilterComplete)" @click="setAllDateChanged">
-				DATUM ERSETZEN
+				DATUM FÜR ALLE SETZEN
 			</button>
 		</div>
 		<div v-if="!isFilterComplete">
