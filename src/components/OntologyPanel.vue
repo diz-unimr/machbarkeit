@@ -34,7 +34,7 @@
 							</div>
 						</div>
 						<div v-else-if="ontologyTree?.length === 0" class="no-result-data">
-							Keine Daten
+							Keine Daten in Module "{{ activeModule?.name }}" gefunden.
 						</div>
 					</div>
 					<div v-else-if="isLoading" class="loading-text">

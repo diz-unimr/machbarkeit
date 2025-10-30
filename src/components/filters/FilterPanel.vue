@@ -6,9 +6,9 @@
 	<div class="filter-dialog-container">
 		<div class="filter-dialog-wrapper">
 			<div class="filter-dialog">
-				<h3 class="filter-dialog__title">
+				<div class="filter-dialog__title">
 					Einschränkungen der ausgewählten Merkmale
-				</h3>
+				</div>
 				<div v-if="selectedCriteria.length > 1 && selectedCriteria[0]?.timeRestrictionAllowed && !isStateEditFilter" class="dropdown-wrapper">
 					<TimeRangeOptions label="master filter" @set-all-filter="replaceAllDateChanged" />
 				</div>
@@ -173,21 +173,22 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-@media (max-width: 1300px) {
+/* @media (max-width: 1300px) {
 	.filter-dialog-container {
-		top: -45%;
+		top: 0;
 	}
 	.filter-dialog {
-		max-height: 550px;
+		max-height: 85vh;
 	}
-}
+} */
 
 .filter-dialog-container {
 	display: flex;
 	position: relative;
 	z-index: 100;
-	width: clamp(500px, 85%, 1000px);
+	width: 100%;
 	margin: 0px auto 0px auto;
+	max-height: 100%;
 }
 
 .filter-dialog-wrapper {
@@ -216,6 +217,7 @@ export default Vue.extend({
 	border-bottom-width: 2px;
 	border-bottom-style: solid;
 	border-bottom-color: #5a78ae;
+	font-size: 24px;
 	font-weight: 600;
 	font-family: Roboto,Helvetica Neue,sans-serif;
 }

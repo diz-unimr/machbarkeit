@@ -341,6 +341,8 @@ export default Vue.extend({
 	border: dashed 1px black;
 	margin: 20px;
 	padding: 20px;
+	overflow-y: auto;
+	max-height: 60vh;
 }
 
 .selected-criteria-container {
