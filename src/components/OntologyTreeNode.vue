@@ -147,30 +147,28 @@ export default Vue.extend({
 			},
 			// Updates checked items when checkbox state changes
 			set(checked: boolean): void {
-				// let selectedItem = this.setCriterionContext(this.criterion) // Get the selected item
-				let selectedItem = this.criterion
 				if (checked) {
 					this.$store.dispatch('addCheckedItem', this.criterion.id)
+					this.$store.dispatch('addSelectedItem', { key: this.criterion.id, item: this.criterion })
 					// if parent is checked, check all children
 					if (this.criterion.children && this.criterion.children.length > 0) {
 						this.toggleChildren(this.criterion.children, checked)
 					}
 					// if all children are checked, check the parent
 					if (this.parent && this.parent.selectable) {
-						selectedItem = this.toggleParent(checked, selectedItem)
+						this.toggleParent(checked, this.criterion)
 					}
-					this.$store.dispatch('addSelectedItem', { key: selectedItem.id, item: selectedItem })
 				} else {
 					this.$store.dispatch('removeCheckedItem', this.criterion.id)
+					this.$store.dispatch('removeSelectedItem', this.criterion.id)
 					// if parent is unchecked, uncheck all children
 					if (this.criterion.children && this.criterion.children.length > 0) {
 						this.toggleChildren(this.criterion.children, checked)
 					}
 					// if child is unchecked, uncheck the parent
 					if (this.parent && this.parent.selectable) {
-						selectedItem = this.toggleParent(checked, selectedItem)
+						this.toggleParent(checked, this.criterion)
 					}
-					this.$store.dispatch('removeSelectedItem', selectedItem.id)
 				}
 			},
 		},
@@ -191,20 +189,6 @@ export default Vue.extend({
 	destroyed() {},
 
 	methods: {
-		/* setCriterionContext(criterion: Criterion) {
-			if (this.modules) {
-				const module = this.modules.find((module: Module) => module.id === criterion.moduleId)
-				criterion.context = {
-					code: module.fdpgCdsCode || '',
-					display: module.name || '',
-					system: module.fdpgCdsSystem || '',
-					version: module.version || '',
-				}
-				criterion.color = module.color
-				return criterion
-			}
-		}, */
-
 		toggleChildren(children: Criterion[], isChecked: boolean): void {
 			children.forEach((child: Criterion) => {
 				if (isChecked) {
@@ -220,22 +204,20 @@ export default Vue.extend({
 			})
 		},
 
-		toggleParent(isChecked: boolean, selectedItem: Criterion): Criterion {
-			/* if (!this.parent) {
-				const parent = this.$store.getters.getOntologyInfo(this.criterion.moduleId, this.criterion.parentId, this.criterion.id)
-			} */
-			if (this.parent) {
+		toggleParent(isChecked: boolean, selectedItem: Criterion): void {
+			if (!this.parent) return
+			if (this.parent !== null) {
 				if (isChecked) {
 					const checkedItems = this.$store.state.checkedItems
 					const areAllChildrenChecked = this.parent.children.every(child => checkedItems.includes(child.id))
 					if (areAllChildrenChecked) {
 						this.$store.dispatch('addCheckedItem', this.parent.id)
-						selectedItem = this.parent
+						this.$store.dispatch('addSelectedItem', { key: this.parent.id, item: this.parent }) //
 						if (this.parent.parentId !== null && this.parent.selectable) {
 							this.parent.children.forEach((child: Criterion) => {
 								this.$store.dispatch('removeSelectedItem', child.id)
 							})
-							this.$emit('change', isChecked, selectedItem) // go back to upper parent level
+							this.$emit('change', isChecked, this.parent) // go back to upper parent level
 						}
 					}
 				} else {
@@ -256,7 +238,6 @@ export default Vue.extend({
 					}
 				}
 			}
-			return selectedItem
 		},
 
 		expandTreeNode(): void {
@@ -267,11 +248,9 @@ export default Vue.extend({
 			const termCode = undefined
 			const loinc = undefined
 			const swlCode = undefined
-			// const isLoincSupport = false
 			if (this.moduleName === 'Laboruntersuchung') {
 				const loinc = criterion.termCodes?.find((termCode) => termCode.system === 'http://loinc.org')?.code
 				const swlCode = criterion.termCodes?.find((termCode) => termCode.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code')?.code
-				// const isLoincSupport = loinc !== undefined && loinc !== null
 				return [termCode, loinc, swlCode]
 			} else {
 				const termCode = criterion.termCodes[0]?.code
@@ -284,10 +263,8 @@ export default Vue.extend({
 
 <style scoped>
 .ontology-nested-tree-node {
-	/* overflow-y: auto; */
 	overflow: visible;
 	scrollbar-width: auto;
-	/* height: 100%; */
 	padding: 0 10px 0 15px;
 }
 
@@ -295,14 +272,8 @@ export default Vue.extend({
 	list-style-type: none;
 }
 
-/* .ontology-nested-tree-node li:not(:first-child) {
-	margin-left: 15px;
-} */
-
 .ontology-head-node {
 	display: flex;
-	/* place-content: center flex-start;
-	align-items: flex-start; */
 	margin-top: 5px;
 	gap: clamp(10px, 1.5%, 15px);
 }
@@ -383,10 +354,6 @@ export default Vue.extend({
 	max-width: fit-content;
 	margin-top: 5px;
 }
-
-/* .terminology-description-wrapper .hover-modal {
-	top: -12px;
-} */
 
 .terminology-code:hover .hover-modal,
 .terminology-description-wrapper span:hover .hover-modal {

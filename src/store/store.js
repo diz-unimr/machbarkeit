@@ -207,6 +207,7 @@ export default new Store({
 		},
 
 		getSelectedItem: (state) => (id) => {
+
 			return state.selectedItems[id]
 		},
 
@@ -215,16 +216,6 @@ export default new Store({
 			if (characteristic.id === id) {
 				return characteristic
 			}
-		},
-
-		getOntologyTree: (state) => (moduleId) => {
-			return state.ontologies && moduleId ? state.ontologies[moduleId] : null
-		},
-
-		getOntologyInfo: (state) => (moduleId, parentId, criterionId) => {
-			const parent = state.ontologies ? state.ontologies[moduleId].find((ontology) => ontology.id === parentId) : null
-			const childInfo = parent ? parent.children.find((child) => child.id === criterionId) : null
-			return childInfo
 		},
 	},
 })
