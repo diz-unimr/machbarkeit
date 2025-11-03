@@ -34,7 +34,7 @@
 							</div>
 						</div>
 						<div v-else-if="ontologyTree?.length === 0" class="no-result-data">
-							Keine Daten
+							Keine Daten in Modul "{{ activeModule?.name }}" gefunden.
 						</div>
 					</div>
 					<div v-else-if="isLoading" class="loading-text">
@@ -63,7 +63,7 @@
 import Vue from 'vue'
 import OntologyTreeNode from './OntologyTreeNode.vue'
 import WarningModal from './WarningModal.vue'
-import type { OntologyPanelData, Module } from '../types/OntologyPanelData'
+import type { OntologyPanelData, Module, Criterion } from '../types/OntologyPanelData'
 
 import { getModules } from '../services/modules-service'
 import { getOntology, setAbortController } from '../services/ontology-service'
@@ -157,18 +157,50 @@ export default Vue.extend({
 		async sendOntologyRequest(module: Module, searchText: string = ''): Promise<void> {
 			if (!this.isInputTextCleared) {
 				this.isLoading = true
-				const [ontologyTree, requestWarning] = await getOntology(module, searchText)
+				let [ontologyTree, requestWarning] = await getOntology(module, searchText)
 				if (requestWarning === 'canceled') {
 					console.warn('Ontology request was canceled')
 					return
 				} else if (requestWarning !== '') {
 					this.$emit('send-request-warning', requestWarning)
 				} else if (ontologyTree && requestWarning === '') {
-					if (searchText === '') this.$store.dispatch('addOntologyTree', { ontologyTree, moduleId: module.id })
+					ontologyTree = this.sortOntologyTree(ontologyTree)
+					if (searchText === '') {
+						this.$store.dispatch('addOntologyTree', { ontologyTree, moduleId: module.id })
+					}
 				}
 				this.ontologyTree = ontologyTree
 				this.isLoading = false
 			}
+		},
+
+		sortOntologyTree(ontologyTree: OntologyPanelData['ontologyTree']): OntologyPanelData['ontologyTree'] {
+			if (!ontologyTree) return ontologyTree
+
+			const ontologyTreeCopy = [...ontologyTree]
+			let sortedOntologyTree: Criterion[] = []
+			const nonSelectableItems = ontologyTreeCopy?.filter((item) => !item.selectable)
+			const selectableItems = ontologyTreeCopy?.filter((item) => item.selectable)
+
+			if (this.activeModule?.name === 'Laboruntersuchung') {
+				const loincItems = selectableItems?.filter((item) => item.termCodes.some((code) => code.system === 'http://loinc.org'))
+				const swisslabCodeItems = selectableItems?.filter((item) => item.termCodes.every((code) => code.system === 'https://fhir.diz.uni-marburg.de/CodeSystem/swisslab-code'))
+				loincItems.sort((a, b) => a.termCodes[1].code.localeCompare(b.termCodes[1].code))
+				swisslabCodeItems.sort((a, b) => a.termCodes[0].code.localeCompare(b.termCodes[0].code))
+				sortedOntologyTree = [...nonSelectableItems, ...loincItems, ...swisslabCodeItems]
+			} else {
+				nonSelectableItems.sort((a, b) => a.display.localeCompare(b.display))
+				selectableItems.sort((a, b) => a.termCodes[0].code.localeCompare(b.termCodes[0].code))
+				sortedOntologyTree = [...nonSelectableItems, ...selectableItems]
+			}
+			// Recursively sort children
+			sortedOntologyTree.forEach((node) => {
+				if (node.children && node.children.length > 0) {
+					node.children = this.sortOntologyTree(node.children)
+				}
+			})
+
+			return sortedOntologyTree
 		},
 
 		changeTab(moduleId: string): void {

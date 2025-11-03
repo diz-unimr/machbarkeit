@@ -3,6 +3,8 @@
 	SPDX-License-Identifier: AGPL-3.0-or-later
 */
 import lodash from 'lodash'
+import store from '../store/store'
+import type { Criterion, Module } from '../types/OntologyPanelData'
 /**
  * Returns the theme color associated with a given module name.
  * @param {string} moduleName - The name of the module.
@@ -33,4 +35,22 @@ export function transformObjectKeys<T extends { children?: T[] }>(data: T[]): T[
 		return transformedObj
 	})
 	return response
+}
+
+/**
+ * Sets the context for a Criterion based on the matching module from this.modules.
+ * @param criterion - The Criterion to update with context fields.
+ */
+export function setCriterionContext(criterion: Criterion) {
+	const modules = store.state.modules as Module[]
+	if (modules) {
+		const module = modules.find((module: Module) => module.id === criterion.moduleId)
+		criterion.context = {
+			code: module!.fdpgCdsCode || '',
+			display: module!.name || '',
+			system: module!.fdpgCdsSystem || '',
+			version: module!.version || '',
+		}
+		return criterion
+	}
 }

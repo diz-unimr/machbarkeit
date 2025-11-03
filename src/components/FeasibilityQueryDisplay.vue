@@ -16,8 +16,8 @@
 							:key="index"
 							style="position: relative">
 							<!-- can be changed sequence -->
-							<div class="selected-criteria-container" :style="{ 'border': '1px solid' + draggableInclusionCharacteristics[index].color }">
-								<div class="selected-criteria-left" :style="{ 'background-color': draggableInclusionCharacteristics[index].color}" />
+							<div class="selected-criteria-container" :style="{ 'border': '1px solid' + getModuleColor(characteristic) }">
+								<div class="selected-criteria-left" :style="{ 'background-color': getModuleColor(characteristic)}" />
 								<div class="selected-criteria-middle">
 									<div class="selected-criteria-display" @click="editLimitation(characteristic, index, 'inclusionCriteria')">
 										{{ characteristic.display }} ({{ characteristic.termCodes[0].code }})
@@ -53,7 +53,7 @@
 										</p>
 									</div>
 								</div>
-								<div class="selected-criteria-right" :style="{ 'background-color': draggableInclusionCharacteristics[index].color}">
+								<div class="selected-criteria-right" :style="{ 'background-color': getModuleColor(characteristic) }">
 									<button class="delete-btn" @click="deleteCharacteristic(index, 'inclusionCriteria')">
 										<svg role="img"
 											width="20px"
@@ -207,7 +207,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import draggable from 'vuedraggable'
-import type { Criterion } from '../types/OntologyPanelData'
+import type { Criterion, Module } from '../types/OntologyPanelData'
 import type { TimeRangeType } from '../types/TimeRangeOptionsData'
 import type { CharacteristicGroup } from '../types/FeasibilityQueryContainerData'
 
@@ -290,6 +290,11 @@ export default Vue.extend({
 				this.$store.dispatch('removeLogic', { index: index - 1, section: criteriaType })
 			} else this.$store.dispatch('removeLogic', { index, section: criteriaType })
 		},
+
+		getModuleColor(characteristic: Criterion): string {
+			const module: Module = this.$store.state.modules.find((module: Module) => module.id === characteristic.moduleId)
+			return module ? module.color : '#5270a7'
+		},
 	},
 })
 </script>
@@ -336,6 +341,8 @@ export default Vue.extend({
 	border: dashed 1px black;
 	margin: 20px;
 	padding: 20px;
+	overflow-y: auto;
+	max-height: 60vh;
 }
 
 .selected-criteria-container {
